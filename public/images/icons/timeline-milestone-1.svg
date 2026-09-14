@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64" fill="none">
+  <circle cx="32" cy="32" r="28" fill="#7D9B7B" opacity="0.1"/>
+  <circle cx="32" cy="32" r="24" fill="none" stroke="#7D9B7B" stroke-width="2"/>
+  <text x="32" y="38" text-anchor="middle" font-family="Playfair Display" font-size="20" font-weight="700" fill="#7D9B7B">1888</text>
+  <path d="M 20 18 Q 32 12, 44 18" stroke="#D4AF7A" stroke-width="2" fill="none"/>
+  <path d="M 20 46 Q 32 52, 44 46" stroke="#D4AF7A" stroke-width="2" fill="none"/>
+</svg>

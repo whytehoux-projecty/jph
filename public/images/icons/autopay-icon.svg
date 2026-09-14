@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#7D9B7B" stroke-width="2">
+  <!-- Autopay cycle arrows -->
+  <path d="M 12 8 A 4 4 0 1 1 4 8 A 4 4 0 1 1 12 8" fill="none"/>
+  <path d="M 12 6 L 12 8 L 10 8" fill="#7D9B7B"/>
+  <circle cx="8" cy="8" r="2" fill="#D4AF7A" opacity="0.5"/>
+</svg>

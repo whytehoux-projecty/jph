@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300" fill="none">
+  <!-- Fingerprint with vintage styling -->
+  <circle cx="150" cy="150" r="90" fill="none" stroke="#7D9B7B" stroke-width="2" opacity="0.2"/>
+  
+  <!-- Fingerprint ridges -->
+  <path d="M 100 150 Q 100 100, 150 100 Q 200 100, 200 150" fill="none" stroke="#7D9B7B" stroke-width="3"/>
+  <path d="M 105 150 Q 105 110, 150 110 Q 195 110, 195 150" fill="none" stroke="#7D9B7B" stroke-width="3"/>
+  <path d="M 110 150 Q 110 120, 150 120 Q 190 120, 190 150" fill="none" stroke="#7D9B7B" stroke-width="3"/>
+  <path d="M 115 150 Q 115 130, 150 130 Q 185 130, 185 150" fill="none" stroke="#7D9B7B" stroke-width="3"/>
+  <path d="M 120 150 Q 120 140, 150 140 Q 180 140, 180 150" fill="none" stroke="#7D9B7B" stroke-width="3"/>
+  
+  <!-- Lower curves -->
+  <path d="M 100 150 Q 100 200, 150 200 Q 200 200, 200 150" fill="none" stroke="#7D9B7B" stroke-width="3"/>
+  <path d="M 105 150 Q 105 190, 150 190 Q 195 190, 195 150" fill="none" stroke="#7D9B7B" stroke-width="3"/>
+  <path d="M 110 150 Q 110 180, 150 180 Q 190 180, 190 150" fill="none" stroke="#7D9B7B" stroke-width="3"/>
+  
+  <!-- Center circle -->
+  <circle cx="150" cy="150" r="15" fill="none" stroke="#D4AF7A" stroke-width="3"/>
+  
+  <!-- Text -->
+  <text x="150" y="270" text-anchor="middle" font-family="Inter" font-size="14" fill="#7D9B7B" font-weight="600">Biometric Security</text>
+</svg>

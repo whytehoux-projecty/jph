@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300" fill="none">
+  <!-- Empty vintage ledger book -->
+  <rect x="80" y="70" width="140" height="180" rx="4" fill="#F5F1E8" stroke="#9CA3AF" stroke-width="3"/>
+  
+  <!-- Book spine -->
+  <rect x="75" y="70" width="10" height="180" rx="2" fill="#7D9B7B" opacity="0.3"/>
+  
+  <!-- Pages -->
+  <line x1="90" y1="70" x2="90" y2="250" stroke="#9CA3AF" stroke-width="1"/>
+  <line x1="100" y1="100" x2="200" y2="100" stroke="#D4AF7A" stroke-width="2"/>
+  <line x1="100" y1="130" x2="200" y2="130" stroke="#B8BFC6" stroke-width="1" stroke-dasharray="5,3"/>
+  <line x1="100" y1="150" x2="200" y2="150" stroke="#B8BFC6" stroke-width="1" stroke-dasharray="5,3"/>
+  <line x1="100" y1="170" x2="200" y2="170" stroke="#B8BFC6" stroke-width="1" stroke-dasharray="5,3"/>
+  
+  <!-- Empty icon in center -->
+  <circle cx="150" cy="180" r="25" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="3,3"/>
+  <path d="M 140 180 L 160 180 M 150 170 L 150 190" stroke="#9CA3AF" stroke-width="2"/>
+  
+  <!-- Text -->
+  <text x="150" y="270" text-anchor="middle" font-family="Inter" font-size="14" fill="#9CA3AF">No transactions yet</text>
+</svg>

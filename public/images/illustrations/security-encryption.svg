@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300" fill="none">
+  <!-- Vintage safe/vault illustration -->
+  <rect x="75" y="60" width="150" height="180" rx="8" fill="#7D9B7B" opacity="0.1" stroke="#7D9B7B" stroke-width="3"/>
+  
+  <!-- Vault door circle -->
+  <circle cx="150" cy="140" r="50" fill="none" stroke="#7D9B7B" stroke-width="4"/>
+  <circle cx="150" cy="140" r="40" fill="none" stroke="#D4AF7A" stroke-width="2"/>
+  
+  <!-- Digital elements - lock symbol in center -->
+  <path d="M 145 130 L 145 125 C 145 122, 147 120, 150 120 C 153 120, 155 122, 155 125 L 155 130 Z" fill="none" stroke="#3D3D3D" stroke-width="2"/>
+  <rect x="142" y="130" width="16" height="12" rx="2" fill="#3D3D3D"/>
+  
+  <!-- Combination dial marks -->
+  <circle cx="150" cy="140" r="25" fill="none" stroke="#7D9B7B" stroke-width="1" stroke-dasharray="2,4"/>
+  
+  <!-- Hinges -->
+  <rect x="65" y="90" width="8" height="30" rx="2" fill="#9CA3AF"/>
+  <rect x="65" y="180" width="8" height="30" rx="2" fill="#9CA3AF"/>
+  
+  <!-- Text -->
+  <text x="150" y="260" text-anchor="middle" font-family="Inter" font-size="14" fill="#7D9B7B" font-weight="600">Bank-Grade Encryption</text>
+</svg>

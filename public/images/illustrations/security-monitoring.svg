@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300" fill="none">
+  <!-- Watchful eye - vintage detective aesthetic -->
+  <ellipse cx="150" cy="150" rx="90" ry="60" fill="none" stroke="#7D9B7B" stroke-width="3"/>
+  
+  <!-- Iris -->
+  <circle cx="150" cy="150" r="35" fill="#7D9B7B" opacity="0.2"/>
+  <circle cx="150" cy="150" r="30" fill="none" stroke="#7D9B7B" stroke-width="2"/>
+  
+  <!-- Pupil -->
+  <circle cx="150" cy="150" r="15" fill="#3D3D3D"/>
+  
+  <!-- Light reflection -->
+  <circle cx="145" cy="145" r="5" fill="white" opacity="0.8"/>
+  
+  <!-- Iris details -->
+  <path d="M 135 150 L 165 150 M 150 135 L 150 165" stroke="#D4AF7A" stroke-width="1" opacity="0.5"/>
+  <circle cx="150" cy="150" r="25" fill="none" stroke="#D4AF7A" stroke-width="1" opacity="0.5"/>
+  
+  <!-- Eyelashes top -->
+  <path d="M 100 135 L 95 125 M 120 128 L 118 118 M 140 125 L 140 115 M 160 125 L 160 115 M 180 128 L 182 118 M 200 135 L 205 125" stroke="#7D9B7B" stroke-width="2"/>
+  
+  <!-- Eyelashes bottom -->
+  <path d="M 100 165 L 95 175 M 200 165 L 205 175" stroke="#7D9B7B" stroke-width="2"/>
+  
+  <!-- Text -->
+  <text x="150" y="270" text-anchor="middle" font-family="Inter" font-size="14" fill="#7D9B7B" font-weight="600">24/7 Monitoring</text>
+</svg>

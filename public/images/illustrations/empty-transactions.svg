@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300" fill="none">
+  <rect x="50" y="80" width="200" height="160" rx="8" fill="none" stroke="#9CA3AF" stroke-width="3"/>
+  <path d="M 50 120 L 250 120" stroke="#9CA3AF" stroke-width="3"/>
+  <circle cx="150" cy="180" r="30" fill="none" stroke="#7D9B7B" stroke-width="2" stroke-dasharray="5,5"/>
+  <text x="150" y="190" text-anchor="middle" font-family="Inter" font-size="14" fill="#9CA3AF">No transactions yet</text>
+  <text x="150" y="210" text-anchor="middle" font-family="Inter" font-size="12" fill="#B8BFC6">Your recent activity will appear here</text>
+</svg>

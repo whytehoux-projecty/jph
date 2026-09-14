@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+  <!-- Checkmark badge -->
+  <circle cx="8" cy="8" r="7" fill="#7D9B7B" opacity="0.2" stroke="#7D9B7B" stroke-width="2"/>
+  <path d="M 5 8 L 7 10 L 11 6" fill="none" stroke="#7D9B7B" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

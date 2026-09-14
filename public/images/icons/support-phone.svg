@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#7D9B7B" stroke-width="2">
+  <!-- Vintage telephone handset -->
+  <path d="M 12 12 Q 10 12, 10 14 L 10 18 Q 10 20, 12 20 L 16 20 Q 18 20, 18 18 L 18 14 Q 18 12, 16 12 Z" fill="#7D9B7B" opacity="0.2"/>
+  <path d="M 30 28 Q 28 28, 28 30 L 28 34 Q 28 36, 30 36 L 34 36 Q 36 36, 36 34 L 36 30 Q 36 28, 34 28 Z" fill="#7D9B7B" opacity="0.2"/>
+  
+  <!-- Phone curve -->
+  <path d="M 16 18 Q 24 24, 30 30" stroke="#D4AF7A" stroke-width="3" fill="none"/>
+  
+  <!-- Decorative details -->
+  <circle cx="14" cy="15" r="1.5" fill="#3D3D3D"/>
+  <circle cx="32" cy="33" r="1.5" fill="#3D3D3D"/>
+</svg>

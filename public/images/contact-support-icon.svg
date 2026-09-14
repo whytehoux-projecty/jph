@@ -1,0 +1,28 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background Circle -->
+  <circle cx="32" cy="32" r="30" fill="#0A2A5C" stroke="#CBA135" stroke-width="2"/>
+  
+  <!-- Headset Base -->
+  <path d="M20 28C20 20 25.5 14 32 14C38.5 14 44 20 44 28V36C44 38 42 40 40 40H38V32H42V28C42 21 37.5 16 32 16C26.5 16 22 21 22 28V32H26V40H24C22 40 20 38 20 36V28Z" fill="white"/>
+  
+  <!-- Left Earpiece -->
+  <rect x="18" y="30" width="8" height="12" rx="4" fill="#CBA135"/>
+  <rect x="20" y="32" width="4" height="8" rx="2" fill="#0A2A5C"/>
+  
+  <!-- Right Earpiece -->
+  <rect x="38" y="30" width="8" height="12" rx="4" fill="#CBA135"/>
+  <rect x="40" y="32" width="4" height="8" rx="2" fill="#0A2A5C"/>
+  
+  <!-- Microphone -->
+  <rect x="26" y="38" width="3" height="8" rx="1.5" fill="#CBA135"/>
+  <circle cx="27.5" cy="46" r="2" fill="#0A2A5C"/>
+  
+  <!-- Sound Waves -->
+  <path d="M48 24C48 24 50 26 50 32C50 38 48 40 48 40" stroke="white" stroke-width="2" fill="none" stroke-linecap="round"/>
+  <path d="M50 20C50 20 54 24 54 32C54 40 50 44 50 44" stroke="white" stroke-width="1.5" fill="none" stroke-linecap="round" opacity="0.7"/>
+  
+  <!-- 24/7 Badge -->
+  <circle cx="48" cy="48" r="8" fill="#CBA135"/>
+  <text x="48" y="46" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="6" font-weight="bold">24</text>
+  <text x="48" y="52" text-anchor="middle" fill="white" font-family="Arial, sans-serif" font-size="6" font-weight="bold">7</text>
+</svg>

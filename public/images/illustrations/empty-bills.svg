@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="300" viewBox="0 0 300 300" fill="none">
+  <!-- Empty folder for bills -->
+  <path d="M 70 100 L 120 100 L 130 90 L 230 90 L 230 220 L 70 220 Z" fill="#F5F1E8" stroke="#9CA3AF" stroke-width="3"/>
+  
+  <!-- Folder tab -->
+  <path d="M 120 100 L 130 90 L 230 90 L 230 110 L 70 110 L 70 100 L 120 100" fill="#7D9B7B" opacity="0.2" stroke="#7D9B7B" stroke-width="2"/>
+  
+  <!-- Empty icon -->
+  <circle cx="150" cy="160" r="30" fill="none" stroke="#9CA3AF" stroke-width="2" stroke-dasharray="4,4"/>
+  <text x="150" y="170" text-anchor="middle" font-family="Playfair Display" font-size="40" fill="#9CA3AF" opacity="0.5">$</text>
+  
+  <!-- Text -->
+  <text x="150" y="270" text-anchor="middle" font-family="Inter" font-size="14" fill="#9CA3AF">No bills scheduled</text>
+</svg>

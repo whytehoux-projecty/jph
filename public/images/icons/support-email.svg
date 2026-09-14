@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48" fill="none" stroke="#7D9B7B" stroke-width="2">
+  <!-- Envelope -->
+  <rect x="8" y="14" width="32" height="20" rx="2" fill="none" stroke="#7D9B7B" stroke-width="2"/>
+  <path d="M 8 14 L 24 26 L 40 14" fill="none" stroke="#D4AF7A" stroke-width="2"/>
+  
+  <!-- Wax seal decoration -->
+  <circle cx="30" cy="28" r="4" fill="#D4AF7A" opacity="0.5"/>
+</svg>

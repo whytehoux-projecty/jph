@@ -1,0 +1,244 @@
+// JPHeritage Unified Digital Bank Demo Schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+// -----------------------------------------------------------------------------
+// Admin & User Management
+// -----------------------------------------------------------------------------
+
+model AdminUser {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  password  String
+  firstName String   @map("first_name")
+  lastName  String   @map("last_name")
+  role      String   @default("ADMIN")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  @@map("admin_users")
+}
+
+model User {
+  id                String   @id @default(cuid())
+  email             String   @unique
+  password          String
+  firstName         String   @map("first_name")
+  lastName          String   @map("last_name")
+  phone             String?
+  dateOfBirth       DateTime @map("date_of_birth")
+  address           String?
+  city              String?
+  state             String?
+  zipCode           String?  @map("zip_code")
+  status            String   @default("ACTIVE")
+  tier              String   @default("BASIC")
+  hasOnlineAccess   Boolean  @default(false) @map("has_online_access")
+  preferredLanguage String   @default("en") @map("preferred_language")
+  preferredCurrency String   @default("USD") @map("preferred_currency")
+  twoFactorEnabled  Boolean  @default(false) @map("two_factor_enabled")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @updatedAt @map("updated_at")
+
+  accounts         Account[]
+  beneficiaries    Beneficiary[]
+  savingsGoals     SavingsGoal[]
+  payees           Payee[]
+  notifications    Notification[]
+
+  @@map("users")
+}
+
+// -----------------------------------------------------------------------------
+// Account Management
+// -----------------------------------------------------------------------------
+
+model Account {
+  id             String        @id @default(cuid())
+  userId         String        @map("user_id")
+  accountNumber  String        @unique @map("account_number")
+  accountType    String        @map("account_type")
+  currency       String        @default("USD")
+  balance        Float         @default(0.00) // Using Float for SQLite
+  status         String        @default("ACTIVE")
+  createdAt      DateTime      @default(now()) @map("created_at")
+  updatedAt      DateTime      @updatedAt @map("updated_at")
+
+  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions   Transaction[]
+  cards          Card[]
+  bills          Bill[]
+  statements     Statement[]
+
+  @@map("accounts")
+}
+
+// -----------------------------------------------------------------------------
+// Onboarding & Approval Workflows
+// -----------------------------------------------------------------------------
+
+model AccountApplication {
+  id               String    @id @default(cuid())
+  applicationType  String    @map("application_type") // PERSONAL, BUSINESS
+  firstName        String    @map("first_name")
+  lastName         String    @map("last_name")
+  email            String
+  phone            String
+  dateOfBirth      DateTime  @map("date_of_birth")
+  address          String
+  city             String
+  state            String
+  zipCode          String    @map("zip_code")
+  employmentStatus String    @map("employment_status")
+  annualIncome     Float     @map("annual_income")
+  status           String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  reviewedBy       String?   @map("reviewed_by")
+  reviewedAt       DateTime? @map("reviewed_at")
+  createdAt        DateTime  @default(now()) @map("created_at")
+  updatedAt        DateTime  @updatedAt @map("updated_at")
+
+  @@map("account_applications")
+}
+
+model OnlineAccessRequest {
+  id            String    @id @default(cuid())
+  accountNumber String    @map("account_number")
+  email         String
+  status        String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  reviewedBy    String?   @map("reviewed_by")
+  reviewedAt    DateTime? @map("reviewed_at")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @updatedAt @map("updated_at")
+
+  @@map("online_access_requests")
+}
+
+// -----------------------------------------------------------------------------
+// Advanced Transactions
+// -----------------------------------------------------------------------------
+
+model Transaction {
+  id              String    @id @default(cuid())
+  accountId       String    @map("account_id")
+  type            String    // DEBIT, CREDIT
+  transactionType String    @map("transaction_type") // LOCAL_TRANSFER, INT_WIRE, CRYPTO_WITHDRAWAL, CRYPTO_DEPOSIT
+  amount          Float
+  currency        String    @default("USD")
+  status          String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  description     String
+  reference       String    @unique
+  metadata        String?   // JSON string for storing Crypto Wallet Address, SWIFT/IBAN, etc.
+  processedAt     DateTime? @map("processed_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
+
+  account         Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@map("transactions")
+}
+
+model Beneficiary {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  name          String
+  accountNumber String   @map("account_number")
+  bankName      String   @map("bank_name")
+  swiftCode     String?  @map("swift_code")
+  isInternal    Boolean  @default(false) @map("is_internal")
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("beneficiaries")
+}
+
+model Card {
+  id           String   @id @default(cuid())
+  accountId    String   @map("account_id")
+  cardNumber   String   @unique @map("card_number")
+  cardType     String   @map("card_type") // DEBIT, CREDIT
+  network      String   @default("VISA")
+  expiryDate   DateTime @map("expiry_date")
+  cvv          String
+  status       String   @default("ACTIVE")
+  createdAt    DateTime @default(now()) @map("created_at")
+
+  account      Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@map("cards")
+}
+
+// -----------------------------------------------------------------------------
+// Core Banking Entities
+// -----------------------------------------------------------------------------
+
+model SavingsGoal {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  name          String
+  targetAmount  Float    @map("target_amount")
+  currentAmount Float    @default(0) @map("current_amount")
+  targetDate    DateTime @map("target_date")
+  createdAt     DateTime @default(now()) @map("created_at")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("savings_goals")
+}
+
+model Payee {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  name          String
+  accountNumber String   @map("account_number")
+  category      String   @default("OTHER")
+  country       String   @default("usa")
+  createdAt     DateTime @default(now()) @map("created_at")
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  bills         Bill[]
+  
+  @@map("payees")
+}
+
+model Bill {
+  id        String    @id @default(cuid())
+  accountId String    @map("account_id")
+  payeeId   String    @map("payee_id")
+  amount    Float
+  status    String    @default("PENDING") // PENDING, PAID
+  paidAt    DateTime? @map("paid_at")
+  createdAt DateTime  @default(now()) @map("created_at")
+  account   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  payee     Payee     @relation(fields: [payeeId], references: [id], onDelete: Cascade)
+  
+  @@map("bills")
+}
+
+model Statement {
+  id          String   @id @default(cuid())
+  accountId   String   @map("account_id")
+  period      String   // e.g. "2026-08"
+  filePath    String?  @map("file_path")
+  generatedAt DateTime @default(now()) @map("generated_at")
+  account     Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  
+  @@map("statements")
+}
+
+model Notification {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  title     String
+  message   String
+  isRead    Boolean  @default(false) @map("is_read")
+  createdAt DateTime @default(now()) @map("created_at")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  @@map("notifications")
+}

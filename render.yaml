@@ -1,0 +1,86 @@
+services:
+  # ============================================================
+  # Heritage Vault — E-Banking Portal
+  # ============================================================
+  # TWO deployment options are provided below.
+  # Option A (Native Node.js) is recommended — simpler, faster builds.
+  # Option B (Docker) matches the existing Dockerfile.prod.
+  # ============================================================
+
+  # ------------------------------------------------------------
+  # OPTION A — Native Node.js (RECOMMENDED)
+  # Render makes env vars available automatically during build,
+  # so NEXT_PUBLIC_* vars are correctly embedded into the bundle.
+  # ------------------------------------------------------------
+  - type: web
+    name: heritage-vault
+    runtime: node
+    region: oregon         # change to match your users' geography
+    plan: starter          # upgrade to standard for production traffic
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: NEXT_TELEMETRY_DISABLED
+        value: "1"
+      - key: PORT
+        value: "4000"
+
+      # --- REQUIRED ---
+      # URL of the deployed Heritage Bank Core API (backend).
+      # If the backend is also a Render service, use fromService below.
+      - key: NEXT_PUBLIC_API_URL
+        sync: false        # enter value in Render dashboard at deploy time
+        # fromService:     # uncomment if Core API is also on Render
+        #   name: heritage-core-api
+        #   type: web
+        #   property: host
+        #   envVarKey: NEXT_PUBLIC_API_URL
+
+      # URL of the Corporate Website (Netlify or otherwise).
+      # Used for "Back to site" links and signup redirects.
+      - key: NEXT_PUBLIC_CORPORATE_URL
+        sync: false        # e.g. https://jpheritagebank.com
+
+      # --- OPTIONAL ---
+      # OCR provider for invoice scanning.
+      # Leave blank — the route returns 422 and falls back to manual entry.
+      - key: NEXT_PUBLIC_OCR_PROVIDER
+        value: ""
+
+  # ------------------------------------------------------------
+  # OPTION B — Docker (uses Dockerfile.prod)
+  # NEXT_PUBLIC_* vars are passed as Docker build args so Next.js
+  # can embed them into the client bundle during `npm run build`.
+  # Dockerfile.prod has been updated to declare ARG for each var.
+  #
+  # To activate: remove/comment Option A above and
+  # uncomment everything in Option B below.
+  # ------------------------------------------------------------
+  # - type: web
+  #   name: heritage-vault
+  #   runtime: docker
+  #   dockerfilePath: ./Dockerfile.prod
+  #   dockerContext: .
+  #   region: oregon
+  #   plan: starter
+  #   healthCheckPath: /
+  #   dockerBuildArgs:
+  #     - NEXT_PUBLIC_API_URL
+  #     - NEXT_PUBLIC_CORPORATE_URL
+  #     - NEXT_PUBLIC_OCR_PROVIDER
+  #   envVars:
+  #     - key: NODE_ENV
+  #       value: production
+  #     - key: NEXT_TELEMETRY_DISABLED
+  #       value: "1"
+  #     - key: PORT
+  #       value: "4000"
+  #     - key: NEXT_PUBLIC_API_URL
+  #       sync: false
+  #     - key: NEXT_PUBLIC_CORPORATE_URL
+  #       sync: false
+  #     - key: NEXT_PUBLIC_OCR_PROVIDER
+  #       value: ""

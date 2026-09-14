@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+  <!-- CSV document icon -->
+  <rect x="6" y="4" width="20" height="24" rx="2" fill="#7D9B7B" opacity="0.2" stroke="#7D9B7B" stroke-width="2"/>
+  <path d="M 18 4 L 18 10 L 26 10" fill="none" stroke="#7D9B7B" stroke-width="2"/>
+  
+  <!-- Table grid -->
+  <line x1="10" y1="14" x2="22" y2="14" stroke="#7D9B7B" stroke-width="1"/>
+  <line x1="10" y1="18" x2="22" y2="18" stroke="#7D9B7B" stroke-width="1"/>
+  <line x1="10" y1="22" x2="22" y2="22" stroke="#7D9B7B" stroke-width="1"/>
+  <line x1="14" y1="12" x2="14" y2="24" stroke="#7D9B7B" stroke-width="1"/>
+  <line x1="18" y1="12" x2="18" y2="24" stroke="#7D9B7B" stroke-width="1"/>
+</svg>

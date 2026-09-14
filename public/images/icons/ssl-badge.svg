@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32" fill="none">
+  <!-- SSL security badge -->
+  <rect x="4" y="4" width="24" height="24" rx="2" fill="#7D9B7B" opacity="0.1" stroke="#7D9B7B" stroke-width="2"/>
+  
+  <!-- Lock icon -->
+  <rect x="11" y="16" width="10" height="8" rx="1" fill="none" stroke="#7D9B7B" stroke-width="2"/>
+  <path d="M 13 16 L 13 13 C 13 11, 14 10, 16 10 C 18 10, 19 11, 19 13 L 19 16" fill="none" stroke="#7D9B7B" stroke-width="2"/>
+  
+  <!-- SSL text -->
+  <text x="16" y="9" text-anchor="middle" font-family="Inter" font-size="5" font-weight="700" fill="#7D9B7B">SSL</text>
+</svg>
