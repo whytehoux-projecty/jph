@@ -47,8 +47,8 @@ export async function updateCategory(id: string, category: string) {
   const session = await auth();
   if (!session?.user?.id) throw new Error('Unauthorized');
 
-  const tx = await prisma.transaction.findUnique({ where: { id } });
-  if (!tx) throw new Error('Not found');
+  const tx = await prisma.transaction.findUnique({ where: { id }, include: { account: true } });
+  if (!tx || tx.account.userId !== session.user.id) throw new Error('Not found or unauthorized');
 
   const metadata = tx.metadata ? JSON.parse(tx.metadata) : {};
   metadata.category = category;
@@ -65,8 +65,8 @@ export async function addNote(id: string, note: string) {
   const session = await auth();
   if (!session?.user?.id) throw new Error('Unauthorized');
 
-  const tx = await prisma.transaction.findUnique({ where: { id } });
-  if (!tx) throw new Error('Not found');
+  const tx = await prisma.transaction.findUnique({ where: { id }, include: { account: true } });
+  if (!tx || tx.account.userId !== session.user.id) throw new Error('Not found or unauthorized');
 
   const metadata = tx.metadata ? JSON.parse(tx.metadata) : {};
   metadata.note = note;
@@ -83,8 +83,8 @@ export async function disputeTransaction(id: string, data: any) {
   const session = await auth();
   if (!session?.user?.id) throw new Error('Unauthorized');
 
-  const tx = await prisma.transaction.findUnique({ where: { id } });
-  if (!tx) throw new Error('Not found');
+  const tx = await prisma.transaction.findUnique({ where: { id }, include: { account: true } });
+  if (!tx || tx.account.userId !== session.user.id) throw new Error('Not found or unauthorized');
 
   const metadata = tx.metadata ? JSON.parse(tx.metadata) : {};
   metadata.disputeReason = data.reason;
@@ -109,7 +109,7 @@ export async function exportReceiptData(id: string) {
     include: { account: true }
   });
 
-  if (!tx) throw new Error('Not found');
+  if (!tx || tx.account.userId !== session.user.id) throw new Error('Not found or unauthorized');
 
   return tx;
 }

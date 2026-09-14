@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@/auth';
 import { AdminApplicationList } from '@/components/admin/AdminApplicationList';
 
 export default async function AccountApplications() {
@@ -9,6 +10,8 @@ export default async function AccountApplications() {
 
   const handleApprove = async (formData: FormData) => {
     'use server'
+    const session = await auth();
+    if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
     const id = formData.get('id') as string;
     const app = await prisma.accountApplication.findUnique({ where: { id } });
     if (!app) return;
@@ -47,6 +50,8 @@ export default async function AccountApplications() {
 
   const handleReject = async (formData: FormData) => {
     'use server'
+    const session = await auth();
+    if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
     const id = formData.get('id') as string;
     await prisma.accountApplication.update({
       where: { id },

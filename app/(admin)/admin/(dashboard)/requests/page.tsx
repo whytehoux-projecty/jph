@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@/auth';
 import { AdminRequestList } from '@/components/admin/AdminRequestList';
 
 export default async function OnlineRequests() {
@@ -9,6 +10,8 @@ export default async function OnlineRequests() {
 
   const handleApprove = async (formData: FormData) => {
     'use server'
+    const session = await auth();
+    if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
     const id = formData.get('id') as string;
     const request = await prisma.onlineAccessRequest.findUnique({ where: { id } });
     if (!request) return;
@@ -33,6 +36,8 @@ export default async function OnlineRequests() {
 
   const handleReject = async (formData: FormData) => {
     'use server'
+    const session = await auth();
+    if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
     const id = formData.get('id') as string;
     await prisma.onlineAccessRequest.update({
       where: { id },

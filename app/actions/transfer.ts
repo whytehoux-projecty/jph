@@ -23,6 +23,11 @@ export async function submitTransfer(formData: FormData) {
   }
   
   const fromAccountId = formData.get('fromAccountId') as string || user.accounts[0].id;
+  
+  if (!user.accounts.some(acc => acc.id === fromAccountId)) {
+    throw new Error('Unauthorized account access');
+  }
+
   const description = formData.get('description') as string;
 
   // Metadata based on type

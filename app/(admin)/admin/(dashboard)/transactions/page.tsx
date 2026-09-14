@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@/auth';
 import { AutoRefreshHeader } from './AutoRefreshHeader';
 import { AdminTransactionList } from '@/components/admin/AdminTransactionList';
 
@@ -11,6 +12,8 @@ export default async function TransactionsAdmin() {
 
   const handleApprove = async (formData: FormData) => {
     'use server'
+    const session = await auth();
+    if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
     const id = formData.get('id') as string;
     const tx = await prisma.transaction.findUnique({ where: { id }, include: { account: true } });
     if (!tx) return;
@@ -33,6 +36,8 @@ export default async function TransactionsAdmin() {
 
   const handleReject = async (formData: FormData) => {
     'use server'
+    const session = await auth();
+    if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
     const id = formData.get('id') as string;
     await prisma.transaction.update({
       where: { id },
@@ -43,6 +48,8 @@ export default async function TransactionsAdmin() {
 
   const handleCancel = async (formData: FormData) => {
     'use server'
+    const session = await auth();
+    if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
     const id = formData.get('id') as string;
     await prisma.transaction.update({
       where: { id },

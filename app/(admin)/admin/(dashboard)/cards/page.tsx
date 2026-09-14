@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@/auth';
 import { AdminCardList } from '@/components/admin/AdminCardList';
 
 export default async function AdminCardsPage() {
@@ -22,6 +23,8 @@ export default async function AdminCardsPage() {
 
   const handleToggleStatus = async (formData: FormData) => {
     'use server'
+    const session = await auth();
+    if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
     const id = formData.get('id') as string;
     const status = formData.get('status') as string;
     

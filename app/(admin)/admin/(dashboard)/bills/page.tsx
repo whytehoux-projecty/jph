@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@/auth';
 import { AdminBillList } from '@/components/admin/AdminBillList';
 
 export default async function AdminBillsPage() {
@@ -29,6 +30,8 @@ export default async function AdminBillsPage() {
 
   const handleApprove = async (formData: FormData) => {
     'use server'
+    const session = await auth();
+    if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
     const id = formData.get('id') as string;
     
     // In a real system, this would debit the account. 
@@ -51,6 +54,8 @@ export default async function AdminBillsPage() {
 
   const handleReject = async (formData: FormData) => {
     'use server'
+    const session = await auth();
+    if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
     const id = formData.get('id') as string;
     
     await prisma.bill.update({

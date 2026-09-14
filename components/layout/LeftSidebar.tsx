@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { signOut } from "next-auth/react";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -109,12 +110,10 @@ export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
 
         {/* Logout Separate Section */}
         <div className="absolute bottom-4 left-0 w-full px-2">
-          <Link
-            href={
-              process.env.NEXT_PUBLIC_CORPORATE_URL || "http://localhost:3002"
-            }
+          <button
+            onClick={() => signOut({ callbackUrl: process.env.NEXT_PUBLIC_CORPORATE_URL || "http://localhost:3002" })}
             className={cn(
-              "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-destructive/10 hover:text-destructive",
+              "w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-destructive/10 hover:text-destructive",
               "text-muted-foreground",
               !isOpen && "justify-center px-0",
             )}>
@@ -125,7 +124,7 @@ export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
               className={cn(!isOpen && "mx-auto")}
             />
             {isOpen && <span>Logout</span>}
-          </Link>
+          </button>
         </div>
       </ScrollArea>
     </aside>

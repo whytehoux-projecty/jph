@@ -1,5 +1,6 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
+import { auth } from '@/auth';
 import { AdminUserList } from '@/components/admin/AdminUserList';
 
 export default async function AdminUsersPage() {
@@ -20,6 +21,8 @@ export default async function AdminUsersPage() {
 
   const handleToggleStatus = async (formData: FormData) => {
     'use server'
+    const session = await auth();
+    if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
     const id = formData.get('id') as string;
     const status = formData.get('status') as string;
     
@@ -33,6 +36,8 @@ export default async function AdminUsersPage() {
 
   const handleToggleTier = async (formData: FormData) => {
     'use server'
+    const session = await auth();
+    if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
     const id = formData.get('id') as string;
     const tier = formData.get('tier') as string;
     
