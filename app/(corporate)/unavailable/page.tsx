@@ -12,13 +12,9 @@ export default function ServiceUnavailablePage() {
     const checkServiceStatus = async () => {
         setIsChecking(true);
         try {
-            const res = await fetch('/api/health', {
-                method: 'GET',
-                cache: 'no-store',
-            });
-            if (res.ok) {
-                window.location.href = '/login';
-            }
+            // The health check API was removed, simulate a manual check
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            window.location.reload();
         } catch {
             console.log('Portal still unavailable');
         } finally {
@@ -27,10 +23,8 @@ export default function ServiceUnavailablePage() {
         }
     };
 
-    useEffect(() => {
-        const interval = setInterval(checkServiceStatus, 30000);
-        return () => clearInterval(interval);
-    }, []);
+    // Auto-polling removed to prevent 404s on deleted endpoints
+    useEffect(() => {}, []);
 
     return (
         <main className="flex-1 flex items-center justify-center py-16 px-4">

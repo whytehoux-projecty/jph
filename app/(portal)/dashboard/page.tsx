@@ -12,6 +12,7 @@ import { Overview } from "@/components/dashboard/overview";
 import { RecentTransactions } from "@/components/dashboard/recent-sales";
 import { formatCurrency } from "@/lib/utils";
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { DashboardStatCard } from "@/components/dashboard/DashboardStatCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { SpendingByCategory } from "@/components/dashboard/SpendingByCategory";
 import { getProfile } from "@/app/actions/profile";
@@ -63,74 +64,36 @@ export default async function DashboardPage() {
 
         {/* Stats Cards */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <Card className="animate-fade-in-up animate-delay-100 shadow-sm hover:shadow-md transition-shadow duration-300 bg-[color:var(--heritage-navy)]/90 border-[color:var(--heritage-navy-mid)] text-white">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium font-sans text-white">
-                Total Balance
-              </CardTitle>
-              <Wallet className="h-4 w-4 text-soft-gold" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-soft-gold font-playfair">
-                {formatCurrency(totalBalance)}
-              </div>
-              <p className="text-xs text-[color:var(--heritage-surface)]/80 mt-1">
-                Across all accounts
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="animate-fade-in-up animate-delay-200 shadow-sm hover:shadow-md transition-shadow duration-300 bg-[color:var(--heritage-navy)]/90 border-[color:var(--heritage-navy-mid)] text-white">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium font-sans text-white">
-                Income (Month)
-              </CardTitle>
-              <ArrowDownLeft className="h-4 w-4 text-green-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-green-400 font-playfair">
-                +{formatCurrency(income)}
-              </div>
-              <p className="text-xs text-[color:var(--heritage-surface)]/80 mt-1">
-                Total deposits
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="animate-fade-in-up animate-delay-300 shadow-sm hover:shadow-md transition-shadow duration-300 bg-[color:var(--heritage-navy)]/90 border-[color:var(--heritage-navy-mid)] text-white">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium font-sans text-white">
-                Expenses (Month)
-              </CardTitle>
-              <ArrowUpRight className="h-4 w-4 text-red-400" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-red-400 font-playfair">
-                -{formatCurrency(expenses)}
-              </div>
-              <p className="text-xs text-[color:var(--heritage-surface)]/80 mt-1">
-                Withdrawals & transfers
-              </p>
-            </CardContent>
-          </Card>
-          <Card className="animate-fade-in-up animate-delay-400 shadow-sm hover:shadow-md transition-shadow duration-300 bg-[color:var(--heritage-navy)]/90 border-[color:var(--heritage-navy-mid)] text-white">
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium font-sans text-white">
-                Savings Goals
-              </CardTitle>
-              <PiggyBank className="h-4 w-4 text-soft-gold" />
-            </CardHeader>
-            <CardContent>
-              <div className="text-2xl font-bold text-soft-gold font-playfair">
-                {formatCurrency(savingsGoal)}
-              </div>
-              <Progress
-                value={savingsTarget > 0 ? (savingsGoal / savingsTarget) * 100 : 0}
-                className="h-1.5 mt-2 bg-white/20"
-              />
-              <p className="text-[11px] text-[color:var(--heritage-surface)]/80 mt-1">
-                of {formatCurrency(savingsTarget)} goal
-              </p>
-            </CardContent>
-          </Card>
+          <DashboardStatCard
+            title="Total Balance"
+            value={formatCurrency(totalBalance)}
+            icon={Wallet}
+            subtitle="Across all accounts"
+            animate="animate-fade-in-up animate-delay-100"
+          />
+          <DashboardStatCard
+            title="Income (Month)"
+            value={`+${formatCurrency(income)}`}
+            icon={ArrowDownLeft}
+            changeType="positive"
+            subtitle="Total deposits"
+            animate="animate-fade-in-up animate-delay-200"
+          />
+          <DashboardStatCard
+            title="Expenses (Month)"
+            value={`-${formatCurrency(expenses)}`}
+            icon={ArrowUpRight}
+            changeType="negative"
+            subtitle="Withdrawals & transfers"
+            animate="animate-fade-in-up animate-delay-300"
+          />
+          <DashboardStatCard
+            title="Savings Goals"
+            value={formatCurrency(savingsGoal)}
+            icon={PiggyBank}
+            subtitle={`of ${formatCurrency(savingsTarget)} goal`}
+            animate="animate-fade-in-up animate-delay-400"
+          />
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">

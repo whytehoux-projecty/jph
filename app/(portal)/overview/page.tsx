@@ -13,6 +13,7 @@ import { RecentTransactions } from "@/components/dashboard/recent-sales";
 import { Progress } from "@/components/ui/progress";
 import { formatCurrency, languageToLocale, translate } from '@/lib/utils';
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
+import { DashboardStatCard } from "@/components/dashboard/DashboardStatCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { SpendingByCategory } from "@/components/dashboard/SpendingByCategory";
 import { getProfile } from "@/app/actions/profile";
@@ -138,70 +139,36 @@ export default async function OverviewPage() {
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <Card className="animate-fade-in-up animate-delay-100 hover-lift">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium font-sans">
-                  {translate(language, "overview.totalBalance") || "Total Balance"}
-                </CardTitle>
-                <Wallet className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {formatCurrency(totalBalance, currency, languageToLocale(language))}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {translate(language, "overview.acrossAllAccounts") || "Across all accounts"}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="animate-fade-in-up animate-delay-200 hover-lift">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium font-sans">
-                  {translate(language, "overview.incomeMonth") || "Income (Month)"}
-                </CardTitle>
-                <ArrowDownLeft className="h-4 w-4 text-green-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-green-600">
-                  +
-                  {formatCurrency(income, currency, languageToLocale(language))}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {translate(language, "overview.totalDeposits") || "Total deposits"}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="animate-fade-in-up animate-delay-300 hover-lift">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium font-sans">
-                  {translate(language, "overview.expensesMonth") || "Expenses (Month)"}
-                </CardTitle>
-                <ArrowUpRight className="h-4 w-4 text-red-600" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold text-red-600">
-                  -
-                  {formatCurrency(expenses, currency, languageToLocale(language))}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {translate(language, "overview.withdrawalsTransfers") || "Withdrawals & transfers"}
-                </p>
-              </CardContent>
-            </Card>
-            <Card className="animate-fade-in-up animate-delay-400 hover-lift">
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium font-sans">
-                  {translate(language, "overview.savingsGoals") || "Savings Goals"}
-                </CardTitle>
-                <PiggyBank className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {formatCurrency(savingsGoal, currency, languageToLocale(language))}
-                </div>
-                <p className="text-xs text-muted-foreground">Target 2026</p>
-              </CardContent>
-            </Card>
+            <DashboardStatCard
+              title={translate(language, "overview.totalBalance") || "Total Balance"}
+              value={formatCurrency(totalBalance, currency, languageToLocale(language))}
+              icon={Wallet}
+              subtitle={translate(language, "overview.acrossAllAccounts") || "Across all accounts"}
+              animate="animate-fade-in-up animate-delay-100"
+            />
+            <DashboardStatCard
+              title={translate(language, "overview.incomeMonth") || "Income (Month)"}
+              value={`+${formatCurrency(income, currency, languageToLocale(language))}`}
+              icon={ArrowDownLeft}
+              changeType="positive"
+              subtitle={translate(language, "overview.totalDeposits") || "Total deposits"}
+              animate="animate-fade-in-up animate-delay-200"
+            />
+            <DashboardStatCard
+              title={translate(language, "overview.expensesMonth") || "Expenses (Month)"}
+              value={`-${formatCurrency(expenses, currency, languageToLocale(language))}`}
+              icon={ArrowDownLeft}
+              changeType="negative"
+              subtitle={translate(language, "overview.withdrawalsTransfers") || "Withdrawals & transfers"}
+              animate="animate-fade-in-up animate-delay-300"
+            />
+            <DashboardStatCard
+              title={translate(language, "overview.savingsGoals") || "Savings Goals"}
+              value={formatCurrency(savingsGoal, currency, languageToLocale(language))}
+              icon={PiggyBank}
+              subtitle="Target 2026"
+              animate="animate-fade-in-up animate-delay-400"
+            />
           </div>
 
           <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">

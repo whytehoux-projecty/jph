@@ -28,6 +28,7 @@ import {
   AlertCircle,
   Loader2,
   ExternalLink,
+  Lock,
 } from "lucide-react";
 import { VintageIcon } from "@/components/ui/vintage-icon";
 import { sendContactMessage } from "@/app/actions/support";
@@ -221,34 +222,8 @@ export function LinkExternalAccountDialog({
   isOpen,
   onClose,
 }: LinkExternalAccountDialogProps) {
-  const [step, setStep] = useState(1);
-  const [loading, setLoading] = useState(false);
-  const [selectedBank, setSelectedBank] = useState<string | null>(null);
-
-  const handleLink = async () => {
-    // External bank linking requires Plaid or similar — not yet integrated
-    toast.info({
-      title: 'External Account Linking Coming Soon',
-      description: 'This feature requires a third-party bank connection service. Visit a branch to link external accounts.',
-    });
-    handleClose();
-  };
-
-  const handleClose = () => {
-    setStep(1);
-    setSelectedBank(null);
-    onClose();
-  };
-
-  const BANKS = [
-    { id: "chase", name: "Chase", color: "bg-blue-600" },
-    { id: "boa", name: "Bank of America", color: "bg-red-600" },
-    { id: "wf", name: "Wells Fargo", color: "bg-yellow-600" },
-    { id: "citi", name: "Citi", color: "bg-blue-400" },
-  ];
-
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-md sm:rounded-none">
         <DialogHeader>
           <DialogTitle className="text-xl font-playfair flex items-center gap-2">
@@ -259,88 +234,18 @@ export function LinkExternalAccountDialog({
           </DialogDescription>
         </DialogHeader>
 
-        {step === 1 && (
-          <div className="grid grid-cols-2 gap-4 py-4">
-            {BANKS.map((bank) => (
-              <Button
-                key={bank.id}
-                variant="outline"
-                className={`h-24 flex flex-col items-center justify-center gap-2 hover:border-vintage-gold hover:bg-muted/50 rounded-none ${
-                  selectedBank === bank.id ? "border-vintage-gold bg-muted" : ""
-                }`}
-                onClick={() => setSelectedBank(bank.id)}>
-                <div
-                  className={`w-8 h-8 rounded-full ${bank.color} opacity-80`}
-                />
-                <span className="font-medium text-sm">{bank.name}</span>
-              </Button>
-            ))}
-          </div>
-        )}
-
-        {step === 2 && (
-          <div className="space-y-4 py-4">
-            <div className="text-center mb-6">
-              <div
-                className={`w-12 h-12 rounded-full mx-auto mb-2 bg-muted flex items-center justify-center`}>
-                <Landmark className="w-6 h-6 text-muted-foreground" />
-              </div>
-              <h4 className="font-medium">
-                Login to {BANKS.find((b) => b.id === selectedBank)?.name}
-              </h4>
-              <p className="text-xs text-muted-foreground">
-                Enter your credentials to connect
-              </p>
-            </div>
-            <Input placeholder="Username / User ID" />
-            <Input type="password" placeholder="Password" />
-          </div>
-        )}
-
-        {step === 3 && (
-          <div className="text-center py-8 space-y-4">
-            <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
-              <CheckCircle2 className="w-8 h-8 text-green-600" />
-            </div>
-            <h3 className="text-xl font-semibold text-charcoal">Connected!</h3>
-            <p className="text-muted-foreground">
-              Your external account has been linked successfully.
+        <div className="py-6">
+          <div className="p-6 rounded-lg border border-dashed border-muted-foreground/30 text-center bg-muted/30">
+            <Lock className="h-8 w-8 mx-auto text-muted-foreground mb-3" />
+            <p className="text-sm font-medium">Identity Verification Required</p>
+            <p className="text-xs text-muted-foreground mt-2 leading-relaxed">
+              To link an external account, please visit a branch or call our support line.
             </p>
           </div>
-        )}
+        </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t">
-          {step === 1 && (
-            <>
-              <Button variant="ghost" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button
-                disabled={!selectedBank}
-                onClick={() => setStep(2)}
-                icon={<ArrowRight className="w-4 h-4" />}>
-                Next
-              </Button>
-            </>
-          )}
-          {step === 2 && (
-            <>
-              <Button variant="ghost" onClick={() => setStep(1)}>
-                Back
-              </Button>
-              <Button onClick={handleLink} disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />{" "}
-                    Connecting...
-                  </>
-                ) : (
-                  "Connect Account"
-                )}
-              </Button>
-            </>
-          )}
-          {step === 3 && <Button onClick={handleClose}>Done</Button>}
+          <Button onClick={onClose}>Close</Button>
         </div>
       </DialogContent>
     </Dialog>
