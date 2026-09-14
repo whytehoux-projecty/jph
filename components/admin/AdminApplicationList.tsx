@@ -1,0 +1,230 @@
+"use client";
+
+import { useState } from "react";
+import { format } from "date-fns";
+import { FileText, Search, Filter, Eye, CheckCircle2, XCircle } from "lucide-react";
+import { 
+  Table, 
+  TableBody, 
+  TableCell, 
+  TableHead, 
+  TableHeader, 
+  TableRow 
+} from "@/components/ui/table";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/Button";
+
+type AccountApplication = {
+  id: string;
+  applicationType: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dateOfBirth: Date;
+  address: string;
+  city: string;
+  state: string;
+  zipCode: string;
+  employmentStatus: string;
+  annualIncome: number;
+  status: string;
+  createdAt: Date;
+};
+
+export function AdminApplicationList({ 
+  initialApplications,
+  onApprove,
+  onReject
+}: { 
+  initialApplications: AccountApplication[];
+  onApprove: (formData: FormData) => void;
+  onReject: (formData: FormData) => void;
+}) {
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [selectedApp, setSelectedApp] = useState<AccountApplication | null>(null);
+
+  const filtered = initialApplications.filter((app) => {
+    const matchesSearch = 
+      app.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      app.firstName.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const matchesStatus = statusFilter === "ALL" || app.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
+
+  return (
+    <div className="space-y-4">
+      {/* Controls */}
+      <div className="flex flex-col sm:flex-row gap-4 justify-between bg-white p-4 rounded-xl shadow-sm border border-neutral-200">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+          <input 
+            type="text" 
+            placeholder="Search email or applicant name..." 
+            className="w-full pl-9 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold/50"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        <div className="flex items-center gap-2">
+          <Filter className="w-4 h-4 text-muted-foreground" />
+          <select 
+            className="text-sm bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-vintage-gold/50"
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+          >
+            <option value="ALL">All Statuses</option>
+            <option value="PENDING">Pending</option>
+            <option value="APPROVED">Approved</option>
+            <option value="REJECTED">Rejected</option>
+          </select>
+        </div>
+      </div>
+
+      {/* Table */}
+      <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+        <Table>
+          <TableHeader className="bg-neutral-50">
+            <TableRow>
+              <TableHead>Applicant Name</TableHead>
+              <TableHead>Email</TableHead>
+              <TableHead>Account Type</TableHead>
+              <TableHead>Date Applied</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {filtered.length === 0 ? (
+              <TableRow>
+                <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                  No applications found matching your filters.
+                </TableCell>
+              </TableRow>
+            ) : (
+              filtered.map((app) => (
+                <TableRow key={app.id}>
+                  <TableCell className="font-medium text-charcoal">
+                    {app.firstName} {app.lastName}
+                  </TableCell>
+                  <TableCell className="text-sm text-muted-foreground">
+                    {app.email}
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-xs bg-neutral-100 text-neutral-700 px-2.5 py-1 rounded-md font-medium uppercase tracking-wide">
+                      {app.applicationType}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-sm">
+                    {format(new Date(app.createdAt), 'MMM d, yyyy')}
+                  </TableCell>
+                  <TableCell>
+                    <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${
+                      app.status === 'PENDING' ? 'bg-amber-100 text-amber-800' : 
+                      app.status === 'APPROVED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    }`}>
+                      {app.status}
+                    </span>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Button 
+                      variant="ghost" 
+                      size="small" 
+                      onClick={() => setSelectedApp(app)}
+                      className="text-vintage-gold hover:text-vintage-gold hover:bg-vintage-gold/10"
+                    >
+                      <Eye className="w-4 h-4 mr-2" />
+                      Review
+                    </Button>
+                  </TableCell>
+                </TableRow>
+              ))
+            )}
+          </TableBody>
+        </Table>
+      </div>
+
+      {/* Detail Modal */}
+      <Dialog open={!!selectedApp} onOpenChange={(open) => !open && setSelectedApp(null)}>
+        <DialogContent className="max-w-3xl">
+          <DialogHeader>
+            <DialogTitle className="text-xl font-playfair flex items-center gap-2">
+              <FileText className="w-5 h-5" /> Account Application Review
+            </DialogTitle>
+            <DialogDescription>
+              Applicant: <span className="font-medium text-charcoal">{selectedApp?.firstName} {selectedApp?.lastName}</span>
+            </DialogDescription>
+          </DialogHeader>
+
+          {selectedApp && (
+            <div className="space-y-6 py-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="bg-neutral-50 p-5 rounded-lg border border-neutral-200 space-y-4">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b pb-2">Personal Information</h4>
+                  <div className="grid grid-cols-2 gap-y-3 text-sm">
+                    <span className="text-muted-foreground">Full Name</span>
+                    <span className="font-medium">{selectedApp.firstName} {selectedApp.lastName}</span>
+                    <span className="text-muted-foreground">Date of Birth</span>
+                    <span className="font-medium">{format(new Date(selectedApp.dateOfBirth), 'PPP')}</span>
+                    <span className="text-muted-foreground">Phone</span>
+                    <span className="font-medium">{selectedApp.phone}</span>
+                    <span className="text-muted-foreground">Email</span>
+                    <span className="font-medium">{selectedApp.email}</span>
+                  </div>
+                </div>
+
+                <div className="bg-neutral-50 p-5 rounded-lg border border-neutral-200 space-y-4">
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b pb-2">Financial Profile</h4>
+                  <div className="grid grid-cols-2 gap-y-3 text-sm">
+                    <span className="text-muted-foreground">Employment</span>
+                    <span className="font-medium capitalize">{selectedApp.employmentStatus.toLowerCase()}</span>
+                    <span className="text-muted-foreground">Annual Income</span>
+                    <span className="font-medium">${selectedApp.annualIncome.toLocaleString()}</span>
+                    <span className="text-muted-foreground">Requested Type</span>
+                    <span className="font-medium">{selectedApp.applicationType} Account</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="bg-neutral-50 p-5 rounded-lg border border-neutral-200 space-y-4">
+                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b pb-2">Address Details</h4>
+                <div className="text-sm font-medium">
+                  <p>{selectedApp.address}</p>
+                  <p>{selectedApp.city}, {selectedApp.state} {selectedApp.zipCode}</p>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              {selectedApp.status === 'PENDING' && (
+                <div className="flex items-center gap-3 justify-end pt-4 border-t border-neutral-200">
+                  <form action={onReject}>
+                    <input type="hidden" name="id" value={selectedApp.id} />
+                    <Button type="submit" variant="primary" className="bg-red-600 hover:bg-red-700 border-none shadow-none text-white" onClick={() => setSelectedApp(null)}>
+                      <XCircle className="w-4 h-4 mr-2" /> Reject Application
+                    </Button>
+                  </form>
+                  <form action={onApprove}>
+                    <input type="hidden" name="id" value={selectedApp.id} />
+                    <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => setSelectedApp(null)}>
+                      <CheckCircle2 className="w-4 h-4 mr-2" /> Approve & Create Account
+                    </Button>
+                  </form>
+                </div>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
