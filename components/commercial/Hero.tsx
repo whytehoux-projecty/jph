@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { ArrowRight } from 'lucide-react';
 import { Button } from '@/components/commercial-ui/Button';
+import { EBankingWidget } from '@/components/commercial/EBankingWidget';
 
 interface HeroProps {
     headline: string;
@@ -46,10 +47,7 @@ export function Hero({ headline, subheadline, primaryCTA, secondaryCTA, image, s
                     {/* E-Banking Widget or Image/Visual */}
                     {showEBankingWidget ? (
                         <div className="flex items-center justify-center">
-                            {/* E-Banking widget will be imported and used in the homepage */}
-                            <div className="w-full max-w-md">
-                                {/* Placeholder - will be replaced by actual widget in homepage */}
-                            </div>
+                            <EBankingWidget className="w-full max-w-md" />
                         </div>
                     ) : (
                         <div className="relative h-[400px] md:h-[600px] rounded-none overflow-hidden shadow-vintage-xl">

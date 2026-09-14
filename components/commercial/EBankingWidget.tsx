@@ -24,25 +24,9 @@ export function EBankingWidget({ className = '' }: EBankingWidgetProps) {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setIsChecking(true);
-
-        const portalUrl = process.env.NEXT_PUBLIC_PORTAL_URL || 'http://localhost:4000';
-
-        try {
-            // Check if portal is available
-            await fetch(`${portalUrl}/api/health`, {
-                method: 'HEAD',
-                mode: 'no-cors',
-                cache: 'no-cache'
-            });
-
-            // If portal is available, redirect to it
-            window.location.href = portalUrl;
-        } catch (_) {
-            // If portal is not available, show unavailable page
-            router.push('/unavailable');
-        } finally {
-            setIsChecking(false);
-        }
+        // In the unified bank, portal is internal — redirect directly to /login
+        router.push('/login');
+        setIsChecking(false);
     };
 
     return (

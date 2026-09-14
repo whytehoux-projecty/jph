@@ -7,9 +7,10 @@ import { X, CheckCircle2, AlertCircle, AlertTriangle, Info } from "lucide-react"
 import { cn } from "@/lib/utils";
 import { PortalHeader } from "@/components/layout/PortalHeader";
 import { LeftSidebar } from "@/components/layout/LeftSidebar";
-import { RightSidebar } from "@/components/layout/RightSidebar";
+import { RightSidebar, type UserProfile } from "@/components/layout/RightSidebar";
 import { Footer } from "@/components/layout/Footer";
 import { MobileInstallPrompt } from "@/components/layout/MobileInstallPrompt";
+import { getProfile } from "@/app/actions/profile";
 import type { ToastItem } from "@/lib/toast";
 
 const VARIANT_STYLES: Record<ToastItem["variant"], string> = {
@@ -92,6 +93,7 @@ export default function EBankingLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
+  const [profile, setProfile] = useState<UserProfile | null>(null);
 
   // Skip portal layout for auth, corporate marketing, and admin pages
   const isPassThrough =
@@ -111,6 +113,26 @@ export default function EBankingLayout({ children }: { children: ReactNode }) {
     pathname?.startsWith("/privacy") ||
     pathname?.startsWith("/terms") ||
     pathname?.startsWith("/unavailable");
+
+  useEffect(() => {
+    if (!isPassThrough) {
+      getProfile()
+        .then((user) => {
+          if (user) {
+            setProfile({
+              id: user.id,
+              firstName: user.firstName,
+              lastName: user.lastName,
+              tier: user.tier,
+            });
+          }
+        })
+        .catch(() => {
+          // Unauthenticated or error
+          setProfile(null);
+        });
+    }
+  }, [isPassThrough, pathname]);
 
   if (isPassThrough) {
     return <>{children}</>;
@@ -156,6 +178,7 @@ export default function EBankingLayout({ children }: { children: ReactNode }) {
       <RightSidebar
         isOpen={isRightSidebarOpen}
         onToggle={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
+        profile={profile}
       />
 
       {/* Global Toast Notification Container */}

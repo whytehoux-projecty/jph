@@ -12,7 +12,6 @@ import {
 import { Button } from "@/components/ui/Button";
 import { useRouter } from "next/navigation";
 import { payBill } from "@/app/actions/bills";
-import { api } from "@/lib/api-client";
 import { Globe, FileText, Check, Building } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";

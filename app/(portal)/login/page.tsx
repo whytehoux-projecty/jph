@@ -9,6 +9,7 @@ import { signIn } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Footer } from "@/components/layout/Footer";
+import { PortalStatusIndicator } from "@/components/portal/PortalStatusIndicator";
 
 type PortalStatus = "online" | "offline" | "maintenance" | "scheduled_downtime";
 
@@ -51,7 +52,7 @@ export default function LoginPage() {
     // Validation
     const newErrors: Record<string, string> = {};
 
-    const isAccountNumber = /^[a-zA-Z0-9-]+$/.test(formData.accountNumber);
+    const isAccountNumber = /^\d{10,12}$/.test(formData.accountNumber);
     const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.accountNumber);
 
     if (!formData.accountNumber) {
@@ -132,9 +133,16 @@ export default function LoginPage() {
       <div className="relative z-10 h-full w-full flex items-center justify-center px-6">
 
         <div className="flex flex-col items-center">
+          <PortalStatusIndicator
+            healthCheckUrl="/api/health"
+            pollInterval={60000}
+            showDetails={false}
+            onStatusChange={setPortalStatus}
+            className="mb-3"
+          />
 
-        {/* Login Form */}
-        <div className="relative z-30">
+          {/* Login Form */}
+          <div className="relative z-30">
           {/* Explicitly sized container: 320px x auto - Sharper edges (rounded-sm) */}
           <div className="w-[320px] h-auto bg-white/90 backdrop-blur-md shadow-2xl rounded-sm p-6 border border-[color:var(--heritage-navy)]/20 flex flex-col justify-center">
             {/* General Error Message */}
@@ -253,13 +261,13 @@ export default function LoginPage() {
 
                 <div className="flex flex-col gap-2 items-center">
                   <Link
-                    href="/apply"
-                    className="text-sm text-[#1E4B35] hover:underline font-medium flex items-center justify-center gap-1">
+                    href="/contact"
+                    className="text-sm text-[color:var(--heritage-navy)] hover:underline font-medium flex items-center justify-center gap-1">
                     Forgot username/password? <span className="text-xs">›</span>
                   </Link>
                   <Link
-                    href={`${process.env.NEXT_PUBLIC_CORPORATE_URL}/signup`}
-                    className="text-sm text-[#1E4B35] hover:underline font-medium flex items-center justify-center gap-1">
+                    href="/apply"
+                    className="text-sm text-[color:var(--heritage-navy)] hover:underline font-medium flex items-center justify-center gap-1">
                     Not enrolled? Sign up now.{" "}
                     <span className="text-xs">›</span>
                   </Link>

@@ -1,7 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-
-const prisma = new PrismaClient();
+import { AutoRefreshHeader } from './AutoRefreshHeader';
 
 export default async function TransactionsAdmin() {
   const transactions = await prisma.transaction.findMany({
@@ -43,7 +42,7 @@ export default async function TransactionsAdmin() {
 
   return (
     <div>
-      <h2 className="text-2xl font-bold mb-6">Pending & Processed Transactions</h2>
+      <AutoRefreshHeader />
       <div className="bg-white rounded-lg shadow overflow-hidden">
         <table className="min-w-full text-left text-sm whitespace-nowrap">
           <thead className="uppercase tracking-wider border-b-2 dark:border-neutral-600 bg-neutral-50 dark:bg-neutral-800">

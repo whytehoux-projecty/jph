@@ -32,7 +32,6 @@ import { VintageIcon } from "@/components/ui/vintage-icon";
 import { Input } from "@/components/ui/input";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
-import { api } from "@/lib/api-client";
 
 interface Account {
   id: string;

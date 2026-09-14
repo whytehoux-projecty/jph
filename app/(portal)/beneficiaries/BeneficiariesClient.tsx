@@ -3,8 +3,8 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import { createBeneficiary, deleteBeneficiary } from '@/app/actions/beneficiaries';
-import { api } from '@/lib/api-client';
 import { toast } from '@/lib/toast';
 import {
     Plus,
@@ -72,8 +72,7 @@ export default function BeneficiariesClient({ initialBeneficiaries }: { initialB
     }, []);
 
     const loadBeneficiaries = async () => {
-        // Mock load for UI updates after adding/deleting
-        window.location.reload();
+        router.refresh();
     };
 
     const handleAddBeneficiary = async (e: React.FormEvent) => {
@@ -290,14 +289,15 @@ export default function BeneficiariesClient({ initialBeneficiaries }: { initialB
                                     <Badge variant={beneficiary.isInternal ? "success" : "secondary"} className="text-[10px] font-normal px-2">
                                         {beneficiary.isInternal ? "Internal" : "External"}
                                     </Badge>
-                                    <Button
-                                        size="small"
-                                        variant="outline"
-                                        className="text-xs h-8 ml-auto hover:bg-vintage-green hover:text-white hover:border-vintage-green transition-colors gap-1"
-                                        onClick={() => { window.location.href = `/transfer?recipientName=${encodeURIComponent(beneficiary.name)}&accountNumber=${encodeURIComponent(beneficiary.accountNumber)}`; }}
-                                    >
-                                        Transfer <Send className="w-3 h-3 ml-1" />
-                                    </Button>
+                                    <Link href={`/transfer?accountNumber=${encodeURIComponent(beneficiary.accountNumber)}&recipientName=${encodeURIComponent(beneficiary.name)}&bankName=${encodeURIComponent(beneficiary.bankName)}`}>
+                                        <Button
+                                            size="small"
+                                            variant="outline"
+                                            className="text-xs h-8 ml-auto hover:bg-vintage-green hover:text-white hover:border-vintage-green transition-colors gap-1"
+                                        >
+                                            Transfer <Send className="w-3 h-3 ml-1" />
+                                        </Button>
+                                    </Link>
                                 </div>
                             </CardContent>
                         </Card>

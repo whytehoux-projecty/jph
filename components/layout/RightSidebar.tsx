@@ -24,9 +24,17 @@ import {
   AccountSwitcherWidget,
 } from "@/components/dashboard/RightSidebarWidgets";
 
+export interface UserProfile {
+  firstName: string;
+  lastName: string;
+  id: string;
+  tier?: string;
+}
+
 interface RightSidebarProps {
   isOpen: boolean;
   onToggle: () => void;
+  profile?: UserProfile | null;
 }
 
 const extraServices = [
@@ -56,11 +64,18 @@ const extraServices = [
   },
 ];
 
-export function RightSidebar({ isOpen, onToggle }: RightSidebarProps) {
+export function RightSidebar({ isOpen, onToggle, profile }: RightSidebarProps) {
+  const initials = profile?.firstName && profile?.lastName
+    ? `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase()
+    : 'JD';
+  const fullName = profile ? `${profile.firstName} ${profile.lastName}` : 'John Doe';
+  const tierLabel = profile?.tier ? `${profile.tier} MEMBER` : 'PREMIUM MEMBER';
+  const memberId = profile?.id ? (profile.id.length > 10 ? profile.id.slice(-10).toUpperCase() : profile.id) : '8839-2991-00';
+
   return (
     <aside
       className={cn(
-        "fixed right-0 top-[70px] bottom-0 w-[300px] border-l border-[#1E4B35]/10 bg-[#F1F8F5]/95 backdrop-blur-md transition-transform duration-300 ease-in-out z-40 shadow-xl",
+        "fixed right-0 top-[70px] bottom-0 w-[300px] border-l border-[color:var(--heritage-navy)]/10 bg-white/95 backdrop-blur-md transition-transform duration-300 ease-in-out z-40 shadow-xl",
         isOpen ? "translate-x-0" : "translate-x-full",
       )}>
       <ScrollArea className="h-full">
@@ -74,7 +89,7 @@ export function RightSidebar({ isOpen, onToggle }: RightSidebarProps) {
                   className="object-cover"
                 />
                 <AvatarFallback className="rounded-xl text-3xl">
-                  JD
+                  {initials}
                 </AvatarFallback>
               </Avatar>
               <div className="absolute bottom-0 right-0 h-9 w-9 bg-green-500 rounded-full border-4 border-white flex items-center justify-center shadow-sm">
@@ -83,17 +98,17 @@ export function RightSidebar({ isOpen, onToggle }: RightSidebarProps) {
             </div>
             <div className="text-center space-y-1">
               <h3 className="font-playfair font-bold text-2xl text-charcoal">
-                John Doe
+                {fullName}
               </h3>
               <div className="flex items-center justify-center gap-2">
                 <Badge
                   variant="outline"
                   className="text-secondary border-secondary text-xs px-2 py-0.5 bg-secondary/5">
-                  PREMIUM MEMBER
+                  {tierLabel}
                 </Badge>
               </div>
               <p className="text-xs text-muted-foreground font-mono mt-1">
-                ID: 8839-2991-00
+                ID: {memberId}
               </p>
             </div>
           </div>

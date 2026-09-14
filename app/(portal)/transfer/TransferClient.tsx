@@ -1,7 +1,5 @@
 "use client";
 
-export const dynamic = "force-dynamic";
-
 import { Suspense, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -1056,6 +1054,57 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                     </p>
                   )}
                 </div>
+
+                {isOtpStep && (
+                  <Card className="border-amber-300 bg-amber-50/70 my-4 shadow-sm">
+                    <CardHeader className="pb-2">
+                      <CardTitle className="text-base flex items-center gap-2 text-amber-950">
+                        <ShieldCheck className="h-5 w-5 text-amber-600" />
+                        Verification Required
+                      </CardTitle>
+                      <CardDescription className="text-amber-800 text-xs">
+                        Enter the 6-digit code sent to your registered contact method.
+                        <span className="block mt-1 text-[11px] text-amber-700/80 italic">
+                          Demo mode: enter any 6-digit number to proceed.
+                        </span>
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="space-y-3">
+                      <Input
+                        type="text"
+                        inputMode="numeric"
+                        maxLength={6}
+                        placeholder="000000"
+                        value={otpCode}
+                        onChange={(e) => {
+                          setOtpCode(e.target.value.replace(/\D/g, ""));
+                          setOtpError(null);
+                        }}
+                        className="text-center text-2xl tracking-[0.5em] font-mono h-14 bg-white border-amber-200 focus:border-amber-500"
+                        autoFocus
+                      />
+                      {otpError && (
+                        <p className="text-xs text-red-600 font-medium">{otpError}</p>
+                      )}
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="small"
+                        disabled={resendCooldown > 0 || isSubmitting}
+                        onClick={() => {
+                          setResendCooldown(30);
+                          setOtpCode("");
+                          setOtpError(null);
+                        }}
+                        className="w-full text-xs text-amber-900 hover:text-amber-950 hover:bg-amber-100/60"
+                      >
+                        {resendCooldown > 0
+                          ? `Resend code in ${resendCooldown}s`
+                          : "Resend verification code"}
+                      </Button>
+                    </CardContent>
+                  </Card>
+                )}
 
                 <div className="pt-4">
                   <Button

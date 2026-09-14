@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -25,6 +26,11 @@ import {
   ArrowUpRight,
 } from "lucide-react";
 import { formatCurrency } from "@/lib/utils";
+import { getAccounts } from "@/app/actions/accounts";
+import { getBillHistory } from "@/app/actions/bills";
+import { getTransactionStats } from "@/app/actions/transactions";
+import { getNotifications } from "@/app/actions/notifications";
+import { formatDistanceToNow } from "date-fns";
 
 export function FinancialTipWidget() {
   return (
@@ -49,10 +55,15 @@ export function BudgetWidget() {
 
   return (
     <div className="space-y-4">
-      <h4 className="text-sm font-semibold flex items-center gap-2">
-        <TrendingUp className="h-4 w-4 text-primary" />
-        Monthly Budget
-      </h4>
+      <div className="flex items-center justify-between">
+        <h4 className="text-sm font-semibold flex items-center gap-2">
+          <TrendingUp className="h-4 w-4 text-primary" />
+          Monthly Budget
+        </h4>
+        <Badge variant="outline" className="text-[10px] text-muted-foreground px-1.5 py-0 h-4">
+          Demo
+        </Badge>
+      </div>
       <div className="space-y-3">
         {categories.map((cat) => (
           <div key={cat.name} className="space-y-1">
@@ -78,20 +89,18 @@ export function BudgetWidget() {
 }
 
 export function UpcomingBillsWidget() {
-  const bills = [
-    {
-      name: "Netflix Subscription",
-      amount: 15.99,
-      date: "Tomorrow",
-      icon: Calendar,
-    },
-    {
-      name: "Electric Bill",
-      amount: 142.5,
-      date: "In 3 days",
-      icon: AlertCircle,
-    },
-  ];
+  const [bills, setBills] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getBillHistory()
+      .then((data) => {
+        const pending = (data || []).filter((b: any) => b.status === "PENDING").slice(0, 3);
+        setBills(pending);
+      })
+      .catch(() => setBills([]))
+      .finally(() => setLoading(false));
+  }, []);
 
   return (
     <div className="space-y-3">
@@ -102,22 +111,30 @@ export function UpcomingBillsWidget() {
       <div className="space-y-2">
         {bills.map((bill) => (
           <div
-            key={bill.name}
+            key={bill.id || bill.payee?.name || bill.amount}
             className="flex items-center justify-between p-2 rounded-lg bg-muted/50 text-xs">
             <div className="flex items-center gap-2">
               <div className="p-1.5 rounded-full bg-background border">
-                <bill.icon className="h-3 w-3 text-muted-foreground" />
+                <Calendar className="h-3 w-3 text-muted-foreground" />
               </div>
               <div>
-                <p className="font-medium">{bill.name}</p>
-                <p className="text-[10px] text-muted-foreground">{bill.date}</p>
+                <p className="font-medium">{bill.payee?.name || "Scheduled Bill"}</p>
+                <p className="text-[10px] text-muted-foreground">Due soon</p>
               </div>
             </div>
             <span className="font-semibold">{formatCurrency(bill.amount)}</span>
           </div>
         ))}
+        {bills.length === 0 && !loading && (
+          <p className="text-xs text-muted-foreground text-center py-2">No pending bills</p>
+        )}
       </div>
-      <Button variant="ghost" size="small" className="w-full text-xs h-7">
+      <Button
+        variant="ghost"
+        size="small"
+        className="w-full text-xs h-7"
+        onClick={() => { window.location.href = '/bills'; }}
+      >
         See All Bills <ChevronRight className="h-3 w-3 ml-1" />
       </Button>
     </div>
@@ -134,11 +151,18 @@ export function CreditScoreWidget() {
             Credit Score
           </span>
         </div>
-        <Badge
-          variant="outline"
-          className="text-[10px] border-green-500/50 text-green-400 bg-green-500/10 px-1.5 py-0 h-5">
-          Excellent
-        </Badge>
+        <div className="flex items-center gap-1.5">
+          <Badge
+            variant="outline"
+            className="text-[10px] border-green-500/50 text-green-400 bg-green-500/10 px-1.5 py-0 h-5">
+            Excellent
+          </Badge>
+          <Badge
+            variant="outline"
+            className="text-[9px] border-white/20 text-slate-400 px-1 py-0 h-4">
+            Demo
+          </Badge>
+        </div>
       </div>
       <div className="flex items-end gap-2 mb-1">
         <span className="text-3xl font-bold">785</span>
@@ -152,8 +176,21 @@ export function CreditScoreWidget() {
 }
 
 export function CashFlowProjectionWidget() {
-  const inflow = 8420;
-  const outflow = 5140;
+  const [inflow, setInflow] = useState(0);
+  const [outflow, setOutflow] = useState(0);
+
+  useEffect(() => {
+    getTransactionStats("month")
+      .then((s: any) => {
+        setInflow(s?.income || 6250);
+        setOutflow(Math.abs(s?.expenses || 3820));
+      })
+      .catch(() => {
+        setInflow(6250);
+        setOutflow(3820);
+      });
+  }, []);
+
   const net = inflow - outflow;
   const netColor = net >= 0 ? "text-vintage-green" : "text-red-600";
 
@@ -193,10 +230,6 @@ export function CashFlowProjectionWidget() {
   );
 }
 
-import { useState, useEffect } from "react";
-import { getNotifications } from "@/app/actions/notifications";
-import { formatDistanceToNow } from "date-fns";
-
 export function RecentAlertsWidget() {
   const [alerts, setAlerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -208,7 +241,6 @@ export function RecentAlertsWidget() {
         const notifications = Array.isArray(res) ? res : [];
         setAlerts(notifications.slice(0, 5));
       } catch {
-        // Silent — x-silent-error header already suppresses api-client logging
         setAlerts([]);
       } finally {
         setLoading(false);
@@ -229,19 +261,24 @@ export function RecentAlertsWidget() {
           <div
             key={alert.id || alert.title}
             className="flex items-start justify-between p-2 rounded-lg bg-muted/50 text-xs">
-            <div>
-              <p className="font-medium">{alert.title}</p>
-              <p className="text-[10px] text-muted-foreground">
-                {alert.message} • {formatDistanceToNow(new Date(alert.date), { addSuffix: true })}
+            <div className="flex-1 min-w-0 mr-2">
+              <p className="font-medium truncate">{alert.title}</p>
+              <p className="text-[10px] text-muted-foreground line-clamp-1">
+                {alert.message} • {formatDistanceToNow(new Date(alert.createdAt || Date.now()), { addSuffix: true })}
               </p>
             </div>
-            <Button variant="ghost" size="small" className="h-6 text-[10px]">
+            <Button
+              variant="ghost"
+              size="small"
+              className="h-6 text-[10px] shrink-0"
+              onClick={() => { window.location.href = '/dashboard'; }}
+            >
               View
             </Button>
           </div>
         ))}
         {alerts.length === 0 && !loading && (
-             <p className="text-xs text-muted-foreground text-center py-2">No new alerts</p>
+          <p className="text-xs text-muted-foreground text-center py-2">No new alerts</p>
         )}
       </div>
     </div>
@@ -249,20 +286,36 @@ export function RecentAlertsWidget() {
 }
 
 export function AccountSwitcherWidget() {
+  const [accounts, setAccounts] = useState<any[]>([]);
+
+  useEffect(() => {
+    getAccounts()
+      .then((data) => setAccounts(data || []))
+      .catch(() => setAccounts([]));
+  }, []);
+
   return (
     <div className="space-y-3">
       <h4 className="text-sm font-semibold flex items-center gap-2">
         <Wallet className="h-4 w-4 text-primary" />
         Account Switcher
       </h4>
-      <Select defaultValue="primary-checking">
+      <Select defaultValue={accounts[0]?.id || ""}>
         <SelectTrigger className="h-9">
-          <SelectValue placeholder="Select account" />
+          <SelectValue placeholder={accounts.length > 0 ? "Select account" : "Loading accounts..."} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="primary-checking">Primary Checking</SelectItem>
-          <SelectItem value="savings-plus">Savings Plus</SelectItem>
-          <SelectItem value="business-pro">Business Pro</SelectItem>
+          {accounts.length > 0 ? (
+            accounts.map((a) => (
+              <SelectItem key={a.id} value={a.id}>
+                {a.accountType} ••••{a.accountNumber.slice(-4)} ({formatCurrency(a.balance, a.currency || 'USD')})
+              </SelectItem>
+            ))
+          ) : (
+            <SelectItem value="none" disabled>
+              No accounts available
+            </SelectItem>
+          )}
         </SelectContent>
       </Select>
     </div>

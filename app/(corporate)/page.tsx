@@ -5,6 +5,7 @@ import {
     ChevronRight
 } from 'lucide-react';
 import { ProductGrid } from '@/components/commercial/ProductGrid';
+import { Testimonials } from '@/components/commercial/Testimonials';
 import BankMergerShowcase from '@/components/commercial/BankMergerShowcase';
 import { ROUTES, BANK_INFO } from '@/lib/constants';
 import Image from 'next/image';
@@ -250,6 +251,9 @@ export default function Home() {
 
             {/* ── FULL PRODUCT GRID ────────────────────────────── */}
             <ProductGrid />
+
+            {/* ── CLIENT TESTIMONIALS ──────────────────────────── */}
+            <Testimonials />
 
             {/* ── HERITAGE VAULT CTA ───────────────────────────── */}
             <section className="py-24 bg-[#0D2545] relative overflow-hidden">
