@@ -40,6 +40,16 @@ export default async function TransactionsAdmin() {
     revalidatePath('/admin/transactions');
   };
 
+  const handleCancel = async (formData: FormData) => {
+    'use server'
+    const id = formData.get('id') as string;
+    await prisma.transaction.update({
+      where: { id },
+      data: { status: 'CANCELLED', processedAt: new Date() }
+    });
+    revalidatePath('/admin/transactions');
+  };
+
   return (
     <div>
       <AutoRefreshHeader />
@@ -65,7 +75,8 @@ export default async function TransactionsAdmin() {
                 <td className="px-6 py-4">
                   <span className={`px-2 py-1 rounded text-xs font-bold ${
                     tx.status === 'PENDING' ? 'bg-yellow-100 text-yellow-800' : 
-                    tx.status === 'APPROVED' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+                    tx.status === 'APPROVED' ? 'bg-green-100 text-green-800' : 
+                    tx.status === 'CANCELLED' ? 'bg-gray-100 text-gray-800' : 'bg-red-100 text-red-800'
                   }`}>
                     {tx.status}
                   </span>
@@ -80,6 +91,10 @@ export default async function TransactionsAdmin() {
                       <form action={handleReject}>
                         <input type="hidden" name="id" value={tx.id} />
                         <button className="text-red-600 hover:underline">Reject</button>
+                      </form>
+                      <form action={handleCancel}>
+                        <input type="hidden" name="id" value={tx.id} />
+                        <button className="text-gray-600 hover:underline">Cancel</button>
                       </form>
                     </div>
                   )}

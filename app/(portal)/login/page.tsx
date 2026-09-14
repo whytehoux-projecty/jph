@@ -9,14 +9,10 @@ import { signIn } from "next-auth/react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { Footer } from "@/components/layout/Footer";
-import { PortalStatusIndicator } from "@/components/portal/PortalStatusIndicator";
-
-type PortalStatus = "online" | "offline" | "maintenance" | "scheduled_downtime";
 
 export default function LoginPage() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
-  const [portalStatus, setPortalStatus] = useState<PortalStatus>("online");
   const [formData, setFormData] = useState({
     accountNumber: "",
     password: "",
@@ -25,29 +21,11 @@ export default function LoginPage() {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(false);
 
-  useEffect(() => {
-    // Portal status mocked as online
-    setPortalStatus("online");
-  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrors({});
     setIsLoading(true);
-
-    // Check if portal is online before attempting login
-    if (portalStatus !== "online") {
-      setErrors({
-        general:
-          portalStatus === "maintenance"
-            ? "Portal is currently under maintenance. Please try again later."
-            : portalStatus === "scheduled_downtime"
-              ? "Portal is undergoing scheduled maintenance. Please check back soon."
-              : "Portal is currently offline. Please try again later.",
-      });
-      setIsLoading(false);
-      return;
-    }
 
     // Validation
     const newErrors: Record<string, string> = {};
@@ -133,14 +111,6 @@ export default function LoginPage() {
       <div className="relative z-10 h-full w-full flex items-center justify-center px-6">
 
         <div className="flex flex-col items-center">
-          <PortalStatusIndicator
-            healthCheckUrl="/api/health"
-            pollInterval={60000}
-            showDetails={false}
-            onStatusChange={setPortalStatus}
-            className="mb-3"
-          />
-
           {/* Login Form */}
           <div className="relative z-30">
           {/* Explicitly sized container: 320px x auto - Sharper edges (rounded-sm) */}
