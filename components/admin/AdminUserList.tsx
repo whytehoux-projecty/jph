@@ -44,7 +44,9 @@ type AdminUser = {
 export function AdminUserList({ 
   initialUsers,
   onToggleStatus,
-  onToggleTier
+  onToggleTier,
+  onDeletePin,
+  onLoginAs
 }: { 
   initialUsers: AdminUser[];
   onToggleStatus: (formData: FormData) => void;
