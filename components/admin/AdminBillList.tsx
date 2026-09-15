@@ -192,15 +192,15 @@ export function AdminBillList({
               {/* Action Buttons */}
               {selectedBill.status === 'PENDING' && (
                 <div className="flex items-center gap-3 justify-end pt-4 border-t border-neutral-200">
-                  <form action={onReject}>
+                  <form action={async (formData) => { await onReject(formData); setSelectedBill(null); }}>
                     <input type="hidden" name="id" value={selectedBill.id} />
-                    <Button type="submit" variant="primary" className="bg-red-600 hover:bg-red-700 text-white border-none shadow-none" onClick={() => setSelectedBill(null)}>
+                    <Button type="submit" variant="primary" className="bg-red-600 hover:bg-red-700 text-white border-none shadow-none">
                       <XCircle className="w-4 h-4 mr-2" /> Reject Bill
                     </Button>
                   </form>
-                  <form action={onApprove}>
+                  <form action={async (formData) => { await onApprove(formData); setSelectedBill(null); }}>
                     <input type="hidden" name="id" value={selectedBill.id} />
-                    <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => setSelectedBill(null)}>
+                    <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">
                       <CheckCircle2 className="w-4 h-4 mr-2" /> Process Payment
                     </Button>
                   </form>

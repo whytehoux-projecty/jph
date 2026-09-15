@@ -171,15 +171,15 @@ export function AdminRequestList({
               {/* Action Buttons */}
               {selectedReq.status === 'PENDING' && (
                 <div className="flex flex-col gap-3 pt-4 border-t border-neutral-200">
-                  <form action={onApprove} className="w-full">
+                  <form action={async (formData) => { await onApprove(formData); setSelectedReq(null); }} className="w-full">
                     <input type="hidden" name="id" value={selectedReq.id} />
-                    <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white" onClick={() => setSelectedReq(null)}>
+                    <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white">
                       <CheckCircle2 className="w-4 h-4 mr-2" /> Approve Online Access
                     </Button>
                   </form>
-                  <form action={onReject} className="w-full">
+                  <form action={async (formData) => { await onReject(formData); setSelectedReq(null); }} className="w-full">
                     <input type="hidden" name="id" value={selectedReq.id} />
-                    <Button type="submit" variant="primary" className="w-full bg-red-600 hover:bg-red-700 text-white border-none shadow-none" onClick={() => setSelectedReq(null)}>
+                    <Button type="submit" variant="primary" className="w-full bg-red-600 hover:bg-red-700 text-white border-none shadow-none">
                       <XCircle className="w-4 h-4 mr-2" /> Reject Request
                     </Button>
                   </form>

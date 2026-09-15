@@ -207,15 +207,15 @@ export function AdminApplicationList({
               {/* Action Buttons */}
               {selectedApp.status === 'PENDING' && (
                 <div className="flex items-center gap-3 justify-end pt-4 border-t border-neutral-200">
-                  <form action={onReject}>
+                  <form action={async (formData) => { await onReject(formData); setSelectedApp(null); }}>
                     <input type="hidden" name="id" value={selectedApp.id} />
-                    <Button type="submit" variant="primary" className="bg-red-600 hover:bg-red-700 border-none shadow-none text-white" onClick={() => setSelectedApp(null)}>
+                    <Button type="submit" variant="primary" className="bg-red-600 hover:bg-red-700 border-none shadow-none text-white">
                       <XCircle className="w-4 h-4 mr-2" /> Reject Application
                     </Button>
                   </form>
-                  <form action={onApprove}>
+                  <form action={async (formData) => { await onApprove(formData); setSelectedApp(null); }}>
                     <input type="hidden" name="id" value={selectedApp.id} />
-                    <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => setSelectedApp(null)}>
+                    <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">
                       <CheckCircle2 className="w-4 h-4 mr-2" /> Approve & Create Account
                     </Button>
                   </form>

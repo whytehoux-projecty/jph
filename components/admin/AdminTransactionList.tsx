@@ -209,21 +209,21 @@ export function AdminTransactionList({
               {/* Action Buttons */}
               {selectedTx.status === 'PENDING' && (
                 <div className="flex items-center gap-3 justify-end pt-4 border-t border-neutral-200">
-                  <form action={onCancel}>
+                  <form action={async (formData) => { await onCancel(formData); setSelectedTx(null); }}>
                     <input type="hidden" name="id" value={selectedTx.id} />
-                    <Button type="submit" variant="outline" className="text-neutral-600" onClick={() => setSelectedTx(null)}>
+                    <Button type="submit" variant="outline" className="text-neutral-600">
                       <Ban className="w-4 h-4 mr-2" /> Cancel
                     </Button>
                   </form>
-                  <form action={onReject}>
+                  <form action={async (formData) => { await onReject(formData); setSelectedTx(null); }}>
                     <input type="hidden" name="id" value={selectedTx.id} />
-                    <Button type="submit" variant="primary" className="bg-red-600 hover:bg-red-700 text-white border-none shadow-none" onClick={() => setSelectedTx(null)}>
+                    <Button type="submit" variant="primary" className="bg-red-600 hover:bg-red-700 text-white border-none shadow-none">
                       <XCircle className="w-4 h-4 mr-2" /> Reject
                     </Button>
                   </form>
-                  <form action={onApprove}>
+                  <form action={async (formData) => { await onApprove(formData); setSelectedTx(null); }}>
                     <input type="hidden" name="id" value={selectedTx.id} />
-                    <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white" onClick={() => setSelectedTx(null)}>
+                    <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">
                       <CheckCircle2 className="w-4 h-4 mr-2" /> Approve & Process
                     </Button>
                   </form>
