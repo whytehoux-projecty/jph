@@ -433,10 +433,23 @@ export default function ApplicationPage() {
                                         ) : (
                                             <label className="cursor-pointer bg-white border border-gray-200 px-4 py-2 rounded-md text-sm font-medium hover:bg-gray-50 inline-block transition-colors">
                                                 {uploadingSelfie ? 'Uploading...' : 'Take/Select Photo'}
-                                                <input type="file" className="hidden" accept="image/*" onChange={(e) => e.target.files && handleFileUpload(e.target.files[0], 'selfie')} disabled={uploadingSelfie} />
+                                                <input type="file" className="hidden" accept="image/*" capture="user" onChange={(e) => e.target.files && handleFileUpload(e.target.files[0], 'selfie')} disabled={uploadingSelfie} />
                                             </label>
                                         )}
                                         {errors.livenessImageUrl && <p className="text-xs text-red-500 mt-2">{errors.livenessImageUrl}</p>}
+                                    </div>
+                                    
+                                    <div className="pt-4 border-t border-gray-100">
+                                        <Button 
+                                            variant="outline" 
+                                            className="w-full border-dashed"
+                                            onClick={() => {
+                                                updateField('idDocumentUrl', 'https://via.placeholder.com/400x250?text=Mock+ID+Document');
+                                                updateField('livenessImageUrl', 'https://via.placeholder.com/300x400?text=Mock+Selfie');
+                                            }}
+                                        >
+                                            [Dev Only] Populate Mock Uploads & Skip
+                                        </Button>
                                     </div>
                                 </div>
                             </div>
