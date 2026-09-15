@@ -12,12 +12,16 @@ export async function requestAccountOpening(data: any) {
                 email: data.email,
                 phone: data.phone,
                 dateOfBirth: new Date(data.dateOfBirth),
+                nationality: data.nationality,
+                currencyPreference: data.currencyPreference,
                 address: data.address,
                 city: data.city,
                 state: data.state,
                 zipCode: data.zipCode,
                 employmentStatus: data.employmentStatus,
                 annualIncome: Number(data.annualIncome),
+                idDocumentUrl: data.idDocumentUrl,
+                livenessImageUrl: data.livenessImageUrl,
                 status: 'PENDING'
             }
         });

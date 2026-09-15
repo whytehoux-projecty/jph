@@ -96,13 +96,26 @@ model AccountApplication {
   email            String
   phone            String
   dateOfBirth      DateTime  @map("date_of_birth")
+  nationality      String?
+  currencyPreference String? @map("currency_preference") @default("USD")
   address          String
   city             String
   state            String
   zipCode          String    @map("zip_code")
   employmentStatus String    @map("employment_status")
   annualIncome     Float     @map("annual_income")
-  status           String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  
+  // File Uploads
+  idDocumentUrl    String?   @map("id_document_url")
+  livenessImageUrl String?   @map("liveness_image_url")
+  
+  // Staff Verification
+  verificationRequired Boolean @default(false) @map("verification_required")
+  scheduledMeetingAt   DateTime? @map("scheduled_meeting_at")
+  meetingMethod        String?   @map("meeting_method")
+  meetingLink          String?   @map("meeting_link")
+
+  status           String    @default("PENDING") // PENDING, VERIFICATION_REQUIRED, APPROVED, REJECTED
   reviewedBy       String?   @map("reviewed_by")
   reviewedAt       DateTime? @map("reviewed_at")
   createdAt        DateTime  @default(now()) @map("created_at")
