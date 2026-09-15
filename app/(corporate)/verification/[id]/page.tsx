@@ -2,9 +2,10 @@ import { prisma } from '@/lib/prisma';
 import { notFound } from 'next/navigation';
 import { VerificationForm } from './VerificationForm';
 
-export default async function VerificationPage({ params }: { params: { id: string } }) {
+export default async function VerificationPage({ params }: { params: Promise<{ id: string }> }) {
+    const { id } = await params;
     const app = await prisma.accountApplication.findUnique({
-        where: { id: params.id }
+        where: { id }
     });
 
     if (!app || app.status !== 'VERIFICATION_REQUIRED') {
