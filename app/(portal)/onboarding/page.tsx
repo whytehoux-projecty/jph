@@ -110,7 +110,7 @@ export default function OnboardingPage() {
                     {/* Stepper */}
                     <div className="flex justify-between mb-8 relative">
                         <div className="absolute top-1/2 left-0 right-0 h-0.5 bg-gray-200 -z-10 -translate-y-1/2"></div>
-                        <div className="absolute top-1/2 left-0 h-0.5 bg-vintage-gold -z-10 -translate-y-1/2 transition-all duration-300" style={{ width: \`\${(currentStep - 1) * 50}%\` }}></div>
+                        <div className="absolute top-1/2 left-0 h-0.5 bg-vintage-gold -z-10 -translate-y-1/2 transition-all duration-300" style={{ width: `${(currentStep - 1) * 50}%` }}></div>
                         
                         {[1, 2, 3].map((step) => (
                             <div key={step} className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${currentStep >= step ? 'bg-vintage-gold text-white' : 'bg-gray-200 text-gray-500'}`}>
