@@ -2,6 +2,7 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { AdminApplicationList } from '@/components/admin/AdminApplicationList';
+import bcrypt from 'bcryptjs';
 
 export default async function AccountApplications() {
   const applications = await prisma.accountApplication.findMany({
@@ -16,11 +17,12 @@ export default async function AccountApplications() {
     const app = await prisma.accountApplication.findUnique({ where: { id } });
     if (!app) return;
     
+    const hashedPassword = await bcrypt.hash('Welcome123!', 10);
     // Create the mock user
-    const user = await prisma.user.create({
+    const newUser = await prisma.user.create({
       data: {
         email: app.email,
-        password: 'password123', // Default mock password
+        password: hashedPassword, // Default mock password
         firstName: app.firstName,
         lastName: app.lastName,
         phone: app.phone,
@@ -32,7 +34,7 @@ export default async function AccountApplications() {
     // Create the mock account
     await prisma.account.create({
       data: {
-        userId: user.id,
+        userId: newUser.id,
         accountNumber: Math.floor(1000000000 + Math.random() * 9000000000).toString(),
         accountType: app.applicationType,
         balance: 0.00

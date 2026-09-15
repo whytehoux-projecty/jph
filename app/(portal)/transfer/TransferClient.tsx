@@ -113,9 +113,9 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
   const [selectedTypeId, setSelectedTypeId] =
     useState<UiTransferTypeId>("internal");
   const [hasSelectedMethod, setHasSelectedMethod] = useState(false);
-  const [isOtpStep, setIsOtpStep] = useState(false);
-  const [otpCode, setOtpCode] = useState("");
-  const [otpError, setOtpError] = useState<string | null>(null);
+  const [isPinStep, setIsPinStep] = useState(false);
+  const [pinCode, setPinCode] = useState("");
+  const [pinError, setPinError] = useState<string | null>(null);
   const [resendCooldown, setResendCooldown] = useState(0);
   const [showReceipt, setShowReceipt] = useState(false);
   const [receipt, setReceipt] = useState<TransferReceiptSummary | null>(null);
@@ -285,28 +285,28 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
 
       if (Object.keys(errors).length === 0) {
         setIsReviewMode(true);
-        setIsOtpStep(false);
-        setOtpCode("");
-        setOtpError(null);
+        setIsPinStep(false);
+        setPinCode("");
+        setPinError(null);
       }
       return;
     }
 
-    if (isReviewMode && !isOtpStep) {
-      // Open OTP step — user retrieves code from their authenticator app
-      setOtpError(null);
-      setOtpCode("");
-      setIsOtpStep(true);
+    if (isReviewMode && !isPinStep) {
+      // Open PIN step
+      setPinError(null);
+      setPinCode("");
+      setIsPinStep(true);
       setResendCooldown(30);
       return;
     }
 
-    if (isOtpStep) {
-      if (!otpCode || otpCode.trim().length < 4) {
-        setOtpError("Enter the verification code we sent to you.");
+    if (isPinStep) {
+      if (!pinCode || pinCode.trim().length < 4) {
+        setPinError("Enter your 4-6 digit Transaction PIN.");
         return;
       }
-      setOtpError(null);
+      setPinError(null);
     }
 
     setFieldErrors({});
@@ -321,6 +321,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
       submitData.append('amount', formData.amount);
       submitData.append('fromAccountId', formData.fromAccountId);
       submitData.append('description', formData.description);
+      submitData.append('pinCode', pinCode);
 
       if (formData.transferType === "INTERNAL") {
         submitData.append('toAccountNumber', formData.toAccountNumber);
@@ -356,9 +357,9 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
 
       setSelectedBeneficiary(null);
       setIsReviewMode(false);
-      setIsOtpStep(false);
-      setOtpCode("");
-      setOtpError(null);
+      setIsPinStep(false);
+      setPinCode("");
+      setPinError(null);
       setResendCooldown(0);
 
 
@@ -366,8 +367,8 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
       // Refresh recent transactions
       router.refresh();
     } catch (error: any) {
-      if (isOtpStep && error.response?.status === 400) {
-        setOtpError(
+      if (isPinStep && error.response?.status === 400) {
+        setPinError(
           error.response?.data?.message ||
             "Invalid or expired code. Try again or resend.",
         );
@@ -649,45 +650,26 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                           {formData.description || "Not provided"}
                         </span>
                       </div>
-                      {isOtpStep && (
+                      {isPinStep && (
                         <div className="mt-3 pt-3 border-t border-emerald-200 space-y-2">
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs font-medium text-charcoal">
-                              Enter verification code
-                            </span>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                if (resendCooldown > 0 || isSubmitting) return;
-                                setOtpError(null);
-                                setOtpCode("");
-                                // No HTTP call needed — user retrieves a fresh code from their authenticator app
-                                setResendCooldown(30);
-                              }}
-                              className="text-[11px] text-vintage-green hover:underline disabled:opacity-60"
-                              disabled={resendCooldown > 0 || isSubmitting}>
-                              {resendCooldown > 0
-                                ? `Resend in ${resendCooldown}s`
-                                : "Resend code"}
-                            </button>
-                          </div>
+                          <div className="flex items-center justify-between"><span className="text-xs font-medium text-charcoal">Enter Transaction PIN</span></div>
                           <Input
                             type="text"
                             inputMode="numeric"
                             maxLength={6}
                             className="h-9 tracking-[0.3em] text-center font-mono text-base"
-                            value={otpCode}
+                            value={pinCode}
                             onChange={(e) => {
-                              setOtpCode(e.target.value.replace(/\D/g, ""));
-                              setOtpError(null);
+                              setPinCode(e.target.value.replace(/\D/g, ""));
+                              setPinError(null);
                             }}
                             placeholder="••••••"
-                            aria-label="Verification code"
+                            aria-label="Transaction PIN"
                           />
-                          {otpError && (
-                            <p className="text-xs text-red-600">{otpError}</p>
+                          {pinError && (
+                            <p className="text-xs text-red-600">{pinError}</p>
                           )}
-                          {!otpError && (
+                          {!pinError && (
                             <p className="text-[11px] text-muted-foreground">
                               We sent a one-time code to your registered contact
                               method.
@@ -1055,7 +1037,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                   )}
                 </div>
 
-                {isOtpStep && (
+                {isPinStep && (
                   <Card className="border-amber-300 bg-amber-50/70 my-4 shadow-sm">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base flex items-center gap-2 text-amber-950">
@@ -1075,16 +1057,16 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                         inputMode="numeric"
                         maxLength={6}
                         placeholder="000000"
-                        value={otpCode}
+                        value={pinCode}
                         onChange={(e) => {
-                          setOtpCode(e.target.value.replace(/\D/g, ""));
-                          setOtpError(null);
+                          setPinCode(e.target.value.replace(/\D/g, ""));
+                          setPinError(null);
                         }}
                         className="text-center text-2xl tracking-[0.5em] font-mono h-14 bg-white border-amber-200 focus:border-amber-500"
                         autoFocus
                       />
-                      {otpError && (
-                        <p className="text-xs text-red-600 font-medium">{otpError}</p>
+                      {pinError && (
+                        <p className="text-xs text-red-600 font-medium">{pinError}</p>
                       )}
                       <Button
                         type="button"
@@ -1093,8 +1075,8 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                         disabled={resendCooldown > 0 || isSubmitting}
                         onClick={() => {
                           setResendCooldown(30);
-                          setOtpCode("");
-                          setOtpError(null);
+                          setPinCode("");
+                          setPinError(null);
                         }}
                         className="w-full text-xs text-amber-900 hover:text-amber-950 hover:bg-amber-100/60"
                       >
@@ -1121,7 +1103,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                             userPreferences.language,
                             "transfer.nextReview",
                           ) || "Next: Review details"
-                        : !isOtpStep
+                        : !isPinStep
                           ? translate(
                               userPreferences.language,
                               "transfer.nextVerify",

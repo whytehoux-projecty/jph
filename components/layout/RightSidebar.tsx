@@ -28,7 +28,8 @@ export interface UserProfile {
   firstName: string;
   lastName: string;
   id: string;
-  tier?: string;
+  tier: string;
+  pinSetupComplete: boolean;
 }
 
 interface RightSidebarProps {

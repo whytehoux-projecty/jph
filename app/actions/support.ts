@@ -10,6 +10,14 @@ export async function sendContactMessage(data: any) {
   // or just log it if there's no session
   
   if (session?.user?.id) {
+    await prisma.supportTicket.create({
+      data: {
+        userId: session.user.id,
+        subject: data.subject || "Support Inquiry",
+        message: data.message || "No message provided",
+      }
+    });
+
     await prisma.notification.create({
       data: {
         userId: session.user.id,

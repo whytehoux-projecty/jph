@@ -10,6 +10,7 @@ import { LeftSidebar } from "@/components/layout/LeftSidebar";
 import { RightSidebar, type UserProfile } from "@/components/layout/RightSidebar";
 import { Footer } from "@/components/layout/Footer";
 import { MobileInstallPrompt } from "@/components/layout/MobileInstallPrompt";
+import { PinSetupModal } from "@/components/portal/PinSetupModal";
 import { getProfile } from "@/app/actions/profile";
 import type { ToastItem } from "@/lib/toast";
 
@@ -124,6 +125,7 @@ export default function EBankingLayout({ children }: { children: ReactNode }) {
               firstName: user.firstName,
               lastName: user.lastName,
               tier: user.tier,
+              pinSetupComplete: user.pinSetupComplete,
             });
           }
         })
@@ -183,6 +185,7 @@ export default function EBankingLayout({ children }: { children: ReactNode }) {
 
       {/* Global Toast Notification Container */}
       <ToastContainer />
+      {profile && !profile.pinSetupComplete && <PinSetupModal />}
     </div>
   );
 }

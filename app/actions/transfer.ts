@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
+import bcrypt from 'bcryptjs';
 
 export async function submitTransfer(formData: FormData) {
   const session = await auth();
@@ -50,6 +51,19 @@ export async function submitTransfer(formData: FormData) {
   // Basic validation
   if (!amount || amount <= 0) {
     throw new Error('Invalid amount');
+  }
+
+  const pinCode = formData.get('pinCode') as string;
+  if (!user.transactionPin) {
+    throw new Error('Transaction PIN not set up. Please go to settings to set it up.');
+  }
+
+  const isValidPin = await bcrypt.compare(pinCode, user.transactionPin);
+  if (!isValidPin) {
+    // Return a 400 response structure since the client checks error.response?.status === 400
+    const err = new Error('Invalid Transaction PIN');
+    (err as any).response = { status: 400, data: { message: 'Invalid Transaction PIN' } };
+    throw err;
   }
 
   // Create PENDING transaction

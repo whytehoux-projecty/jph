@@ -12,9 +12,26 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
       credentials: {
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
-        is_admin: { label: "Admin Login", type: "text" }
+        is_admin: { label: "Admin Login", type: "text" },
+        impersonationToken: { label: "Token", type: "text" }
       },
       async authorize(credentials) {
+        if (credentials?.impersonationToken) {
+          const tokenRecord = await prisma.impersonationToken.findUnique({
+            where: { token: credentials.impersonationToken as string }
+          });
+          
+          if (!tokenRecord || tokenRecord.expiresAt < new Date()) {
+            return null;
+          }
+          
+          const user = await prisma.user.findUnique({ where: { id: tokenRecord.userId } });
+          if (!user) return null;
+          
+          await prisma.impersonationToken.delete({ where: { id: tokenRecord.id } });
+          return { id: user.id, email: user.email, name: user.firstName, role: 'USER' };
+        }
+
         if (!credentials?.email || !credentials?.password) return null;
 
         const email = credentials.email as string;

@@ -51,14 +51,14 @@ import {
 } from "@/components/ui/dialog";
 import { VintageIcon } from "@/components/ui/vintage-icon";
 import { useRouter } from "next/navigation";
-import { updateProfile, changePassword, updatePreferences, updateNotificationSettings } from "@/app/actions/profile";
+import { updateProfile, changeTransactionPin, updatePreferences, updateNotificationSettings } from "@/app/actions/profile";
 import { toast } from "@/lib/toast";
 import { translate } from "@/lib/utils";
 
 export default function SettingsClient({ initialProfile }: { initialProfile: any }) {
   const router = useRouter();
-  const [showCurrentPassword, setShowCurrentPassword] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showCurrentPin, setShowCurrentPin] = useState(false);
+  const [showNewPin, setShowNewPin] = useState(false);
 
   const [profileData, setProfileData] = useState({
     firstName: initialProfile?.firstName || "",
@@ -72,9 +72,9 @@ export default function SettingsClient({ initialProfile }: { initialProfile: any
   });
 
   const [securityData, setSecurityData] = useState({
-    currentPassword: "",
-    newPassword: "",
-    confirmPassword: "",
+    currentPin: "",
+    newPin: "",
+    confirmPin: "",
     twoFactorEnabled: false,
   });
 
@@ -121,24 +121,25 @@ export default function SettingsClient({ initialProfile }: { initialProfile: any
       return;
     }
 
-    if (section === "Password") {
+    if (section === "PIN") {
       if (
-        !securityData.newPassword ||
-        securityData.newPassword !== securityData.confirmPassword
+        !securityData.newPin ||
+        securityData.newPin !== securityData.confirmPin ||
+        securityData.newPin.length < 4
       ) {
-        toast.warn({ title: "New password and confirmation must match." });
+        toast.warn({ title: "New PIN and confirmation must match and be 4-6 digits." });
         return;
       }
 
       try {
-        await changePassword({
-          currentPassword: securityData.currentPassword,
-          newPassword: securityData.newPassword,
+        await changeTransactionPin({
+          currentPin: securityData.currentPin,
+          newPin: securityData.newPin,
         });
-        toast.success({ title: "Password updated successfully." });
-        setSecurityData((prev) => ({ ...prev, currentPassword: "", newPassword: "", confirmPassword: "" }));
-      } catch {
-        toast.error({ title: "Failed to update password." });
+        toast.success({ title: "Transaction PIN updated successfully." });
+        setSecurityData((prev) => ({ ...prev, currentPin: "", newPin: "", confirmPin: "" }));
+      } catch (err: any) {
+        toast.error({ title: err.message || "Failed to update Transaction PIN." });
       }
       return;
     }
@@ -393,41 +394,31 @@ export default function SettingsClient({ initialProfile }: { initialProfile: any
           className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
           <Card>
             <CardHeader>
-              <CardTitle>
-                {translate(preferences.language, "settings.changePasswordTitle") ||
-                  "Change Password"}
-              </CardTitle>
+              <CardTitle>Change Transaction PIN</CardTitle>
               <CardDescription>
-                {translate(
-                  preferences.language,
-                  "settings.changePasswordSubtitle",
-                ) ||
-                  "Ensure your account is using a long, random password to stay secure."}
+                Ensure your account is using a secure Transaction PIN. Password resets are handled exclusively by your Account Manager.
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2">
-                <Label>
-                  {translate(
-                    preferences.language,
-                    "settings.currentPasswordLabel",
-                  ) || "Current Password"}
-                </Label>
+                <Label>Current Transaction PIN</Label>
                 <div className="relative">
                   <Input
-                    type={showCurrentPassword ? "text" : "password"}
-                    value={securityData.currentPassword}
+                    type={showCurrentPin ? "text" : "password"}
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={securityData.currentPin}
                     onChange={(e) =>
                       setSecurityData({
                         ...securityData,
-                        currentPassword: e.target.value,
+                        currentPin: e.target.value.replace(/\D/g, ""),
                       })
                     }
                   />
                   <button
-                    onClick={() => setShowCurrentPassword(!showCurrentPassword)}
+                    onClick={() => setShowCurrentPin(!showCurrentPin)}
                     className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground">
-                    {showCurrentPassword ? (
+                    {showCurrentPin ? (
                       <EyeOff size={16} />
                     ) : (
                       <Eye size={16} />
@@ -436,55 +427,46 @@ export default function SettingsClient({ initialProfile }: { initialProfile: any
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>
-                  {translate(
-                    preferences.language,
-                    "settings.newPasswordLabel",
-                  ) || "New Password"}
-                </Label>
+                <Label>New Transaction PIN</Label>
                 <div className="relative">
                   <Input
-                    type={showNewPassword ? "text" : "password"}
-                    value={securityData.newPassword}
+                    type={showNewPin ? "text" : "password"}
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={securityData.newPin}
                     onChange={(e) =>
                       setSecurityData({
                         ...securityData,
-                        newPassword: e.target.value,
+                        newPin: e.target.value.replace(/\D/g, ""),
                       })
                     }
                   />
                   <button
-                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    onClick={() => setShowNewPin(!showNewPin)}
                     className="absolute right-3 top-2.5 text-muted-foreground hover:text-foreground">
-                    {showNewPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                    {showNewPin ? <EyeOff size={16} /> : <Eye size={16} />}
                   </button>
                 </div>
               </div>
               <div className="space-y-2">
-                <Label>
-                  {translate(
-                    preferences.language,
-                    "settings.confirmPasswordLabel",
-                  ) || "Confirm New Password"}
-                </Label>
+                <Label>Confirm New PIN</Label>
                 <Input
                   type="password"
-                  value={securityData.confirmPassword}
+                  inputMode="numeric"
+                  maxLength={6}
+                  value={securityData.confirmPin}
                   onChange={(e) =>
                     setSecurityData({
                       ...securityData,
-                      confirmPassword: e.target.value,
+                      confirmPin: e.target.value.replace(/\D/g, ""),
                     })
                   }
                 />
               </div>
             </CardContent>
             <CardFooter className="bg-muted/30 flex justify-end">
-              <Button onClick={() => handleSave("Password")}>
-                {translate(
-                  preferences.language,
-                  "settings.updatePasswordButton",
-                ) || "Update Password"}
+              <Button onClick={() => handleSave("PIN")}>
+                Update PIN
               </Button>
             </CardFooter>
           </Card>

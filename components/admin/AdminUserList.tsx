@@ -19,6 +19,8 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/Button";
+import { resetUserPassword } from "@/app/actions/admin";
+import { LogIn, Key, Trash2 } from "lucide-react";
 
 type AdminUser = {
   id: string;
@@ -47,6 +49,8 @@ export function AdminUserList({
   initialUsers: AdminUser[];
   onToggleStatus: (formData: FormData) => void;
   onToggleTier: (formData: FormData) => void;
+  onDeletePin: (formData: FormData) => void;
+  onLoginAs: (formData: FormData) => void;
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -237,6 +241,43 @@ export function AdminUserList({
                     ) : (
                       <><UserCheck className="w-4 h-4 mr-2" /> Activate Customer</>
                     )}
+                  </Button>
+                </form>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
+                <form action={onLoginAs}>
+                  <input type="hidden" name="id" value={selectedUser.id} />
+                  <Button type="submit" variant="outline" className="w-full text-blue-600 border-blue-200 hover:bg-blue-50">
+                    <LogIn className="w-4 h-4 mr-2" /> Login As
+                  </Button>
+                </form>
+                
+                <Button 
+                  variant="outline" 
+                  className="w-full text-orange-600 border-orange-200 hover:bg-orange-50"
+                  onClick={async () => {
+                    if (confirm(`Are you sure you want to reset the password for ${selectedUser.firstName}?`)) {
+                      try {
+                        const newPass = await resetUserPassword(selectedUser.id);
+                        alert(`Password reset successful!\n\nNew Password: ${newPass}\n\nPlease copy this and send it securely to the user.`);
+                      } catch (e: any) {
+                        alert(e.message || "Failed to reset password");
+                      }
+                    }
+                  }}
+                >
+                  <Key className="w-4 h-4 mr-2" /> Reset Password
+                </Button>
+
+                <form action={onDeletePin} onSubmit={(e) => {
+                  if (!confirm("Are you sure you want to delete this user's Transaction PIN? They will be forced to set up a new one on next login.")) {
+                    e.preventDefault();
+                  }
+                }}>
+                  <input type="hidden" name="id" value={selectedUser.id} />
+                  <Button type="submit" variant="outline" className="w-full text-red-600 border-red-200 hover:bg-red-50">
+                    <Trash2 className="w-4 h-4 mr-2" /> Delete PIN
                   </Button>
                 </form>
               </div>

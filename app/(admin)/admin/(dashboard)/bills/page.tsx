@@ -34,14 +34,24 @@ export default async function AdminBillsPage() {
     if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
     const id = formData.get('id') as string;
     
-    // In a real system, this would debit the account. 
-    // For this mock, we just mark it as PAID.
     const bill = await prisma.bill.findUnique({ where: { id }, include: { account: true } });
     if (!bill) return;
 
     await prisma.account.update({
       where: { id: bill.accountId },
       data: { balance: bill.account.balance - bill.amount }
+    });
+
+    await prisma.transaction.create({
+      data: {
+        accountId: bill.accountId,
+        type: 'DEBIT',
+        transactionType: 'LOCAL_TRANSFER',
+        amount: -bill.amount,
+        status: 'APPROVED',
+        description: `Bill Payment`, // Simple description since we don't fetch Payee in this query
+        reference: `BILL-${bill.id.substring(0, 8)}`,
+      }
     });
 
     await prisma.bill.update({

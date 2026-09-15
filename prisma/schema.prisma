@@ -45,6 +45,8 @@ model User {
   preferredLanguage String   @default("en") @map("preferred_language")
   preferredCurrency String   @default("USD") @map("preferred_currency")
   twoFactorEnabled  Boolean  @default(false) @map("two_factor_enabled")
+  transactionPin    String?  @map("transaction_pin")
+  pinSetupComplete  Boolean  @default(false) @map("pin_setup_complete")
   createdAt         DateTime @default(now()) @map("created_at")
   updatedAt         DateTime @updatedAt @map("updated_at")
 
@@ -53,6 +55,7 @@ model User {
   savingsGoals     SavingsGoal[]
   payees           Payee[]
   notifications    Notification[]
+  supportTickets   SupportTicket[]
 
   @@map("users")
 }
@@ -242,4 +245,28 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   
   @@map("notifications")
+}
+
+model SupportTicket {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  subject   String
+  message   String
+  status    String   @default("OPEN") // OPEN, RESOLVED
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+  
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("support_tickets")
+}
+
+model ImpersonationToken {
+  id         String   @id @default(cuid())
+  userId     String   @map("user_id")
+  token      String   @unique
+  expiresAt  DateTime @map("expires_at")
+  createdAt  DateTime @default(now()) @map("created_at")
+
+  @@map("impersonation_tokens")
 }

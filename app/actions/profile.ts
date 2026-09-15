@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
+import bcrypt from 'bcryptjs';
 
 export async function getProfile() {
   const session = await auth();
@@ -30,13 +31,42 @@ export async function updateProfile(data: any) {
   return updated;
 }
 
-export async function changePassword(data: any) {
-  // In a real application, you would verify the current password,
-  // hash the new password (e.g. using bcrypt), and save it.
-  // For demo, we just simulate success.
+export async function changeTransactionPin(data: { currentPin: string; newPin: string }) {
   const session = await auth();
   if (!session?.user?.id) throw new Error('Unauthorized');
   
+  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+  if (!user || !user.transactionPin) throw new Error('PIN not set up');
+  
+  const match = await bcrypt.compare(data.currentPin, user.transactionPin);
+  if (!match) throw new Error('Incorrect current PIN');
+  
+  const hashedPin = await bcrypt.hash(data.newPin, 10);
+  await prisma.user.update({
+    where: { id: user.id },
+    data: { transactionPin: hashedPin }
+  });
+
+  return { success: true };
+}
+
+export async function setupTransactionPin(pin: string) {
+  const session = await auth();
+  if (!session?.user?.id) return { error: 'Unauthorized' };
+  
+  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
+  if (user?.pinSetupComplete) return { error: 'PIN is already set up' };
+
+  const hashedPin = await bcrypt.hash(pin, 10);
+  
+  await prisma.user.update({
+    where: { id: session.user.id },
+    data: {
+      transactionPin: hashedPin,
+      pinSetupComplete: true
+    }
+  });
+
   return { success: true };
 }
 

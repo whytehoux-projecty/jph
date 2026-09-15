@@ -24,70 +24,37 @@ type SupportTicket = {
   id: string;
   subject: string;
   message: string;
-  senderName: string;
-  senderEmail: string;
   status: string;
-  priority: string;
   createdAt: Date;
+  user: {
+    firstName: string;
+    lastName: string;
+    email: string;
+  };
 };
 
-// Static mock data since we don't have a SupportMessage model in Prisma
-const MOCK_TICKETS: SupportTicket[] = [
-  {
-    id: "TKT-1049",
-    subject: "International Wire Transfer Delayed",
-    message: "I sent a wire transfer 3 days ago to the UK and the recipient hasn't received it yet. Can you please track it?",
-    senderName: "Alice Walker",
-    senderEmail: "alice@example.com",
-    status: "OPEN",
-    priority: "HIGH",
-    createdAt: subHours(new Date(), 2)
-  },
-  {
-    id: "TKT-1048",
-    subject: "Need help setting up Auto-Pay",
-    message: "I'm trying to set up auto-pay for my mortgage bill but the system keeps throwing an error. Attached a screenshot.",
-    senderName: "Bob Smith",
-    senderEmail: "bob.smith@example.com",
-    status: "OPEN",
-    priority: "MEDIUM",
-    createdAt: subHours(new Date(), 5)
-  },
-  {
-    id: "TKT-1047",
-    subject: "Requesting higher transfer limit",
-    message: "I need to purchase a property and require my daily transfer limit to be increased to $150,000 for this week only.",
-    senderName: "Charles Davies",
-    senderEmail: "charles.d@example.com",
-    status: "CLOSED",
-    priority: "HIGH",
-    createdAt: subDays(new Date(), 1)
-  }
-];
-
-export function AdminSupportList() {
+export function AdminSupportList({ 
+  initialTickets, 
+  onResolveTicket 
+}: { 
+  initialTickets: SupportTicket[], 
+  onResolveTicket: (formData: FormData) => void 
+}) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [selectedTicket, setSelectedTicket] = useState<SupportTicket | null>(null);
-  
-  // Local state for demo purposes to simulate resolving tickets
-  const [tickets, setTickets] = useState<SupportTicket[]>(MOCK_TICKETS);
 
-  const filtered = tickets.filter((tkt) => {
+  const filtered = initialTickets.filter((tkt) => {
     const matchesSearch = 
       tkt.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tkt.senderName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      tkt.senderEmail.toLowerCase().includes(searchTerm.toLowerCase());
+      tkt.user.firstName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tkt.user.lastName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      tkt.user.email.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesStatus = statusFilter === "ALL" || tkt.status === statusFilter;
     
     return matchesSearch && matchesStatus;
   });
-
-  const handleResolve = (id: string) => {
-    setTickets(tickets.map(t => t.id === id ? { ...t, status: "CLOSED" } : t));
-    setSelectedTicket(null);
-  };
 
   return (
     <div className="space-y-4">
@@ -125,7 +92,7 @@ export function AdminSupportList() {
               <TableHead>Ticket ID</TableHead>
               <TableHead>Customer</TableHead>
               <TableHead>Subject</TableHead>
-              <TableHead>Priority</TableHead>
+              
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
@@ -133,7 +100,7 @@ export function AdminSupportList() {
           <TableBody>
             {filtered.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-32 text-center text-muted-foreground">
+                <TableCell colSpan={5} className="h-32 text-center text-muted-foreground">
                   No tickets found.
                 </TableCell>
               </TableRow>
@@ -142,8 +109,8 @@ export function AdminSupportList() {
                 <TableRow key={tkt.id} className={tkt.status === 'CLOSED' ? 'opacity-60' : ''}>
                   <TableCell className="font-mono text-xs text-muted-foreground">{tkt.id}</TableCell>
                   <TableCell>
-                    <div className="font-medium text-sm text-charcoal">{tkt.senderName}</div>
-                    <div className="text-xs text-muted-foreground">{tkt.senderEmail}</div>
+                    <div className="font-medium text-sm text-charcoal">{`${tkt.user.firstName} ${tkt.user.lastName}`}</div>
+                    <div className="text-xs text-muted-foreground">{tkt.user.email}</div>
                   </TableCell>
                   <TableCell>
                     <div className="font-medium text-sm text-charcoal max-w-[200px] truncate">{tkt.subject}</div>
@@ -151,14 +118,7 @@ export function AdminSupportList() {
                       <Clock className="w-3 h-3" /> {format(tkt.createdAt, 'MMM d, HH:mm')}
                     </div>
                   </TableCell>
-                  <TableCell>
-                    <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${
-                      tkt.priority === 'HIGH' ? 'bg-red-100 text-red-800' : 
-                      tkt.priority === 'MEDIUM' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
-                    }`}>
-                      {tkt.priority}
-                    </span>
-                  </TableCell>
+                  
                   <TableCell>
                     <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${
                       tkt.status === 'OPEN' ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-600'
@@ -202,16 +162,10 @@ export function AdminSupportList() {
                 <div className="flex justify-between items-start border-b border-neutral-200 pb-4 mb-4">
                   <div>
                     <h3 className="font-medium text-lg text-charcoal">{selectedTicket.subject}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">From: <span className="font-medium text-charcoal">{selectedTicket.senderName}</span> ({selectedTicket.senderEmail})</p>
+                    <p className="text-sm text-muted-foreground mt-1">From: <span className="font-medium text-charcoal">{`${selectedTicket.user.firstName} ${selectedTicket.user.lastName}`}</span> ({selectedTicket.user.email})</p>
                   </div>
                   <div className="text-right space-y-2">
-                    <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${
-                      selectedTicket.priority === 'HIGH' ? 'bg-red-100 text-red-800' : 
-                      selectedTicket.priority === 'MEDIUM' ? 'bg-amber-100 text-amber-800' : 'bg-blue-100 text-blue-800'
-                    }`}>
-                      {selectedTicket.priority}
-                    </span>
-                    <br/>
+                    
                     <span className={`inline-block px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${
                       selectedTicket.status === 'OPEN' ? 'bg-green-100 text-green-800' : 'bg-neutral-100 text-neutral-600'
                     }`}>
@@ -227,24 +181,26 @@ export function AdminSupportList() {
 
               {/* Action Buttons */}
               {selectedTicket.status === 'OPEN' && (
-                <div className="space-y-4 pt-4 border-t border-neutral-200">
+                <form action={onResolveTicket} className="space-y-4 pt-4 border-t border-neutral-200">
+                  <input type="hidden" name="id" value={selectedTicket.id} />
                   <div className="space-y-2">
                     <label className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Quick Reply (Email Customer)</label>
                     <textarea 
+                      name="reply"
                       placeholder="Type your response here..."
                       rows={4}
                       className="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold/50 resize-none"
                     />
                   </div>
                   <div className="flex justify-end gap-3">
-                    <Button variant="outline" className="text-neutral-600" onClick={() => setSelectedTicket(null)}>
+                    <Button type="button" variant="outline" className="text-neutral-600" onClick={() => setSelectedTicket(null)}>
                       Cancel
                     </Button>
-                    <Button className="bg-charcoal text-white hover:bg-neutral-800" onClick={() => handleResolve(selectedTicket.id)}>
+                    <Button type="submit" className="bg-charcoal text-white hover:bg-neutral-800" onClick={() => setTimeout(() => setSelectedTicket(null), 100)}>
                       <CheckCircle2 className="w-4 h-4 mr-2" /> Send Reply & Resolve Ticket
                     </Button>
                   </div>
-                </div>
+                </form>
               )}
             </div>
           )}
