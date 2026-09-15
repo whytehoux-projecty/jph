@@ -6,13 +6,11 @@ import { useRouter } from 'next/navigation';
 import { Button } from '@/components/commercial-ui/Button';
 import { Input } from '@/components/forms/Input';
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/commercial-ui/Card';
-import { Lock, Mail, User, CreditCard, Eye, EyeOff, CheckCircle } from 'lucide-react';
+import { Lock, Mail, User, CreditCard, CheckCircle } from 'lucide-react';
 import { requestOnlineAccess } from '@/app/(corporate)/actions';
 
 export default function SignupPage() {
     const router = useRouter();
-    const [showPassword, setShowPassword] = useState(false);
-    const [showConfirmPassword, setShowConfirmPassword] = useState(false);
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState({
         // Step 1: Account Verification
@@ -26,17 +24,13 @@ export default function SignupPage() {
         email: '',
         phone: '',
 
-        // Step 3: Create Credentials
-        username: '',
-        password: '',
-        confirmPassword: '',
-
-        // Step 4: Agreement
+        // Step 3: Agreement
         agreeToTerms: false,
         agreeToPrivacy: false,
     });
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
+    const [success, setSuccess] = useState(false);
 
     const validateStep1 = () => {
         const newErrors: Record<string, string> = {};
@@ -84,30 +78,6 @@ export default function SignupPage() {
     const validateStep3 = () => {
         const newErrors: Record<string, string> = {};
 
-        if (!formData.username) {
-            newErrors.username = 'Username is required';
-        } else if (formData.username.length < 4) {
-            newErrors.username = 'Username must be at least 4 characters';
-        }
-
-        if (!formData.password) {
-            newErrors.password = 'Password is required';
-        } else if (formData.password.length < 8) {
-            newErrors.password = 'Password must be at least 8 characters';
-        } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
-            newErrors.password = 'Password must contain uppercase, lowercase, and number';
-        }
-
-        if (formData.password !== formData.confirmPassword) {
-            newErrors.confirmPassword = 'Passwords do not match';
-        }
-
-        return newErrors;
-    };
-
-    const validateStep4 = () => {
-        const newErrors: Record<string, string> = {};
-
         if (!formData.agreeToTerms) {
             newErrors.agreeToTerms = 'You must agree to the terms and conditions';
         }
@@ -123,7 +93,6 @@ export default function SignupPage() {
 
         if (currentStep === 1) newErrors = validateStep1();
         else if (currentStep === 2) newErrors = validateStep2();
-        else if (currentStep === 3) newErrors = validateStep3();
 
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -137,7 +106,7 @@ export default function SignupPage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        const newErrors = validateStep4();
+        const newErrors = validateStep3();
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
             return;
@@ -149,15 +118,9 @@ export default function SignupPage() {
             await requestOnlineAccess({
                 accountNumber: formData.accountNumber,
                 email: formData.email,
-                password: formData.password,
-                firstName: formData.firstName,
-                lastName: formData.lastName,
-                phone: formData.phone,
-                dateOfBirth: formData.dateOfBirth,
             });
 
-            router.push('/login?registered=true');
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            setSuccess(true);
         } catch (error: any) {
             console.error('Registration failed:', error);
             setErrors({
@@ -168,19 +131,38 @@ export default function SignupPage() {
         }
     };
 
+    if (success) {
+        return (
+            <main className="min-h-screen bg-gradient-to-br from-off-white to-warm-cream py-12 px-4 flex items-center justify-center">
+                <Card className="text-center p-12 shadow-vintage-lg border-none bg-white max-w-xl mx-auto">
+                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
+                        <CheckCircle className="w-10 h-10" />
+                    </div>
+                    <h1 className="text-3xl font-playfair font-bold text-charcoal mb-4">Application Received</h1>
+                    <p className="text-charcoal-light mb-8 text-lg">
+                        Your request for Internet Banking access has been submitted. Our team will review it shortly. Once approved, you will receive a secure email containing your temporary login credentials.
+                    </p>
+                    <Button onClick={() => router.push('/')} variant="primary" size="large">
+                        Return Home
+                    </Button>
+                </Card>
+            </main>
+        );
+    }
+
     return (
         <main className="min-h-screen bg-gradient-to-br from-off-white to-warm-cream py-12 px-4">
             <div className="container mx-auto max-w-4xl">
                 {/* Progress Steps */}
                 <div className="mb-8">
                     <div className="flex items-center justify-between">
-                        {[1, 2, 3, 4].map((step) => (
+                        {[1, 2, 3].map((step) => (
                             <div key={step} className="flex items-center flex-1">
                                 <div className={`flex items-center justify-center w-10 h-10 rounded-full ${currentStep >= step ? 'bg-heritage-navy text-white' : 'bg-faded-gray-light text-charcoal-light'
                                     } font-semibold transition-all`}>
                                     {currentStep > step ? <CheckCircle className="w-6 h-6" /> : step}
                                 </div>
-                                {step < 4 && (
+                                {step < 3 && (
                                     <div className={`flex-1 h-1 mx-2 ${currentStep > step ? 'bg-heritage-navy' : 'bg-faded-gray-light'
                                         } transition-all`} />
                                 )}
@@ -190,7 +172,6 @@ export default function SignupPage() {
                     <div className="flex justify-between mt-2">
                         <span className="text-xs text-charcoal-light">Verify Account</span>
                         <span className="text-xs text-charcoal-light">Personal Info</span>
-                        <span className="text-xs text-charcoal-light">Credentials</span>
                         <span className="text-xs text-charcoal-light">Complete</span>
                     </div>
                 </div>
@@ -200,18 +181,16 @@ export default function SignupPage() {
                         <CardTitle className="text-2xl">
                             {currentStep === 1 && 'Verify Your Account'}
                             {currentStep === 2 && 'Personal Information'}
-                            {currentStep === 3 && 'Create Login Credentials'}
-                            {currentStep === 4 && 'Review and Agree'}
+                            {currentStep === 3 && 'Review and Agree'}
                         </CardTitle>
                         <CardDescription>
                             {currentStep === 1 && 'Enter your existing JP Heritage Bank account details to get started'}
                             {currentStep === 2 && 'Confirm your personal information'}
-                            {currentStep === 3 && 'Choose a username and secure password'}
-                            {currentStep === 4 && 'Review your information and accept our terms'}
+                            {currentStep === 3 && 'Review your information and accept our terms'}
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <form onSubmit={currentStep === 4 ? handleSubmit : (e) => { e.preventDefault(); handleNext(); }}>
+                        <form onSubmit={currentStep === 3 ? handleSubmit : (e) => { e.preventDefault(); handleNext(); }}>
                             {/* Step 1: Account Verification */}
                             {currentStep === 1 && (
                                 <div className="space-y-6">
@@ -299,83 +278,8 @@ export default function SignupPage() {
                                 </div>
                             )}
 
-                            {/* Step 3: Credentials */}
+                            {/* Step 3: Agreement */}
                             {currentStep === 3 && (
-                                <div className="space-y-6">
-                                    <Input
-                                        label="Username"
-                                        type="text"
-                                        placeholder="Choose a unique username"
-                                        value={formData.username}
-                                        onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                                        error={errors.username}
-                                        icon={<User className="w-5 h-5" />}
-                                    />
-
-                                    <div className="relative">
-                                        <Input
-                                            label="Password"
-                                            type={showPassword ? 'text' : 'password'}
-                                            placeholder="Create a strong password"
-                                            value={formData.password}
-                                            onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                                            error={errors.password}
-                                            icon={<Lock className="w-5 h-5" />}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowPassword(!showPassword)}
-                                            className="absolute right-3 top-9 text-charcoal-lighter hover:text-charcoal transition-colors"
-                                        >
-                                            {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                        </button>
-                                    </div>
-
-                                    <div className="relative">
-                                        <Input
-                                            label="Confirm Password"
-                                            type={showConfirmPassword ? 'text' : 'password'}
-                                            placeholder="Re-enter your password"
-                                            value={formData.confirmPassword}
-                                            onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                                            error={errors.confirmPassword}
-                                            icon={<Lock className="w-5 h-5" />}
-                                        />
-                                        <button
-                                            type="button"
-                                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                            className="absolute right-3 top-9 text-charcoal-lighter hover:text-charcoal transition-colors"
-                                        >
-                                            {showConfirmPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
-                                        </button>
-                                    </div>
-
-                                    <div className="p-4 bg-parchment rounded-none text-sm text-charcoal-light">
-                                        <p className="font-semibold text-charcoal mb-2">Password Requirements:</p>
-                                        <ul className="space-y-1">
-                                            <li className="flex items-center gap-2">
-                                                <CheckCircle className={`w-4 h-4 ${formData.password.length >= 8 ? 'text-heritage-navy' : 'text-faded-gray'}`} />
-                                                At least 8 characters
-                                            </li>
-                                            <li className="flex items-center gap-2">
-                                                <CheckCircle className={`w-4 h-4 ${/[A-Z]/.test(formData.password) ? 'text-heritage-navy' : 'text-faded-gray'}`} />
-                                                One uppercase letter
-                                            </li>
-                                            <li className="flex items-center gap-2">
-                                                <CheckCircle className={`w-4 h-4 ${/[a-z]/.test(formData.password) ? 'text-heritage-navy' : 'text-faded-gray'}`} />
-                                                One lowercase letter
-                                            </li>
-                                            <li className="flex items-center gap-2">
-                                                <CheckCircle className={`w-4 h-4 ${/\d/.test(formData.password) ? 'text-heritage-navy' : 'text-faded-gray'}`} />
-                                                One number
-                                            </li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            )}
-
-                            {/* Step 4: Agreement */}
-                            {currentStep === 4 && (
                                 <div className="space-y-6">
                                     <div className="p-6 bg-parchment rounded-none space-y-4">
                                         <h3 className="font-semibold text-charcoal">Review Your Information</h3>
@@ -391,10 +295,6 @@ export default function SignupPage() {
                                             <div>
                                                 <p className="text-charcoal-light">Email</p>
                                                 <p className="font-semibold text-charcoal">{formData.email}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-charcoal-light">Username</p>
-                                                <p className="font-semibold text-charcoal">{formData.username}</p>
                                             </div>
                                         </div>
                                     </div>
@@ -440,6 +340,12 @@ export default function SignupPage() {
                                             <p className="text-sm text-red-600">{errors.agreeToPrivacy}</p>
                                         )}
                                     </div>
+                                    
+                                    {errors.submit && (
+                                        <div className="p-3 bg-red-50 text-red-700 text-sm border border-red-200 rounded">
+                                            {errors.submit}
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
@@ -452,6 +358,7 @@ export default function SignupPage() {
                                         size="large"
                                         onClick={() => setCurrentStep(currentStep - 1)}
                                         className="flex-1"
+                                        disabled={isLoading}
                                     >
                                         Back
                                     </Button>
@@ -463,7 +370,7 @@ export default function SignupPage() {
                                     className="flex-1"
                                     loading={isLoading}
                                 >
-                                    {currentStep === 4 ? (isLoading ? 'Creating Account...' : 'Complete Registration') : 'Continue'}
+                                    {currentStep === 3 ? (isLoading ? 'Submitting...' : 'Complete Request') : 'Continue'}
                                 </Button>
                             </div>
                         </form>

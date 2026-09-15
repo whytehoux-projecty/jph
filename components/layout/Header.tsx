@@ -67,13 +67,24 @@ export function Header() {
                     >
                         Open Account
                     </Link>
-                    <Link
-                        href={ROUTES.vault}
-                        className="inline-flex items-center gap-2 text-sm font-semibold bg-[#B8960C] hover:bg-[#D4AF7A] text-white px-5 py-2 rounded-none transition-all duration-200 shadow-gold-glow hover:shadow-lg hover:-translate-y-0.5"
-                    >
-                        <Shield className="w-4 h-4" />
-                        Access Vault
-                    </Link>
+                    <div className="relative group">
+                        <button
+                            className="inline-flex items-center gap-2 text-sm font-semibold bg-[#B8960C] hover:bg-[#D4AF7A] text-white px-5 py-2 rounded-none transition-all duration-200 shadow-gold-glow hover:shadow-lg hover:-translate-y-0.5"
+                        >
+                            <Shield className="w-4 h-4" />
+                            Access Vault
+                        </button>
+                        <div className="absolute right-0 mt-0 w-48 bg-white border border-gray-100 shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 flex flex-col z-50 pt-2">
+                            <div className="bg-white rounded-b-lg overflow-hidden shadow-lg border border-gray-100">
+                                <Link href="/login" className="block px-4 py-3 text-sm text-[#0D2545] hover:bg-gray-50 border-b border-gray-100 font-medium">
+                                    As a User? (Log in)
+                                </Link>
+                                <Link href="/signup" className="block px-4 py-3 text-sm text-[#0D2545] hover:bg-gray-50 font-medium">
+                                    Apply to Use
+                                </Link>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
                 {/* Mobile menu button */}
@@ -133,12 +144,19 @@ export function Header() {
                                 Open Account
                             </Link>
                             <Link
-                                href={ROUTES.vault}
+                                href="/login"
                                 className="flex items-center justify-center gap-2 w-full py-3 bg-[#B8960C] text-white font-semibold rounded-none hover:bg-[#D4AF7A] transition-colors"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
                                 <Shield className="w-4 h-4" />
-                                Access Vault
+                                As a User? (Log in)
+                            </Link>
+                            <Link
+                                href="/signup"
+                                className="block w-full text-center py-3 border border-[#B8960C] text-[#B8960C] font-semibold rounded-none hover:bg-[#B8960C]/10 transition-colors"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                Apply to Use
                             </Link>
                         </div>
 

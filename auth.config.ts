@@ -15,11 +15,17 @@ export const authConfig = {
       if (token?.role) {
         (session.user as any).role = token.role;
       }
+      if (token?.isFirstLogin !== undefined) {
+        (session.user as any).isFirstLogin = token.isFirstLogin;
+      }
       return session;
     },
     async jwt({ token, user }) {
       if (user) {
         token.role = (user as any).role;
+        if ('isFirstLogin' in user) {
+          token.isFirstLogin = (user as any).isFirstLogin;
+        }
       }
       return token;
     }

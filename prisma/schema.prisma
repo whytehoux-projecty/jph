@@ -44,11 +44,15 @@ model User {
   hasOnlineAccess   Boolean  @default(false) @map("has_online_access")
   preferredLanguage String   @default("en") @map("preferred_language")
   preferredCurrency String   @default("USD") @map("preferred_currency")
-  twoFactorEnabled  Boolean  @default(false) @map("two_factor_enabled")
-  transactionPin    String?  @map("transaction_pin")
-  pinSetupComplete  Boolean  @default(false) @map("pin_setup_complete")
-  createdAt         DateTime @default(now()) @map("created_at")
-  updatedAt         DateTime @updatedAt @map("updated_at")
+  twoFactorEnabled    Boolean  @default(false) @map("two_factor_enabled")
+  transactionPin      String?  @map("transaction_pin")
+  pinSetupComplete    Boolean  @default(false) @map("pin_setup_complete")
+  isFirstLogin        Boolean  @default(true) @map("is_first_login")
+  temporaryPassword   String?  @map("temporary_password")
+  cryptoWalletEnabled Boolean  @default(false) @map("crypto_wallet_enabled")
+  profilePhotoUrl     String?  @map("profile_photo_url")
+  createdAt           DateTime @default(now()) @map("created_at")
+  updatedAt           DateTime @updatedAt @map("updated_at")
 
   accounts         Account[]
   beneficiaries    Beneficiary[]
@@ -56,6 +60,7 @@ model User {
   payees           Payee[]
   notifications    Notification[]
   supportTickets   SupportTicket[]
+  cryptoWallets    CryptoWallet[]
 
   @@map("users")
 }
@@ -82,6 +87,21 @@ model Account {
   statements     Statement[]
 
   @@map("accounts")
+}
+
+model CryptoWallet {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  currency  String   // e.g., "USDC", "USDT"
+  balance   Float    @default(0.00)
+  address   String   @unique
+  status    String   @default("ACTIVE")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("crypto_wallets")
 }
 
 // -----------------------------------------------------------------------------
@@ -129,6 +149,7 @@ model OnlineAccessRequest {
   accountNumber String    @map("account_number")
   email         String
   status        String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  rejectionReason String? @map("rejection_reason")
   reviewedBy    String?   @map("reviewed_by")
   reviewedAt    DateTime? @map("reviewed_at")
   createdAt     DateTime  @default(now()) @map("created_at")

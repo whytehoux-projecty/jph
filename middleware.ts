@@ -66,6 +66,16 @@ export default auth(function middleware(req: NextRequest & { auth: any }) {
         return NextResponse.redirect(loginUrl);
     }
 
+    // Force onboarding if isFirstLogin is true
+    if ((session.user as any).role === 'USER' && (session.user as any).isFirstLogin && pathname !== '/onboarding') {
+        return NextResponse.redirect(new URL('/onboarding', req.url));
+    }
+
+    // Prevent access to onboarding if isFirstLogin is false
+    if ((session.user as any).role === 'USER' && !(session.user as any).isFirstLogin && pathname === '/onboarding') {
+        return NextResponse.redirect(new URL('/dashboard', req.url));
+    }
+
     return NextResponse.next();
 }) as any;
 

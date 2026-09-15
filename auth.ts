@@ -60,7 +60,7 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
           const passwordsMatch = await bcrypt.compare(password, user.password).catch(() => false);
           if (passwordsMatch || password === user.password) {
             if (!user.hasOnlineAccess) throw new Error("Online access pending approval.");
-            return { id: user.id, email: user.email, name: user.firstName, role: 'USER' };
+            return { id: user.id, email: user.email, name: user.firstName, role: 'USER', isFirstLogin: user.isFirstLogin };
           }
         }
 

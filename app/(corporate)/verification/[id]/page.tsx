@@ -20,13 +20,13 @@ export default async function VerificationPage({ params }: { params: Promise<{ i
                     <p className="text-charcoal-light">Please schedule a brief call with our team.</p>
                 </div>
 
-                <VerificationForm 
+                <VerificationForm
                     app={{
                         id: app.id,
                         firstName: app.firstName,
                         applicationType: app.applicationType,
                         status: app.status
-                    }} 
+                    }}
                 />
             </div>
         </main>
