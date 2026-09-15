@@ -21,7 +21,11 @@ export default async function OnlineRequests() {
 
   const enrichedRequests = await Promise.all(
     requests.map(async (req) => {
-      const user = await prisma.user.findUnique({ where: { email: req.email } });
+      const account = await prisma.account.findUnique({ 
+        where: { accountNumber: req.accountNumber },
+        include: { user: true }
+      });
+      const user = account?.user;
       return {
         id: req.id,
         accountNumber: req.accountNumber,
@@ -43,7 +47,11 @@ export default async function OnlineRequests() {
     const request = await prisma.onlineAccessRequest.findUnique({ where: { id } });
     if (!request) return;
     
-    const user = await prisma.user.findUnique({ where: { email: request.email } });
+    const account = await prisma.account.findUnique({ 
+      where: { accountNumber: request.accountNumber },
+      include: { user: true }
+    });
+    const user = account?.user;
     if (user) {
         const tempPassword = generateTemporaryPassword();
         const hashedPassword = await bcrypt.hash(tempPassword, 10);
