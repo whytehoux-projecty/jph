@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   Users,
@@ -67,15 +68,13 @@ export function AdminSidebar() {
       </div>
 
       <div className="p-4 border-t border-white/10">
-        <form action="/api/auth/signout" method="POST">
-          <button 
-            type="submit"
-            className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm font-medium text-red-400 hover:bg-red-400/10 transition-colors"
-          >
-            <LogOut className="w-4 h-4" />
-            Sign Out
-          </button>
-        </form>
+        <button 
+          onClick={() => signOut({ callbackUrl: '/admin/login' })}
+          className="flex items-center gap-3 w-full px-3 py-2 rounded-md text-sm font-medium text-red-400 hover:bg-red-400/10 transition-colors"
+        >
+          <LogOut className="w-4 h-4" />
+          Sign Out
+        </button>
       </div>
     </aside>
   );
