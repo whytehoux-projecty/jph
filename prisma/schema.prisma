@@ -51,6 +51,7 @@ model User {
   temporaryPassword   String?  @map("temporary_password")
   cryptoWalletEnabled Boolean  @default(false) @map("crypto_wallet_enabled")
   profilePhotoUrl     String?  @map("profile_photo_url")
+  isFlagged           Boolean  @default(false) @map("is_flagged")
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
 
