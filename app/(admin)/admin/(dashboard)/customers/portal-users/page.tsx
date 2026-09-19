@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function PortalUsersPage() {
   const users = await prisma.user.findMany({
-    where: { role: 'USER', hasOnlineAccess: true },
+    where: { hasOnlineAccess: true },
     orderBy: { createdAt: 'desc' },
     include: {
       accounts: {

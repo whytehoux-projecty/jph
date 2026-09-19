@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function FlaggedAccountHoldersPage() {
   const users = await prisma.user.findMany({
-    where: { role: 'USER', isFlagged: true },
+    where: { isFlagged: true },
     orderBy: { createdAt: 'desc' },
     include: {
       accounts: {

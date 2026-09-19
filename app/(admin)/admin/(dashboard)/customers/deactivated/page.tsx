@@ -7,7 +7,7 @@ export const dynamic = 'force-dynamic';
 
 export default async function DeactivatedAccountHoldersPage() {
   const users = await prisma.user.findMany({
-    where: { role: 'USER', status: 'SUSPENDED' },
+    where: { status: 'SUSPENDED' },
     orderBy: { createdAt: 'desc' },
     include: {
       accounts: {

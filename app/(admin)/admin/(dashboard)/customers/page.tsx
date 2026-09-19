@@ -5,10 +5,10 @@ import { prisma } from "@/lib/prisma";
 export const dynamic = 'force-dynamic';
 
 export default async function CustomersHubPage() {
-  const totalUsers = await prisma.user.count({ where: { role: 'USER' } });
-  const activeUsers = await prisma.user.count({ where: { role: 'USER', status: 'ACTIVE' } });
-  const suspendedUsers = await prisma.user.count({ where: { role: 'USER', status: 'SUSPENDED' } });
-  const flaggedUsers = await prisma.user.count({ where: { role: 'USER', isFlagged: true } });
+  const totalUsers = await prisma.user.count({ where: {} });
+  const activeUsers = await prisma.user.count({ where: { status: 'ACTIVE' } });
+  const suspendedUsers = await prisma.user.count({ where: { status: 'SUSPENDED' } });
+  const flaggedUsers = await prisma.user.count({ where: { isFlagged: true } });
 
   const stats = [
     { title: "Total Customers", value: totalUsers, icon: <Users className="w-5 h-5" /> },
