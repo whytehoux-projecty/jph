@@ -7,21 +7,24 @@ export async function requestAccountOpening(data: any) {
         const application = await prisma.accountApplication.create({
             data: {
                 applicationType: data.applicationType || 'PERSONAL',
+                desiredAccountType: data.desiredAccountType,
+                isExistingCustomer: data.isExistingCustomer,
+                isUsCitizenOrResident: data.isUsCitizenOrResident,
+                consentComms: data.consentComms,
+                consentPrivacy: data.consentPrivacy,
                 firstName: data.firstName,
                 lastName: data.lastName,
                 email: data.email,
                 phone: data.phone,
-                dateOfBirth: new Date(data.dateOfBirth),
-                nationality: data.nationality,
-                currencyPreference: data.currencyPreference,
-                address: data.address,
-                city: data.city,
-                state: data.state,
+                dateOfBirth: data.dateOfBirth ? new Date(data.dateOfBirth) : new Date(), // Using current date as fallback since dateOfBirth is removed from initial form
+                nationality: data.nationality || '',
+                currencyPreference: data.currencyPreference || 'USD',
+                address: data.address || '',
+                city: data.city || '',
+                state: data.state || '',
                 zipCode: data.zipCode,
-                employmentStatus: data.employmentStatus,
-                annualIncome: Number(data.annualIncome),
-                idDocumentUrl: data.idDocumentUrl,
-                livenessImageUrl: data.livenessImageUrl,
+                employmentStatus: data.employmentStatus || '',
+                annualIncome: Number(data.annualIncome || 0),
                 status: 'PENDING'
             }
         });

@@ -41,6 +41,7 @@ type AccountApplication = {
   verificationRequired: boolean;
   scheduledMeetingAt: Date | null;
   meetingMethod: string | null;
+  registrationToken?: string | null;
   status: string;
   createdAt: Date;
 };
@@ -156,6 +157,13 @@ export function AdminApplicationList({
                     }`}>
                       {app.status.replace('_', ' ')}
                     </span>
+                    {app.status === 'APPROVED' && app.registrationToken && (
+                        <div className="mt-1">
+                            <span className="text-[10px] bg-gray-100 text-gray-500 px-1 py-0.5 rounded border border-gray-200">
+                                /register/{app.registrationToken.substring(0, 8)}...
+                            </span>
+                        </div>
+                    )}
                   </TableCell>
                   <TableCell className="text-right">
                     <Button 
@@ -193,64 +201,29 @@ export function AdminApplicationList({
             <div className="space-y-6 py-4">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="bg-neutral-50 p-5 rounded-lg border border-neutral-200 space-y-4">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b pb-2">Personal Information</h4>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b pb-2">Preliminary Contact Info</h4>
                   <div className="grid grid-cols-2 gap-y-3 text-sm">
                     <span className="text-muted-foreground">Full Name</span>
                     <span className="font-medium">{selectedApp.firstName} {selectedApp.lastName}</span>
-                    <span className="text-muted-foreground">Date of Birth</span>
-                    <span className="font-medium">{format(new Date(selectedApp.dateOfBirth), 'PPP')}</span>
-                    <span className="text-muted-foreground">Nationality</span>
-                    <span className="font-medium">{selectedApp.nationality || 'N/A'}</span>
                     <span className="text-muted-foreground">Phone</span>
                     <span className="font-medium">{selectedApp.phone}</span>
                     <span className="text-muted-foreground">Email</span>
                     <span className="font-medium">{selectedApp.email}</span>
+                    <span className="text-muted-foreground">Zip Code</span>
+                    <span className="font-medium">{selectedApp.zipCode}</span>
                   </div>
                 </div>
 
                 <div className="bg-neutral-50 p-5 rounded-lg border border-neutral-200 space-y-4">
-                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b pb-2">Financial Profile</h4>
+                  <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b pb-2">Eligibility Status</h4>
                   <div className="grid grid-cols-2 gap-y-3 text-sm">
-                    <span className="text-muted-foreground">Requested Type</span>
-                    <span className="font-medium">{selectedApp.applicationType}</span>
-                    <span className="text-muted-foreground">Base Currency</span>
-                    <span className="font-medium">{selectedApp.currencyPreference || 'USD'}</span>
-                    <span className="text-muted-foreground">Employment</span>
-                    <span className="font-medium capitalize">{selectedApp.employmentStatus.toLowerCase()}</span>
-                    <span className="text-muted-foreground">Annual Income</span>
-                    <span className="font-medium">${selectedApp.annualIncome.toLocaleString()}</span>
+                    <span className="text-muted-foreground">Requested Product</span>
+                    <span className="font-medium">{selectedApp.desiredAccountType || selectedApp.applicationType}</span>
+                    <span className="text-muted-foreground">Existing Customer</span>
+                    <span className="font-medium">{selectedApp.isExistingCustomer ? 'Yes' : 'No'}</span>
+                    <span className="text-muted-foreground">US Citizen/Resident</span>
+                    <span className="font-medium">{selectedApp.isUsCitizenOrResident ? 'Yes' : 'No'}</span>
                   </div>
-                </div>
-              </div>
-              
-              {/* Identity Documents */}
-              <div className="bg-neutral-50 p-5 rounded-lg border border-neutral-200 space-y-4">
-                <h4 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground border-b pb-2">Identity Documents</h4>
-                <div className="grid grid-cols-2 gap-6">
-                    <div>
-                        <span className="block text-sm font-medium mb-2 text-charcoal">Government ID</span>
-                        {selectedApp.idDocumentUrl ? (
-                            <div className="h-32 border border-gray-200 rounded-md bg-white flex items-center justify-center overflow-hidden">
-                                {selectedApp.idDocumentUrl.endsWith('.pdf') ? (
-                                    <a href={selectedApp.idDocumentUrl} target="_blank" className="text-blue-600 flex items-center gap-1 text-sm"><ExternalLink className="w-4 h-4"/> View PDF</a>
-                                ) : (
-                                    <img src={selectedApp.idDocumentUrl} alt="ID Document" className="object-contain h-full w-full" />
-                                )}
-                            </div>
-                        ) : (
-                            <div className="h-32 border border-gray-200 border-dashed rounded-md bg-gray-50 flex items-center justify-center text-sm text-gray-400">No document uploaded</div>
-                        )}
-                    </div>
-                    <div>
-                        <span className="block text-sm font-medium mb-2 text-charcoal">Liveness Selfie</span>
-                        {selectedApp.livenessImageUrl ? (
-                            <div className="h-32 border border-gray-200 rounded-md bg-white flex items-center justify-center overflow-hidden">
-                                <img src={selectedApp.livenessImageUrl} alt="Liveness Selfie" className="object-cover h-full w-full" />
-                            </div>
-                        ) : (
-                            <div className="h-32 border border-gray-200 border-dashed rounded-md bg-gray-50 flex items-center justify-center text-sm text-gray-400">No selfie uploaded</div>
-                        )}
-                    </div>
                 </div>
               </div>
 
@@ -271,26 +244,25 @@ export function AdminApplicationList({
                   </div>
               )}
 
+              {selectedApp.status === 'APPROVED' && selectedApp.registrationToken && (
+                  <div className="bg-green-50 p-5 rounded-lg border border-green-200 space-y-4">
+                      <h4 className="text-sm font-semibold text-green-900 flex items-center gap-2">
+                          <CheckCircle2 className="w-5 h-5"/> Registration Link Generated
+                      </h4>
+                      <p className="text-sm text-green-800">
+                          Application approved. Provide the applicant with the following secure link to complete their full registration.
+                      </p>
+                      <div className="flex items-center gap-2 mt-2">
+                          <code className="text-xs bg-white px-3 py-2 rounded border border-green-200 flex-1 break-all select-all font-mono">
+                              {typeof window !== 'undefined' ? window.location.origin : ''}/register/{selectedApp.registrationToken}
+                          </code>
+                      </div>
+                  </div>
+              )}
+
               {/* Action Buttons */}
               {(selectedApp.status === 'PENDING' || selectedApp.status === 'VERIFICATION_REQUIRED') && (
-                <div className="space-y-4 pt-4 border-t border-neutral-200">
-                  <div className="bg-green-50 p-4 rounded-lg border border-green-100 flex items-center justify-between">
-                    <div>
-                        <label className="text-sm font-semibold text-green-900 block mb-1">Optional: Initial Deposit for Provisioning</label>
-                        <p className="text-xs text-green-700">Automatically generate an initial funding transaction upon approval.</p>
-                    </div>
-                    <div className="flex items-center gap-2">
-                        <span className="text-green-900 font-medium">$</span>
-                        <input 
-                            type="number" 
-                            className="w-32 h-10 px-3 border border-green-200 rounded-md focus:outline-none focus:ring-1 focus:ring-green-500"
-                            value={initialDeposit}
-                            onChange={(e) => setInitialDeposit(e.target.value)}
-                        />
-                    </div>
-                  </div>
-
-                  <div className="flex items-center gap-3 justify-end">
+                <div className="space-y-4 pt-4 border-t border-neutral-200">                  <div className="flex items-center gap-3 justify-end">
                     <form action={async (formData) => { await onReject(formData); setSelectedApp(null); }}>
                       <input type="hidden" name="id" value={selectedApp.id} />
                       <Button type="submit" variant="outline" className="text-red-600 border-red-200 hover:bg-red-50">

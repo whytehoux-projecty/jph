@@ -39,6 +39,16 @@ type AdminUser = {
     balance: number;
     status: string;
   }[];
+  registrationForm?: {
+    fullLegalName: string;
+    dateOfBirth: Date;
+    ssnItin: string;
+    mothersMaidenName: string;
+    residentialAddress: string;
+    employmentStatus: string;
+    primarySourceOfFunds: string;
+    estimatedAnnualIncome: string;
+  } | null;
 };
 
 export function AdminUserList({ 
@@ -57,6 +67,7 @@ export function AdminUserList({
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
+  const [activeTab, setActiveTab] = useState<'overview' | 'kyc'>('overview');
 
   const filtered = initialUsers.filter((user) => {
     const matchesSearch = 
@@ -198,27 +209,67 @@ export function AdminUserList({
                 </div>
               </div>
 
-              <div className="space-y-3">
-                <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b pb-2">Linked Accounts</h4>
-                {selectedUser.accounts.length === 0 ? (
-                  <p className="text-sm text-muted-foreground">No accounts opened yet.</p>
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    {selectedUser.accounts.map(acc => (
-                      <div key={acc.id} className="p-3 bg-white border border-neutral-200 rounded-md shadow-sm flex justify-between items-center">
-                        <div>
-                          <p className="text-xs font-semibold text-charcoal uppercase">{acc.accountType}</p>
-                          <p className="text-xs font-mono text-muted-foreground">{acc.accountNumber}</p>
-                        </div>
-                        <div className="text-right">
-                          <p className="font-mono font-medium text-sm">${acc.balance.toFixed(2)}</p>
-                          <span className="text-[10px] text-green-600 font-bold uppercase">{acc.status}</span>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
+              <div className="flex border-b border-neutral-200">
+                <button
+                  className={`px-4 py-2 text-sm font-medium ${activeTab === 'overview' ? 'text-heritage-navy border-b-2 border-heritage-navy' : 'text-neutral-500 hover:text-neutral-700'}`}
+                  onClick={() => setActiveTab('overview')}
+                >
+                  Overview
+                </button>
+                {selectedUser.registrationForm && (
+                    <button
+                    className={`px-4 py-2 text-sm font-medium ${activeTab === 'kyc' ? 'text-heritage-navy border-b-2 border-heritage-navy' : 'text-neutral-500 hover:text-neutral-700'}`}
+                    onClick={() => setActiveTab('kyc')}
+                    >
+                    KYC Profile
+                    </button>
                 )}
               </div>
+
+              {activeTab === 'overview' ? (
+                  <div className="space-y-3">
+                    <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b pb-2">Linked Accounts</h4>
+                    {selectedUser.accounts.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No accounts opened yet.</p>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                        {selectedUser.accounts.map(acc => (
+                          <div key={acc.id} className="p-3 bg-white border border-neutral-200 rounded-md shadow-sm flex justify-between items-center">
+                            <div>
+                              <p className="text-xs font-semibold text-charcoal uppercase">{acc.accountType}</p>
+                              <p className="text-xs font-mono text-muted-foreground">{acc.accountNumber}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="font-mono font-medium text-sm">${acc.balance.toFixed(2)}</p>
+                              <span className="text-[10px] text-green-600 font-bold uppercase">{acc.status}</span>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+              ) : selectedUser.registrationForm && (
+                  <div className="space-y-4">
+                      <div className="bg-neutral-50 p-4 rounded border border-neutral-200">
+                          <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b pb-2 mb-3">Identity Data</h4>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div><span className="text-muted-foreground block text-xs">Full Legal Name</span> {selectedUser.registrationForm.fullLegalName}</div>
+                              <div><span className="text-muted-foreground block text-xs">Date of Birth</span> {format(new Date(selectedUser.registrationForm.dateOfBirth), 'PP')}</div>
+                              <div><span className="text-muted-foreground block text-xs">SSN/ITIN</span> •••-••-{selectedUser.registrationForm.ssnItin.slice(-4)}</div>
+                              <div><span className="text-muted-foreground block text-xs">Mother's Maiden Name</span> {selectedUser.registrationForm.mothersMaidenName}</div>
+                          </div>
+                      </div>
+                      <div className="bg-neutral-50 p-4 rounded border border-neutral-200">
+                          <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b pb-2 mb-3">Address & Employment</h4>
+                          <div className="grid grid-cols-2 gap-4 text-sm">
+                              <div className="col-span-2"><span className="text-muted-foreground block text-xs">Residential Address</span> {selectedUser.registrationForm.residentialAddress}</div>
+                              <div><span className="text-muted-foreground block text-xs">Employment Status</span> {selectedUser.registrationForm.employmentStatus}</div>
+                              <div><span className="text-muted-foreground block text-xs">Source of Funds</span> {selectedUser.registrationForm.primarySourceOfFunds}</div>
+                              <div><span className="text-muted-foreground block text-xs">Estimated Income</span> {selectedUser.registrationForm.estimatedAnnualIncome}</div>
+                          </div>
+                      </div>
+                  </div>
+              )}
 
               {/* Action Buttons */}
               <div className="grid grid-cols-2 gap-3 pt-4 border-t border-neutral-200">

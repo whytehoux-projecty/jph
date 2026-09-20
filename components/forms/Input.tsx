@@ -9,10 +9,11 @@ export interface InputProps
     error?: string;
     icon?: React.ReactNode;
     iconPosition?: 'left' | 'right';
+    helperText?: string;
 }
 
 const Input = React.forwardRef<HTMLInputElement, InputProps>(
-    ({ className, type, label, error, icon, iconPosition = 'left', ...props }, ref) => {
+    ({ className, type, label, error, icon, iconPosition = 'left', helperText, ...props }, ref) => {
         return (
             <div className="w-full">
                 {label && (
@@ -49,6 +50,9 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                 </div>
                 {error && (
                     <p className="mt-1.5 text-sm text-red-600">{error}</p>
+                )}
+                {helperText && !error && (
+                    <p className="mt-1.5 text-xs text-charcoal-lighter">{helperText}</p>
                 )}
             </div>
         );

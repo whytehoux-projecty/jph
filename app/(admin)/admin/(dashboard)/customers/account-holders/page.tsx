@@ -12,7 +12,8 @@ export default async function AllAccountHoldersPage() {
     include: {
       accounts: {
         select: { id: true, accountNumber: true, accountType: true, balance: true, status: true }
-      }
+      },
+      registrationForm: true
     }
   });
 

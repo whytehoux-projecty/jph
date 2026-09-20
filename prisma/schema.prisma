@@ -28,22 +28,22 @@ model AdminUser {
 }
 
 model User {
-  id                String   @id @default(cuid())
-  email             String   @unique
-  password          String
-  firstName         String   @map("first_name")
-  lastName          String   @map("last_name")
-  phone             String?
-  dateOfBirth       DateTime @map("date_of_birth")
-  address           String?
-  city              String?
-  state             String?
-  zipCode           String?  @map("zip_code")
-  status            String   @default("ACTIVE")
-  tier              String   @default("BASIC")
-  hasOnlineAccess   Boolean  @default(false) @map("has_online_access")
-  preferredLanguage String   @default("en") @map("preferred_language")
-  preferredCurrency String   @default("USD") @map("preferred_currency")
+  id                  String   @id @default(cuid())
+  email               String   @unique
+  password            String
+  firstName           String   @map("first_name")
+  lastName            String   @map("last_name")
+  phone               String?
+  dateOfBirth         DateTime @map("date_of_birth")
+  address             String?
+  city                String?
+  state               String?
+  zipCode             String?  @map("zip_code")
+  status              String   @default("ACTIVE")
+  tier                String   @default("BASIC")
+  hasOnlineAccess     Boolean  @default(false) @map("has_online_access")
+  preferredLanguage   String   @default("en") @map("preferred_language")
+  preferredCurrency   String   @default("USD") @map("preferred_currency")
   twoFactorEnabled    Boolean  @default(false) @map("two_factor_enabled")
   transactionPin      String?  @map("transaction_pin")
   pinSetupComplete    Boolean  @default(false) @map("pin_setup_complete")
@@ -62,6 +62,7 @@ model User {
   notifications    Notification[]
   supportTickets   SupportTicket[]
   cryptoWallets    CryptoWallet[]
+  registrationForm RegistrationForm?
 
   @@map("users")
 }
@@ -71,21 +72,21 @@ model User {
 // -----------------------------------------------------------------------------
 
 model Account {
-  id             String        @id @default(cuid())
-  userId         String        @map("user_id")
-  accountNumber  String        @unique @map("account_number")
-  accountType    String        @map("account_type")
-  currency       String        @default("USD")
-  balance        Float         @default(0.00) // Using Float for SQLite
-  status         String        @default("ACTIVE")
-  createdAt      DateTime      @default(now()) @map("created_at")
-  updatedAt      DateTime      @updatedAt @map("updated_at")
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  accountNumber String   @unique @map("account_number")
+  accountType   String   @map("account_type")
+  currency      String   @default("USD")
+  balance       Float    @default(0.00) // Using Float for SQLite
+  status        String   @default("ACTIVE")
+  createdAt     DateTime @default(now()) @map("created_at")
+  updatedAt     DateTime @updatedAt @map("updated_at")
 
-  user           User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  transactions   Transaction[]
-  cards          Card[]
-  bills          Bill[]
-  statements     Statement[]
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+  cards        Card[]
+  bills        Bill[]
+  statements   Statement[]
 
   @@map("accounts")
 }
@@ -93,14 +94,14 @@ model Account {
 model CryptoWallet {
   id        String   @id @default(cuid())
   userId    String   @map("user_id")
-  currency  String   // e.g., "USDC", "USDT"
+  currency  String // e.g., "USDC", "USDT"
   balance   Float    @default(0.00)
   address   String   @unique
   status    String   @default("ACTIVE")
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("crypto_wallets")
 }
@@ -110,51 +111,119 @@ model CryptoWallet {
 // -----------------------------------------------------------------------------
 
 model AccountApplication {
-  id               String    @id @default(cuid())
-  applicationType  String    @map("application_type") // PERSONAL, BUSINESS
-  firstName        String    @map("first_name")
-  lastName         String    @map("last_name")
-  email            String
-  phone            String
-  dateOfBirth      DateTime  @map("date_of_birth")
-  nationality      String?
-  currencyPreference String? @map("currency_preference") @default("USD")
-  address          String
-  city             String
-  state            String
-  zipCode          String    @map("zip_code")
-  employmentStatus String    @map("employment_status")
-  annualIncome     Float     @map("annual_income")
-  
+  id                    String   @id @default(cuid())
+  applicationType       String   @map("application_type") // PERSONAL, BUSINESS
+  desiredAccountType    String?  @map("desired_account_type")
+  isExistingCustomer    Boolean  @default(false) @map("is_existing_customer")
+  isUsCitizenOrResident Boolean  @default(false) @map("is_us_citizen_or_resident")
+  consentComms          Boolean  @default(false) @map("consent_comms")
+  consentPrivacy        Boolean  @default(false) @map("consent_privacy")
+  firstName             String   @map("first_name")
+  lastName              String   @map("last_name")
+  email                 String
+  phone                 String
+  dateOfBirth           DateTime @map("date_of_birth")
+  nationality           String?
+  currencyPreference    String?  @default("USD") @map("currency_preference")
+  address               String
+  city                  String
+  state                 String
+  zipCode               String   @map("zip_code")
+  employmentStatus      String   @map("employment_status")
+  annualIncome          Float    @map("annual_income")
+
   // File Uploads
-  idDocumentUrl    String?   @map("id_document_url")
-  livenessImageUrl String?   @map("liveness_image_url")
-  
+  idDocumentUrl    String? @map("id_document_url")
+  livenessImageUrl String? @map("liveness_image_url")
+
   // Staff Verification
-  verificationRequired Boolean @default(false) @map("verification_required")
+  verificationRequired Boolean   @default(false) @map("verification_required")
   scheduledMeetingAt   DateTime? @map("scheduled_meeting_at")
   meetingMethod        String?   @map("meeting_method")
   meetingLink          String?   @map("meeting_link")
 
-  status           String    @default("PENDING") // PENDING, VERIFICATION_REQUIRED, APPROVED, REJECTED
-  reviewedBy       String?   @map("reviewed_by")
-  reviewedAt       DateTime? @map("reviewed_at")
-  createdAt        DateTime  @default(now()) @map("created_at")
-  updatedAt        DateTime  @updatedAt @map("updated_at")
+  registrationToken  String?           @unique @map("registration_token")
+  registrationForm   RegistrationForm? @relation(fields: [registrationFormId], references: [id])
+  registrationFormId String?           @unique @map("registration_form_id")
+
+  status     String    @default("PENDING") // PENDING, VERIFICATION_REQUIRED, APPROVED, REJECTED
+  reviewedBy String?   @map("reviewed_by")
+  reviewedAt DateTime? @map("reviewed_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+  updatedAt  DateTime  @updatedAt @map("updated_at")
 
   @@map("account_applications")
 }
 
+model RegistrationForm {
+  id String @id @default(cuid())
+
+  // 1. Full Personal Identification (KYC)
+  fullLegalName     String   @map("full_legal_name")
+  dateOfBirth       DateTime @map("date_of_birth")
+  ssnItin           String   @map("ssn_itin")
+  mothersMaidenName String   @map("mothers_maiden_name")
+
+  // 2. Contact & Residential Details
+  residentialAddress String @map("residential_address")
+  mailingAddress     String @map("mailing_address")
+  primaryPhoneType   String @map("primary_phone_type")
+
+  // 3. Employment & Financial Profile
+  employmentStatus      String @map("employment_status")
+  occupation            String @map("occupation")
+  employerName          String @map("employer_name")
+  primarySourceOfFunds  String @map("primary_source_of_funds")
+  estimatedAnnualIncome String @map("estimated_annual_income")
+
+  // 4. Identity Verification
+  primaryIdType          String   @map("primary_id_type")
+  idNumber               String   @map("id_number")
+  stateCountryOfIssuance String   @map("state_country_of_issuance")
+  issueDate              DateTime @map("issue_date")
+  expirationDate         DateTime @map("expiration_date")
+  idFrontDocumentUrl     String?  @map("id_front_document_url")
+  idBackDocumentUrl      String?  @map("id_back_document_url")
+
+  // 5. Account Configuration & Preferences
+  overdraftProtection Boolean @map("overdraft_protection")
+  debitCardRequest    Boolean @map("debit_card_request")
+  nameToAppearOnCard  String? @map("name_to_appear_on_card")
+  statementPreference String  @map("statement_preference")
+
+  // 6. Initial Funding
+  fundingMethod                String  @map("funding_method")
+  externalAccountRoutingNumber String? @map("external_account_routing_number")
+  externalAccountNumber        String? @map("external_account_number")
+  initialDepositAmount         Float   @map("initial_deposit_amount")
+
+  // 7. Legal Disclosures & E-Signatures
+  w9Certification                    Boolean  @map("w9_certification")
+  electronicCommunicationsDisclosure Boolean  @map("electronic_communications_disclosure")
+  depositAccountAgreement            Boolean  @map("deposit_account_agreement")
+  digitalSignature                   String   @map("digital_signature")
+  signatureDate                      DateTime @map("signature_date")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  accountApplication AccountApplication?
+  user               User?               @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userId             String?             @unique @map("user_id")
+
+  @@map("registration_forms")
+}
+
 model OnlineAccessRequest {
-  id            String    @id @default(cuid())
-  accountNumber String    @map("account_number")
-  email         String
-  status        String    @default("PENDING") // PENDING, APPROVED, REJECTED
-  rejectionReason String? @map("rejection_reason")
-  reviewedBy    String?   @map("reviewed_by")
-  reviewedAt    DateTime? @map("reviewed_at")
-  createdAt     DateTime  @default(now()) @map("created_at")
-  updatedAt     DateTime  @updatedAt @map("updated_at")
+  id              String    @id @default(cuid())
+  accountNumber   String    @map("account_number")
+  email           String
+  status          String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  rejectionReason String?   @map("rejection_reason")
+  reviewedBy      String?   @map("reviewed_by")
+  reviewedAt      DateTime? @map("reviewed_at")
+  createdAt       DateTime  @default(now()) @map("created_at")
+  updatedAt       DateTime  @updatedAt @map("updated_at")
 
   @@map("online_access_requests")
 }
@@ -166,19 +235,19 @@ model OnlineAccessRequest {
 model Transaction {
   id              String    @id @default(cuid())
   accountId       String    @map("account_id")
-  type            String    // DEBIT, CREDIT
+  type            String // DEBIT, CREDIT
   transactionType String    @map("transaction_type") // LOCAL_TRANSFER, INT_WIRE, CRYPTO_WITHDRAWAL, CRYPTO_DEPOSIT
   amount          Float
   currency        String    @default("USD")
   status          String    @default("PENDING") // PENDING, APPROVED, REJECTED
   description     String
   reference       String    @unique
-  metadata        String?   // JSON string for storing Crypto Wallet Address, SWIFT/IBAN, etc.
+  metadata        String? // JSON string for storing Crypto Wallet Address, SWIFT/IBAN, etc.
   processedAt     DateTime? @map("processed_at")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
 
-  account         Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@map("transactions")
 }
@@ -193,23 +262,23 @@ model Beneficiary {
   isInternal    Boolean  @default(false) @map("is_internal")
   createdAt     DateTime @default(now()) @map("created_at")
 
-  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("beneficiaries")
 }
 
 model Card {
-  id           String   @id @default(cuid())
-  accountId    String   @map("account_id")
-  cardNumber   String   @unique @map("card_number")
-  cardType     String   @map("card_type") // DEBIT, CREDIT
-  network      String   @default("VISA")
-  expiryDate   DateTime @map("expiry_date")
-  cvv          String
-  status       String   @default("ACTIVE")
-  createdAt    DateTime @default(now()) @map("created_at")
+  id         String   @id @default(cuid())
+  accountId  String   @map("account_id")
+  cardNumber String   @unique @map("card_number")
+  cardType   String   @map("card_type") // DEBIT, CREDIT
+  network    String   @default("VISA")
+  expiryDate DateTime @map("expiry_date")
+  cvv        String
+  status     String   @default("ACTIVE")
+  createdAt  DateTime @default(now()) @map("created_at")
 
-  account      Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@map("cards")
 }
@@ -227,7 +296,7 @@ model SavingsGoal {
   targetDate    DateTime @map("target_date")
   createdAt     DateTime @default(now()) @map("created_at")
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@map("savings_goals")
 }
 
@@ -241,7 +310,7 @@ model Payee {
   createdAt     DateTime @default(now()) @map("created_at")
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   bills         Bill[]
-  
+
   @@map("payees")
 }
 
@@ -255,18 +324,18 @@ model Bill {
   createdAt DateTime  @default(now()) @map("created_at")
   account   Account   @relation(fields: [accountId], references: [id], onDelete: Cascade)
   payee     Payee     @relation(fields: [payeeId], references: [id], onDelete: Cascade)
-  
+
   @@map("bills")
 }
 
 model Statement {
   id          String   @id @default(cuid())
   accountId   String   @map("account_id")
-  period      String   // e.g. "2026-08"
+  period      String // e.g. "2026-08"
   filePath    String?  @map("file_path")
   generatedAt DateTime @default(now()) @map("generated_at")
   account     Account  @relation(fields: [accountId], references: [id], onDelete: Cascade)
-  
+
   @@map("statements")
 }
 
@@ -278,7 +347,7 @@ model Notification {
   isRead    Boolean  @default(false) @map("is_read")
   createdAt DateTime @default(now()) @map("created_at")
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
+
   @@map("notifications")
 }
 
@@ -290,18 +359,18 @@ model SupportTicket {
   status    String   @default("OPEN") // OPEN, RESOLVED
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
-  
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("support_tickets")
 }
 
 model ImpersonationToken {
-  id         String   @id @default(cuid())
-  userId     String   @map("user_id")
-  token      String   @unique
-  expiresAt  DateTime @map("expires_at")
-  createdAt  DateTime @default(now()) @map("created_at")
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  token     String   @unique
+  expiresAt DateTime @map("expires_at")
+  createdAt DateTime @default(now()) @map("created_at")
 
   @@map("impersonation_tokens")
 }

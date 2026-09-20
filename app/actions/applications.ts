@@ -10,80 +10,44 @@ export async function handleApprove(formData: FormData) {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
   const id = formData.get('id') as string;
-  const initialDeposit = Number(formData.get('initialDeposit') || 0);
 
   const app = await prisma.accountApplication.findUnique({ where: { id } });
   if (!app) return;
   
-  const hashedPassword = await bcrypt.hash('Welcome123!', 10);
-  
-  // Create the mock user
-  const newUser = await prisma.user.create({
-    data: {
-      email: app.email,
-      password: hashedPassword, // Default mock password
-      firstName: app.firstName,
-      lastName: app.lastName,
-      phone: app.phone,
-      dateOfBirth: app.dateOfBirth,
-      address: app.address,
-      city: app.city,
-      state: app.state,
-      zipCode: app.zipCode,
-      preferredCurrency: app.currencyPreference || 'USD',
-      status: 'ACTIVE',
-    }
-  });
-
-  // Create the mock account
-  const account = await prisma.account.create({
-    data: {
-      userId: newUser.id,
-      accountNumber: Math.floor(1000000000 + Math.random() * 9000000000).toString(),
-      accountType: app.applicationType,
-      balance: initialDeposit
-    }
-  });
-
-  if (initialDeposit > 0) {
-    await prisma.transaction.create({
-      data: {
-        accountId: account.id,
-        type: 'CREDIT',
-        transactionType: 'LOCAL_TRANSFER',
-        amount: initialDeposit,
-        currency: app.currencyPreference || 'USD',
-        status: 'APPROVED',
-        description: 'Initial Funding Deposit',
-        reference: `FUND-${Date.now()}`
-      }
-    });
-  }
+  const registrationToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 
   // Update application
   await prisma.accountApplication.update({
     where: { id },
-    data: { status: 'APPROVED', reviewedAt: new Date() }
+    data: { 
+      status: 'APPROVED', 
+      reviewedAt: new Date(),
+      registrationToken
+    }
   });
 
-  // Send Welcome Email
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+  const registerLink = `${baseUrl}/register/${registrationToken}`;
+
+  // Send Welcome Email (Email sending is currently disabled/mocked in this environment, but this is the template)
   await sendEmail({
     to: app.email,
-    subject: 'Welcome to JP Heritage Bank - Account Approved',
+    subject: 'Action Required: Complete Your JP Heritage Bank Registration',
     html: `
       <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto;">
-        <h2>Account Approved</h2>
+        <h2>Preliminary Approval Granted</h2>
         <p>Dear ${app.firstName},</p>
-        <p>Congratulations! Your application for a ${app.applicationType} account has been approved.</p>
-        <p>Your new account number is: <strong>${account.accountNumber}</strong></p>
-        <p>You can now log in using your email address and the temporary password: <strong>Welcome123!</strong></p>
-        <p>Please log in and change your password immediately.</p>
+        <p>Congratulations! Your preliminary application for an account has been approved.</p>
+        <p>To finalize your account setup, please complete our secure registration form by clicking the link below:</p>
+        <a href="${registerLink}" style="display: inline-block; padding: 10px 20px; background-color: #0b2545; color: #fff; text-decoration: none; border-radius: 5px; margin: 20px 0;">Complete Registration</a>
+        <p>If the button doesn't work, copy and paste this link into your browser:<br/>${registerLink}</p>
         <p>Best regards,<br/>JP Heritage Bank Team</p>
       </div>
     `
   });
 
   revalidatePath('/admin/customers/applications');
+  return registrationToken;
 }
 
 export async function handleReject(formData: FormData) {
