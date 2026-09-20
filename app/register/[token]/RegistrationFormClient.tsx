@@ -1,20 +1,17 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import Image from 'next/image';
-import { 
-    Camera, 
-    Upload, 
-    CheckCircle2, 
-    AlertCircle, 
-    FileText, 
-    RefreshCw, 
-    Trash2, 
-    Shield, 
-    Lock, 
-    Building2,
-    X
+import {
+    Camera,
+    Upload,
+    CheckCircle2,
+    FileText,
+    RefreshCw,
+    Trash2,
+    Lock,
+    X,
+    UserCheck
 } from 'lucide-react';
 import { submitRegistrationForm } from '@/app/actions/registrationForm';
 
@@ -28,37 +25,47 @@ export default function RegistrationFormClient({ application }: { application: a
     const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
     const [signatureFileName, setSignatureFileName] = useState<string | null>(null);
     const [signatureFileType, setSignatureFileType] = useState<'image' | 'pdf' | null>(null);
-    
-    // Live camera modal state
-    const [isCameraModalOpen, setIsCameraModalOpen] = useState(false);
+
+    // Passport photo state
+    const [photoPreview, setPhotoPreview] = useState<string | null>(null);
+
+    // Live camera modal state (for signature and photo)
+    const [activeCameraTarget, setActiveCameraTarget] = useState<'signature' | 'photo' | null>(null);
     const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
-    const [cameraError, setCameraError] = useState<string | null>(null);
     const videoRef = useRef<HTMLVideoElement | null>(null);
     const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
     // Hidden input refs
     const cameraInputRef = useRef<HTMLInputElement | null>(null);
     const fileInputRef = useRef<HTMLInputElement | null>(null);
+    const photoInputRef = useRef<HTMLInputElement | null>(null);
     const idFrontInputRef = useRef<HTMLInputElement | null>(null);
     const idBackInputRef = useRef<HTMLInputElement | null>(null);
 
     const [formData, setFormData] = useState({
-        // 1. Full Personal Identification (KYC)
+        // Title & Name
+        title: 'Mr',
+        gender: 'Male',
         fullLegalName: `${application.firstName} ${application.lastName}`,
         dateOfBirth: '',
         ssnItin: '',
         mothersMaidenName: '',
+        nationality: 'United States',
+        countryOfResidence: 'United States',
+        maritalStatus: 'Single',
 
         // 2. Contact & Residential Details
         residentialAddress: '',
         mailingAddress: '',
         isMailingSame: true,
         primaryPhoneType: 'Mobile',
+        secondaryPhone: '',
 
         // 3. Employment & Financial Profile
         employmentStatus: 'Employed',
         occupation: '',
         employerName: '',
+        employerAddress: '',
         primarySourceOfFunds: 'Salary/Wages',
         estimatedAnnualIncome: '50000-100000',
 
@@ -71,22 +78,31 @@ export default function RegistrationFormClient({ application }: { application: a
         idFrontDocumentUrl: '',
         idBackDocumentUrl: '',
 
-        // 5. Account Configuration & Preferences
+        // 5. Next of Kin Details
+        nextOfKinName: '',
+        nextOfKinRelationship: 'Spouse',
+        nextOfKinPhone: '',
+        nextOfKinAddress: '',
+
+        // 6. Account Configuration & Preferences
+        desiredAccountType: application.desiredAccountType || 'Everyday Checking',
+        currencyPreference: application.currencyPreference || 'USD',
         overdraftProtection: false,
         debitCardRequest: true,
         nameToAppearOnCard: `${application.firstName} ${application.lastName}`,
         statementPreference: 'E-Statements',
 
-        // 6. Initial Funding
+        // 7. Initial Funding
         fundingMethod: 'External Bank Transfer (ACH)',
         externalAccountRoutingNumber: '',
         externalAccountNumber: '',
         initialDepositAmount: '',
 
-        // 7. Legal Disclosures & E-Signatures
+        // 8. Legal Disclosures & E-Signatures
         w9Certification: false,
         electronicCommunicationsDisclosure: false,
         depositAccountAgreement: false,
+        marketingConsent: true,
         digitalSignature: '',
         signatureDate: new Date().toISOString().split('T')[0]
     });
@@ -102,7 +118,7 @@ export default function RegistrationFormClient({ application }: { application: a
         }
     };
 
-    // ID document mock upload
+    // ID document upload
     const handleIdUpload = (file: File, type: 'front' | 'back') => {
         const reader = new FileReader();
         reader.onload = () => {
@@ -111,30 +127,42 @@ export default function RegistrationFormClient({ application }: { application: a
         reader.readAsDataURL(file);
     };
 
+    // Photo upload
+    const handlePhotoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const file = e.target.files?.[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+            setPhotoPreview(reader.result as string);
+        };
+        reader.readAsDataURL(file);
+    };
+
     // Camera handling
-    const openCamera = async () => {
-        // First try getUserMedia for interactive viewfinder
+    const openCamera = async (target: 'signature' | 'photo') => {
+        setActiveCameraTarget(target);
         if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
             try {
                 const stream = await navigator.mediaDevices.getUserMedia({
-                    video: { facingMode: 'environment' }
+                    video: { facingMode: target === 'photo' ? 'user' : 'environment' }
                 });
                 setCameraStream(stream);
-                setIsCameraModalOpen(true);
-                setCameraError(null);
                 setTimeout(() => {
                     if (videoRef.current) {
                         videoRef.current.srcObject = stream;
                         videoRef.current.play();
                     }
-                }, 200);
+                }, 150);
                 return;
             } catch (err) {
                 console.warn('getUserMedia failed, falling back to file input camera capture:', err);
             }
         }
-        // Fallback: trigger native device camera file input
-        cameraInputRef.current?.click();
+        if (target === 'signature') {
+            cameraInputRef.current?.click();
+        } else {
+            photoInputRef.current?.click();
+        }
     };
 
     const stopCamera = () => {
@@ -142,11 +170,11 @@ export default function RegistrationFormClient({ application }: { application: a
             cameraStream.getTracks().forEach(track => track.stop());
             setCameraStream(null);
         }
-        setIsCameraModalOpen(false);
+        setActiveCameraTarget(null);
     };
 
     const capturePhoto = () => {
-        if (videoRef.current && canvasRef.current) {
+        if (videoRef.current && canvasRef.current && activeCameraTarget) {
             const video = videoRef.current;
             const canvas = canvasRef.current;
             canvas.width = video.videoWidth || 640;
@@ -155,10 +183,14 @@ export default function RegistrationFormClient({ application }: { application: a
             if (ctx) {
                 ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
                 const dataUrl = canvas.toDataURL('image/png');
-                setSignaturePreview(dataUrl);
-                setSignatureFileType('image');
-                setSignatureFileName(`signature_snap_${Date.now()}.png`);
-                updateField('digitalSignature', dataUrl);
+                if (activeCameraTarget === 'signature') {
+                    setSignaturePreview(dataUrl);
+                    setSignatureFileType('image');
+                    setSignatureFileName(`signature_snap_${Date.now()}.png`);
+                    updateField('digitalSignature', dataUrl);
+                } else {
+                    setPhotoPreview(dataUrl);
+                }
                 stopCamera();
             }
         }
@@ -188,7 +220,6 @@ export default function RegistrationFormClient({ application }: { application: a
 
         if (isPdf) {
             setSignatureFileType('pdf');
-            // For PDF, we can create an object URL or store base64
             const reader = new FileReader();
             reader.onload = () => {
                 const base64 = reader.result as string;
@@ -283,7 +314,7 @@ export default function RegistrationFormClient({ application }: { application: a
 
     if (success) {
         return (
-            <div className="bg-white p-8 md:p-14 shadow-2xl border border-neutral-300 text-center space-y-6 animate-in fade-in duration-500">
+            <div className="bg-white p-8 md:p-14 shadow-2xl border-2 border-[#0D2545] rounded-xl text-center space-y-6 animate-in fade-in duration-500">
                 <div className="w-20 h-20 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto">
                     <CheckCircle2 className="w-10 h-10" />
                 </div>
@@ -291,27 +322,27 @@ export default function RegistrationFormClient({ application }: { application: a
                     <span className="text-xs uppercase tracking-widest font-bold text-neutral-500">
                         Official Execution Receipt
                     </span>
-                    <h2 className="text-3xl font-playfair font-bold text-neutral-900">
+                    <h2 className="text-2xl md:text-3xl font-bold text-[#0D2545] tracking-tight">
                         Registration Application Submitted
                     </h2>
-                    <p className="text-sm font-mono text-neutral-600">
-                        RECORD HASH: {application.registrationToken.substring(0, 16).toUpperCase()}...
+                    <p className="text-xs font-mono text-neutral-600">
+                        DOSSIER HASH: {application.registrationToken.substring(0, 16).toUpperCase()}...
                     </p>
                 </div>
-                <p className="text-neutral-700 text-base max-w-lg mx-auto leading-relaxed">
-                    Thank you, <strong>{formData.fullLegalName}</strong>. Your Customer Identification Program (CIP) application, attached identity credentials, and verified digital signature have been securely transmitted to the JP Heritage Bank Underwriting & Compliance Department.
+                <p className="text-neutral-700 text-sm max-w-lg mx-auto leading-relaxed">
+                    Thank you, <strong>{formData.fullLegalName}</strong>. Your Customer Identification Program (CIP) application, attached credentials, and verified digital signature have been recorded.
                 </p>
-                <div className="p-4 bg-neutral-50 border border-neutral-200 max-w-md mx-auto text-left text-xs text-neutral-600 space-y-1.5 font-mono">
+                <div className="p-4 bg-neutral-50 border border-neutral-300 max-w-md mx-auto text-left text-xs text-neutral-700 space-y-1.5 font-mono">
                     <div><strong>APPLICANT:</strong> {formData.fullLegalName}</div>
-                    <div><strong>ACCOUNT TYPE:</strong> {application.desiredAccountType || 'Everyday Checking'}</div>
+                    <div><strong>ACCOUNT TYPE:</strong> {formData.desiredAccountType}</div>
                     <div><strong>INITIAL FUNDING:</strong> ${Number(formData.initialDepositAmount).toFixed(2)}</div>
                     <div><strong>DATE OF EXECUTION:</strong> {formData.signatureDate}</div>
-                    <div><strong>STATUS:</strong> PENDING FINAL COMPLIANCE PROVISIONING</div>
+                    <div><strong>STATUS:</strong> PENDING COMPLIANCE PROVISIONING</div>
                 </div>
                 <div className="pt-4">
                     <button
                         onClick={() => router.push('/login')}
-                        className="px-8 py-3 bg-[#0D2545] text-white font-semibold text-sm tracking-wider hover:bg-[#1B355B] transition-colors"
+                        className="px-8 py-3 bg-[#0D2545] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#1B355B] transition-colors shadow"
                     >
                         Access Heritage Vault Portal
                     </button>
@@ -322,45 +353,55 @@ export default function RegistrationFormClient({ application }: { application: a
 
     return (
         <>
-            {/* Hidden Inputs for Signature & ID */}
-            <input 
-                type="file" 
-                ref={cameraInputRef} 
-                accept="image/*" 
-                capture="environment" 
-                className="hidden" 
-                onChange={handleCameraFileInput} 
+            {/* Hidden Inputs */}
+            <input
+                type="file"
+                ref={cameraInputRef}
+                accept="image/*"
+                capture="environment"
+                className="hidden"
+                onChange={handleCameraFileInput}
             />
-            <input 
-                type="file" 
-                ref={fileInputRef} 
-                accept=".pdf,image/png,image/jpeg,image/jpg" 
-                className="hidden" 
-                onChange={handleFileUpload} 
+            <input
+                type="file"
+                ref={fileInputRef}
+                accept=".pdf,image/png,image/jpeg,image/jpg"
+                className="hidden"
+                onChange={handleFileUpload}
             />
-            <input 
-                type="file" 
-                ref={idFrontInputRef} 
-                accept="image/*,.pdf" 
-                className="hidden" 
-                onChange={(e) => e.target.files?.[0] && handleIdUpload(e.target.files[0], 'front')} 
+            <input
+                type="file"
+                ref={photoInputRef}
+                accept="image/*"
+                capture="user"
+                className="hidden"
+                onChange={handlePhotoUpload}
             />
-            <input 
-                type="file" 
-                ref={idBackInputRef} 
-                accept="image/*,.pdf" 
-                className="hidden" 
-                onChange={(e) => e.target.files?.[0] && handleIdUpload(e.target.files[0], 'back')} 
+            <input
+                type="file"
+                ref={idFrontInputRef}
+                accept="image/*,.pdf"
+                className="hidden"
+                onChange={(e) => e.target.files?.[0] && handleIdUpload(e.target.files[0], 'front')}
+            />
+            <input
+                type="file"
+                ref={idBackInputRef}
+                accept="image/*,.pdf"
+                className="hidden"
+                onChange={(e) => e.target.files?.[0] && handleIdUpload(e.target.files[0], 'back')}
             />
 
-            {/* Live Camera Modal (if supported & opened) */}
-            {isCameraModalOpen && (
+            {/* Live Camera Modal (Desktop & Interactive Camera) */}
+            {activeCameraTarget && (
                 <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
                     <div className="bg-white rounded-lg shadow-2xl max-w-lg w-full overflow-hidden border border-neutral-300">
                         <div className="bg-[#0D2545] text-white px-5 py-3 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <Camera className="w-5 h-5 text-amber-400" />
-                                <span className="font-semibold text-sm tracking-wide">Snap Signature with Camera</span>
+                                <span className="font-bold text-xs uppercase tracking-wide">
+                                    {activeCameraTarget === 'signature' ? 'Snap Signature with Camera' : 'Capture Passport Photograph / Selfie'}
+                                </span>
                             </div>
                             <button onClick={stopCamera} className="text-white/70 hover:text-white transition-colors">
                                 <X className="w-5 h-5" />
@@ -368,12 +409,16 @@ export default function RegistrationFormClient({ application }: { application: a
                         </div>
                         <div className="p-4 space-y-4">
                             <p className="text-xs text-neutral-600 text-center">
-                                Hold up your signed paper signature directly in front of the camera, align within the frame, and click <strong>Snap Signature</strong>.
+                                {activeCameraTarget === 'signature'
+                                    ? 'Hold up your signed document in front of the lens, align within the frame, and click Snap Signature.'
+                                    : 'Position your face clearly within the frame and click Capture Photo.'}
                             </p>
                             <div className="relative bg-black rounded overflow-hidden aspect-video flex items-center justify-center">
                                 <video ref={videoRef} autoPlay playsInline muted className="w-full h-full object-cover" />
                                 <div className="absolute inset-4 border-2 border-dashed border-amber-400/70 pointer-events-none flex items-center justify-center">
-                                    <span className="text-xs text-amber-300 bg-black/60 px-2 py-1 rounded">Align signature here</span>
+                                    <span className="text-xs text-amber-300 bg-black/60 px-2 py-1 rounded font-mono">
+                                        {activeCameraTarget === 'signature' ? 'Align signature here' : 'Align face here'}
+                                    </span>
                                 </div>
                             </div>
                             <canvas ref={canvasRef} className="hidden" />
@@ -381,17 +426,17 @@ export default function RegistrationFormClient({ application }: { application: a
                                 <button
                                     type="button"
                                     onClick={stopCamera}
-                                    className="px-4 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 rounded border border-neutral-300"
+                                    className="px-4 py-2 text-xs font-semibold text-neutral-700 hover:bg-neutral-100 rounded border border-neutral-300 uppercase"
                                 >
                                     Cancel
                                 </button>
                                 <button
                                     type="button"
                                     onClick={capturePhoto}
-                                    className="px-5 py-2 text-xs font-semibold text-white bg-[#0D2545] hover:bg-[#1B355B] rounded flex items-center gap-1.5"
+                                    className="px-5 py-2 text-xs font-bold text-white bg-[#0D2545] hover:bg-[#1B355B] rounded flex items-center gap-1.5 uppercase tracking-wide"
                                 >
                                     <Camera className="w-4 h-4" />
-                                    Snap Signature
+                                    Capture
                                 </button>
                             </div>
                         </div>
@@ -399,761 +444,917 @@ export default function RegistrationFormClient({ application }: { application: a
                 </div>
             )}
 
-            {/* Embedded Fillable PDF Form Container */}
-            <form 
-                onSubmit={handleSubmit} 
-                className="bg-white text-neutral-900 shadow-2xl shadow-black/80 border border-neutral-300 relative print:shadow-none print:m-0"
+            {/* Embedded Fillable PDF Form Container (Styled after Stanbic Bank & SBB West Bank Forms) */}
+            <form
+                onSubmit={handleSubmit}
+                className="bg-white text-neutral-900 shadow-2xl shadow-black/80 border-2 border-[#0D2545] rounded-xl overflow-hidden relative font-sans text-xs"
             >
-                {/* PDF Top Document Metadata Bar */}
-                <div className="bg-[#0D2545] text-white px-6 py-2.5 flex flex-wrap items-center justify-between text-[11px] font-mono tracking-wider border-b border-[#B8960C]">
-                    <div className="flex items-center gap-3">
-                        <span className="font-bold text-amber-300">FORM JPH-CIP-1040 (REV. 2026)</span>
-                        <span className="hidden sm:inline text-neutral-300">• OMB Control No. 1557-0811</span>
-                    </div>
-                    <div className="flex items-center gap-3 text-neutral-300">
-                        <span>CONFIDENTIAL FINANCIAL RECORD</span>
-                        <span className="hidden md:inline">• USA PATRIOT ACT § 326 COMPLIANT</span>
-                    </div>
-                </div>
-
-                {/* Bank Letterhead & Official Form Heading */}
-                <div className="p-6 md:p-10 border-b-2 border-neutral-800 bg-gradient-to-b from-neutral-50 to-white">
-                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-6 border-b border-neutral-300">
-                        <div className="flex items-center gap-4">
-                            <div className="relative w-16 h-16 shrink-0">
-                                <Image
-                                    src="/images/logos/jp-heritage-icon.png"
-                                    alt="JP Heritage Bank Crest"
-                                    fill
-                                    className="object-contain"
-                                    priority
+                {/* 1. Official Bank Letterhead & Header (Stanbic Bank Layout) */}
+                <div className="p-6 md:p-8 bg-white border-b-2 border-[#0D2545]">
+                    <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+                        {/* Left: Bank Logo & Group Affiliation */}
+                        <div className="space-y-1.5">
+                            <div className="flex items-center gap-3">
+                                <img
+                                    src="/bank-logo.svg"
+                                    alt="JP Heritage Bank Logo"
+                                    className="h-12 md:h-14 w-auto object-contain"
                                 />
                             </div>
+                            <p className="text-[11px] font-semibold text-neutral-600 tracking-tight">
+                                A member of Heritage Financial Group • Established 1888
+                            </p>
+                            <p className="text-[10px] text-neutral-500 font-mono">
+                                100 Wall Street, 28th Floor, New York, NY 10005 • Member FDIC • Fedwire: 021000089
+                            </p>
+                        </div>
+
+                        {/* Right: Form Title & Control Info */}
+                        <div className="text-left md:text-right space-y-1">
+                            <h1 className="text-xl md:text-2xl font-bold text-[#0D2545] tracking-tight">
+                                Application to open Personal account
+                            </h1>
+                            <p className="text-[11px] font-mono font-bold text-neutral-600">
+                                FORM JPH-CIP-1040 (REV. 2026)
+                            </p>
+                            <span className="inline-block text-[10px] font-mono bg-blue-50 text-[#0D2545] px-2 py-0.5 border border-blue-200">
+                                USA PATRIOT ACT § 326 COMPLIANT
+                            </span>
+                        </div>
+                    </div>
+
+                    {/* Instruction & Header Metadata Strip */}
+                    <div className="mt-6 pt-4 border-t border-neutral-200 flex flex-wrap items-center justify-between gap-4 text-[11px]">
+                        <div>
+                            <span className="font-bold text-neutral-800">Please complete in </span>
+                            <span className="font-black text-[#0D2545] uppercase tracking-wider">BLOCK</span>
+                            <span className="font-bold text-neutral-800"> letters.</span>
+                        </div>
+                        <div className="flex flex-wrap items-center gap-4 font-mono text-[11px]">
                             <div>
-                                <h1 className="text-2xl md:text-3xl font-serif font-black tracking-wider text-[#0D2545] uppercase">
-                                    JP Heritage Bank, N.A.
-                                </h1>
-                                <p className="text-xs font-serif italic text-neutral-700 tracking-wide">
-                                    Established 1888 • Private & Commercial Banking
-                                </p>
-                                <p className="text-[11px] text-neutral-600 mt-1">
-                                    Corporate Headquarters: 100 Wall Street, 28th Floor, New York, NY 10005 • Tel: (800) 555-JPHB
-                                </p>
+                                <span className="text-neutral-500 mr-1.5">Branch:</span>
+                                <span className="font-bold text-neutral-800 underline decoration-neutral-300">Wall Street HQ</span>
                             </div>
-                        </div>
-
-                        <div className="text-right text-[11px] font-mono text-neutral-600 space-y-0.5 border-l-2 border-neutral-300 pl-4">
-                            <div><strong>REGULATOR:</strong> OCC / FED</div>
-                            <div><strong>FDIC CERTIFICATE:</strong> #18880</div>
-                            <div><strong>ROUTING (ABA):</strong> 021000089</div>
-                            <div><strong>SECURITY:</strong> 256-BIT ENCRYPTED</div>
-                        </div>
-                    </div>
-
-                    {/* Official Document Title */}
-                    <div className="text-center py-6">
-                        <h2 className="text-xl md:text-2xl font-serif font-bold text-neutral-900 tracking-wide uppercase">
-                            Customer Identification Program (CIP) & Account Opening Application
-                        </h2>
-                        <p className="text-xs text-neutral-600 uppercase tracking-wider font-semibold mt-1">
-                            Official Paper Application for Individual / Personal Deposit Accounts
-                        </p>
-                    </div>
-
-                    {/* Official Notice / Warning Box */}
-                    <div className="p-4 bg-amber-50/70 border border-amber-300/80 text-[11px] text-neutral-800 leading-relaxed font-sans">
-                        <strong className="block text-amber-900 uppercase font-bold mb-1">
-                            Important Information About Procedures for Opening a New Account:
-                        </strong>
-                        To help the government fight the funding of terrorism and money laundering activities, Federal law requires all financial institutions to obtain, verify, and record information that identifies each person who opens an account. What this means for you: When you open an account, we will ask for your name, address, date of birth, and other information that will allow us to identify you. We will also ask to see your driver's license or other identifying documents.
-                    </div>
-
-                    {/* Pre-Approval Dossier Box */}
-                    <div className="mt-5 grid grid-cols-2 md:grid-cols-4 gap-3 p-3.5 bg-neutral-100 border border-neutral-300 text-xs font-mono">
-                        <div>
-                            <span className="text-neutral-500 block text-[10px] uppercase font-bold">Registration Token:</span>
-                            <span className="font-bold text-[#0D2545]">{application.registrationToken.substring(0, 14)}...</span>
-                        </div>
-                        <div>
-                            <span className="text-neutral-500 block text-[10px] uppercase font-bold">Applicant Name:</span>
-                            <span className="font-bold text-neutral-900">{application.firstName} {application.lastName}</span>
-                        </div>
-                        <div>
-                            <span className="text-neutral-500 block text-[10px] uppercase font-bold">Desired Account:</span>
-                            <span className="font-bold text-neutral-900">{application.desiredAccountType || 'Everyday Checking'}</span>
-                        </div>
-                        <div>
-                            <span className="text-neutral-500 block text-[10px] uppercase font-bold">Pre-Approval Status:</span>
-                            <span className="font-bold text-emerald-700">APPROVED FOR CIP</span>
+                            <div>
+                                <span className="text-neutral-500 mr-1.5">Date (DD-MM-YYYY):</span>
+                                <span className="font-bold text-[#0D2545] bg-neutral-100 px-2 py-0.5 border border-neutral-300">
+                                    {new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}
+                                </span>
+                            </div>
+                            <div>
+                                <span className="text-neutral-500 mr-1.5">CIF / Token:</span>
+                                <span className="font-bold text-[#0D2545] bg-neutral-100 px-2 py-0.5 border border-neutral-300">
+                                    {application.registrationToken.substring(0, 10).toUpperCase()}
+                                </span>
+                            </div>
                         </div>
                     </div>
                 </div>
 
                 {errors.submit && (
-                    <div className="p-4 bg-red-100 border-b border-red-300 text-red-800 text-center font-bold text-sm">
+                    <div className="p-3 bg-red-100 border-b border-red-300 text-red-800 text-center font-bold text-xs">
                         {errors.submit}
                     </div>
                 )}
 
-                {/* ========================================================================= */}
-                {/* SECTION 1: APPLICANT IDENTIFICATION (KYC) */}
-                {/* ========================================================================= */}
-                <div className="p-6 md:p-10 border-b border-neutral-300">
-                    <div className="bg-[#0D2545] text-white px-4 py-2 mb-6 flex items-center justify-between border-l-4 border-[#B8960C]">
-                        <h3 className="font-bold text-sm tracking-wider uppercase">
-                            Section 1: Applicant Identification (Primary Account Holder)
-                        </h3>
-                        <span className="text-[10px] font-mono text-neutral-300">USA PATRIOT ACT § 326</span>
+                {/* 2. Accounts Required Section (Stanbic Style) */}
+                <div className="border-b border-[#0D2545]">
+                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
+                        <span>Accounts required</span>
+                        <span className="text-[10px] font-mono text-blue-200">SECTION 1</span>
                     </div>
-
-                    <div className="grid md:grid-cols-2 gap-5">
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                Full Legal Name (Must match government ID) <span className="text-red-600">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                className={`w-full px-3 py-2.5 bg-[#F1F5F9] border ${errors.fullLegalName ? 'border-red-600 bg-red-50' : 'border-[#94A3B8] focus:border-[#0D2545] focus:bg-white'} text-neutral-900 font-mono text-sm outline-none transition-colors rounded-none`}
-                                value={formData.fullLegalName}
-                                onChange={(e) => updateField('fullLegalName', e.target.value)}
-                            />
-                            {errors.fullLegalName && <p className="text-xs text-red-600 mt-1 font-bold">{errors.fullLegalName}</p>}
+                    <div className="p-4 bg-neutral-50/50">
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {[
+                                { id: 'Everyday Checking', label: 'Everyday Checking' },
+                                { id: 'High-Yield Savings', label: 'High-Yield Savings' },
+                                { id: 'Certificate of Deposit', label: 'Certificate of Deposit' },
+                                { id: 'Private Wealth Reserve', label: 'Private Wealth Reserve' },
+                            ].map((acc) => (
+                                <label
+                                    key={acc.id}
+                                    className={`flex items-center gap-2.5 p-2.5 border cursor-pointer transition-colors ${formData.desiredAccountType === acc.id
+                                        ? 'bg-blue-50/80 border-[#0D2545] font-bold text-[#0D2545]'
+                                        : 'bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-100'
+                                        }`}
+                                >
+                                    <input
+                                        type="radio"
+                                        name="accountType"
+                                        className="w-4 h-4 text-[#0D2545] rounded-none focus:ring-0"
+                                        checked={formData.desiredAccountType === acc.id}
+                                        onChange={() => updateField('desiredAccountType', acc.id)}
+                                    />
+                                    <span className="text-xs">{acc.label}</span>
+                                </label>
+                            ))}
                         </div>
 
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                Date of Birth <span className="text-red-600">*</span>
-                            </label>
-                            <input
-                                type="date"
-                                className={`w-full px-3 py-2.5 bg-[#F1F5F9] border ${errors.dateOfBirth ? 'border-red-600 bg-red-50' : 'border-[#94A3B8] focus:border-[#0D2545] focus:bg-white'} text-neutral-900 font-mono text-sm outline-none transition-colors rounded-none`}
-                                value={formData.dateOfBirth}
-                                onChange={(e) => updateField('dateOfBirth', e.target.value)}
-                            />
-                            {errors.dateOfBirth && <p className="text-xs text-red-600 mt-1 font-bold">{errors.dateOfBirth}</p>}
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                Social Security Number (SSN) or ITIN <span className="text-red-600">*</span>
-                            </label>
-                            <input
-                                type="password"
-                                placeholder="XXX-XX-XXXX"
-                                className={`w-full px-3 py-2.5 bg-[#F1F5F9] border ${errors.ssnItin ? 'border-red-600 bg-red-50' : 'border-[#94A3B8] focus:border-[#0D2545] focus:bg-white'} text-neutral-900 font-mono text-sm outline-none transition-colors rounded-none`}
-                                value={formData.ssnItin}
-                                onChange={(e) => updateField('ssnItin', e.target.value)}
-                            />
-                            {errors.ssnItin && <p className="text-xs text-red-600 mt-1 font-bold">{errors.ssnItin}</p>}
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                Mother's Maiden Name (Security Verification) <span className="text-red-600">*</span>
-                            </label>
-                            <input
-                                type="password"
-                                className={`w-full px-3 py-2.5 bg-[#F1F5F9] border ${errors.mothersMaidenName ? 'border-red-600 bg-red-50' : 'border-[#94A3B8] focus:border-[#0D2545] focus:bg-white'} text-neutral-900 font-mono text-sm outline-none transition-colors rounded-none`}
-                                value={formData.mothersMaidenName}
-                                onChange={(e) => updateField('mothersMaidenName', e.target.value)}
-                            />
-                            {errors.mothersMaidenName && <p className="text-xs text-red-600 mt-1 font-bold">{errors.mothersMaidenName}</p>}
+                        {/* Currency Selector */}
+                        <div className="mt-3 pt-3 border-t border-neutral-200 flex flex-wrap items-center gap-4 text-xs">
+                            <span className="font-bold text-neutral-700">Account Currency:</span>
+                            {['USD ($)', 'EUR (€)', 'GBP (£)'].map((curr) => {
+                                const code = curr.substring(0, 3);
+                                return (
+                                    <label key={code} className="flex items-center gap-1.5 cursor-pointer">
+                                        <input
+                                            type="radio"
+                                            name="currency"
+                                            className="w-3.5 h-3.5 text-[#0D2545] rounded-none focus:ring-0"
+                                            checked={formData.currencyPreference === code}
+                                            onChange={() => updateField('currencyPreference', code)}
+                                        />
+                                        <span className="font-mono font-medium">{curr}</span>
+                                    </label>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
 
-                {/* ========================================================================= */}
-                {/* SECTION 2: CONTACT & RESIDENTIAL DETAILS */}
-                {/* ========================================================================= */}
-                <div className="p-6 md:p-10 border-b border-neutral-300 bg-neutral-50/40">
-                    <div className="bg-[#0D2545] text-white px-4 py-2 mb-6 flex items-center justify-between border-l-4 border-[#B8960C]">
-                        <h3 className="font-bold text-sm tracking-wider uppercase">
-                            Section 2: Contact & Residential Details
-                        </h3>
-                        <span className="text-[10px] font-mono text-neutral-300">NO P.O. BOXES PERMITTED</span>
+                {/* 3. Personal Details Section (Grid Structure from Stanbic & SBB West Bank) */}
+                <div className="border-b border-[#0D2545]">
+                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
+                        <span>Personal details</span>
+                        <span className="text-[10px] font-mono text-blue-200">SECTION 2</span>
                     </div>
 
-                    <div className="space-y-5">
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
+                    <div className="p-4 space-y-4">
+                        {/* Row 1: Title, Gender, Marital Status & Passport Photo Affix Box */}
+                        <div className="grid md:grid-cols-12 gap-4">
+                            <div className="md:col-span-9 space-y-3">
+                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                                    {/* Title */}
+                                    <div className="border border-neutral-300 p-2 bg-white">
+                                        <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                            Title
+                                        </label>
+                                        <select
+                                            className="w-full bg-transparent font-medium text-xs outline-none"
+                                            value={formData.title}
+                                            onChange={(e) => updateField('title', e.target.value)}
+                                        >
+                                            <option>Mr</option>
+                                            <option>Mrs</option>
+                                            <option>Ms</option>
+                                            <option>Dr</option>
+                                            <option>Prof</option>
+                                        </select>
+                                    </div>
+
+                                    {/* Gender */}
+                                    <div className="border border-neutral-300 p-2 bg-white">
+                                        <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                            Gender
+                                        </label>
+                                        <div className="flex items-center gap-3 pt-0.5">
+                                            {['Male', 'Female'].map((g) => (
+                                                <label key={g} className="flex items-center gap-1 cursor-pointer">
+                                                    <input
+                                                        type="radio"
+                                                        name="gender"
+                                                        className="w-3.5 h-3.5 text-[#0D2545] rounded-none focus:ring-0"
+                                                        checked={formData.gender === g}
+                                                        onChange={() => updateField('gender', g)}
+                                                    />
+                                                    <span className="text-xs">{g}</span>
+                                                </label>
+                                            ))}
+                                        </div>
+                                    </div>
+
+                                    {/* Marital Status */}
+                                    <div className="border border-neutral-300 p-2 bg-white">
+                                        <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                            Marital Status
+                                        </label>
+                                        <select
+                                            className="w-full bg-transparent font-medium text-xs outline-none"
+                                            value={formData.maritalStatus}
+                                            onChange={(e) => updateField('maritalStatus', e.target.value)}
+                                        >
+                                            <option>Single</option>
+                                            <option>Married</option>
+                                            <option>Divorced</option>
+                                            <option>Widowed</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                {/* Full Legal Name */}
+                                <div className="border border-neutral-300 p-2 bg-white">
+                                    <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                        First Names & Surname (Must match official ID) <span className="text-red-600">*</span>
+                                    </label>
+                                    <input
+                                        type="text"
+                                        placeholder="JOHN ALEXANDER DOE"
+                                        className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.fullLegalName ? 'border-red-600' : 'border-neutral-200'} font-bold text-xs uppercase outline-none focus:bg-white focus:border-[#0D2545]`}
+                                        value={formData.fullLegalName}
+                                        onChange={(e) => updateField('fullLegalName', e.target.value.toUpperCase())}
+                                    />
+                                    {errors.fullLegalName && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.fullLegalName}</p>}
+                                </div>
+                            </div>
+
+                            {/* Passport Photo Box (Affix Passport Photograph here - SBB West Bank Style) */}
+                            <div className="md:col-span-3">
+                                <div className="border-2 border-dashed border-[#0D2545]/40 h-full min-h-[120px] p-2 flex flex-col items-center justify-center text-center bg-neutral-50">
+                                    {photoPreview ? (
+                                        <div className="relative w-full h-full flex flex-col items-center">
+                                            <img src={photoPreview} alt="Applicant Photo" className="w-20 h-24 object-cover border border-neutral-400 mb-1" />
+                                            <button
+                                                type="button"
+                                                onClick={() => setPhotoPreview(null)}
+                                                className="text-[10px] text-red-700 font-bold underline"
+                                            >
+                                                Retake Photo
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <>
+                                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-[#0D2545] mb-1">
+                                                <UserCheck className="w-4 h-4" />
+                                            </div>
+                                            <span className="text-[9px] font-bold uppercase text-[#0D2545] leading-tight block mb-1.5">
+                                                Affix Passport Photograph / Selfie
+                                            </span>
+                                            <div className="flex items-center gap-1.5">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => openCamera('photo')}
+                                                    className="px-2 py-1 bg-[#0D2545] text-white text-[9px] font-bold rounded-none flex items-center gap-1"
+                                                >
+                                                    <Camera className="w-2.5 h-2.5" /> Snap
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => photoInputRef.current?.click()}
+                                                    className="px-2 py-1 bg-white border border-neutral-300 text-neutral-800 text-[9px] font-bold rounded-none"
+                                                >
+                                                    Upload
+                                                </button>
+                                            </div>
+                                        </>
+                                    )}
+                                </div>
+                            </div>
+                        </div>
+
+                        {/* Row 2: Date of Birth & SSN / ITIN & Mother's Maiden Name */}
+                        <div className="grid sm:grid-cols-3 gap-3">
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Date of Birth (YYYY-MM-DD) <span className="text-red-600">*</span>
+                                </label>
+                                <input
+                                    type="date"
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.dateOfBirth ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    value={formData.dateOfBirth}
+                                    onChange={(e) => updateField('dateOfBirth', e.target.value)}
+                                />
+                                {errors.dateOfBirth && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.dateOfBirth}</p>}
+                            </div>
+
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    SSN / ITIN / Tax ID <span className="text-red-600">*</span>
+                                </label>
+                                <input
+                                    type="password"
+                                    placeholder="XXX-XX-XXXX"
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.ssnItin ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    value={formData.ssnItin}
+                                    onChange={(e) => updateField('ssnItin', e.target.value)}
+                                />
+                                {errors.ssnItin && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.ssnItin}</p>}
+                            </div>
+
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Mother's Maiden Name (Security) <span className="text-red-600">*</span>
+                                </label>
+                                <input
+                                    type="password"
+                                    placeholder="Mother's birth surname"
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.mothersMaidenName ? 'border-red-600' : 'border-neutral-200'} font-medium text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    value={formData.mothersMaidenName}
+                                    onChange={(e) => updateField('mothersMaidenName', e.target.value)}
+                                />
+                                {errors.mothersMaidenName && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.mothersMaidenName}</p>}
+                            </div>
+                        </div>
+
+                        {/* Row 3: Nationality & Country of Residence */}
+                        <div className="grid sm:grid-cols-2 gap-3">
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Primary Nationality
+                                </label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 text-xs outline-none focus:bg-white focus:border-[#0D2545]"
+                                    value={formData.nationality}
+                                    onChange={(e) => updateField('nationality', e.target.value)}
+                                />
+                            </div>
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Country of Residence
+                                </label>
+                                <input
+                                    type="text"
+                                    className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 text-xs outline-none focus:bg-white focus:border-[#0D2545]"
+                                    value={formData.countryOfResidence}
+                                    onChange={(e) => updateField('countryOfResidence', e.target.value)}
+                                />
+                            </div>
+                        </div>
+
+                        {/* Row 4: Physical Residential Address */}
+                        <div className="border border-neutral-300 p-2 bg-white">
+                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
                                 Physical Residential Address (Street, Apt/Suite, City, State, ZIP) <span className="text-red-600">*</span>
                             </label>
                             <input
                                 type="text"
-                                placeholder="123 Financial Way, Suite 400, New York, NY 10005"
-                                className={`w-full px-3 py-2.5 bg-[#F1F5F9] border ${errors.residentialAddress ? 'border-red-600 bg-red-50' : 'border-[#94A3B8] focus:border-[#0D2545] focus:bg-white'} text-neutral-900 font-mono text-sm outline-none transition-colors rounded-none`}
+                                placeholder="100 WALL STREET, SUITE 400, NEW YORK, NY 10005"
+                                className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.residentialAddress ? 'border-red-600' : 'border-neutral-200'} font-medium text-xs outline-none focus:bg-white focus:border-[#0D2545] uppercase`}
                                 value={formData.residentialAddress}
-                                onChange={(e) => updateField('residentialAddress', e.target.value)}
+                                onChange={(e) => updateField('residentialAddress', e.target.value.toUpperCase())}
                             />
-                            {errors.residentialAddress && <p className="text-xs text-red-600 mt-1 font-bold">{errors.residentialAddress}</p>}
-                        </div>
+                            {errors.residentialAddress && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.residentialAddress}</p>}
 
-                        <div className="p-4 bg-white border border-neutral-300">
-                            <label className="flex items-center gap-3 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    className="w-4 h-4 rounded-none border-2 border-neutral-700 text-[#0D2545] focus:ring-0"
-                                    checked={formData.isMailingSame}
-                                    onChange={(e) => updateField('isMailingSame', e.target.checked)}
-                                />
-                                <span className="text-xs font-bold text-neutral-800 uppercase tracking-wide">
-                                    Mailing Address is identical to Physical Residential Address
-                                </span>
-                            </label>
-
-                            {!formData.isMailingSame && (
-                                <div className="mt-4 pt-4 border-t border-neutral-200">
-                                    <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                        Mailing Address (P.O. Box acceptable for mailing only) <span className="text-red-600">*</span>
-                                    </label>
+                            <div className="mt-2 pt-2 border-t border-neutral-200">
+                                <label className="flex items-center gap-2 cursor-pointer">
                                     <input
-                                        type="text"
-                                        className={`w-full px-3 py-2.5 bg-[#F1F5F9] border ${errors.mailingAddress ? 'border-red-600 bg-red-50' : 'border-[#94A3B8] focus:border-[#0D2545] focus:bg-white'} text-neutral-900 font-mono text-sm outline-none transition-colors rounded-none`}
-                                        value={formData.mailingAddress}
-                                        onChange={(e) => updateField('mailingAddress', e.target.value)}
+                                        type="checkbox"
+                                        className="w-3.5 h-3.5 text-[#0D2545] rounded-none focus:ring-0"
+                                        checked={formData.isMailingSame}
+                                        onChange={(e) => updateField('isMailingSame', e.target.checked)}
                                     />
-                                    {errors.mailingAddress && <p className="text-xs text-red-600 mt-1 font-bold">{errors.mailingAddress}</p>}
-                                </div>
-                            )}
+                                    <span className="text-[11px] font-bold text-neutral-700 uppercase">
+                                        Mailing Address is same as Residential
+                                    </span>
+                                </label>
+                                {!formData.isMailingSame && (
+                                    <div className="mt-2">
+                                        <input
+                                            type="text"
+                                            placeholder="P.O. Box or alternate mailing address"
+                                            className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 font-medium text-xs outline-none focus:bg-white focus:border-[#0D2545] uppercase"
+                                            value={formData.mailingAddress}
+                                            onChange={(e) => updateField('mailingAddress', e.target.value.toUpperCase())}
+                                        />
+                                    </div>
+                                )}
+                            </div>
                         </div>
 
-                        <div className="grid md:grid-cols-2 gap-5">
-                            <div>
-                                <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                    Primary Phone Number Type
-                                </label>
-                                <select
-                                    className="w-full px-3 py-2.5 bg-[#F1F5F9] border border-[#94A3B8] text-neutral-900 font-mono text-sm outline-none rounded-none focus:bg-white focus:border-[#0D2545]"
-                                    value={formData.primaryPhoneType}
-                                    onChange={(e) => updateField('primaryPhoneType', e.target.value)}
-                                >
-                                    <option value="Mobile">Mobile (SMS-Enabled)</option>
-                                    <option value="Home">Home Landline</option>
-                                    <option value="Work">Business / Work Line</option>
-                                </select>
-                            </div>
-                            <div>
-                                <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                    Registered Phone Number
+                        {/* Row 5: Telephone & Email */}
+                        <div className="grid sm:grid-cols-3 gap-3">
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Primary Telephone (Mobile)
                                 </label>
                                 <input
                                     type="text"
                                     disabled
-                                    className="w-full px-3 py-2.5 bg-neutral-200/70 border border-neutral-300 text-neutral-600 font-mono text-sm rounded-none cursor-not-allowed"
+                                    className="w-full bg-neutral-100 px-2 py-1.5 border border-neutral-200 font-mono text-xs text-neutral-600 cursor-not-allowed"
                                     value={application.phone || 'Inherited from preliminary dossier'}
                                 />
                             </div>
-                        </div>
-                    </div>
-                </div>
 
-                {/* ========================================================================= */}
-                {/* SECTION 3: OCCUPATION, EMPLOYMENT & SOURCE OF WEALTH */}
-                {/* ========================================================================= */}
-                <div className="p-6 md:p-10 border-b border-neutral-300">
-                    <div className="bg-[#0D2545] text-white px-4 py-2 mb-6 flex items-center justify-between border-l-4 border-[#B8960C]">
-                        <h3 className="font-bold text-sm tracking-wider uppercase">
-                            Section 3: Occupation, Employment & Source of Wealth
-                        </h3>
-                        <span className="text-[10px] font-mono text-neutral-300">BSA / AML COMPLIANCE</span>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-5">
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                Employment Status <span className="text-red-600">*</span>
-                            </label>
-                            <select
-                                className="w-full px-3 py-2.5 bg-[#F1F5F9] border border-[#94A3B8] text-neutral-900 font-mono text-sm outline-none rounded-none focus:bg-white focus:border-[#0D2545]"
-                                value={formData.employmentStatus}
-                                onChange={(e) => updateField('employmentStatus', e.target.value)}
-                            >
-                                <option value="Employed">Employed (Full-Time / Part-Time)</option>
-                                <option value="Self-Employed">Self-Employed / Business Owner</option>
-                                <option value="Retired">Retired</option>
-                                <option value="Student">Student</option>
-                                <option value="Unemployed">Not Currently Employed</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                Occupation / Professional Title <span className="text-red-600">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                placeholder="e.g. Managing Director, Consultant, Physician"
-                                className={`w-full px-3 py-2.5 bg-[#F1F5F9] border ${errors.occupation ? 'border-red-600 bg-red-50' : 'border-[#94A3B8] focus:border-[#0D2545] focus:bg-white'} text-neutral-900 font-mono text-sm outline-none transition-colors rounded-none`}
-                                value={formData.occupation}
-                                onChange={(e) => updateField('occupation', e.target.value)}
-                            />
-                            {errors.occupation && <p className="text-xs text-red-600 mt-1 font-bold">{errors.occupation}</p>}
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                Employer / Company Name <span className="text-red-600">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                placeholder="e.g. Morgan Capital Partners LLC"
-                                className={`w-full px-3 py-2.5 bg-[#F1F5F9] border ${errors.employerName ? 'border-red-600 bg-red-50' : 'border-[#94A3B8] focus:border-[#0D2545] focus:bg-white'} text-neutral-900 font-mono text-sm outline-none transition-colors rounded-none`}
-                                value={formData.employerName}
-                                onChange={(e) => updateField('employerName', e.target.value)}
-                            />
-                            {errors.employerName && <p className="text-xs text-red-600 mt-1 font-bold">{errors.employerName}</p>}
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                Primary Source of Account Funds
-                            </label>
-                            <select
-                                className="w-full px-3 py-2.5 bg-[#F1F5F9] border border-[#94A3B8] text-neutral-900 font-mono text-sm outline-none rounded-none focus:bg-white focus:border-[#0D2545]"
-                                value={formData.primarySourceOfFunds}
-                                onChange={(e) => updateField('primarySourceOfFunds', e.target.value)}
-                            >
-                                <option value="Salary/Wages">Salary / Employment Compensation</option>
-                                <option value="Investments">Investments / Capital Gains</option>
-                                <option value="Business Profits">Business Ownership / Distributions</option>
-                                <option value="Inheritance">Inheritance / Trust Distribution</option>
-                                <option value="Savings">Accumulated Personal Savings</option>
-                            </select>
-                        </div>
-
-                        <div className="md:col-span-2">
-                            <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                Estimated Annual Household Income (USD)
-                            </label>
-                            <select
-                                className="w-full px-3 py-2.5 bg-[#F1F5F9] border border-[#94A3B8] text-neutral-900 font-mono text-sm outline-none rounded-none focus:bg-white focus:border-[#0D2545]"
-                                value={formData.estimatedAnnualIncome}
-                                onChange={(e) => updateField('estimatedAnnualIncome', e.target.value)}
-                            >
-                                <option value="0-50000">$0 – $50,000</option>
-                                <option value="50000-100000">$50,000 – $100,000</option>
-                                <option value="100000-250000">$100,000 – $250,000</option>
-                                <option value="250000+">$250,000+</option>
-                            </select>
-                        </div>
-                    </div>
-                </div>
-
-                {/* ========================================================================= */}
-                {/* SECTION 4: GOVERNMENT-ISSUED IDENTIFICATION DOCUMENTS */}
-                {/* ========================================================================= */}
-                <div className="p-6 md:p-10 border-b border-neutral-300 bg-neutral-50/40">
-                    <div className="bg-[#0D2545] text-white px-4 py-2 mb-6 flex items-center justify-between border-l-4 border-[#B8960C]">
-                        <h3 className="font-bold text-sm tracking-wider uppercase">
-                            Section 4: Government-Issued Identification Documents
-                        </h3>
-                        <span className="text-[10px] font-mono text-neutral-300">PHOTO ID REQUIRED</span>
-                    </div>
-
-                    <div className="grid md:grid-cols-2 gap-5 mb-6">
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                Primary ID Type <span className="text-red-600">*</span>
-                            </label>
-                            <select
-                                className="w-full px-3 py-2.5 bg-[#F1F5F9] border border-[#94A3B8] text-neutral-900 font-mono text-sm outline-none rounded-none focus:bg-white focus:border-[#0D2545]"
-                                value={formData.primaryIdType}
-                                onChange={(e) => updateField('primaryIdType', e.target.value)}
-                            >
-                                <option value="Driver's License">Driver's License (State-Issued)</option>
-                                <option value="State ID">State Identification Card</option>
-                                <option value="Passport">U.S. / International Passport</option>
-                                <option value="Permanent Resident Card">Permanent Resident Card (Form I-551)</option>
-                            </select>
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                Document ID Number <span className="text-red-600">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                className={`w-full px-3 py-2.5 bg-[#F1F5F9] border ${errors.idNumber ? 'border-red-600 bg-red-50' : 'border-[#94A3B8] focus:border-[#0D2545] focus:bg-white'} text-neutral-900 font-mono text-sm outline-none transition-colors rounded-none`}
-                                value={formData.idNumber}
-                                onChange={(e) => updateField('idNumber', e.target.value)}
-                            />
-                            {errors.idNumber && <p className="text-xs text-red-600 mt-1 font-bold">{errors.idNumber}</p>}
-                        </div>
-
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                State or Country of Issuance <span className="text-red-600">*</span>
-                            </label>
-                            <input
-                                type="text"
-                                placeholder="e.g. New York, USA"
-                                className={`w-full px-3 py-2.5 bg-[#F1F5F9] border ${errors.stateCountryOfIssuance ? 'border-red-600 bg-red-50' : 'border-[#94A3B8] focus:border-[#0D2545] focus:bg-white'} text-neutral-900 font-mono text-sm outline-none transition-colors rounded-none`}
-                                value={formData.stateCountryOfIssuance}
-                                onChange={(e) => updateField('stateCountryOfIssuance', e.target.value)}
-                            />
-                            {errors.stateCountryOfIssuance && <p className="text-xs text-red-600 mt-1 font-bold">{errors.stateCountryOfIssuance}</p>}
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-3">
-                            <div>
-                                <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                    Issue Date <span className="text-red-600">*</span>
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Secondary / Work Telephone
                                 </label>
                                 <input
-                                    type="date"
-                                    className={`w-full px-3 py-2.5 bg-[#F1F5F9] border ${errors.issueDate ? 'border-red-600 bg-red-50' : 'border-[#94A3B8] focus:border-[#0D2545] focus:bg-white'} text-neutral-900 font-mono text-sm outline-none transition-colors rounded-none`}
-                                    value={formData.issueDate}
-                                    onChange={(e) => updateField('issueDate', e.target.value)}
+                                    type="text"
+                                    placeholder="+1 (555) 000-0000"
+                                    className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]"
+                                    value={formData.secondaryPhone}
+                                    onChange={(e) => updateField('secondaryPhone', e.target.value)}
                                 />
-                                {errors.issueDate && <p className="text-xs text-red-600 mt-1 font-bold">{errors.issueDate}</p>}
                             </div>
-                            <div>
-                                <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                    Expiration Date <span className="text-red-600">*</span>
+
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Email Address (Online Banking Login ID)
                                 </label>
                                 <input
-                                    type="date"
-                                    className={`w-full px-3 py-2.5 bg-[#F1F5F9] border ${errors.expirationDate ? 'border-red-600 bg-red-50' : 'border-[#94A3B8] focus:border-[#0D2545] focus:bg-white'} text-neutral-900 font-mono text-sm outline-none transition-colors rounded-none`}
-                                    value={formData.expirationDate}
-                                    onChange={(e) => updateField('expirationDate', e.target.value)}
+                                    type="text"
+                                    disabled
+                                    className="w-full bg-neutral-100 px-2 py-1.5 border border-neutral-200 font-mono text-xs text-neutral-600 cursor-not-allowed"
+                                    value={application.email}
                                 />
-                                {errors.expirationDate && <p className="text-xs text-red-600 mt-1 font-bold">{errors.expirationDate}</p>}
                             </div>
                         </div>
                     </div>
-
-                    {/* ID Document Uploads */}
-                    <div className="grid md:grid-cols-2 gap-5">
-                        <div className="border-2 border-dashed border-neutral-300 p-5 bg-white text-center">
-                            <h4 className="font-bold text-xs uppercase tracking-wider text-neutral-800 mb-1">
-                                Document Photo (Front)
-                            </h4>
-                            <p className="text-[11px] text-neutral-500 mb-3">Clear photo of government-issued ID front</p>
-                            {formData.idFrontDocumentUrl ? (
-                                <div className="p-3 bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-mono flex items-center justify-center gap-2">
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                                    <span>Front Document Uploaded</span>
-                                </div>
-                            ) : (
-                                <button
-                                    type="button"
-                                    onClick={() => idFrontInputRef.current?.click()}
-                                    className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold uppercase tracking-wider border border-neutral-300 inline-flex items-center gap-2"
-                                >
-                                    <Upload className="w-3.5 h-3.5" /> Select File / Photo
-                                </button>
-                            )}
-                        </div>
-
-                        <div className="border-2 border-dashed border-neutral-300 p-5 bg-white text-center">
-                            <h4 className="font-bold text-xs uppercase tracking-wider text-neutral-800 mb-1">
-                                Document Photo (Back)
-                            </h4>
-                            <p className="text-[11px] text-neutral-500 mb-3">Clear photo of government-issued ID barcode/back</p>
-                            {formData.idBackDocumentUrl ? (
-                                <div className="p-3 bg-emerald-50 border border-emerald-300 text-emerald-800 text-xs font-mono flex items-center justify-center gap-2">
-                                    <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                                    <span>Back Document Uploaded</span>
-                                </div>
-                            ) : (
-                                <button
-                                    type="button"
-                                    onClick={() => idBackInputRef.current?.click()}
-                                    className="px-4 py-2 bg-neutral-100 hover:bg-neutral-200 text-neutral-800 text-xs font-semibold uppercase tracking-wider border border-neutral-300 inline-flex items-center gap-2"
-                                >
-                                    <Upload className="w-3.5 h-3.5" /> Select File / Photo
-                                </button>
-                            )}
-                        </div>
-                    </div>
                 </div>
 
-                {/* ========================================================================= */}
-                {/* SECTION 5: ACCOUNT CONFIGURATION & PREFERENCES */}
-                {/* ========================================================================= */}
-                <div className="p-6 md:p-10 border-b border-neutral-300">
-                    <div className="bg-[#0D2545] text-white px-4 py-2 mb-6 flex items-center justify-between border-l-4 border-[#B8960C]">
-                        <h3 className="font-bold text-sm tracking-wider uppercase">
-                            Section 5: Account Configuration & Preferences
-                        </h3>
-                        <span className="text-[10px] font-mono text-neutral-300">SERVICE OPTIONS</span>
+                {/* 4. Employment Details Section (Stanbic Style) */}
+                <div className="border-b border-[#0D2545]">
+                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
+                        <span>Employment details</span>
+                        <span className="text-[10px] font-mono text-blue-200">SECTION 3</span>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-6">
-                        <div className="space-y-4 p-4 bg-neutral-50 border border-neutral-300">
-                            <label className="flex items-start gap-3 cursor-pointer">
-                                <input
-                                    type="checkbox"
-                                    className="mt-0.5 w-4 h-4 rounded-none border-2 border-neutral-700 text-[#0D2545] focus:ring-0"
-                                    checked={formData.overdraftProtection}
-                                    onChange={(e) => updateField('overdraftProtection', e.target.checked)}
-                                />
-                                <div>
-                                    <span className="text-xs font-bold text-neutral-800 uppercase tracking-wide block">
-                                        Opt-In to Standard Overdraft Protection
-                                    </span>
-                                    <p className="text-[11px] text-neutral-600 mt-0.5">
-                                        Authorizes discretionary coverage for ATM and everyday debit transactions.
-                                    </p>
-                                </div>
-                            </label>
-
-                            <label className="flex items-start gap-3 cursor-pointer pt-3 border-t border-neutral-200">
-                                <input
-                                    type="checkbox"
-                                    className="mt-0.5 w-4 h-4 rounded-none border-2 border-neutral-700 text-[#0D2545] focus:ring-0"
-                                    checked={formData.debitCardRequest}
-                                    onChange={(e) => updateField('debitCardRequest', e.target.checked)}
-                                />
-                                <div>
-                                    <span className="text-xs font-bold text-neutral-800 uppercase tracking-wide block">
-                                        Issue Contactless Visa® Debit Card
-                                    </span>
-                                    <p className="text-[11px] text-neutral-600 mt-0.5">
-                                        Card will be personalized and mailed to your residential address.
-                                    </p>
-                                </div>
-                            </label>
-                        </div>
-
-                        <div className="space-y-4">
-                            {formData.debitCardRequest && (
-                                <div>
-                                    <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                        Card Embossing Name (Max 26 Characters)
-                                    </label>
-                                    <input
-                                        type="text"
-                                        maxLength={26}
-                                        className="w-full px-3 py-2.5 bg-[#F1F5F9] border border-[#94A3B8] text-neutral-900 font-mono text-sm outline-none rounded-none uppercase focus:bg-white focus:border-[#0D2545]"
-                                        value={formData.nameToAppearOnCard}
-                                        onChange={(e) => updateField('nameToAppearOnCard', e.target.value.toUpperCase())}
-                                    />
-                                </div>
-                            )}
-
-                            <div>
-                                <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                    Statement Delivery Preference
+                    <div className="p-4 space-y-3">
+                        <div className="grid sm:grid-cols-3 gap-3">
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Employment Status <span className="text-red-600">*</span>
                                 </label>
                                 <select
-                                    className="w-full px-3 py-2.5 bg-[#F1F5F9] border border-[#94A3B8] text-neutral-900 font-mono text-sm outline-none rounded-none focus:bg-white focus:border-[#0D2545]"
-                                    value={formData.statementPreference}
-                                    onChange={(e) => updateField('statementPreference', e.target.value)}
+                                    className="w-full bg-transparent font-medium text-xs outline-none"
+                                    value={formData.employmentStatus}
+                                    onChange={(e) => updateField('employmentStatus', e.target.value)}
                                 >
-                                    <option value="E-Statements">Electronic Statements (Secure Online PDF, No Fee)</option>
-                                    <option value="Paper Statements">Paper Mailed Statements ($5.00 Monthly Paper Fee)</option>
+                                    <option>Employed</option>
+                                    <option>Self-Employed</option>
+                                    <option>Retired</option>
+                                    <option>Student</option>
+                                    <option>Unemployed</option>
+                                </select>
+                            </div>
+
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Occupation / Job Title <span className="text-red-600">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Senior Partner, Physician"
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.occupation ? 'border-red-600' : 'border-neutral-200'} text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    value={formData.occupation}
+                                    onChange={(e) => updateField('occupation', e.target.value)}
+                                />
+                                {errors.occupation && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.occupation}</p>}
+                            </div>
+
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Employer Name <span className="text-red-600">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="e.g. Acme Corporation"
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.employerName ? 'border-red-600' : 'border-neutral-200'} text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    value={formData.employerName}
+                                    onChange={(e) => updateField('employerName', e.target.value)}
+                                />
+                                {errors.employerName && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.employerName}</p>}
+                            </div>
+                        </div>
+
+                        <div className="grid sm:grid-cols-2 gap-3">
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Source of Funds
+                                </label>
+                                <select
+                                    className="w-full bg-transparent font-medium text-xs outline-none"
+                                    value={formData.primarySourceOfFunds}
+                                    onChange={(e) => updateField('primarySourceOfFunds', e.target.value)}
+                                >
+                                    <option>Salary/Wages</option>
+                                    <option>Investments / Dividends</option>
+                                    <option>Business Profits</option>
+                                    <option>Inheritance / Trust</option>
+                                    <option>Personal Savings</option>
+                                </select>
+                            </div>
+
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Estimated Gross Annual Income (USD)
+                                </label>
+                                <select
+                                    className="w-full bg-transparent font-medium text-xs outline-none"
+                                    value={formData.estimatedAnnualIncome}
+                                    onChange={(e) => updateField('estimatedAnnualIncome', e.target.value)}
+                                >
+                                    <option value="0-50000">$0 – $50,000</option>
+                                    <option value="50000-100000">$50,000 – $100,000</option>
+                                    <option value="100000-250000">$100,000 – $250,000</option>
+                                    <option value="250000+">$250,000+</option>
                                 </select>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* ========================================================================= */}
-                {/* SECTION 6: INITIAL ACCOUNT FUNDING & REMITTANCE */}
-                {/* ========================================================================= */}
-                <div className="p-6 md:p-10 border-b border-neutral-300 bg-neutral-50/40">
-                    <div className="bg-[#0D2545] text-white px-4 py-2 mb-6 flex items-center justify-between border-l-4 border-[#B8960C]">
-                        <h3 className="font-bold text-sm tracking-wider uppercase">
-                            Section 6: Initial Account Funding & Remittance
-                        </h3>
-                        <span className="text-[10px] font-mono text-neutral-300">REGULATION CC COMPLIANT</span>
+                {/* 5. Means of Identification (SBB West Bank Style) */}
+                <div className="border-b border-[#0D2545]">
+                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
+                        <span>Means of identification</span>
+                        <span className="text-[10px] font-mono text-blue-200">SECTION 4</span>
                     </div>
 
-                    <div className="grid md:grid-cols-2 gap-5">
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                Initial Deposit Funding Method <span className="text-red-600">*</span>
-                            </label>
-                            <select
-                                className="w-full px-3 py-2.5 bg-[#F1F5F9] border border-[#94A3B8] text-neutral-900 font-mono text-sm outline-none rounded-none focus:bg-white focus:border-[#0D2545]"
-                                value={formData.fundingMethod}
-                                onChange={(e) => updateField('fundingMethod', e.target.value)}
-                            >
-                                <option value="External Bank Transfer (ACH)">External Bank Transfer (ACH Debit)</option>
-                                <option value="Wire Transfer">Incoming Domestic / International Wire</option>
-                                <option value="Mobile Check Deposit">Mobile Check Deposit</option>
-                            </select>
+                    <div className="p-4 space-y-3">
+                        <div className="grid sm:grid-cols-4 gap-3">
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Primary ID Type <span className="text-red-600">*</span>
+                                </label>
+                                <select
+                                    className="w-full bg-transparent font-medium text-xs outline-none"
+                                    value={formData.primaryIdType}
+                                    onChange={(e) => updateField('primaryIdType', e.target.value)}
+                                >
+                                    <option>Driver's License</option>
+                                    <option>State ID Card</option>
+                                    <option>Passport</option>
+                                    <option>Permanent Resident Card</option>
+                                </select>
+                            </div>
+
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    ID Card Number <span className="text-red-600">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.idNumber ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    value={formData.idNumber}
+                                    onChange={(e) => updateField('idNumber', e.target.value)}
+                                />
+                                {errors.idNumber && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.idNumber}</p>}
+                            </div>
+
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Issue Date (YYYY-MM-DD) <span className="text-red-600">*</span>
+                                </label>
+                                <input
+                                    type="date"
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.issueDate ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    value={formData.issueDate}
+                                    onChange={(e) => updateField('issueDate', e.target.value)}
+                                />
+                                {errors.issueDate && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.issueDate}</p>}
+                            </div>
+
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Expiry Date (YYYY-MM-DD) <span className="text-red-600">*</span>
+                                </label>
+                                <input
+                                    type="date"
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.expirationDate ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    value={formData.expirationDate}
+                                    onChange={(e) => updateField('expirationDate', e.target.value)}
+                                />
+                                {errors.expirationDate && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.expirationDate}</p>}
+                            </div>
                         </div>
 
-                        <div>
-                            <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
-                                Initial Deposit Amount ($ USD) <span className="text-red-600">*</span>
-                            </label>
-                            <input
-                                type="number"
-                                step="0.01"
-                                placeholder="500.00"
-                                className={`w-full px-3 py-2.5 bg-[#F1F5F9] border ${errors.initialDepositAmount ? 'border-red-600 bg-red-50' : 'border-[#94A3B8] focus:border-[#0D2545] focus:bg-white'} text-neutral-900 font-mono text-sm outline-none transition-colors rounded-none`}
-                                value={formData.initialDepositAmount}
-                                onChange={(e) => updateField('initialDepositAmount', e.target.value)}
-                            />
-                            {errors.initialDepositAmount && <p className="text-xs text-red-600 mt-1 font-bold">{errors.initialDepositAmount}</p>}
+                        {/* ID Document Attachments */}
+                        <div className="grid sm:grid-cols-2 gap-3 pt-2">
+                            <div className="border border-neutral-300 p-3 bg-neutral-50 flex items-center justify-between">
+                                <div>
+                                    <span className="font-bold text-[11px] text-neutral-800 block uppercase">
+                                        ID Document Photo (Front)
+                                    </span>
+                                    <span className="text-[10px] text-neutral-500">Attach front of photo ID</span>
+                                </div>
+                                {formData.idFrontDocumentUrl ? (
+                                    <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">
+                                        <CheckCircle2 className="w-3.5 h-3.5" /> Attached
+                                    </span>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => idFrontInputRef.current?.click()}
+                                        className="px-3 py-1.5 bg-[#0D2545] text-white text-[10px] font-bold uppercase tracking-wider rounded-none"
+                                    >
+                                        Select File
+                                    </button>
+                                )}
+                            </div>
+
+                            <div className="border border-neutral-300 p-3 bg-neutral-50 flex items-center justify-between">
+                                <div>
+                                    <span className="font-bold text-[11px] text-neutral-800 block uppercase">
+                                        ID Document Photo (Back)
+                                    </span>
+                                    <span className="text-[10px] text-neutral-500">Attach back / barcode side</span>
+                                </div>
+                                {formData.idBackDocumentUrl ? (
+                                    <span className="text-[10px] font-bold text-emerald-700 flex items-center gap-1">
+                                        <CheckCircle2 className="w-3.5 h-3.5" /> Attached
+                                    </span>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => idBackInputRef.current?.click()}
+                                        className="px-3 py-1.5 bg-[#0D2545] text-white text-[10px] font-bold uppercase tracking-wider rounded-none"
+                                    >
+                                        Select File
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 6. Details of Next of Kin (from both attached forms) */}
+                <div className="border-b border-[#0D2545]">
+                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
+                        <span>Details of next of kin</span>
+                        <span className="text-[10px] font-mono text-blue-200">SECTION 5</span>
+                    </div>
+
+                    <div className="p-4 space-y-3">
+                        <div className="grid sm:grid-cols-3 gap-3">
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Next of Kin Full Name
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="JANE DOE"
+                                    className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 text-xs outline-none focus:bg-white focus:border-[#0D2545] uppercase"
+                                    value={formData.nextOfKinName}
+                                    onChange={(e) => updateField('nextOfKinName', e.target.value.toUpperCase())}
+                                />
+                            </div>
+
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Relationship
+                                </label>
+                                <select
+                                    className="w-full bg-transparent font-medium text-xs outline-none"
+                                    value={formData.nextOfKinRelationship}
+                                    onChange={(e) => updateField('nextOfKinRelationship', e.target.value)}
+                                >
+                                    <option>Spouse</option>
+                                    <option>Child</option>
+                                    <option>Parent</option>
+                                    <option>Sibling</option>
+                                    <option>Other</option>
+                                </select>
+                            </div>
+
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Contact Telephone
+                                </label>
+                                <input
+                                    type="text"
+                                    placeholder="+1 (555) 000-0000"
+                                    className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]"
+                                    value={formData.nextOfKinPhone}
+                                    onChange={(e) => updateField('nextOfKinPhone', e.target.value)}
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* 7. E-Banking & Account Funding (Stanbic Style) */}
+                <div className="border-b border-[#0D2545]">
+                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
+                        <span>E-Banking & Initial Funding details</span>
+                        <span className="text-[10px] font-mono text-blue-200">SECTION 6</span>
+                    </div>
+
+                    <div className="p-4 space-y-3">
+                        <div className="grid sm:grid-cols-2 gap-3">
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Initial Deposit Amount ($ USD) <span className="text-red-600">*</span>
+                                </label>
+                                <input
+                                    type="number"
+                                    step="0.01"
+                                    placeholder="500.00"
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.initialDepositAmount ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    value={formData.initialDepositAmount}
+                                    onChange={(e) => updateField('initialDepositAmount', e.target.value)}
+                                />
+                                {errors.initialDepositAmount && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.initialDepositAmount}</p>}
+                            </div>
+
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    Funding Method <span className="text-red-600">*</span>
+                                </label>
+                                <select
+                                    className="w-full bg-transparent font-medium text-xs outline-none"
+                                    value={formData.fundingMethod}
+                                    onChange={(e) => updateField('fundingMethod', e.target.value)}
+                                >
+                                    <option>External Bank Transfer (ACH)</option>
+                                    <option>Incoming Wire Transfer</option>
+                                    <option>Mobile Check Deposit</option>
+                                </select>
+                            </div>
                         </div>
 
                         {formData.fundingMethod === 'External Bank Transfer (ACH)' && (
-                            <>
-                                <div>
-                                    <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
+                            <div className="grid sm:grid-cols-2 gap-3">
+                                <div className="border border-neutral-300 p-2 bg-white">
+                                    <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
                                         External Bank 9-Digit Routing Number <span className="text-red-600">*</span>
                                     </label>
                                     <input
                                         type="password"
                                         maxLength={9}
                                         placeholder="XXXXXXXXX"
-                                        className={`w-full px-3 py-2.5 bg-[#F1F5F9] border ${errors.externalAccountRoutingNumber ? 'border-red-600 bg-red-50' : 'border-[#94A3B8] focus:border-[#0D2545] focus:bg-white'} text-neutral-900 font-mono text-sm outline-none transition-colors rounded-none`}
+                                        className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.externalAccountRoutingNumber ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
                                         value={formData.externalAccountRoutingNumber}
                                         onChange={(e) => updateField('externalAccountRoutingNumber', e.target.value)}
                                     />
-                                    {errors.externalAccountRoutingNumber && <p className="text-xs text-red-600 mt-1 font-bold">{errors.externalAccountRoutingNumber}</p>}
+                                    {errors.externalAccountRoutingNumber && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.externalAccountRoutingNumber}</p>}
                                 </div>
 
-                                <div>
-                                    <label className="block text-xs font-bold text-neutral-800 uppercase tracking-wider mb-1">
+                                <div className="border border-neutral-300 p-2 bg-white">
+                                    <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
                                         External Bank Account Number <span className="text-red-600">*</span>
                                     </label>
                                     <input
                                         type="password"
                                         placeholder="XXXXXXXXXXXX"
-                                        className={`w-full px-3 py-2.5 bg-[#F1F5F9] border ${errors.externalAccountNumber ? 'border-red-600 bg-red-50' : 'border-[#94A3B8] focus:border-[#0D2545] focus:bg-white'} text-neutral-900 font-mono text-sm outline-none transition-colors rounded-none`}
+                                        className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.externalAccountNumber ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
                                         value={formData.externalAccountNumber}
                                         onChange={(e) => updateField('externalAccountNumber', e.target.value)}
                                     />
-                                    {errors.externalAccountNumber && <p className="text-xs text-red-600 mt-1 font-bold">{errors.externalAccountNumber}</p>}
+                                    {errors.externalAccountNumber && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.externalAccountNumber}</p>}
                                 </div>
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>
 
-                {/* ========================================================================= */}
-                {/* SECTION 7: TAXPAYER IDENTIFICATION (W-9) & REGULATORY DISCLOSURES */}
-                {/* ========================================================================= */}
-                <div className="p-6 md:p-10 border-b border-neutral-300">
-                    <div className="bg-[#0D2545] text-white px-4 py-2 mb-6 flex items-center justify-between border-l-4 border-[#B8960C]">
-                        <h3 className="font-bold text-sm tracking-wider uppercase">
-                            Section 7: Taxpayer Identification (W-9) & Legal Certifications
-                        </h3>
-                        <span className="text-[10px] font-mono text-neutral-300">INTERNAL REVENUE CODE</span>
+                {/* 8. Consent & Regulatory Disclosures (Two-Column Table from Stanbic Bank Form) */}
+                <div className="border-b border-[#0D2545]">
+                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
+                        <span>Consent & Regulatory Declarations</span>
+                        <span className="text-[10px] font-mono text-blue-200">SECTION 7</span>
                     </div>
 
-                    <div className="space-y-4 p-5 bg-neutral-50 border border-neutral-300 text-xs leading-relaxed text-neutral-800">
-                        <label className="flex items-start gap-3 cursor-pointer">
-                            <input
-                                type="checkbox"
-                                className="mt-1 w-4 h-4 rounded-none border-2 border-neutral-700 text-[#0D2545] focus:ring-0"
-                                checked={formData.w9Certification}
-                                onChange={(e) => updateField('w9Certification', e.target.checked)}
-                            />
-                            <div>
-                                <span className="font-bold uppercase tracking-wide block text-neutral-900">
-                                    W-9 Certification Under Penalties of Perjury <span className="text-red-600">*</span>
-                                </span>
-                                <p className="text-[11px] text-neutral-600 mt-0.5">
-                                    Under penalties of perjury, I certify that: (1) The number shown on this form is my correct taxpayer identification number; (2) I am not subject to backup withholding; and (3) I am a U.S. citizen or other U.S. person.
-                                </p>
-                                {errors.w9Certification && <p className="text-xs text-red-600 font-bold mt-1">{errors.w9Certification}</p>}
-                            </div>
-                        </label>
+                    <div className="p-4">
+                        <table className="w-full border-collapse border border-neutral-300 text-[11px]">
+                            <thead>
+                                <tr className="bg-neutral-100 text-[#0D2545]">
+                                    <th className="border border-neutral-300 p-2.5 text-left font-bold uppercase">
+                                        Consent & Certification Items
+                                    </th>
+                                    <th className="border border-neutral-300 p-2.5 text-center font-bold uppercase w-28">
+                                        Please Tick
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td className="border border-neutral-300 p-2.5 text-neutral-800 leading-snug">
+                                        <strong>W-9 Taxpayer Identification Certification:</strong> Under penalties of perjury, I certify that: (1) The number shown on this form is my correct taxpayer identification number; (2) I am not subject to backup withholding; and (3) I am a U.S. citizen or other U.S. person.
+                                        {errors.w9Certification && <p className="text-red-600 font-bold mt-1">{errors.w9Certification}</p>}
+                                    </td>
+                                    <td className="border border-neutral-300 p-2.5 text-center bg-neutral-50/50">
+                                        <div className="flex items-center justify-center gap-3">
+                                            <label className="flex items-center gap-1 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-4 h-4 text-[#0D2545] rounded-none focus:ring-0"
+                                                    checked={formData.w9Certification}
+                                                    onChange={(e) => updateField('w9Certification', e.target.checked)}
+                                                />
+                                                <span className="font-bold">Yes</span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
 
-                        <label className="flex items-start gap-3 cursor-pointer pt-3 border-t border-neutral-200">
-                            <input
-                                type="checkbox"
-                                className="mt-1 w-4 h-4 rounded-none border-2 border-neutral-700 text-[#0D2545] focus:ring-0"
-                                checked={formData.electronicCommunicationsDisclosure}
-                                onChange={(e) => updateField('electronicCommunicationsDisclosure', e.target.checked)}
-                            />
-                            <div>
-                                <span className="font-bold uppercase tracking-wide block text-neutral-900">
-                                    Electronic Communications & Records Disclosure Consent <span className="text-red-600">*</span>
-                                </span>
-                                <p className="text-[11px] text-neutral-600 mt-0.5">
-                                    I consent to receive all notices, disclosures, tax statements, and account documentation electronically in compliance with the federal E-SIGN Act.
-                                </p>
-                                {errors.electronicCommunicationsDisclosure && <p className="text-xs text-red-600 font-bold mt-1">{errors.electronicCommunicationsDisclosure}</p>}
-                            </div>
-                        </label>
+                                <tr>
+                                    <td className="border border-neutral-300 p-2.5 text-neutral-800 leading-snug">
+                                        <strong>Electronic Communications & Records Consent:</strong> I agree to receive all account disclosures, monthly notices, and official statements in electronic format pursuant to the E-SIGN Act.
+                                        {errors.electronicCommunicationsDisclosure && <p className="text-red-600 font-bold mt-1">{errors.electronicCommunicationsDisclosure}</p>}
+                                    </td>
+                                    <td className="border border-neutral-300 p-2.5 text-center bg-neutral-50/50">
+                                        <div className="flex items-center justify-center gap-3">
+                                            <label className="flex items-center gap-1 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-4 h-4 text-[#0D2545] rounded-none focus:ring-0"
+                                                    checked={formData.electronicCommunicationsDisclosure}
+                                                    onChange={(e) => updateField('electronicCommunicationsDisclosure', e.target.checked)}
+                                                />
+                                                <span className="font-bold">Yes</span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
 
-                        <label className="flex items-start gap-3 cursor-pointer pt-3 border-t border-neutral-200">
-                            <input
-                                type="checkbox"
-                                className="mt-1 w-4 h-4 rounded-none border-2 border-neutral-700 text-[#0D2545] focus:ring-0"
-                                checked={formData.depositAccountAgreement}
-                                onChange={(e) => updateField('depositAccountAgreement', e.target.checked)}
-                            />
-                            <div>
-                                <span className="font-bold uppercase tracking-wide block text-neutral-900">
-                                    Deposit Account Agreement & Truth in Savings Acknowledgment <span className="text-red-600">*</span>
-                                </span>
-                                <p className="text-[11px] text-neutral-600 mt-0.5">
-                                    I have received, read, and agree to be bound by the JP Heritage Bank Deposit Account Agreement, Fee Schedule, and Funds Availability Policy.
-                                </p>
-                                {errors.depositAccountAgreement && <p className="text-xs text-red-600 font-bold mt-1">{errors.depositAccountAgreement}</p>}
-                            </div>
-                        </label>
+                                <tr>
+                                    <td className="border border-neutral-300 p-2.5 text-neutral-800 leading-snug">
+                                        <strong>Deposit Account Agreement & Truth in Savings:</strong> I have received, read, and agree to the JP Heritage Bank Deposit Account Agreement, Fee Schedule, and Funds Availability Policy.
+                                        {errors.depositAccountAgreement && <p className="text-red-600 font-bold mt-1">{errors.depositAccountAgreement}</p>}
+                                    </td>
+                                    <td className="border border-neutral-300 p-2.5 text-center bg-neutral-50/50">
+                                        <div className="flex items-center justify-center gap-3">
+                                            <label className="flex items-center gap-1 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-4 h-4 text-[#0D2545] rounded-none focus:ring-0"
+                                                    checked={formData.depositAccountAgreement}
+                                                    onChange={(e) => updateField('depositAccountAgreement', e.target.checked)}
+                                                />
+                                                <span className="font-bold">Yes</span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <td className="border border-neutral-300 p-2.5 text-neutral-800 leading-snug">
+                                        <strong>Marketing & Financial Advisory Communications:</strong> I consent that the Bank may communicate related commercial products, wealth advisory updates, and special investment services to me.
+                                    </td>
+                                    <td className="border border-neutral-300 p-2.5 text-center bg-neutral-50/50">
+                                        <div className="flex items-center justify-center gap-3">
+                                            <label className="flex items-center gap-1 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-4 h-4 text-[#0D2545] rounded-none focus:ring-0"
+                                                    checked={formData.marketingConsent}
+                                                    onChange={(e) => updateField('marketingConsent', e.target.checked)}
+                                                />
+                                                <span className="font-bold">Yes</span>
+                                            </label>
+                                            <label className="flex items-center gap-1 cursor-pointer">
+                                                <input
+                                                    type="checkbox"
+                                                    className="w-4 h-4 text-[#0D2545] rounded-none focus:ring-0"
+                                                    checked={!formData.marketingConsent}
+                                                    onChange={(e) => updateField('marketingConsent', !e.target.checked)}
+                                                />
+                                                <span className="font-bold">No</span>
+                                            </label>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
-                {/* ========================================================================= */}
-                {/* SECTION 8: DIGITAL SIGNATURE & EXECUTION */}
-                {/* ========================================================================= */}
-                <div className="p-6 md:p-10 bg-white">
-                    <div className="bg-[#0D2545] text-white px-4 py-2 mb-6 flex items-center justify-between border-l-4 border-[#B8960C]">
-                        <h3 className="font-bold text-sm tracking-wider uppercase">
-                            Section 8: Digital Signature & Execution
-                        </h3>
-                        <span className="text-[10px] font-mono text-neutral-300">FEDERAL E-SIGN ACT</span>
+                {/* 9. Declaration & Specimen Signature (SBB West Bank & Stanbic Style) */}
+                <div className="p-6 md:p-8 bg-white">
+                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between mb-4">
+                        <span>Declaration & Specimen Signature</span>
+                        <span className="text-[10px] font-mono text-blue-200">SECTION 8</span>
                     </div>
 
-                    <p className="text-xs text-neutral-700 mb-6 leading-relaxed">
-                        To execute this application, please provide your official signature. You may either <strong>snap a photo of your signature with your device camera</strong>, or <strong>upload an image/PDF of your signature</strong> from your photo app or file manager.
-                    </p>
+                    <div className="p-4 bg-neutral-50 border border-neutral-300 text-[11px] text-neutral-700 leading-relaxed mb-6">
+                        <strong>DECLARATION:</strong> I/We hereby apply for the opening of account(s) with JP Heritage Bank, N.A. I/We understand that the information given herein and the documents supplied are the basis for opening such account(s) and I/We therefore warrant that such information is correct, complete, and not misleading. I/We further undertake to indemnify the Bank for any loss suffered as a result of any false information provided.
+                    </div>
 
                     {/* Two Working Buttons */}
-                    <div className="grid sm:grid-cols-2 gap-4 mb-6">
-                        {/* Button 1: Snap Signature (Camera) */}
+                    <div className="grid sm:grid-cols-2 gap-3 mb-4">
                         <button
                             type="button"
-                            onClick={openCamera}
-                            className="w-full py-3.5 px-5 bg-[#0D2545] text-white hover:bg-[#1B355B] font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2.5 border border-[#0D2545] shadow-sm active:translate-y-0.5"
+                            onClick={() => openCamera('signature')}
+                            className="py-3 px-4 bg-[#0D2545] hover:bg-[#1B355B] text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border border-[#0D2545] shadow-sm"
                         >
                             <Camera className="w-4 h-4 text-amber-400" />
                             <span>1. Snap Signature (Camera)</span>
                         </button>
 
-                        {/* Button 2: Upload Signature (PDF / PNG / JPEG) */}
                         <button
                             type="button"
                             onClick={() => fileInputRef.current?.click()}
-                            className="w-full py-3.5 px-5 bg-neutral-100 hover:bg-neutral-200 text-neutral-900 font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2.5 border border-neutral-400 shadow-sm active:translate-y-0.5"
+                            className="py-3 px-4 bg-white hover:bg-neutral-100 text-neutral-900 font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border border-neutral-400 shadow-sm"
                         >
                             <Upload className="w-4 h-4 text-[#0D2545]" />
                             <span>2. Upload Signature (PDF / PNG / JPEG)</span>
                         </button>
                     </div>
 
-                    {/* Paper Document Signature Block */}
-                    <div className={`p-6 border-2 ${errors.digitalSignature ? 'border-red-600 bg-red-50/50' : 'border-neutral-400 bg-neutral-50/70'} relative transition-colors`}>
+                    {/* Specimen Signature Box (Styled after SBB Specimen 1 & Stanbic) */}
+                    <div className={`p-5 border-2 ${errors.digitalSignature ? 'border-red-600 bg-red-50/40' : 'border-[#0D2545] bg-white'} relative`}>
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
-                            {/* Left: Signature Display / Baseline */}
+                            {/* Left: Specimen Signature Area */}
                             <div className="flex-1">
-                                <span className="text-[10px] font-mono font-bold text-neutral-500 uppercase block mb-2">
-                                    Authorized Applicant Signature Block
+                                <span className="text-[10px] font-bold text-[#0D2545] uppercase tracking-wider block mb-2">
+                                    SPECIMEN 1 — PRIMARY APPLICANT SIGNATURE
                                 </span>
 
                                 {signaturePreview ? (
-                                    <div className="space-y-3">
+                                    <div className="space-y-2">
                                         {signatureFileType === 'image' ? (
-                                            <div className="p-3 bg-white border border-neutral-300 inline-block">
-                                                <img 
-                                                    src={signaturePreview} 
-                                                    alt="Captured Signature" 
-                                                    className="max-h-24 max-w-xs object-contain" 
+                                            <div className="p-2 bg-neutral-50 border border-neutral-300 inline-block">
+                                                <img
+                                                    src={signaturePreview}
+                                                    alt="Signature Preview"
+                                                    className="max-h-20 max-w-xs object-contain"
                                                 />
                                             </div>
                                         ) : (
-                                            <div className="p-4 bg-white border border-neutral-300 flex items-center gap-3 max-w-sm">
-                                                <FileText className="w-8 h-8 text-red-600 shrink-0" />
+                                            <div className="p-3 bg-neutral-50 border border-neutral-300 flex items-center gap-3 max-w-sm">
+                                                <FileText className="w-6 h-6 text-red-600 shrink-0" />
                                                 <div className="truncate">
                                                     <span className="font-bold text-xs text-neutral-900 block truncate">{signatureFileName}</span>
                                                     <span className="text-[10px] text-emerald-700 font-semibold uppercase">PDF Signature Attached</span>
@@ -1161,72 +1362,72 @@ export default function RegistrationFormClient({ application }: { application: a
                                             </div>
                                         )}
 
-                                        <div className="flex items-center gap-3">
+                                        <div>
                                             <button
                                                 type="button"
                                                 onClick={clearSignature}
-                                                className="text-xs text-red-700 hover:text-red-900 font-semibold flex items-center gap-1"
+                                                className="text-[11px] text-red-700 hover:text-red-900 font-bold flex items-center gap-1"
                                             >
-                                                <Trash2 className="w-3.5 h-3.5" /> Remove / Clear
+                                                <Trash2 className="w-3 h-3" /> Clear / Replace Signature
                                             </button>
                                         </div>
                                     </div>
                                 ) : (
-                                    <div className="py-6 border-b-2 border-neutral-800 flex items-end justify-between">
+                                    <div className="py-5 border-b-2 border-neutral-800 flex items-end justify-between">
                                         <div className="flex items-baseline gap-2">
-                                            <span className="font-serif font-black text-2xl text-neutral-900">X</span>
-                                            <span className="text-xs font-mono text-neutral-500 italic">
-                                                (No signature attached yet — use buttons above to snap or upload)
+                                            <span className="font-serif font-black text-xl text-neutral-900">X</span>
+                                            <span className="text-[11px] font-mono text-neutral-400 italic">
+                                                (Signature space — use buttons above to snap or upload)
                                             </span>
                                         </div>
                                     </div>
                                 )}
 
                                 <div className="text-[11px] font-mono text-neutral-600 mt-2">
-                                    PRIMARY APPLICANT: <strong>{formData.fullLegalName || application.firstName + ' ' + application.lastName}</strong>
+                                    NAME: <strong>{formData.fullLegalName || application.firstName + ' ' + application.lastName}</strong>
                                 </div>
                             </div>
 
-                            {/* Right: Date of Execution */}
+                            {/* Right: Date */}
                             <div className="md:w-48">
-                                <label className="block text-[10px] font-mono font-bold text-neutral-500 uppercase mb-1">
-                                    Date of Execution:
+                                <label className="block text-[10px] font-bold text-[#0D2545] uppercase mb-1">
+                                    Date (DD-MM-YYYY):
                                 </label>
                                 <input
                                     type="text"
                                     disabled
-                                    className="w-full px-3 py-2 bg-neutral-200/80 border border-neutral-400 text-neutral-800 font-mono text-xs rounded-none"
+                                    className="w-full px-2.5 py-1.5 bg-neutral-100 border border-neutral-300 text-neutral-800 font-mono text-xs"
                                     value={formData.signatureDate}
                                 />
                             </div>
                         </div>
 
                         {errors.digitalSignature && (
-                            <p className="text-xs text-red-600 font-bold mt-4">
+                            <p className="text-xs text-red-600 font-bold mt-3">
                                 {errors.digitalSignature}
                             </p>
                         )}
                     </div>
 
                     {/* Final Submission Button */}
-                    <div className="mt-10 pt-6 border-t-2 border-neutral-800 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="mt-8 pt-6 border-t border-neutral-300 flex flex-col sm:flex-row items-center justify-between gap-4">
                         <div className="text-[11px] text-neutral-500 flex items-center gap-2">
-                            <Lock className="w-4 h-4 text-emerald-700 shrink-0" />
-                            <span>This document is transmitted with 256-bit bank grade encryption under federal oversight.</span>
+                            <Lock className="w-4 h-4 text-[#0D2545] shrink-0" />
+                            <span>Encrypted under Section 326 of the USA PATRIOT Act and FDIC guidelines.</span>
                         </div>
 
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className="w-full sm:w-auto px-10 py-4 bg-[#0D2545] hover:bg-[#1B355B] text-white font-bold text-sm tracking-wider uppercase transition-colors flex items-center justify-center gap-3 disabled:opacity-50 shadow-lg active:translate-y-0.5"
+                            className="w-full sm:w-auto px-10 py-3.5 bg-[#0D2545] hover:bg-[#1B355B] text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2.5 disabled:opacity-50 shadow-md"
                         >
                             {isSubmitting ? (
                                 <>
                                     <RefreshCw className="w-4 h-4 animate-spin" />
-                                    <span>Processing & Transmitting...</span>
+                                    <span>Transmitting CIP Dossier...</span>
                                 </>
                             ) : (
-                                <span>Submit Official CIP Application</span>
+                                <span>Submit Official Application</span>
                             )}
                         </button>
                     </div>
