@@ -2,8 +2,8 @@ import { notFound } from 'next/navigation';
 import { prisma } from '@/lib/prisma';
 import RegistrationFormClient from './RegistrationFormClient';
 
-export default async function RegistrationFormPage({ params }: { params: { token: string } }) {
-    const { token } = params;
+export default async function RegistrationFormPage({ params }: { params: Promise<{ token: string }> }) {
+    const { token } = await params;
 
     const application = await prisma.accountApplication.findUnique({
         where: { registrationToken: token }
