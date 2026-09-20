@@ -44,6 +44,9 @@ type AccountApplication = {
   registrationToken?: string | null;
   status: string;
   createdAt: Date;
+  desiredAccountType: string | null;
+  isExistingCustomer: boolean;
+  isUsCitizenOrResident: boolean;
 };
 
 export function AdminApplicationList({ 
