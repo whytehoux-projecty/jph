@@ -1,17 +1,19 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/commercial-ui/Button';
 import { Input } from '@/components/forms/Input';
 import { Card, CardContent } from '@/components/commercial-ui/Card';
-import { CheckCircle, Shield, Briefcase, Mail, Phone, MapPin, User } from 'lucide-react';
+import { CheckCircle, Shield, Briefcase, Mail, Phone, MapPin, User, Building2, Clock, ShieldCheck, X } from 'lucide-react';
 import { requestAccountOpening } from '@/app/(corporate)/actions';
 
-export default function ApplicationPage() {
+function ApplicationFormContent() {
     const router = useRouter();
     const [isSubmitting, setIsSubmitting] = useState(false);
-    const [success, setSuccess] = useState(false);
+    const searchParams = useSearchParams();
+    const isSubmitted = searchParams.get('submitted') === 'true';
+    const [referenceId] = useState(() => `JPH-${Math.floor(100000 + Math.random() * 900000)}`);
     const [errors, setErrors] = useState<Record<string, string>>({});
 
     const [formData, setFormData] = useState({
@@ -69,37 +71,16 @@ export default function ApplicationPage() {
         setIsSubmitting(true);
         try {
             await requestAccountOpening(formData);
-            setSuccess(true);
+            // Reload page with submitted query parameter to display official acknowledgment on same page
+            window.location.href = '/apply?submitted=true';
         } catch (error) {
             console.error('Application error:', error);
             setErrors({
                 submit: 'Failed to submit request. Please try again.'
             });
-        } finally {
             setIsSubmitting(false);
         }
     };
-
-    if (success) {
-        return (
-            <main className="min-h-screen bg-off-white py-20 px-4">
-                <div className="container mx-auto max-w-2xl">
-                    <Card className="text-center p-12 shadow-vintage-lg border-none bg-white">
-                        <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
-                            <CheckCircle className="w-10 h-10" />
-                        </div>
-                        <h1 className="text-3xl font-playfair font-bold text-charcoal mb-4">Request Received</h1>
-                        <p className="text-charcoal-light mb-8 text-lg">
-                            Thank you for your interest in JP Heritage Bank. We've received your request and will review your preliminary eligibility. If approved, you will receive instructions on how to complete the full registration.
-                        </p>
-                        <Button onClick={() => router.push('/')} variant="primary" size="large">
-                            Return Home
-                        </Button>
-                    </Card>
-                </div>
-            </main>
-        );
-    }
 
     return (
         <main className="min-h-screen bg-off-white flex">
@@ -161,6 +142,126 @@ export default function ApplicationPage() {
                         <h1 className="text-3xl font-playfair font-bold text-charcoal">Open an Account</h1>
                         <p className="text-charcoal-light mt-2">Secure, global banking tailored to you</p>
                     </div>
+
+                    {/* Professional Institutional Notification when submitted */}
+                    {isSubmitted && (
+                        <div className="mb-10 bg-white border border-vintage-gold/50 rounded-2xl shadow-vintage-lg overflow-hidden animate-in fade-in slide-in-from-top-4 duration-500">
+                            {/* Top Gold & Navy Accent Bar */}
+                            <div className="bg-gradient-to-r from-heritage-navy via-heritage-navy-light to-heritage-navy px-6 py-4 flex flex-wrap items-center justify-between gap-3 text-white border-b border-vintage-gold/30">
+                                <div className="flex items-center gap-2.5">
+                                    <div className="w-9 h-9 rounded-full bg-vintage-gold/20 flex items-center justify-center text-vintage-gold border border-vintage-gold/40">
+                                        <ShieldCheck className="w-5 h-5" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-playfair font-bold text-base md:text-lg tracking-wide text-white">
+                                            Application Request Submitted
+                                        </h3>
+                                        <p className="text-xs text-blue-200/80">Official Notice • JP Heritage Underwriting & Admissions</p>
+                                    </div>
+                                </div>
+                                <div className="flex items-center gap-3">
+                                    <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
+                                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                                        Request Successfully Recorded
+                                    </span>
+                                    <button 
+                                        type="button" 
+                                        onClick={() => {
+                                            const url = new URL(window.location.href);
+                                            url.searchParams.delete('submitted');
+                                            window.history.replaceState({}, '', url.toString());
+                                            window.location.reload();
+                                        }}
+                                        className="text-white/60 hover:text-white p-1 transition-colors"
+                                        title="Dismiss notice"
+                                    >
+                                        <X className="w-4 h-4" />
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="p-6 md:p-8 space-y-6">
+                                {/* Reference Details Grid */}
+                                <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 p-4 bg-off-white rounded-xl border border-neutral-200/80 text-xs">
+                                    <div>
+                                        <span className="text-charcoal-light block mb-0.5">Reference ID</span>
+                                        <span className="font-mono font-bold text-heritage-navy text-sm">{referenceId}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-charcoal-light block mb-0.5">Review Status</span>
+                                        <span className="font-semibold text-amber-700 flex items-center gap-1">
+                                            <Clock className="w-3.5 h-3.5" /> Under Review
+                                        </span>
+                                    </div>
+                                    <div>
+                                        <span className="text-charcoal-light block mb-0.5">Submission Date</span>
+                                        <span className="font-medium text-charcoal">{new Date().toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}</span>
+                                    </div>
+                                    <div>
+                                        <span className="text-charcoal-light block mb-0.5">Admissions Division</span>
+                                        <span className="font-medium text-charcoal">Private Client CIP</span>
+                                    </div>
+                                </div>
+
+                                {/* Message Body */}
+                                <div className="space-y-2">
+                                    <h4 className="text-base font-semibold text-charcoal">
+                                        Thank you for initiating your account opening inquiry with JP Heritage Bank.
+                                    </h4>
+                                    <p className="text-sm text-charcoal-light leading-relaxed">
+                                        Your preliminary eligibility dossier has been securely recorded and dispatched to our Underwriting & Admissions Committee. You do not need to resubmit this form.
+                                    </p>
+                                </div>
+
+                                {/* Step Process Indicator */}
+                                <div className="border-t border-neutral-200/80 pt-5">
+                                    <h5 className="text-xs font-semibold text-charcoal uppercase tracking-wider mb-4">
+                                        Next Steps in Your Onboarding Protocol:
+                                    </h5>
+                                    <div className="grid md:grid-cols-3 gap-3">
+                                        <div className="p-3.5 rounded-lg bg-emerald-50/70 border border-emerald-200/70">
+                                            <div className="flex items-center gap-2 mb-1.5 text-emerald-800 font-semibold text-xs">
+                                                <CheckCircle className="w-4 h-4 text-emerald-600" />
+                                                <span>1. Request Received</span>
+                                            </div>
+                                            <p className="text-xs text-emerald-900/80">
+                                                Your preliminary information has been logged and encrypted.
+                                            </p>
+                                        </div>
+
+                                        <div className="p-3.5 rounded-lg bg-blue-50/70 border border-blue-200/70">
+                                            <div className="flex items-center gap-2 mb-1.5 text-blue-800 font-semibold text-xs">
+                                                <span className="w-4 h-4 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px]">2</span>
+                                                <span>2. Underwriter Review</span>
+                                            </div>
+                                            <p className="text-xs text-blue-900/80">
+                                                Admissions officers review regional and identity qualifications (1–2 business days).
+                                            </p>
+                                        </div>
+
+                                        <div className="p-3.5 rounded-lg bg-neutral-50 border border-neutral-200/80">
+                                            <div className="flex items-center gap-2 mb-1.5 text-charcoal font-semibold text-xs">
+                                                <span className="w-4 h-4 rounded-full bg-neutral-300 text-charcoal flex items-center justify-center text-[10px]">3</span>
+                                                <span>3. Secure KYC Link</span>
+                                            </div>
+                                            <p className="text-xs text-charcoal-light">
+                                                Upon approval, a single-use tokenized link is emailed to complete your official KYC application.
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Concierge Help */}
+                                <div className="bg-heritage-navy/5 p-4 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs text-charcoal-light border border-heritage-navy/10">
+                                    <div className="flex items-center gap-2">
+                                        <Building2 className="w-4 h-4 text-heritage-navy shrink-0" />
+                                        <span>For expedited corporate or institutional inquiries: <strong>admissions@jpheritage.com</strong></span>
+                                    </div>
+                                    <span className="font-mono text-heritage-navy font-semibold shrink-0">(800) 555-JPHB</span>
+                                </div>
+                            </div>
+                        </div>
+                    )}
 
                     <form onSubmit={handleSubmit} className="space-y-10 animate-in fade-in slide-in-from-bottom-8 duration-700">
                         {errors.submit && (
@@ -330,5 +431,17 @@ export default function ApplicationPage() {
                 </div>
             </div>
         </main>
+    );
+}
+
+export default function ApplicationPage() {
+    return (
+        <Suspense fallback={
+            <div className="min-h-screen bg-off-white flex items-center justify-center">
+                <div className="w-8 h-8 border-4 border-heritage-navy border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        }>
+            <ApplicationFormContent />
+        </Suspense>
     );
 }

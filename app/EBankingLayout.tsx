@@ -101,7 +101,7 @@ export default function EBankingLayout({ children }: { children: ReactNode }) {
     pathname?.includes("/auth/") ||
     pathname === "/login" ||
     pathname === "/signup" ||
-    pathname === "/register" ||
+    pathname?.startsWith("/register") ||
     pathname?.startsWith("/admin") ||
     // Corporate marketing routes (all routes not under /dashboard, /accounts, etc.)
     pathname === "/" ||
