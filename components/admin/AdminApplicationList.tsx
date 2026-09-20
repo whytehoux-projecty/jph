@@ -20,34 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/Button";
 
-type AccountApplication = {
-  id: string;
-  applicationType: string;
-  firstName: string;
-  lastName: string;
-  email: string;
-  phone: string;
-  dateOfBirth: Date;
-  nationality: string | null;
-  currencyPreference: string | null;
-  address: string;
-  city: string;
-  state: string;
-  zipCode: string;
-  employmentStatus: string;
-  annualIncome: number;
-  idDocumentUrl: string | null;
-  livenessImageUrl: string | null;
-  verificationRequired: boolean;
-  scheduledMeetingAt: Date | null;
-  meetingMethod: string | null;
-  registrationToken?: string | null;
-  status: string;
-  createdAt: Date;
-  desiredAccountType: string | null;
-  isExistingCustomer: boolean;
-  isUsCitizenOrResident: boolean;
-};
+import type { AccountApplication } from '@prisma/client';
 
 export function AdminApplicationList({ 
   initialApplications,
