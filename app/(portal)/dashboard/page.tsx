@@ -7,43 +7,80 @@ import {
   CardTitle,
   CardDescription,
 } from "@/components/ui/Card";
-import { Progress } from "@/components/ui/progress";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Overview } from "@/components/dashboard/overview";
 import { RecentTransactions } from "@/components/dashboard/recent-sales";
-import { formatCurrency } from "@/lib/utils";
+import { Progress } from "@/components/ui/progress";
+import { formatCurrency, languageToLocale, translate } from '@/lib/utils';
 import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { DashboardStatCard } from "@/components/dashboard/DashboardStatCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { SpendingByCategory } from "@/components/dashboard/SpendingByCategory";
 import { getProfile } from "@/app/actions/profile";
 import { getAccounts } from "@/app/actions/accounts";
-import { getTransactionStats, getRecentTransactions } from "@/app/actions/transactions";
+import { getTransactions, getTransactionStats } from "@/app/actions/transactions";
 import { getSavingsGoal } from "@/app/actions/savings";
 import { redirect } from "next/navigation";
+import Link from "next/link";
+import { buttonVariants } from "@/components/ui/Button";
 
 export const dynamic = "force-dynamic";
 
+const processChartData = (txs: any[]) => {
+  const monthlyData: Record<
+    string,
+    { name: string; income: number; expense: number }
+  > = {};
+
+  const sortedTxs = [...txs].sort(
+    (a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+  );
+
+  sortedTxs.forEach((tx) => {
+    const date = new Date(tx.createdAt);
+    const monthKey = `${date.getFullYear()}-${date.getMonth()}`;
+    const monthName = date.toLocaleString("default", { month: "short" });
+
+    if (!monthlyData[monthKey]) {
+      monthlyData[monthKey] = { name: monthName, income: 0, expense: 0 };
+    }
+
+    const amt = Number(tx.amount);
+    if (amt > 0) {
+      monthlyData[monthKey].income += amt;
+    } else {
+      monthlyData[monthKey].expense += Math.abs(amt);
+    }
+  });
+
+  return Object.values(monthlyData);
+};
+
 export default async function DashboardPage() {
-  let user, accounts, stats, transactions, goal;
+  let user, accounts, stats, transactions, allTransactions, goal;
   
   try {
     user = await getProfile();
     accounts = await getAccounts();
     stats = await getTransactionStats("month");
-    transactions = await getRecentTransactions(5);
+    transactions = await getTransactions({ limit: 5 });
+    allTransactions = await getTransactions({ limit: 50 });
     goal = await getSavingsGoal();
   } catch (error) {
     redirect('/login');
   }
 
-  if (!user || !accounts || !stats || !transactions) return null;
+  if (!user || !accounts || !stats || !transactions || !allTransactions) return null;
 
   const totalBalance = accounts.reduce((sum: any, acc: any) => sum + Number(acc.balance), 0);
   const income = stats.income || 0;
   const expenses = stats.expenses || 0;
-  const savingsGoal = goal?.currentAmount || 0;
+  const savingsGoal = goal?.currentAmount || 0; 
   const savingsTarget = goal?.targetAmount || 25000;
-  const serializedTransactions = transactions.map((t: any) => ({
+  const analyticsData = processChartData(allTransactions || []);
+  const language = user?.preferredLanguage || 'en';
+  const currency = user?.preferredCurrency || 'USD';
+  const serializedTransactions = (transactions || []).map((t: any) => ({
     ...t,
     createdAt: t.createdAt.toISOString(),
     updatedAt: t.updatedAt?.toISOString() || t.createdAt.toISOString(),
@@ -52,85 +89,104 @@ export default async function DashboardPage() {
 
   const getGreeting = () => {
     const hour = new Date().getHours();
-    if (hour < 12) return 'Good morning';
-    if (hour < 18) return 'Good afternoon';
+    if (hour < 12) {
+        if (language === 'es') return 'Buenos días';
+        if (language === 'fr') return 'Bonjour';
+        if (language === 'de') return 'Guten Morgen';
+        return 'Good morning';
+    }
+    if (hour < 18) {
+        if (language === 'es') return 'Buenas tardes';
+        if (language === 'fr') return 'Bon après-midi';
+        if (language === 'de') return 'Guten Tag';
+        return 'Good afternoon';
+    }
+    if (language === 'es') return 'Buenas noches';
+    if (language === 'fr') return 'Bonsoir';
+    if (language === 'de') return 'Guten Abend';
     return 'Good evening';
   };
 
   return (
     <div className="flex-1 space-y-6 p-6 pt-4">
-      {/* Fix #37: Greeting / personalization on main dashboard */}
-      <div className="flex items-center justify-between pb-2">
+      <div className="flex items-center justify-between space-y-2 pb-4">
         <h2 className="text-3xl font-bold tracking-tight font-playfair">
-          {getGreeting()}, <span className="text-[color:var(--heritage-gold)]">{user?.firstName || 'there'}</span>
+          {getGreeting()}, {user?.firstName || "there"}
         </h2>
-        <p className="text-sm text-muted-foreground hidden md:block">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+        <div className="flex items-center space-x-2">
+          <Link href="/dashboard" className={buttonVariants({ variant: "primary", size: "small" })}>
+            Refresh Data
+          </Link>
+        </div>
       </div>
-      <div className="space-y-6">
-        {/* Quick Actions */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <div className="lg:col-span-4">
-            <ErrorBoundary>
-              <QuickActions />
-            </ErrorBoundary>
-          </div>
-        </div>
 
-        {/* Stats Cards */}
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-          <DashboardStatCard
-            title="Total Balance"
-            value={formatCurrency(totalBalance)}
-            icon={Wallet}
-            subtitle="Across all accounts"
-            animate="animate-fade-in-up animate-delay-100"
-          />
-          <DashboardStatCard
-            title="Income (Month)"
-            value={`+${formatCurrency(income)}`}
-            icon={ArrowDownLeft}
-            changeType="positive"
-            subtitle="Total deposits"
-            animate="animate-fade-in-up animate-delay-200"
-          />
-          <DashboardStatCard
-            title="Expenses (Month)"
-            value={`-${formatCurrency(expenses)}`}
-            icon={ArrowUpRight}
-            changeType="negative"
-            subtitle="Withdrawals & transfers"
-            animate="animate-fade-in-up animate-delay-300"
-          />
-          <DashboardStatCard
-            title="Savings Goals"
-            value={formatCurrency(savingsGoal)}
-            icon={PiggyBank}
-            subtitle={`of ${formatCurrency(savingsTarget)} goal`}
-            animate="animate-fade-in-up animate-delay-400"
-          />
-        </div>
+      <Tabs defaultValue="overview" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="overview">
+            {translate(language, "nav.overview") || "Overview"}
+          </TabsTrigger>
+          <TabsTrigger value="analytics">
+            {translate(language, "nav.analytics") || "Analytics"}
+          </TabsTrigger>
+        </TabsList>
 
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          {/* Fix #2: CardDescription on dark cards — use text-white/70 not heritage-surface/80 */}
-          <Card className="col-span-4 animate-scale-in shadow-sm hover:shadow-md transition-shadow duration-300 bg-[color:var(--heritage-navy)] border-[color:var(--heritage-navy-mid)] text-white">
-            <CardHeader>
-              <CardTitle className="text-white font-playfair">Overview</CardTitle>
-            </CardHeader>
-            <CardContent className="pl-2">
+        <TabsContent value="overview" className="space-y-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <div className="lg:col-span-4">
               <ErrorBoundary>
-                <Overview income={income} expense={expenses} />
+                <QuickActions />
               </ErrorBoundary>
-            </CardContent>
-          </Card>
+            </div>
+          </div>
 
-          <div className="col-span-3 space-y-4">
-            <Card className="animate-slide-in-right shadow-sm hover:shadow-md transition-shadow duration-300 bg-[color:var(--heritage-navy)] border-[color:var(--heritage-navy-mid)] text-white">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+            <DashboardStatCard
+              title={translate(language, "overview.totalBalance") || "Total Balance"}
+              value={formatCurrency(totalBalance, currency, languageToLocale(language))}
+              icon={Wallet}
+              subtitle={translate(language, "overview.acrossAllAccounts") || "Across all accounts"}
+              animate="animate-fade-in-up animate-delay-100"
+            />
+            <DashboardStatCard
+              title={translate(language, "overview.incomeMonth") || "Income (Month)"}
+              value={`+${formatCurrency(income, currency, languageToLocale(language))}`}
+              icon={ArrowDownLeft}
+              changeType="positive"
+              subtitle={translate(language, "overview.totalDeposits") || "Total deposits"}
+              animate="animate-fade-in-up animate-delay-200"
+            />
+            <DashboardStatCard
+              title={translate(language, "overview.expensesMonth") || "Expenses (Month)"}
+              value={`-${formatCurrency(expenses, currency, languageToLocale(language))}`}
+              icon={ArrowUpRight}
+              changeType="negative"
+              subtitle={translate(language, "overview.withdrawalsTransfers") || "Withdrawals & transfers"}
+              animate="animate-fade-in-up animate-delay-300"
+            />
+            <DashboardStatCard
+              title={translate(language, "overview.savingsGoals") || "Savings Goals"}
+              value={formatCurrency(savingsGoal, currency, languageToLocale(language))}
+              icon={PiggyBank}
+              subtitle={`of ${formatCurrency(savingsTarget)} target`}
+              animate="animate-fade-in-up animate-delay-400"
+            />
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            <Card className="col-span-4 animate-scale-in hover-lift">
               <CardHeader>
-                <CardTitle className="text-white font-playfair">
-                  Recent Transactions
-                </CardTitle>
-                {/* Fix #2: was text-[heritage-surface]/80 = invisible white-on-navy */}
-                <CardDescription className="text-white/70">
+                <CardTitle>Overview</CardTitle>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <ErrorBoundary>
+                  <Overview income={income} expense={expenses} />
+                </ErrorBoundary>
+              </CardContent>
+            </Card>
+            <Card className="col-span-3 animate-slide-in-right hover-lift">
+              <CardHeader>
+                <CardTitle>Recent Transactions</CardTitle>
+                <CardDescription>
                   Latest activity across all accounts.
                 </CardDescription>
               </CardHeader>
@@ -140,17 +196,59 @@ export default async function DashboardPage() {
                 </ErrorBoundary>
               </CardContent>
             </Card>
-
-            {/* Spending by Category */}
-            <ErrorBoundary>
-              <SpendingByCategory
-                transactions={serializedTransactions}
-                totalExpenses={expenses}
-              />
-            </ErrorBoundary>
           </div>
-        </div>
-      </div>
+        </TabsContent>
+
+        <TabsContent value="analytics" className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
+          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
+            <Card className="col-span-4">
+              <CardHeader>
+                <CardTitle>Financial Analysis</CardTitle>
+                <CardDescription>Income vs Expenses over time</CardDescription>
+              </CardHeader>
+              <CardContent className="pl-2">
+                <ErrorBoundary>
+                  <Overview data={analyticsData} />
+                </ErrorBoundary>
+              </CardContent>
+            </Card>
+            <div className="col-span-3 space-y-4">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Savings Progress</CardTitle>
+                  <CardDescription>
+                    Progress towards your goal of {formatCurrency(savingsGoal)}
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="font-medium">Total Saved</span>
+                    <span className="font-bold">
+                      {formatCurrency(totalBalance)}
+                    </span>
+                  </div>
+                  <div className="w-full">
+                    <Progress
+                      value={(totalBalance / savingsGoal) * 100}
+                      className="h-2"
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground text-right">
+                    {((totalBalance / savingsGoal) * 100).toFixed(1)}% of goal
+                  </p>
+                </CardContent>
+              </Card>
+
+              <ErrorBoundary>
+                <SpendingByCategory
+                  transactions={transactions}
+                  totalExpenses={expenses}
+                />
+              </ErrorBoundary>
+            </div>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

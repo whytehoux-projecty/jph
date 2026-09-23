@@ -10,6 +10,7 @@ import { LeftSidebar } from "@/components/layout/LeftSidebar";
 import { RightSidebar, type UserProfile } from "@/components/layout/RightSidebar";
 import { Footer } from "@/components/layout/Footer";
 import { MobileInstallPrompt } from "@/components/layout/MobileInstallPrompt";
+import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { PinSetupModal } from "@/components/portal/PinSetupModal";
 import { getProfile } from "@/app/actions/profile";
 import type { ToastItem } from "@/lib/toast";
@@ -143,12 +144,12 @@ export default function EBankingLayout({ children }: { children: ReactNode }) {
   return (
     <div className="flex min-h-screen bg-white relative isolate">
       {/* Background Image Layer */}
-      <div className="fixed inset-0 z-[-1] bg-white">
+      <div className="fixed inset-0 z-[-1] bg-black">
         <Image
           src="/images/portal-bg.webp"
           alt="JP Heritage portal background"
           fill
-          className="object-cover opacity-95"
+          className="object-cover opacity-60"
           priority
         />
       </div>
@@ -174,7 +175,7 @@ export default function EBankingLayout({ children }: { children: ReactNode }) {
         />
         <main
           className={cn(
-            "flex-1 px-4 py-6 md:px-8",
+            "flex-1 px-4 py-6 md:px-8 pb-24 md:pb-6",
             "transition-all duration-300 ease-in-out",
           )}>
           {children}
@@ -191,6 +192,8 @@ export default function EBankingLayout({ children }: { children: ReactNode }) {
       {/* Global Toast Notification Container */}
       <ToastContainer />
       {profile && !profile.pinSetupComplete && <PinSetupModal />}
+      
+      <MobileBottomNav />
     </div>
   );
 }

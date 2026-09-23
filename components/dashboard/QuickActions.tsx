@@ -63,7 +63,7 @@ export function QuickActions() {
             <Link
               key={action.title}
               href={action.href}
-              className="group relative flex flex-col items-start p-4 rounded-none border bg-card/50 hover:bg-card hover:shadow-md transition-all duration-300 hover:-translate-y-1">
+              className="group relative flex flex-col items-start p-4 rounded-none border bg-card hover:shadow-md transition-all duration-300 hover:-translate-y-1">
               <div className="flex w-full items-start justify-between mb-3">
                 <VintageIcon
                   icon={action.icon}

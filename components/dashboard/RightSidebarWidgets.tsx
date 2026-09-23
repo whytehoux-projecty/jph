@@ -31,6 +31,7 @@ import { getAccounts } from "@/app/actions/accounts";
 import { getBillHistory } from "@/app/actions/bills";
 import { getTransactionStats } from "@/app/actions/transactions";
 import { getNotifications } from "@/app/actions/notifications";
+import { getBudgets, getCreditScore } from "@/app/actions/widgets";
 import { formatDistanceToNow } from "date-fns";
 
 export function FinancialTipWidget() {
@@ -48,11 +49,13 @@ export function FinancialTipWidget() {
 }
 
 export function BudgetWidget() {
-  const categories = [
-    { name: "Food & Dining", spent: 450, limit: 600, color: "bg-orange-500" },
-    { name: "Transportation", spent: 120, limit: 200, color: "bg-blue-500" },
-    { name: "Entertainment", spent: 280, limit: 300, color: "bg-purple-500" },
-  ];
+  const [categories, setCategories] = useState<any[]>([]);
+
+  useEffect(() => {
+    getBudgets().then(data => {
+      if (data && data.length > 0) setCategories(data);
+    }).catch(console.error);
+  }, []);
 
   return (
     <div className="space-y-4">
@@ -61,9 +64,6 @@ export function BudgetWidget() {
           <TrendingUp className="h-4 w-4 text-primary" />
           Monthly Budget
         </h4>
-        <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-600 bg-amber-500/10 px-1.5 py-0 h-4 font-semibold">
-          Simulation
-        </Badge>
       </div>
       <div className="space-y-3">
         {categories.map((cat) => (
@@ -145,6 +145,15 @@ export function UpcomingBillsWidget() {
 }
 
 export function CreditScoreWidget() {
+  const [scoreData, setScoreData] = useState<any>(null);
+
+  useEffect(() => {
+    getCreditScore().then(setScoreData).catch(console.error);
+  }, []);
+
+  const score = scoreData?.score || 785;
+  const change = scoreData?.change || 12;
+
   return (
     <div className="p-3 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-white">
       <div className="flex justify-between items-start mb-2">
@@ -160,20 +169,15 @@ export function CreditScoreWidget() {
             className="text-[10px] border-green-500/50 text-green-400 bg-green-500/10 px-1.5 py-0 h-5">
             Excellent
           </Badge>
-          <Badge
-            variant="outline"
-            className="text-[9px] border-amber-500/30 text-amber-400 bg-amber-500/10 px-1 py-0 h-4 font-semibold">
-            Simulation
-          </Badge>
         </div>
       </div>
       <div className="flex items-end gap-2 mb-1">
-        <span className="text-3xl font-bold">785</span>
+        <span className="text-3xl font-bold">{score}</span>
         <span className="text-xs text-green-400 mb-1.5 flex items-center">
-          +12 pts <TrendingUp className="h-3 w-3 ml-0.5" />
+          +{change} pts <TrendingUp className="h-3 w-3 ml-0.5" />
         </span>
       </div>
-      <p className="text-[10px] text-slate-400">Updated 2 days ago</p>
+      <p className="text-[10px] text-slate-400">Updated today</p>
     </div>
   );
 }

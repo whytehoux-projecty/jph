@@ -48,7 +48,6 @@ function SidebarTrigger({
 
 const navigation = [
   { name: "Dashboard",    href: "/dashboard",    icon: LayoutDashboard },
-  { name: "Overview",     href: "/overview",     icon: BarChart2 },       // Fix #8/#24: add Overview to sidebar
   { name: "Transfer",     href: "/transfer",     icon: ArrowLeftRight },
   { name: "Transactions", href: "/transactions", icon: Receipt },
   { name: "Accounts",     href: "/accounts",     icon: Wallet },
@@ -66,7 +65,7 @@ export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
   return (
     <aside
       className={cn(
-        "relative h-screen border-r border-[color:var(--heritage-navy)]/15 bg-[color:var(--heritage-surface)]/95 backdrop-blur-md transition-all duration-300 ease-in-out z-[60] flex flex-col",
+        "sticky top-0 h-screen border-r border-[color:var(--heritage-navy)]/15 bg-[color:var(--heritage-surface)]/95 backdrop-blur-md transition-all duration-300 ease-in-out z-[60] flex flex-col shrink-0",
         isOpen ? "w-64" : "w-16"
       )}>
       {/* Sidebar Header with Trigger */}

@@ -64,8 +64,10 @@ model User {
   notifications    Notification[]
   supportTickets   SupportTicket[]
   cryptoWallets    CryptoWallet[]
-  chequeRequests   ChequeRequest[]
+  chequeRequests ChequeRequest[]
   registrationForm RegistrationForm?
+  budgets          Budget[]
+  creditScores     CreditScore[]
 
   @@map("users")
 }
@@ -429,4 +431,38 @@ model ImpersonationToken {
   createdAt DateTime @default(now()) @map("created_at")
 
   @@map("impersonation_tokens")
+}
+
+// -----------------------------------------------------------------------------
+// Widgets & Analytics
+// -----------------------------------------------------------------------------
+
+model Budget {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  category  String
+  limit     Float
+  spent     Float    @default(0)
+  color     String   @default("bg-blue-500")
+  month     String   // Format: YYYY-MM
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("budgets")
+}
+
+model CreditScore {
+  id        String   @id @default(cuid())
+  userId    String   @map("user_id")
+  score     Int
+  change    Int      @default(0) // Positive or negative change
+  month     String   // Format: YYYY-MM
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("credit_scores")
 }
