@@ -68,27 +68,26 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
       icon: Users,
       subItems: [
         { name: "Account Holders", href: "/admin/customers/account-holders" },
-        { name: "New Applications", href: "/admin/customers/applications", badgeCount: badgeCounts.pendingApps, badgeVariant: "urgent" },
-        { name: "e-Portal Access", href: "/admin/customers/portal-requests", badgeCount: badgeCounts.pendingRequests, badgeVariant: "pending" },
+        { name: "Application Mgmt Hub", href: "/admin/customers/application-management" },
+        { name: "Account Applications", href: "/admin/customers/application-management/account-applications", badgeCount: badgeCounts.pendingApps, badgeVariant: "urgent" },
+        { name: "e-Portal Access", href: "/admin/customers/application-management/portal-requests", badgeCount: badgeCounts.pendingRequests, badgeVariant: "pending" },
       ]
     },
     {
-      name: "Finance & Txns",
+      name: "Transaction Mgmt",
       icon: ArrowRightLeft,
       subItems: [
-        { name: "Transactions", href: "/admin/finance/transactions", badgeCount: badgeCounts.pendingTxns, badgeVariant: "urgent" },
-        { name: "Bank Accounts", href: "/admin/finance/accounts" },
-        { name: "Cards & Cheques", href: "/admin/finance/cards" },
-        { name: "Bill Payments", href: "/admin/finance/bills" },
-        { name: "Statements", href: "/admin/finance/statements" },
+        { name: "All Transactions", href: "/admin/transactions", badgeCount: badgeCounts.pendingTxns, badgeVariant: "urgent" },
       ]
     },
     {
-      name: "Communications",
-      icon: LifeBuoy,
+      name: "e-Bank Mgmt",
+      icon: Building2,
       subItems: [
-        { name: "Push Notifications", href: "/admin/communications/notifications" },
-        { name: "Support Inbox", href: "/admin/communications/support", badgeCount: badgeCounts.openTickets, badgeVariant: "pending" },
+        { name: "e-Bank Hub", href: "/admin/ebank" },
+        { name: "Bill Services", href: "/admin/ebank/bill-services" },
+        { name: "Push Notifications", href: "/admin/ebank/notifications" },
+        { name: "Support Inbox", href: "/admin/ebank/support", badgeCount: badgeCounts.openTickets, badgeVariant: "pending" },
       ]
     },
     {

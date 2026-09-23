@@ -39,14 +39,22 @@ type AdminPageShellProps = {
   subtitle?: string;
   children: ReactNode;
   stats?: StatCardProps[];
+  action?: ReactNode;
 };
 
-export function AdminPageShell({ title, subtitle, children, stats }: AdminPageShellProps) {
+export function AdminPageShell({ title, subtitle, children, stats, action }: AdminPageShellProps) {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
-      <div>
-        <h2 className="text-2xl font-bold text-charcoal font-playfair tracking-wide">{title}</h2>
-        {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-charcoal font-playfair tracking-wide">{title}</h2>
+          {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
+        </div>
+        {action && (
+          <div>
+            {action}
+          </div>
+        )}
       </div>
 
       {stats && stats.length > 0 && (

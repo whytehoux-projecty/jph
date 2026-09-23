@@ -11,11 +11,23 @@ export default async function AllAccountHoldersPage() {
     orderBy: { createdAt: 'desc' },
     include: {
       accounts: {
-        select: { id: true, accountNumber: true, accountType: true, balance: true, status: true }
+        include: {
+          cards: true,
+          statements: {
+            orderBy: { generatedAt: 'desc' },
+            take: 10
+          }
+        }
       },
       registrationForm: true
     }
   });
+
+  const formattedUsers = users.map(user => ({
+    ...user,
+    cards: user.accounts.flatMap(acc => acc.cards),
+    statements: user.accounts.flatMap(acc => acc.statements)
+  }));
 
   return (
     <AdminPageShell 
@@ -23,7 +35,7 @@ export default async function AllAccountHoldersPage() {
       subtitle="Manage all customer accounts across all statuses."
     >
       <AdminUserList 
-        initialUsers={users}
+        initialUsers={formattedUsers}
         onToggleStatus={toggleUserStatus}
         onToggleTier={toggleUserTier}
         onDeletePin={deleteUserPin}
