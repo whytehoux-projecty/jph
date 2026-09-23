@@ -1,6 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
     ...(process.env.DOCKER_BUILD === '1' && { output: 'standalone' }),
+    serverActions: {
+        bodySizeLimit: '10mb',
+    },
     images: {
         unoptimized: true,
     },
