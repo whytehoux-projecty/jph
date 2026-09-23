@@ -15,8 +15,8 @@ export default async function CardsPage() {
       expiry: card.expiryDate.toISOString(),
       cvc: card.cvv,
       type: card.cardType.toUpperCase(),
-      scheme: 'Visa',
-      tier: 'Platinum',
+      scheme: card.network || 'Visa',
+      tier: card.cardType.toUpperCase() === 'CREDIT' ? 'Platinum' : 'Standard',
       status: card.status,
       frozen: card.status === 'FROZEN',
       settings: {

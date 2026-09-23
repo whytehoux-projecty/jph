@@ -50,8 +50,22 @@ export default async function DashboardPage() {
     processedAt: t.processedAt?.toISOString(),
   }));
 
+  const getGreeting = () => {
+    const hour = new Date().getHours();
+    if (hour < 12) return 'Good morning';
+    if (hour < 18) return 'Good afternoon';
+    return 'Good evening';
+  };
+
   return (
     <div className="flex-1 space-y-6 p-6 pt-4">
+      {/* Fix #37: Greeting / personalization on main dashboard */}
+      <div className="flex items-center justify-between pb-2">
+        <h2 className="text-3xl font-bold tracking-tight font-playfair">
+          {getGreeting()}, <span className="text-[color:var(--heritage-gold)]">{user?.firstName || 'there'}</span>
+        </h2>
+        <p className="text-sm text-muted-foreground hidden md:block">{new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</p>
+      </div>
       <div className="space-y-6">
         {/* Quick Actions */}
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -97,7 +111,8 @@ export default async function DashboardPage() {
         </div>
 
         <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-          <Card className="col-span-4 animate-scale-in shadow-sm hover:shadow-md transition-shadow duration-300 bg-[color:var(--heritage-navy)]/90 border-[color:var(--heritage-navy-mid)] text-white">
+          {/* Fix #2: CardDescription on dark cards — use text-white/70 not heritage-surface/80 */}
+          <Card className="col-span-4 animate-scale-in shadow-sm hover:shadow-md transition-shadow duration-300 bg-[color:var(--heritage-navy)] border-[color:var(--heritage-navy-mid)] text-white">
             <CardHeader>
               <CardTitle className="text-white font-playfair">Overview</CardTitle>
             </CardHeader>
@@ -109,12 +124,13 @@ export default async function DashboardPage() {
           </Card>
 
           <div className="col-span-3 space-y-4">
-            <Card className="animate-slide-in-right shadow-sm hover:shadow-md transition-shadow duration-300 bg-[color:var(--heritage-navy)]/90 border-[color:var(--heritage-navy-mid)] text-white">
+            <Card className="animate-slide-in-right shadow-sm hover:shadow-md transition-shadow duration-300 bg-[color:var(--heritage-navy)] border-[color:var(--heritage-navy-mid)] text-white">
               <CardHeader>
                 <CardTitle className="text-white font-playfair">
                   Recent Transactions
                 </CardTitle>
-                <CardDescription className="text-[color:var(--heritage-surface)]/80">
+                {/* Fix #2: was text-[heritage-surface]/80 = invisible white-on-navy */}
+                <CardDescription className="text-white/70">
                   Latest activity across all accounts.
                 </CardDescription>
               </CardHeader>

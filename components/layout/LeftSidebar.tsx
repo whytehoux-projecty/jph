@@ -12,12 +12,11 @@ import {
   Wallet,
   CreditCard,
   FileText,
+  BarChart2,
   Users,
   Settings,
   HelpCircle,
   LogOut,
-  ChevronLeft,
-  ChevronRight,
   PanelLeft,
 } from "lucide-react";
 import { VintageIcon } from "@/components/ui/vintage-icon";
@@ -48,16 +47,17 @@ function SidebarTrigger({
 }
 
 const navigation = [
-  { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Transfer", href: "/transfer", icon: ArrowLeftRight },
+  { name: "Dashboard",    href: "/dashboard",    icon: LayoutDashboard },
+  { name: "Overview",     href: "/overview",     icon: BarChart2 },       // Fix #8/#24: add Overview to sidebar
+  { name: "Transfer",     href: "/transfer",     icon: ArrowLeftRight },
   { name: "Transactions", href: "/transactions", icon: Receipt },
-  { name: "Accounts", href: "/accounts", icon: Wallet },
-  { name: "Cards", href: "/cards", icon: CreditCard },
-  { name: "Bills", href: "/bills", icon: FileText },
-  { name: "Beneficiaries", href: "/beneficiaries", icon: Users },
-  { name: "Statements", href: "/statements", icon: FileText },
-  { name: "Settings", href: "/settings", icon: Settings },
-  { name: "Support", href: "/support", icon: HelpCircle },
+  { name: "Accounts",     href: "/accounts",     icon: Wallet },
+  { name: "Cards",        href: "/cards",        icon: CreditCard },
+  { name: "Bills",        href: "/bills",        icon: FileText },
+  { name: "Beneficiaries",href: "/beneficiaries",icon: Users },
+  { name: "Statements",   href: "/statements",   icon: BarChart2 },        // Fix #12: use BarChart2 for Statements, FileText stays for Bills only
+  { name: "Settings",     href: "/settings",     icon: Settings },
+  { name: "Support",      href: "/support",      icon: HelpCircle },
 ];
 
 export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
@@ -72,7 +72,7 @@ export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
       {/* Sidebar Header with Trigger */}
       <div
         className={cn(
-          "flex h-[70px] items-center border-b border-[color:var(--heritage-navy)]/15",
+          "flex h-[70px] items-center border-b border-[color:var(--heritage-navy)]/15 shrink-0",
           isOpen ? "px-3 justify-start" : "justify-center px-0",
         )}>
         <SidebarTrigger onClick={onToggle} />
@@ -81,52 +81,77 @@ export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
         )}
       </div>
 
-      <ScrollArea className="flex-1 py-6">
-        <nav className="space-y-2 px-2">
-          {navigation.map((item) => {
-            const isActive = pathname === item.href;
-            return (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={cn(
-                  "flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground",
-                  isActive
-                    ? "bg-accent text-accent-foreground"
-                    : "text-muted-foreground",
-                  !isOpen && "justify-center px-0",
-                )}>
-                <VintageIcon
-                  icon={item.icon}
-                  size="sm"
-                  variant={isActive ? "green" : "charcoal"}
-                  className={cn(!isOpen && "mx-auto")}
-                />
-                {isOpen && <span>{item.name}</span>}
-              </Link>
-            );
-          })}
-        </nav>
+      {/* Fix #9: wrap nav + logout together so logout stays at bottom without absolute positioning */}
+      <div className="flex-1 flex flex-col overflow-hidden">
+        <ScrollArea className="flex-1 py-4">
+          <nav className="space-y-1 px-2">
+            {navigation.map((item) => {
+              const isActive = pathname === item.href || (item.href !== '/dashboard' && pathname.startsWith(item.href));
+              return (
+                <div key={item.name} className="relative group/item">
+                  <Link
+                    href={item.href}
+                    className={cn(
+                      // Fix #3: Replace gold accent-foreground active state with a clear navy highlight
+                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                      isActive
+                        ? "bg-[color:var(--heritage-navy)] text-white shadow-sm"
+                        : "text-[color:var(--heritage-navy)]/70 hover:bg-[color:var(--heritage-navy)]/10 hover:text-[color:var(--heritage-navy)]",
+                      !isOpen && "justify-center px-0",
+                    )}>
+                    <VintageIcon
+                      icon={item.icon}
+                      size="sm"
+                      variant={isActive ? "green" : "charcoal"}
+                      className={cn(!isOpen && "mx-auto")}
+                    />
+                    {isOpen && <span>{item.name}</span>}
+                  </Link>
 
-        {/* Logout Separate Section */}
-        <div className="absolute bottom-4 left-0 w-full px-2">
-          <button
-            onClick={() => signOut({ callbackUrl: process.env.NEXT_PUBLIC_CORPORATE_URL || "http://localhost:3002" })}
-            className={cn(
-              "w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors hover:bg-destructive/10 hover:text-destructive",
-              "text-muted-foreground",
-              !isOpen && "justify-center px-0",
-            )}>
-            <VintageIcon
-              icon={LogOut}
-              size="sm"
-              variant="charcoal"
-              className={cn(!isOpen && "mx-auto")}
-            />
-            {isOpen && <span>Logout</span>}
-          </button>
+                  {/* Fix #11: tooltip when sidebar is collapsed */}
+                  {!isOpen && (
+                    <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 hidden group-hover/item:flex items-center pointer-events-none">
+                      <div className="bg-[color:var(--heritage-navy)] text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg whitespace-nowrap">
+                        {item.name}
+                      </div>
+                      <div className="absolute right-full border-[6px] border-transparent border-r-[color:var(--heritage-navy)]" />
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </nav>
+        </ScrollArea>
+
+        {/* Fix #9: Logout outside ScrollArea, properly at bottom with border separator */}
+        <div className={cn("shrink-0 border-t border-[color:var(--heritage-navy)]/10 p-2", !isOpen && "flex justify-center")}>
+          {/* Fix #11: Logout tooltip in collapsed mode */}
+          <div className="relative group/logout">
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })} // Fix #33: fallback to /login not localhost:3002
+              className={cn(
+                "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-red-600/80 hover:bg-red-50 hover:text-red-700",
+                !isOpen && "justify-center px-0 w-auto",
+              )}>
+              <VintageIcon
+                icon={LogOut}
+                size="sm"
+                variant="charcoal"
+                className={cn(!isOpen && "mx-auto text-red-600")}
+              />
+              {isOpen && <span>Logout</span>}
+            </button>
+            {!isOpen && (
+              <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 hidden group-hover/logout:flex items-center pointer-events-none">
+                <div className="bg-red-600 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg whitespace-nowrap">
+                  Logout
+                </div>
+                <div className="absolute right-full border-[6px] border-transparent border-r-red-600" />
+              </div>
+            )}
+          </div>
         </div>
-      </ScrollArea>
+      </div>
     </aside>
   );
 }

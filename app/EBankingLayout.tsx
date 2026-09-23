@@ -160,12 +160,17 @@ export default function EBankingLayout({ children }: { children: ReactNode }) {
         onToggle={() => setLeftSidebarOpen(!leftSidebarOpen)}
       />
 
-      <div className="flex-1 flex flex-col min-w-0 relative z-10">
+      {/* Fix #10: Add right margin when RightSidebar is open to prevent occlusion */}
+      <div className={cn(
+        "flex-1 flex flex-col min-w-0 relative z-10 transition-all duration-300 ease-in-out",
+        isRightSidebarOpen ? "xl:mr-[300px]" : "mr-0"
+      )}>
         <PortalHeader
           onToggleRightSidebar={() =>
             setIsRightSidebarOpen(!isRightSidebarOpen)
           }
           isRightSidebarOpen={isRightSidebarOpen}
+          onToggleLeftSidebar={() => setLeftSidebarOpen(!leftSidebarOpen)} // Fix #34: pass left sidebar toggle
         />
         <main
           className={cn(

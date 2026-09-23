@@ -29,11 +29,11 @@ export default async function AccountsPage() {
     availableBalance: acc.balance,
     type: acc.accountType.toLowerCase(),
     interestRate:
-      acc.accountType === "SAVINGS"
+      acc.accountType.toLowerCase().includes("savings")
         ? "4.20% APY"
-        : acc.accountType === "CREDIT"
+        : acc.accountType.toLowerCase().includes("credit") || acc.accountType.toLowerCase().includes("loan")
         ? "21.99% APR"
-        : acc.accountType === "INVESTMENT"
+        : acc.accountType.toLowerCase().includes("investment") || acc.accountType.toLowerCase().includes("wealth")
         ? "Variable"
         : "0.00%",
     monthlyChange: 0,

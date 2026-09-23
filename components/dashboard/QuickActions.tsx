@@ -63,7 +63,7 @@ export function QuickActions() {
             <Link
               key={action.title}
               href={action.href}
-              className="group relative flex flex-col items-start p-4 rounded-none border bg-card/50 hover:bg-card hover:shadow-md transition-all duration-300 hover:-translate-y-0.5">
+              className="group relative flex flex-col items-start p-4 rounded-none border bg-card/50 hover:bg-card hover:shadow-md transition-all duration-300 hover:-translate-y-1">
               <div className="flex w-full items-start justify-between mb-3">
                 <VintageIcon
                   icon={action.icon}
@@ -71,7 +71,7 @@ export function QuickActions() {
                   size="sm"
                   className="rounded-none"
                 />
-                <ArrowUpRight className="h-4 w-4 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity -mr-1 -mt-1" />
+                <ArrowUpRight className="h-4 w-4 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -mr-1 -mt-1" />
               </div>
 
               <h4 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">

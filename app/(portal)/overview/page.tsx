@@ -75,7 +75,8 @@ export default async function OverviewPage() {
   const totalBalance = accounts.reduce((sum: any, acc: any) => sum + Number(acc.balance), 0);
   const income = stats.income || 0;
   const expenses = stats.expenses || 0;
-  const savingsGoal = goal?.targetAmount || 25000;
+  const savingsGoal = goal?.currentAmount || 0; // Fix #35: was targetAmount, should be currentAmount (actual saved amount)
+  const savingsTarget = goal?.targetAmount || 25000;
   const analyticsData = processChartData(allTransactions || []);
   const language = user?.preferredLanguage || 'en';
   const currency = user?.preferredCurrency || 'USD';
@@ -154,10 +155,11 @@ export default async function OverviewPage() {
               subtitle={translate(language, "overview.totalDeposits") || "Total deposits"}
               animate="animate-fade-in-up animate-delay-200"
             />
+            {/* Fix #29: was ArrowDownLeft (same as income) — should be ArrowUpRight */}
             <DashboardStatCard
               title={translate(language, "overview.expensesMonth") || "Expenses (Month)"}
               value={`-${formatCurrency(expenses, currency, languageToLocale(language))}`}
-              icon={ArrowDownLeft}
+              icon={ArrowUpRight}
               changeType="negative"
               subtitle={translate(language, "overview.withdrawalsTransfers") || "Withdrawals & transfers"}
               animate="animate-fade-in-up animate-delay-300"
@@ -166,7 +168,7 @@ export default async function OverviewPage() {
               title={translate(language, "overview.savingsGoals") || "Savings Goals"}
               value={formatCurrency(savingsGoal, currency, languageToLocale(language))}
               icon={PiggyBank}
-              subtitle="Target 2026"
+              subtitle={`of ${formatCurrency(savingsTarget)} target`}
               animate="animate-fade-in-up animate-delay-400"
             />
           </div>

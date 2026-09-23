@@ -30,6 +30,7 @@ export interface UserProfile {
   id: string;
   tier: string;
   pinSetupComplete: boolean;
+  profilePhotoUrl?: string | null; // Fix #30: support real profile photo
 }
 
 interface RightSidebarProps {
@@ -38,34 +39,38 @@ interface RightSidebarProps {
   profile?: UserProfile | null;
 }
 
+// Fix #19: Replace href="#" dead links with real pages
 const extraServices = [
   {
-    name: "Vault Premium +",
-    href: "#",
-    icon: ShieldCheck,
-    desc: "Exclusive security features",
-  },
-  {
     name: "Savings & Goals",
-    href: "#",
+    href: "/overview",
     icon: PiggyBank,
-    desc: "High-yield savings",
+    desc: "High-yield savings & goals",
   },
   {
     name: "Personal Loans",
-    href: "#",
+    href: "/support",
     icon: Banknote,
-    desc: "Low interest rates",
+    desc: "Apply via support",
   },
   {
     name: "Business Suite",
-    href: "#",
+    href: "/support",
     icon: Briefcase,
     desc: "For your enterprise",
+  },
+  {
+    name: "Vault Premium +",
+    href: "/settings",
+    icon: ShieldCheck,
+    desc: "Exclusive security features",
   },
 ];
 
 export function RightSidebar({ isOpen, onToggle, profile }: RightSidebarProps) {
+  // Fix #30: use real profilePhotoUrl if available
+  const avatarSrc = profile?.profilePhotoUrl || "/images/icons/default-avatar.svg";
+
   const initials = profile?.firstName && profile?.lastName
     ? `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase()
     : 'JD';
@@ -76,7 +81,7 @@ export function RightSidebar({ isOpen, onToggle, profile }: RightSidebarProps) {
   return (
     <aside
       className={cn(
-        "fixed right-0 top-[70px] bottom-0 w-[300px] border-l border-[color:var(--heritage-navy)]/10 bg-white/95 backdrop-blur-md transition-transform duration-300 ease-in-out z-40 shadow-xl",
+        "fixed right-0 top-[70px] bottom-0 w-[300px] border-l border-[color:var(--heritage-navy)]/10 bg-white/95 backdrop-blur-md transform transition-transform duration-300 ease-in-out z-40 shadow-xl",
         isOpen ? "translate-x-0" : "translate-x-full",
       )}>
       <ScrollArea className="h-full">
@@ -86,7 +91,7 @@ export function RightSidebar({ isOpen, onToggle, profile }: RightSidebarProps) {
             <div className="relative">
               <Avatar className="h-40 w-40 border-4 border-white shadow-xl rounded-xl">
                 <AvatarImage
-                  src="/images/icons/default-avatar.svg"
+                  src={avatarSrc}
                   className="object-cover"
                 />
                 <AvatarFallback className="rounded-xl text-3xl">
@@ -162,7 +167,7 @@ export function RightSidebar({ isOpen, onToggle, profile }: RightSidebarProps) {
             </div>
           </div>
 
-          {/* Promo Box specific to Sidebar */}
+          {/* Fix #31: Promo button links to /settings instead of doing nothing */}
           <div className="mt-8 p-4 rounded-xl bg-gradient-to-br from-primary/10 to-transparent border border-primary/20">
             <h4 className="font-playfair font-bold text-primary mb-1">
               Upgrade to Metal
@@ -170,9 +175,11 @@ export function RightSidebar({ isOpen, onToggle, profile }: RightSidebarProps) {
             <p className="text-xs text-muted-foreground mb-3">
               Get 3% cashback and exclusive concierge service.
             </p>
-            <Button className="w-full h-8 text-xs bg-primary text-white hover:bg-primary/90">
-              Learn More
-            </Button>
+            <Link href="/support" className="block">
+              <Button className="w-full h-8 text-xs bg-primary text-white hover:bg-primary/90">
+                Learn More
+              </Button>
+            </Link>
           </div>
         </div>
       </ScrollArea>

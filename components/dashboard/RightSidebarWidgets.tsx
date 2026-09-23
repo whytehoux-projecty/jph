@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
@@ -60,8 +61,8 @@ export function BudgetWidget() {
           <TrendingUp className="h-4 w-4 text-primary" />
           Monthly Budget
         </h4>
-        <Badge variant="outline" className="text-[10px] text-muted-foreground px-1.5 py-0 h-4">
-          Demo
+        <Badge variant="outline" className="text-[10px] border-amber-500/30 text-amber-600 bg-amber-500/10 px-1.5 py-0 h-4 font-semibold">
+          Simulation
         </Badge>
       </div>
       <div className="space-y-3">
@@ -89,6 +90,7 @@ export function BudgetWidget() {
 }
 
 export function UpcomingBillsWidget() {
+  const router = useRouter(); // Fix #27
   const [bills, setBills] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -129,11 +131,12 @@ export function UpcomingBillsWidget() {
           <p className="text-xs text-muted-foreground text-center py-2">No pending bills</p>
         )}
       </div>
+      {/* Fix #27: use router.push instead of window.location.href */}
       <Button
         variant="ghost"
         size="small"
         className="w-full text-xs h-7"
-        onClick={() => { window.location.href = '/bills'; }}
+        onClick={() => router.push('/bills')}
       >
         See All Bills <ChevronRight className="h-3 w-3 ml-1" />
       </Button>
@@ -159,8 +162,8 @@ export function CreditScoreWidget() {
           </Badge>
           <Badge
             variant="outline"
-            className="text-[9px] border-white/20 text-slate-400 px-1 py-0 h-4">
-            Demo
+            className="text-[9px] border-amber-500/30 text-amber-400 bg-amber-500/10 px-1 py-0 h-4 font-semibold">
+            Simulation
           </Badge>
         </div>
       </div>
@@ -192,7 +195,8 @@ export function CashFlowProjectionWidget() {
   }, []);
 
   const net = inflow - outflow;
-  const netColor = net >= 0 ? "text-vintage-green" : "text-red-600";
+  // Fix #4: vintage-green is actually navy (#0d2545), use emerald-600 for positive net
+  const netColor = net >= 0 ? "text-emerald-600" : "text-red-600";
 
   return (
     <div className="space-y-3">
@@ -231,6 +235,7 @@ export function CashFlowProjectionWidget() {
 }
 
 export function RecentAlertsWidget() {
+  const router = useRouter(); // Fix #27, #28
   const [alerts, setAlerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -267,11 +272,18 @@ export function RecentAlertsWidget() {
                 {alert.message} • {formatDistanceToNow(new Date(alert.createdAt || Date.now()), { addSuffix: true })}
               </p>
             </div>
+            {/* Fix #28: Navigate to a relevant page based on alert title keywords */}
             <Button
               variant="ghost"
               size="small"
               className="h-6 text-[10px] shrink-0"
-              onClick={() => { window.location.href = '/dashboard'; }}
+              onClick={() => {
+                const title = (alert.title || '').toLowerCase();
+                if (title.includes('transfer') || title.includes('transaction')) router.push('/transactions');
+                else if (title.includes('card')) router.push('/cards');
+                else if (title.includes('bill')) router.push('/bills');
+                else router.push('/dashboard');
+              }}
             >
               View
             </Button>
