@@ -13,6 +13,7 @@ export default async function ActiveAccountHoldersPage() {
       accounts: {
         include: {
           cards: true,
+          cheques: true,
           statements: {
             orderBy: { generatedAt: 'desc' },
             take: 10
@@ -26,6 +27,7 @@ export default async function ActiveAccountHoldersPage() {
   const formattedUsers = users.map(user => ({
     ...user,
     cards: user.accounts.flatMap(acc => acc.cards),
+    cheques: user.accounts.flatMap(acc => acc.cheques),
     statements: user.accounts.flatMap(acc => acc.statements)
   }));
 
@@ -36,11 +38,7 @@ export default async function ActiveAccountHoldersPage() {
     >
       <AdminUserList 
         initialUsers={formattedUsers}
-        onToggleStatus={toggleUserStatus}
-        onToggleTier={toggleUserTier}
-        onDeletePin={deleteUserPin}
         onLoginAs={loginAsUser}
-        onToggleOnlineAccess={toggleUserOnlineAccess}
       />
     </AdminPageShell>
   );

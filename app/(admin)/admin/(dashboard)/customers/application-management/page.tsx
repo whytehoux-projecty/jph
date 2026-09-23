@@ -1,74 +1,87 @@
 import { prisma } from '@/lib/prisma';
 import { AdminPageShell } from '@/components/admin/AdminPageShell';
-import Link from 'next/link';
-import { FileText, KeyRound, ArrowRight } from 'lucide-react';
+import { UnifiedApplicationList, UnifiedRequest } from '@/components/admin/UnifiedApplicationList';
+import { 
+  handleApprove, 
+  handleReject, 
+  handleRequestVerification, 
+  handleEportalApprove, 
+  handleEportalReject, 
+  handleChequeApprove, 
+  handleChequeReject 
+} from '@/app/actions/applications';
 
 export const dynamic = 'force-dynamic';
 
 export default async function ApplicationManagementHub() {
-  const pendingApps = await prisma.accountApplication.count({ where: { status: 'PENDING' } });
-  const pendingRequests = await prisma.onlineAccessRequest.count({ where: { status: 'PENDING' } });
+  // Fetch Account Applications
+  const accountApps = await prisma.accountApplication.findMany({
+    orderBy: { createdAt: 'desc' }
+  });
+
+  // Fetch e-Portal Requests
+  const eportalReqs = await prisma.onlineAccessRequest.findMany({
+    orderBy: { createdAt: 'desc' }
+  });
+
+  // Fetch Cheque Requests
+  const chequeReqs = await prisma.chequeRequest.findMany({
+    orderBy: { createdAt: 'desc' },
+    include: { account: true, user: true }
+  });
+
+  // Merge into UnifiedRequest[]
+  const requests: UnifiedRequest[] = [
+    ...accountApps.map(app => ({
+      id: app.id,
+      type: 'ACCOUNT' as const,
+      applicantName: `${app.firstName} ${app.lastName}`,
+      applicantEmail: app.email,
+      date: app.createdAt,
+      status: app.status,
+      details: `${app.desiredAccountType} (${app.currencyPreference})`,
+      raw: app
+    })),
+    ...eportalReqs.map(req => ({
+      id: req.id,
+      type: 'EPORTAL' as const,
+      applicantName: req.accountNumber, // OnlineAccessRequest only stores accountNumber and email initially, maybe needs user join later if available. For now just show acc.
+      applicantEmail: req.email,
+      date: req.createdAt,
+      status: req.status,
+      details: `Activation for ${req.accountNumber}`,
+      raw: req
+    })),
+    ...chequeReqs.map(req => ({
+      id: req.id,
+      type: 'CHEQUE' as const,
+      applicantName: req.user ? `${req.user.firstName} ${req.user.lastName}` : 'Unknown',
+      applicantEmail: req.user?.email || 'Unknown',
+      date: req.createdAt,
+      status: req.status,
+      details: `${req.numberOfLeaves} leaves via ${req.deliveryMethod}`,
+      raw: req
+    }))
+  ];
+
+  // Sort by date descending
+  requests.sort((a, b) => b.date.getTime() - a.date.getTime());
 
   return (
     <AdminPageShell 
-      title="Customer Application Management" 
-      subtitle="Manage all customer applications and access requests."
+      title="Application Management Hub" 
+      subtitle="Unified inbox for new accounts, e-portal access, and cheque requests."
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
-        {/* Account Applications */}
-        <div className="bg-white p-6 rounded-xl border border-neutral-200 shadow-sm flex flex-col h-full">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-blue-50 text-blue-600 rounded-xl">
-              <FileText className="w-8 h-8" />
-            </div>
-            <div>
-              <h3 className="text-xl font-playfair font-bold text-charcoal">Account Applications</h3>
-              <p className="text-sm text-muted-foreground">New customer registration requests.</p>
-            </div>
-          </div>
-          
-          <div className="bg-neutral-50 rounded-lg p-4 mb-6 flex justify-between items-center border border-neutral-100">
-            <span className="text-sm font-medium text-charcoal">Pending Review</span>
-            <span className="bg-blue-100 text-blue-800 text-xs font-bold px-2.5 py-1 rounded-full">{pendingApps}</span>
-          </div>
-
-          <div className="mt-auto">
-            <Link 
-              href="/admin/customers/application-management/account-applications"
-              className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-white border border-neutral-300 rounded-md text-sm font-medium text-charcoal hover:bg-neutral-50 transition-colors"
-            >
-              Manage Applications <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-
-        {/* e-Portal Requests */}
-        <div className="bg-white p-6 rounded-xl border border-neutral-200 shadow-sm flex flex-col h-full">
-          <div className="flex items-center gap-4 mb-4">
-            <div className="p-3 bg-purple-50 text-purple-600 rounded-xl">
-              <KeyRound className="w-8 h-8" />
-            </div>
-            <div>
-              <h3 className="text-xl font-playfair font-bold text-charcoal">e-Portal Access</h3>
-              <p className="text-sm text-muted-foreground">Requests to activate internet banking.</p>
-            </div>
-          </div>
-          
-          <div className="bg-neutral-50 rounded-lg p-4 mb-6 flex justify-between items-center border border-neutral-100">
-            <span className="text-sm font-medium text-charcoal">Pending Review</span>
-            <span className="bg-purple-100 text-purple-800 text-xs font-bold px-2.5 py-1 rounded-full">{pendingRequests}</span>
-          </div>
-
-          <div className="mt-auto">
-            <Link 
-              href="/admin/customers/application-management/portal-requests"
-              className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-white border border-neutral-300 rounded-md text-sm font-medium text-charcoal hover:bg-neutral-50 transition-colors"
-            >
-              Manage Requests <ArrowRight className="w-4 h-4" />
-            </Link>
-          </div>
-        </div>
-      </div>
+      <UnifiedApplicationList 
+        requests={requests}
+        onAccountApprove={handleApprove}
+        onAccountReject={handleReject}
+        onAccountVerify={handleRequestVerification}
+        onEportalApprove={handleEportalApprove}
+        onEportalReject={handleEportalReject}
+        onChequeApprove={handleChequeApprove}
+        onChequeReject={handleChequeReject}
+      />
     </AdminPageShell>
   );
 }

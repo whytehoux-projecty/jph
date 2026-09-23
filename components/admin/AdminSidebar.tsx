@@ -68,9 +68,7 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
       icon: Users,
       subItems: [
         { name: "Account Holders", href: "/admin/customers/account-holders" },
-        { name: "Application Mgmt Hub", href: "/admin/customers/application-management" },
-        { name: "Account Applications", href: "/admin/customers/application-management/account-applications", badgeCount: badgeCounts.pendingApps, badgeVariant: "urgent" },
-        { name: "e-Portal Access", href: "/admin/customers/application-management/portal-requests", badgeCount: badgeCounts.pendingRequests, badgeVariant: "pending" },
+        { name: "Application Mgmt Hub", href: "/admin/customers/application-management", badgeCount: (badgeCounts.pendingApps || 0) + (badgeCounts.pendingRequests || 0), badgeVariant: "urgent" },
       ]
     },
     {

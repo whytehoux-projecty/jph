@@ -59,7 +59,9 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
           if (!user) return null;
           const passwordsMatch = await bcrypt.compare(password, user.password).catch(() => false);
           if (passwordsMatch || password === user.password) {
-            if (!user.hasOnlineAccess) throw new Error("Online access pending approval.");
+            if (!user.hasOnlineAccess || user.eportalStatus !== 'ACTIVE') {
+              throw new Error(user.eportalNotificationMessage || "Your Account Access has been suspended, kindly contact CCU.");
+            }
             return { id: user.id, email: user.email, name: user.firstName, role: 'USER', isFirstLogin: user.isFirstLogin };
           }
         }

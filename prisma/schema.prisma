@@ -52,6 +52,8 @@ model User {
   cryptoWalletEnabled Boolean  @default(false) @map("crypto_wallet_enabled")
   profilePhotoUrl     String?  @map("profile_photo_url")
   isFlagged           Boolean  @default(false) @map("is_flagged")
+  eportalStatus       String   @default("ACTIVE") @map("eportal_status")
+  eportalNotificationMessage String? @map("eportal_notification_message")
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
 
@@ -62,6 +64,7 @@ model User {
   notifications    Notification[]
   supportTickets   SupportTicket[]
   cryptoWallets    CryptoWallet[]
+  chequeRequests   ChequeRequest[]
   registrationForm RegistrationForm?
 
   @@map("users")
@@ -87,6 +90,8 @@ model Account {
   cards        Card[]
   bills        Bill[]
   statements   Statement[]
+  cheques      Cheque[]
+  chequeRequests ChequeRequest[]
 
   @@map("accounts")
 }
@@ -159,20 +164,33 @@ model RegistrationForm {
   id String @id @default(cuid())
 
   // 1. Full Personal Identification (KYC)
+  title             String?
+  gender            String?
+  maritalStatus     String?   @map("marital_status")
+  nationality       String?
+  countryOfResidence String?  @map("country_of_residence")
   fullLegalName     String   @map("full_legal_name")
   dateOfBirth       DateTime @map("date_of_birth")
   ssnItin           String   @map("ssn_itin")
   mothersMaidenName String   @map("mothers_maiden_name")
 
+  // 1b. Next of Kin Details
+  nextOfKinName         String? @map("next_of_kin_name")
+  nextOfKinRelationship String? @map("next_of_kin_relationship")
+  nextOfKinPhone        String? @map("next_of_kin_phone")
+  nextOfKinAddress      String? @map("next_of_kin_address")
+
   // 2. Contact & Residential Details
   residentialAddress String @map("residential_address")
   mailingAddress     String @map("mailing_address")
   primaryPhoneType   String @map("primary_phone_type")
+  secondaryPhone     String? @map("secondary_phone")
 
   // 3. Employment & Financial Profile
   employmentStatus      String @map("employment_status")
   occupation            String @map("occupation")
   employerName          String @map("employer_name")
+  employerAddress       String? @map("employer_address")
   primarySourceOfFunds  String @map("primary_source_of_funds")
   estimatedAnnualIncome String @map("estimated_annual_income")
 
@@ -202,6 +220,7 @@ model RegistrationForm {
   w9Certification                    Boolean  @map("w9_certification")
   electronicCommunicationsDisclosure Boolean  @map("electronic_communications_disclosure")
   depositAccountAgreement            Boolean  @map("deposit_account_agreement")
+  marketingConsent                   Boolean  @default(true) @map("marketing_consent")
   digitalSignature                   String   @map("digital_signature")
   signatureDate                      DateTime @map("signature_date")
 
@@ -282,6 +301,42 @@ model Card {
   account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@map("cards")
+}
+
+model Cheque {
+  id           String   @id @default(cuid())
+  accountId    String   @map("account_id")
+  chequeNumber String   @map("cheque_number")
+  amount       Float?
+  payeeName    String?  @map("payee_name")
+  status       String   @default("ISSUED") // ISSUED, CLEARED, BOUNCED, CANCELLED
+  issueDate    DateTime @default(now()) @map("issue_date")
+  clearDate    DateTime? @map("clear_date")
+  notes        String?
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@map("cheques")
+}
+
+model ChequeRequest {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  accountId       String   @map("account_id")
+  numberOfLeaves  Int      @default(50) @map("number_of_leaves")
+  deliveryMethod  String   @default("MAIL") @map("delivery_method") // MAIL, PICKUP
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  reviewedBy      String?  @map("reviewed_by")
+  reviewedAt      DateTime? @map("reviewed_at")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @updatedAt @map("updated_at")
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
+
+  @@map("cheque_requests")
 }
 
 // -----------------------------------------------------------------------------

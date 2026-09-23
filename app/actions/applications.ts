@@ -3,7 +3,6 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
-import bcrypt from 'bcryptjs';
 import { sendEmail } from '@/lib/email';
 
 export async function handleApprove(formData: FormData) {
@@ -29,7 +28,6 @@ export async function handleApprove(formData: FormData) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const registerLink = `${baseUrl}/register/${registrationToken}`;
 
-  // Send Welcome Email (Email sending is currently disabled/mocked in this environment, but this is the template)
   await sendEmail({
     to: app.email,
     subject: 'Action Required: Complete Your JP Heritage Bank Registration',
@@ -46,7 +44,6 @@ export async function handleApprove(formData: FormData) {
     `
   });
 
-  revalidatePath('/admin/customers/application-management/account-applications');
   revalidatePath('/admin/customers/application-management');
   return registrationToken;
 }
@@ -61,7 +58,6 @@ export async function handleReject(formData: FormData) {
     data: { status: 'REJECTED', reviewedAt: new Date() }
   });
 
-  // Send Rejection Email
   await sendEmail({
     to: app.email,
     subject: 'JP Heritage Bank - Application Update',
@@ -76,7 +72,6 @@ export async function handleReject(formData: FormData) {
     `
   });
 
-  revalidatePath('/admin/customers/application-management/account-applications');
   revalidatePath('/admin/customers/application-management');
 }
 
@@ -97,7 +92,6 @@ export async function handleRequestVerification(formData: FormData) {
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
   const scheduleLink = `${baseUrl}/verification/${app.id}`;
 
-  // Send Verification Request Email
   await sendEmail({
     to: app.email,
     subject: 'Action Required: Schedule Identity Verification',
@@ -114,6 +108,67 @@ export async function handleRequestVerification(formData: FormData) {
     `
   });
 
-  revalidatePath('/admin/customers/application-management/account-applications');
+  revalidatePath('/admin/customers/application-management');
+}
+
+export async function handleEportalApprove(formData: FormData) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+  const id = formData.get('id') as string;
+  
+  const req = await prisma.onlineAccessRequest.update({
+    where: { id },
+    data: { status: 'APPROVED', reviewedAt: new Date() }
+  });
+
+  // Activate user online access
+  const user = await prisma.user.findUnique({where: {email: req.email}});
+  if (user) {
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { hasOnlineAccess: true, eportalStatus: 'ACTIVE' }
+    });
+  }
+
+  revalidatePath('/admin/customers/application-management');
+  revalidatePath('/admin/customers/account-holders');
+}
+
+export async function handleEportalReject(formData: FormData) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+  const id = formData.get('id') as string;
+  
+  await prisma.onlineAccessRequest.update({
+    where: { id },
+    data: { status: 'REJECTED', reviewedAt: new Date() }
+  });
+
+  revalidatePath('/admin/customers/application-management');
+}
+
+export async function handleChequeApprove(formData: FormData) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+  const id = formData.get('id') as string;
+  
+  await prisma.chequeRequest.update({
+    where: { id },
+    data: { status: 'APPROVED', reviewedAt: new Date(), reviewedBy: (session?.user as any)?.id }
+  });
+
+  revalidatePath('/admin/customers/application-management');
+}
+
+export async function handleChequeReject(formData: FormData) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+  const id = formData.get('id') as string;
+  
+  await prisma.chequeRequest.update({
+    where: { id },
+    data: { status: 'REJECTED', reviewedAt: new Date(), reviewedBy: (session?.user as any)?.id }
+  });
+
   revalidatePath('/admin/customers/application-management');
 }
