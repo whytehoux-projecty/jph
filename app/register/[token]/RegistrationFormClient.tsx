@@ -11,7 +11,8 @@ import {
     Trash2,
     Lock,
     X,
-    UserCheck
+    UserCheck,
+    Download
 } from 'lucide-react';
 import { submitRegistrationForm } from '@/app/actions/registrationForm';
 
@@ -23,6 +24,14 @@ export default function RegistrationFormClient({ application }: { application: a
 
     // Signature state & refs
     const [signaturePreview, setSignaturePreview] = useState<string | null>(null);
+    const [downloadTimestamp, setDownloadTimestamp] = useState<string | null>(null);
+
+    const handleDownloadPdf = () => {
+        setDownloadTimestamp(new Date().toLocaleString('en-US', { timeZoneName: 'short' }));
+        setTimeout(() => {
+            window.print();
+        }, 150);
+    };
     const [signatureFileName, setSignatureFileName] = useState<string | null>(null);
     const [signatureFileType, setSignatureFileType] = useState<'image' | 'pdf' | null>(null);
 
@@ -70,6 +79,7 @@ export default function RegistrationFormClient({ application }: { application: a
         estimatedAnnualIncome: '50000-100000',
 
         // 4. Identity Verification
+        passportPhotoUrl: '',
         primaryIdType: "Driver's License",
         idNumber: '',
         stateCountryOfIssuance: '',
@@ -133,7 +143,9 @@ export default function RegistrationFormClient({ application }: { application: a
         if (!file) return;
         const reader = new FileReader();
         reader.onload = () => {
-            setPhotoPreview(reader.result as string);
+            const dataUrl = reader.result as string;
+            setPhotoPreview(dataUrl);
+            updateField('passportPhotoUrl', dataUrl);
         };
         reader.readAsDataURL(file);
     };
@@ -190,6 +202,7 @@ export default function RegistrationFormClient({ application }: { application: a
                     updateField('digitalSignature', dataUrl);
                 } else {
                     setPhotoPreview(dataUrl);
+                    updateField('passportPhotoUrl', dataUrl);
                 }
                 stopCamera();
             }
@@ -444,21 +457,46 @@ export default function RegistrationFormClient({ application }: { application: a
                 </div>
             )}
 
+            {/* Page Actions */}
+            <div className="flex justify-end mb-4 print:hidden">
+                <button
+                    type="button"
+                    onClick={handleDownloadPdf}
+                    className="px-4 py-2 bg-white border border-[#0D2545] text-[#0D2545] text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-neutral-50 transition-colors shadow-sm rounded"
+                >
+                    <Download className="w-4 h-4" />
+                    Download Form (PDF)
+                </button>
+            </div>
+
             {/* Embedded Fillable PDF Form Container (Styled after Stanbic Bank & SBB West Bank Forms) */}
             <form
                 onSubmit={handleSubmit}
-                className="bg-white text-neutral-900 shadow-2xl shadow-black/80 border-2 border-[#0D2545] rounded-xl overflow-hidden relative font-sans text-xs"
+                className="bg-white text-neutral-900 shadow-2xl shadow-black/80 border-2 border-[#0D2545] rounded-xl overflow-hidden relative font-sans text-xs print:shadow-none print:border-none"
             >
+                {/* Print-only Hard Copy Instructions */}
+                <div className="hidden print:block p-6 bg-neutral-50 border-b-2 border-dashed border-neutral-300">
+                    <h3 className="font-bold uppercase mb-2 text-[#0D2545] text-sm">Hard Copy Submission Instructions</h3>
+                    <p className="mb-1 text-xs text-neutral-800">If you are filling out this form by hand, please return the completed and signed physical copy to our central post office address:</p>
+                    <p className="font-mono mt-2 mb-3 text-xs font-bold text-[#0D2545]">JP Heritage Bank, N.A.<br/>PO Box 10293, Wall Street Station<br/>New York, NY 10005</p>
+                    <p className="text-xs text-neutral-800">Alternatively, you may scan the complete, signed form along with copies of your ID and email them securely to: <strong>onboarding@jpheritage.com</strong></p>
+                    {downloadTimestamp && (
+                        <p className="mt-4 pt-3 border-t border-neutral-300 font-mono text-[10px] text-neutral-500 font-bold uppercase">
+                            DOCUMENT GENERATED ON: {downloadTimestamp}
+                        </p>
+                    )}
+                </div>
+
                 {/* 1. Official Bank Letterhead & Header (Stanbic Bank Layout) */}
                 <div className="p-6 md:p-8 bg-white border-b-2 border-[#0D2545]">
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                         {/* Left: Bank Logo & Group Affiliation */}
                         <div className="space-y-1.5">
-                            <div className="flex items-center gap-3">
+                            <div className="inline-flex items-center justify-center bg-[#0D2545] px-5 py-3 rounded shadow-md mb-2 print:border-2 print:border-black print:bg-[#0D2545] print:shadow-none">
                                 <img
                                     src="/bank-logo.svg"
                                     alt="JP Heritage Bank Logo"
-                                    className="h-12 md:h-14 w-auto object-contain"
+                                    className="h-10 md:h-12 w-auto object-contain"
                                 />
                             </div>
                             <p className="text-[11px] font-semibold text-neutral-600 tracking-tight">
@@ -511,9 +549,9 @@ export default function RegistrationFormClient({ application }: { application: a
                     </div>
                 </div>
 
-                {errors.submit && (
+                {Object.keys(errors).length > 0 && (
                     <div className="p-3 bg-red-100 border-b border-red-300 text-red-800 text-center font-bold text-xs">
-                        {errors.submit}
+                        {errors.submit ? errors.submit : 'Please correct the errors highlighted below before submitting.'}
                     </div>
                 )}
 
@@ -665,8 +703,11 @@ export default function RegistrationFormClient({ application }: { application: a
                                             <img src={photoPreview} alt="Applicant Photo" className="w-20 h-24 object-cover border border-neutral-400 mb-1" />
                                             <button
                                                 type="button"
-                                                onClick={() => setPhotoPreview(null)}
-                                                className="text-[10px] text-red-700 font-bold underline"
+                                                onClick={() => {
+                                                    setPhotoPreview(null);
+                                                    updateField('passportPhotoUrl', '');
+                                                }}
+                                                className="text-[10px] text-red-700 font-bold underline print:hidden"
                                             >
                                                 Retake Photo
                                             </button>
@@ -679,7 +720,7 @@ export default function RegistrationFormClient({ application }: { application: a
                                             <span className="text-[9px] font-bold uppercase text-[#0D2545] leading-tight block mb-1.5">
                                                 Affix Passport Photograph / Selfie
                                             </span>
-                                            <div className="flex items-center gap-1.5">
+                                            <div className="flex items-center gap-1.5 print:hidden">
                                                 <button
                                                     type="button"
                                                     onClick={() => openCamera('photo')}
@@ -953,7 +994,7 @@ export default function RegistrationFormClient({ application }: { application: a
                     </div>
 
                     <div className="p-4 space-y-3">
-                        <div className="grid sm:grid-cols-4 gap-3">
+                        <div className="grid sm:grid-cols-5 gap-3">
                             <div className="border border-neutral-300 p-2 bg-white">
                                 <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
                                     Primary ID Type <span className="text-red-600">*</span>
@@ -981,6 +1022,19 @@ export default function RegistrationFormClient({ application }: { application: a
                                     onChange={(e) => updateField('idNumber', e.target.value)}
                                 />
                                 {errors.idNumber && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.idNumber}</p>}
+                            </div>
+
+                            <div className="border border-neutral-300 p-2 bg-white">
+                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    State / Country <span className="text-red-600">*</span>
+                                </label>
+                                <input
+                                    type="text"
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.stateCountryOfIssuance ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    value={formData.stateCountryOfIssuance}
+                                    onChange={(e) => updateField('stateCountryOfIssuance', e.target.value)}
+                                />
+                                {errors.stateCountryOfIssuance && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.stateCountryOfIssuance}</p>}
                             </div>
 
                             <div className="border border-neutral-300 p-2 bg-white">
@@ -1027,7 +1081,7 @@ export default function RegistrationFormClient({ application }: { application: a
                                     <button
                                         type="button"
                                         onClick={() => idFrontInputRef.current?.click()}
-                                        className="px-3 py-1.5 bg-[#0D2545] text-white text-[10px] font-bold uppercase tracking-wider rounded-none"
+                                        className="px-3 py-1.5 bg-[#0D2545] text-white text-[10px] font-bold uppercase tracking-wider rounded-none print:hidden"
                                     >
                                         Select File
                                     </button>
@@ -1049,7 +1103,7 @@ export default function RegistrationFormClient({ application }: { application: a
                                     <button
                                         type="button"
                                         onClick={() => idBackInputRef.current?.click()}
-                                        className="px-3 py-1.5 bg-[#0D2545] text-white text-[10px] font-bold uppercase tracking-wider rounded-none"
+                                        className="px-3 py-1.5 bg-[#0D2545] text-white text-[10px] font-bold uppercase tracking-wider rounded-none print:hidden"
                                     >
                                         Select File
                                     </button>
@@ -1313,7 +1367,7 @@ export default function RegistrationFormClient({ application }: { application: a
                     </div>
 
                     {/* Two Working Buttons */}
-                    <div className="grid sm:grid-cols-2 gap-3 mb-4">
+                    <div className="grid sm:grid-cols-2 gap-3 mb-4 print:hidden">
                         <button
                             type="button"
                             onClick={() => openCamera('signature')}
@@ -1366,7 +1420,7 @@ export default function RegistrationFormClient({ application }: { application: a
                                             <button
                                                 type="button"
                                                 onClick={clearSignature}
-                                                className="text-[11px] text-red-700 hover:text-red-900 font-bold flex items-center gap-1"
+                                                className="text-[11px] text-red-700 hover:text-red-900 font-bold flex items-center gap-1 print:hidden"
                                             >
                                                 <Trash2 className="w-3 h-3" /> Clear / Replace Signature
                                             </button>
@@ -1410,7 +1464,7 @@ export default function RegistrationFormClient({ application }: { application: a
                     </div>
 
                     {/* Final Submission Button */}
-                    <div className="mt-8 pt-6 border-t border-neutral-300 flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <div className="mt-8 pt-6 border-t border-neutral-300 flex flex-col sm:flex-row items-center justify-between gap-4 print:hidden">
                         <div className="text-[11px] text-neutral-500 flex items-center gap-2">
                             <Lock className="w-4 h-4 text-[#0D2545] shrink-0" />
                             <span>Encrypted under Section 326 of the USA PATRIOT Act and FDIC guidelines.</span>
