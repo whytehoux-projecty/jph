@@ -1,6 +1,7 @@
 import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import EBankingLayout from "./EBankingLayout";
+import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: {
@@ -47,6 +48,7 @@ export default function RootLayout({
     <html lang="en">
       <body suppressHydrationWarning>
         <EBankingLayout>{children}</EBankingLayout>
+        <Toaster position="top-right" richColors />
       </body>
     </html>
   );

@@ -12,14 +12,21 @@ import {
   TableRow 
 } from "@/components/ui/table";
 import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+} from "@/components/ui/sheet";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/Button";
 import { sendStatementEmail } from "@/app/actions/admin";
+import { toast } from "sonner";
 import { 
   updateRegistrationForm, 
   createAccount, 
@@ -122,7 +129,7 @@ export function AdminUserList({
     formData.append('userId', selectedUser!.id);
     await updateRegistrationForm(formData);
     setEditMode(prev => ({ ...prev, [tab]: false }));
-    alert('Details updated successfully. Please refresh if changes do not appear immediately.');
+    toast.success('Details updated successfully. Please refresh if changes do not appear immediately.');
   };
 
   return (
@@ -223,20 +230,20 @@ export function AdminUserList({
       </div>
 
       {/* Detail Modal */}
-      <Dialog open={!!selectedUser} onOpenChange={(open) => {
+      <Sheet open={!!selectedUser} onOpenChange={(open) => {
           if (!open) setSelectedUser(null);
           setActiveTab('bio');
           setEditMode({});
       }}>
-        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="text-xl font-playfair flex items-center gap-2">
-              <Users className="w-5 h-5" /> Account Holder Panel
-            </DialogTitle>
-            <DialogDescription>
-              View and manage customer profile and access.
-            </DialogDescription>
-          </DialogHeader>
+        <SheetContent side="right" className="w-[90vw] sm:max-w-3xl overflow-y-auto p-0 gap-0 border-l border-[color:var(--heritage-navy)]/10">
+          <SheetHeader className="p-6 bg-neutral-50 border-b border-neutral-200">
+            <SheetTitle className="text-xl font-playfair flex items-center gap-2 text-[color:var(--heritage-navy)]">
+              <Users className="w-5 h-5 text-[color:var(--heritage-gold)]" /> Account Holder Profile
+            </SheetTitle>
+            <SheetDescription>
+              View and manage customer profile and access privileges.
+            </SheetDescription>
+          </SheetHeader>
 
           {selectedUser && (
             <div className="space-y-6 py-4">
@@ -306,71 +313,98 @@ export function AdminUserList({
                 
                 {/* BIO TAB */}
                 {activeTab === 'bio' && (
-                  <div className="space-y-4 animate-in fade-in slide-in-from-bottom-2">
-                    <div className="flex justify-between items-center mb-4">
-                      <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground">Personal Profile</h4>
-                      <Button variant="ghost" size="small" onClick={() => handleEditToggle('bio')} className="text-blue-600 hover:bg-blue-50">
+                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 p-6">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="text-lg font-playfair font-bold text-[color:var(--heritage-navy)]">Personal Profile</h4>
+                      <Button variant="ghost" size="small" onClick={() => handleEditToggle('bio')} className="text-[color:var(--heritage-navy)] hover:bg-[color:var(--heritage-navy)]/10">
                         {editMode.bio ? <><X className="w-4 h-4 mr-1"/> Cancel</> : <><Edit2 className="w-4 h-4 mr-1"/> Edit Info</>}
                       </Button>
                     </div>
 
                     {selectedUser.registrationForm ? (
-                      <form onSubmit={(e) => handleSaveForm(e, 'bio')} className="bg-white p-6 rounded-xl border border-neutral-200 shadow-sm relative">
+                      <form onSubmit={(e) => handleSaveForm(e, 'bio')} className="relative space-y-6">
                         {editMode.bio && (
-                          <div className="absolute top-4 right-4 z-10">
-                            <Button type="submit" variant="primary" size="small" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-sm">
+                          <div className="sticky top-0 z-10 flex justify-end mb-4 bg-white/80 backdrop-blur-sm py-2">
+                            <Button type="submit" variant="primary" size="small" className="bg-emerald-600 hover:bg-emerald-700 text-white shadow-md">
                               <Check className="w-4 h-4 mr-1"/> Save Changes
                             </Button>
                           </div>
                         )}
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm mt-4">
-                          {[
-                            ['title', 'Title', selectedUser.registrationForm.title],
-                            ['fullLegalName', 'Full Legal Name', selectedUser.registrationForm.fullLegalName],
-                            ['gender', 'Gender', selectedUser.registrationForm.gender],
-                            ['dateOfBirth', 'Date of Birth (YYYY-MM-DD)', selectedUser.registrationForm.dateOfBirth ? format(new Date(selectedUser.registrationForm.dateOfBirth), 'yyyy-MM-dd') : ''],
-                            ['maritalStatus', 'Marital Status', selectedUser.registrationForm.maritalStatus],
-                            ['nationality', 'Nationality', selectedUser.registrationForm.nationality],
-                            ['ssnItin', 'SSN / ITIN', selectedUser.registrationForm.ssnItin],
-                            ['mothersMaidenName', 'Mother\'s Maiden Name', selectedUser.registrationForm.mothersMaidenName],
-                            ['primaryPhoneType', 'Primary Phone Type', selectedUser.registrationForm.primaryPhoneType],
-                            ['secondaryPhone', 'Secondary Phone', selectedUser.registrationForm.secondaryPhone],
-                            ['residentialAddress', 'Residential Address', selectedUser.registrationForm.residentialAddress],
-                            ['mailingAddress', 'Mailing Address', selectedUser.registrationForm.mailingAddress],
-                          ].map(([key, label, value]) => (
-                            <div key={key} className={key.includes('Address') ? "sm:col-span-2" : ""}>
-                              <label className="text-muted-foreground block text-xs mb-1 uppercase font-semibold">{label}</label>
-                              {editMode.bio ? (
-                                <input type="text" name={key} defaultValue={value} className="w-full px-3 py-1.5 border border-neutral-300 rounded text-sm focus:border-vintage-gold focus:ring-1 focus:ring-vintage-gold outline-none" />
-                              ) : (
-                                <div className="font-medium text-charcoal">{key === 'ssnItin' ? `•••-••-${value?.toString().slice(-4)}` : (value || 'N/A')}</div>
-                              )}
-                            </div>
-                          ))}
+
+                        <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm hover:shadow-md transition-shadow">
+                          <h5 className="text-xs font-bold uppercase tracking-widest text-[color:var(--heritage-gold)] mb-4 flex items-center gap-2"><UserIcon className="w-4 h-4"/> Identity Details</h5>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {[
+                              ['title', 'Title', selectedUser.registrationForm.title],
+                              ['fullLegalName', 'Full Legal Name', selectedUser.registrationForm.fullLegalName],
+                              ['gender', 'Gender', selectedUser.registrationForm.gender],
+                              ['dateOfBirth', 'Date of Birth', selectedUser.registrationForm.dateOfBirth ? format(new Date(selectedUser.registrationForm.dateOfBirth), 'yyyy-MM-dd') : ''],
+                              ['maritalStatus', 'Marital Status', selectedUser.registrationForm.maritalStatus],
+                              ['nationality', 'Nationality', selectedUser.registrationForm.nationality],
+                              ['ssnItin', 'SSN / ITIN', selectedUser.registrationForm.ssnItin],
+                              ['mothersMaidenName', 'Mother\'s Maiden Name', selectedUser.registrationForm.mothersMaidenName],
+                            ].map(([key, label, value]) => (
+                              <div key={key}>
+                                <label className="text-muted-foreground block text-[10px] mb-1 uppercase font-semibold">{label}</label>
+                                {editMode.bio ? (
+                                  <input type="text" name={key} defaultValue={value} className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-[color:var(--heritage-gold)] focus:ring-1 focus:ring-[color:var(--heritage-gold)] outline-none bg-neutral-50" />
+                                ) : (
+                                  <div className="font-medium text-charcoal">{key === 'ssnItin' ? `•••-••-${value?.toString().slice(-4)}` : (value || 'N/A')}</div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         </div>
 
-                        <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b pb-2 mb-4 mt-8">Next of Kin Details</h4>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm">
-                          {[
-                            ['nextOfKinName', 'Full Name', selectedUser.registrationForm.nextOfKinName],
-                            ['nextOfKinRelationship', 'Relationship', selectedUser.registrationForm.nextOfKinRelationship],
-                            ['nextOfKinPhone', 'Phone Number', selectedUser.registrationForm.nextOfKinPhone],
-                            ['nextOfKinAddress', 'Contact Address', selectedUser.registrationForm.nextOfKinAddress],
-                          ].map(([key, label, value]) => (
-                            <div key={key} className={key === 'nextOfKinAddress' ? "sm:col-span-2" : ""}>
-                              <label className="text-muted-foreground block text-xs mb-1 uppercase font-semibold">{label}</label>
-                              {editMode.bio ? (
-                                <input type="text" name={key} defaultValue={value} className="w-full px-3 py-1.5 border border-neutral-300 rounded text-sm focus:border-vintage-gold focus:ring-1 focus:ring-vintage-gold outline-none" />
-                              ) : (
-                                <div className="font-medium text-charcoal">{value || 'N/A'}</div>
-                              )}
-                            </div>
-                          ))}
+                        <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm hover:shadow-md transition-shadow">
+                          <h5 className="text-xs font-bold uppercase tracking-widest text-[color:var(--heritage-gold)] mb-4 flex items-center gap-2"><Mail className="w-4 h-4"/> Contact Information</h5>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            {[
+                              ['primaryPhoneType', 'Primary Phone Type', selectedUser.registrationForm.primaryPhoneType],
+                              ['secondaryPhone', 'Secondary Phone', selectedUser.registrationForm.secondaryPhone],
+                              ['residentialAddress', 'Residential Address', selectedUser.registrationForm.residentialAddress],
+                              ['mailingAddress', 'Mailing Address', selectedUser.registrationForm.mailingAddress],
+                            ].map(([key, label, value]) => (
+                              <div key={key} className={key.includes('Address') ? "sm:col-span-2" : ""}>
+                                <label className="text-muted-foreground block text-[10px] mb-1 uppercase font-semibold">{label}</label>
+                                {editMode.bio ? (
+                                  <input type="text" name={key} defaultValue={value} className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-[color:var(--heritage-gold)] focus:ring-1 focus:ring-[color:var(--heritage-gold)] outline-none bg-neutral-50" />
+                                ) : (
+                                  <div className="font-medium text-charcoal">{value || 'N/A'}</div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+
+                        <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm hover:shadow-md transition-shadow">
+                          <h5 className="text-xs font-bold uppercase tracking-widest text-[color:var(--heritage-gold)] mb-4 flex items-center gap-2"><Users className="w-4 h-4"/> Next of Kin</h5>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                            {[
+                              ['nextOfKinName', 'Full Name', selectedUser.registrationForm.nextOfKinName],
+                              ['nextOfKinRelationship', 'Relationship', selectedUser.registrationForm.nextOfKinRelationship],
+                              ['nextOfKinPhone', 'Phone Number', selectedUser.registrationForm.nextOfKinPhone],
+                              ['nextOfKinAddress', 'Contact Address', selectedUser.registrationForm.nextOfKinAddress],
+                            ].map(([key, label, value]) => (
+                              <div key={key} className={key === 'nextOfKinAddress' ? "sm:col-span-2" : ""}>
+                                <label className="text-muted-foreground block text-[10px] mb-1 uppercase font-semibold">{label}</label>
+                                {editMode.bio ? (
+                                  <input type="text" name={key} defaultValue={value} className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-[color:var(--heritage-gold)] focus:ring-1 focus:ring-[color:var(--heritage-gold)] outline-none bg-neutral-50" />
+                                ) : (
+                                  <div className="font-medium text-charcoal">{value || 'N/A'}</div>
+                                )}
+                              </div>
+                            ))}
+                          </div>
                         </div>
                       </form>
                     ) : (
-                      <div className="bg-white p-6 rounded-xl border border-neutral-200 text-sm">
-                        No detailed registration form found for this customer.
+                      <div className="bg-white p-12 rounded-2xl border border-neutral-100 flex flex-col items-center justify-center text-center shadow-sm">
+                        <div className="w-16 h-16 bg-neutral-50 rounded-full flex items-center justify-center mb-4">
+                          <UserX className="w-8 h-8 text-neutral-400" />
+                        </div>
+                        <h4 className="text-lg font-playfair font-bold text-charcoal mb-2">No Profile Found</h4>
+                        <p className="text-sm text-muted-foreground max-w-sm">This customer does not have a detailed registration form on file.</p>
                       </div>
                     )}
                   </div>
@@ -378,48 +412,79 @@ export function AdminUserList({
 
                 {/* ACCOUNTS TAB */}
                 {activeTab === 'accounts' && (
-                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2">
+                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 p-6">
                     
                     {/* Bank Accounts */}
                     <div>
-                      <div className="flex justify-between items-center mb-3">
-                        <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2"><Building2 className="w-4 h-4"/> Accounts</h4>
-                        <Button variant="outline" size="small" onClick={() => setAccountPanel('new')} className="h-7 text-xs border-dashed"><Plus className="w-3 h-3 mr-1"/> Add Account</Button>
+                      <div className="flex justify-between items-center mb-4">
+                        <h4 className="text-lg font-playfair font-bold text-[color:var(--heritage-navy)] flex items-center gap-2">Bank Accounts</h4>
+                        <Button variant="outline" size="small" onClick={() => setAccountPanel('new')} className="h-8 text-xs border-[color:var(--heritage-gold)] text-[color:var(--heritage-gold)] hover:bg-[color:var(--heritage-gold)]/10"><Plus className="w-3 h-3 mr-1"/> Add Account</Button>
                       </div>
                       
                       {selectedUser.accounts.length === 0 ? (
-                        <p className="text-sm text-muted-foreground p-4 bg-neutral-50 rounded-lg border border-neutral-100">No bank accounts opened yet.</p>
+                        <div className="bg-neutral-50 p-12 rounded-2xl border border-dashed border-neutral-300 flex flex-col items-center justify-center text-center">
+                          <Building2 className="w-10 h-10 text-neutral-400 mb-3" />
+                          <h4 className="text-sm font-bold text-charcoal mb-1">No Accounts Yet</h4>
+                          <p className="text-xs text-muted-foreground mb-4">This customer hasn't opened any bank accounts.</p>
+                          <Button onClick={() => setAccountPanel('new')} className="bg-[color:var(--heritage-navy)] hover:bg-[color:var(--heritage-navy)]/90 text-white h-8 text-xs"><Plus className="w-3 h-3 mr-1"/> Create First Account</Button>
+                        </div>
                       ) : (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-                          {selectedUser.accounts.map(acc => (
-                            <div 
-                              key={acc.id} 
-                              onClick={() => setAccountPanel(acc)}
-                              className="p-4 bg-white border border-neutral-200 rounded-xl shadow-sm hover:border-vintage-gold hover:shadow-md cursor-pointer transition-all flex flex-col justify-between"
-                            >
-                              <div>
-                                <p className="text-xs font-semibold text-charcoal uppercase">{acc.accountType}</p>
-                                <p className="text-sm font-mono text-muted-foreground mt-1">{acc.accountNumber}</p>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {selectedUser.accounts.map(acc => {
+                            const isSavings = acc.accountType.toLowerCase().includes('savings');
+                            const isWealth = acc.accountType.toLowerCase().includes('wealth');
+                            const bgClass = isWealth 
+                              ? 'bg-gradient-to-br from-slate-900 to-black text-white border-slate-800' 
+                              : isSavings 
+                                ? 'bg-gradient-to-br from-[color:var(--heritage-navy)] to-slate-800 text-white border-[color:var(--heritage-navy)]' 
+                                : 'bg-gradient-to-br from-white to-neutral-50 text-charcoal border-neutral-200';
+                            
+                            const textMuted = (isWealth || isSavings) ? 'text-white/60' : 'text-muted-foreground';
+                            
+                            return (
+                              <div 
+                                key={acc.id} 
+                                onClick={() => setAccountPanel(acc)}
+                                className={`p-5 rounded-2xl border shadow-sm hover:shadow-md cursor-pointer transition-all hover:-translate-y-1 relative overflow-hidden group ${bgClass}`}
+                              >
+                                {(isWealth || isSavings) && (
+                                  <div className="absolute -right-8 -top-8 w-32 h-32 bg-white/5 rounded-full blur-2xl group-hover:bg-white/10 transition-colors"></div>
+                                )}
+                                <div className="flex justify-between items-start mb-6 relative z-10">
+                                  <div>
+                                    <p className={`text-[10px] font-bold uppercase tracking-widest ${(isWealth || isSavings) ? 'text-[color:var(--heritage-gold)]' : 'text-[color:var(--heritage-navy)]'}`}>{acc.accountType}</p>
+                                    <p className={`text-sm font-mono mt-1 ${textMuted}`}>{acc.accountNumber}</p>
+                                  </div>
+                                  <span className={`text-[9px] font-bold uppercase px-2 py-1 rounded-full ${
+                                    acc.status === 'ACTIVE' 
+                                      ? (isWealth || isSavings) ? 'bg-emerald-500/20 text-emerald-300' : 'bg-emerald-100 text-emerald-700'
+                                      : (isWealth || isSavings) ? 'bg-red-500/20 text-red-300' : 'bg-red-100 text-red-700'
+                                  }`}>{acc.status}</span>
+                                </div>
+                                <div className="text-right relative z-10">
+                                  <p className="font-playfair font-bold text-2xl">${acc.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                                </div>
                               </div>
-                              <div className="text-right mt-4">
-                                <p className="font-mono font-bold text-lg">${acc.balance.toFixed(2)}</p>
-                                <span className={`text-[10px] font-bold uppercase ${acc.status === 'ACTIVE' ? 'text-green-600' : 'text-red-600'}`}>{acc.status}</span>
-                              </div>
-                            </div>
-                          ))}
+                            );
+                          })}
                         </div>
                       )}
                     </div>
 
                     {/* Issued Cards */}
                     <div>
-                      <div className="flex justify-between items-center mb-3">
-                        <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2"><CreditCard className="w-4 h-4"/> Issued Cards</h4>
-                        <Button variant="outline" size="small" onClick={() => setCardPanel('new')} className="h-7 text-xs border-dashed"><Plus className="w-3 h-3 mr-1"/> Add Card</Button>
+                      <div className="flex justify-between items-center mb-4">
+                        <h4 className="text-lg font-playfair font-bold text-[color:var(--heritage-navy)] flex items-center gap-2">Issued Cards</h4>
+                        <Button variant="outline" size="small" onClick={() => setCardPanel('new')} className="h-8 text-xs border-[color:var(--heritage-gold)] text-[color:var(--heritage-gold)] hover:bg-[color:var(--heritage-gold)]/10"><Plus className="w-3 h-3 mr-1"/> Add Card</Button>
                       </div>
                       
                       {(!selectedUser.cards || selectedUser.cards.length === 0) ? (
-                        <p className="text-sm text-muted-foreground p-4 bg-neutral-50 rounded-lg border border-neutral-100">No cards issued to this customer.</p>
+                        <div className="bg-neutral-50 p-12 rounded-2xl border border-dashed border-neutral-300 flex flex-col items-center justify-center text-center">
+                          <CreditCard className="w-10 h-10 text-neutral-400 mb-3" />
+                          <h4 className="text-sm font-bold text-charcoal mb-1">No Cards Issued</h4>
+                          <p className="text-xs text-muted-foreground mb-4">This customer does not have any active debit or credit cards.</p>
+                          <Button onClick={() => setCardPanel('new')} className="bg-[color:var(--heritage-navy)] hover:bg-[color:var(--heritage-navy)]/90 text-white h-8 text-xs"><Plus className="w-3 h-3 mr-1"/> Issue New Card</Button>
+                        </div>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
                           {selectedUser.cards.map(card => (
@@ -446,13 +511,18 @@ export function AdminUserList({
 
                     {/* Cheques */}
                     <div>
-                      <div className="flex justify-between items-center mb-3">
-                        <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2"><FileSpreadsheet className="w-4 h-4"/> Cheques</h4>
-                        <Button variant="outline" size="small" onClick={() => setChequePanel('new')} className="h-7 text-xs border-dashed"><Plus className="w-3 h-3 mr-1"/> Issue Cheque</Button>
+                      <div className="flex justify-between items-center mb-4">
+                        <h4 className="text-lg font-playfair font-bold text-[color:var(--heritage-navy)] flex items-center gap-2">Cheques</h4>
+                        <Button variant="outline" size="small" onClick={() => setChequePanel('new')} className="h-8 text-xs border-[color:var(--heritage-gold)] text-[color:var(--heritage-gold)] hover:bg-[color:var(--heritage-gold)]/10"><Plus className="w-3 h-3 mr-1"/> Issue Cheque</Button>
                       </div>
                       
                       {(!selectedUser.cheques || selectedUser.cheques.length === 0) ? (
-                        <p className="text-sm text-muted-foreground p-4 bg-neutral-50 rounded-lg border border-neutral-100">No cheques issued to this customer.</p>
+                        <div className="bg-neutral-50 p-12 rounded-2xl border border-dashed border-neutral-300 flex flex-col items-center justify-center text-center">
+                          <FileSpreadsheet className="w-10 h-10 text-neutral-400 mb-3" />
+                          <h4 className="text-sm font-bold text-charcoal mb-1">No Cheques</h4>
+                          <p className="text-xs text-muted-foreground mb-4">This customer has no cheque history.</p>
+                          <Button onClick={() => setChequePanel('new')} className="bg-white border border-neutral-300 hover:bg-neutral-100 text-charcoal h-8 text-xs shadow-sm"><Plus className="w-3 h-3 mr-1"/> Issue Cheque</Button>
+                        </div>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                           {selectedUser.cheques.map(cheque => (
@@ -480,7 +550,10 @@ export function AdminUserList({
                       <div className="flex justify-between items-center mb-3">
                         <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground flex items-center gap-2"><FileText className="w-4 h-4"/> Statements</h4>
                         <form action={async (fd) => {
-                           if(selectedUser.accounts.length === 0) return alert('User has no accounts');
+                           if(selectedUser.accounts.length === 0) {
+                             toast.error('User has no accounts');
+                             return;
+                           }
                            fd.append('accountId', selectedUser.accounts[0].id);
                            const period = prompt("Enter Statement Period (e.g., 2026-10):");
                            if(period) {
@@ -548,9 +621,9 @@ export function AdminUserList({
                                           fd.append('statementId', stmt.id);
                                           fd.append('email', selectedUser.email);
                                           await sendStatementEmail(fd);
-                                          alert(`Account statement for period ${stmt.period} has been sent to ${selectedUser.email}`);
+                                          toast.success(`Account statement for period ${stmt.period} has been sent to ${selectedUser.email}`);
                                         } catch (err: any) {
-                                          alert(err.message || 'Failed to dispatch statement email');
+                                          toast.error(err.message || 'Failed to dispatch statement email');
                                         }
                                       }}
                                     >
@@ -730,7 +803,7 @@ export function AdminUserList({
 
                       <form action={async (fd) => {
                         await updateEportalStatus(fd);
-                        alert('e-Portal settings updated');
+                        toast.success('e-Portal settings updated');
                         setSelectedUser(prev => prev ? ({ ...prev, eportalStatus: fd.get('eportalStatus') as string, eportalNotificationMessage: fd.get('eportalNotificationMessage') as string, hasOnlineAccess: fd.get('eportalStatus') === 'ACTIVE' }) : null);
                       }} className="space-y-6">
                         <input type="hidden" name="id" value={selectedUser.id} />
@@ -769,7 +842,7 @@ export function AdminUserList({
                                 const fd = new FormData();
                                 fd.append('id', selectedUser.id);
                                 await requestOnlineAccess(fd);
-                                alert('e-Portal access application request initiated. Check Application Mgmt Hub.');
+                                toast.success('e-Portal access application request initiated. Check Application Mgmt Hub.');
                               }}
                               className="bg-amber-100 hover:bg-amber-200 text-amber-800 border-none"
                             >
@@ -804,11 +877,11 @@ export function AdminUserList({
                         <form action={async (fd) => {
                           try {
                             await updateEportalCredentials(fd);
-                            alert('Password updated successfully. The new password is now visible.');
+                            toast.success('Password updated successfully. The new password is now visible.');
                             // Optimistically update the UI
                             setSelectedUser(prev => prev ? ({ ...prev, temporaryPassword: fd.get('newPassword') as string }) : null);
                           } catch (err: any) {
-                            alert(err.message || 'Failed to update password');
+                            toast.error(err.message || 'Failed to update password');
                           }
                         }} className="pt-4 mt-4 border-t border-neutral-100">
                           <input type="hidden" name="id" value={selectedUser.id} />
@@ -835,15 +908,15 @@ export function AdminUserList({
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
+        </SheetContent>
+      </Sheet>
 
       {/* Account Management Panel (Sub-modal) */}
       <Dialog open={!!accountPanel} onOpenChange={(open) => !open && setAccountPanel(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-playfair flex items-center gap-2">
-              <Building2 className="w-5 h-5"/> 
+            <DialogTitle className="text-lg font-playfair flex items-center gap-2 text-[color:var(--heritage-navy)]">
+              <Building2 className="w-5 h-5 text-[color:var(--heritage-gold)]"/> 
               {accountPanel === 'new' ? 'Create New Account' : 'Manage Account'}
             </DialogTitle>
           </DialogHeader>
@@ -852,11 +925,11 @@ export function AdminUserList({
                fd.append('userId', selectedUser!.id);
                await createAccount(fd);
                setAccountPanel(null);
-               alert('Account created. Please refresh if not visible immediately.');
+               toast.success('Account created successfully');
              }} className="space-y-4 pt-4">
                <div>
                  <label className="text-xs font-semibold text-muted-foreground uppercase">Account Type</label>
-                 <select name="accountType" className="w-full mt-1 px-3 py-2 border rounded text-sm">
+                 <select name="accountType" className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-neutral-50">
                    <option>Everyday Checking</option>
                    <option>High-Yield Savings</option>
                    <option>Private Wealth Reserve</option>
@@ -864,46 +937,57 @@ export function AdminUserList({
                </div>
                <div>
                  <label className="text-xs font-semibold text-muted-foreground uppercase">Initial Balance ($)</label>
-                 <input type="number" step="0.01" name="initialBalance" defaultValue={0} className="w-full mt-1 px-3 py-2 border rounded text-sm"/>
+                 <input type="number" step="0.01" name="initialBalance" defaultValue={0} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-neutral-50"/>
                </div>
-               <Button type="submit" className="w-full bg-[#0D2545] text-white">Create Account</Button>
+               <Button type="submit" className="w-full bg-[color:var(--heritage-navy)] text-white hover:bg-[color:var(--heritage-navy)]/90">Create Account</Button>
              </form>
           ) : accountPanel && (
             <div className="space-y-6 pt-4">
-              <div className="bg-neutral-50 p-4 rounded text-center border border-neutral-200">
-                <p className="text-xs font-bold uppercase text-charcoal">{accountPanel.accountType}</p>
-                <p className="font-mono text-xl mt-1">{accountPanel.accountNumber}</p>
+              <div className="bg-gradient-to-r from-neutral-50 to-white p-4 rounded-xl border border-neutral-200 shadow-sm flex items-center justify-between">
+                <div>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-[color:var(--heritage-gold)]">{accountPanel.accountType}</p>
+                  <p className="font-mono text-lg mt-1 text-charcoal">{accountPanel.accountNumber}</p>
+                </div>
+                <div className="text-right">
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Balance</p>
+                  <p className="font-mono font-bold text-lg">${accountPanel.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                </div>
               </div>
               <form action={async (fd) => {
                  fd.append('id', accountPanel.id);
                  await updateAccount(fd);
                  setAccountPanel(null);
-                 alert('Account updated.');
-              }} className="space-y-4 border-b border-neutral-100 pb-6">
+                 toast.success('Account updated successfully');
+              }} className="space-y-4">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="text-xs font-semibold text-muted-foreground uppercase">Balance ($)</label>
-                    <input type="number" step="0.01" name="balance" defaultValue={accountPanel.balance} className="w-full mt-1 px-3 py-2 border rounded text-sm font-mono"/>
+                    <label className="text-xs font-semibold text-muted-foreground uppercase">Set Balance ($)</label>
+                    <input type="number" step="0.01" name="balance" defaultValue={accountPanel.balance} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm font-mono bg-neutral-50 focus:border-[color:var(--heritage-gold)] focus:ring-1 focus:ring-[color:var(--heritage-gold)] outline-none"/>
                   </div>
                   <div>
-                    <label className="text-xs font-semibold text-muted-foreground uppercase">Status</label>
-                    <select name="status" defaultValue={accountPanel.status} className="w-full mt-1 px-3 py-2 border rounded text-sm">
+                    <label className="text-xs font-semibold text-muted-foreground uppercase">Account Status</label>
+                    <select name="status" defaultValue={accountPanel.status} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-neutral-50 focus:border-[color:var(--heritage-gold)] focus:ring-1 focus:ring-[color:var(--heritage-gold)] outline-none">
                       <option>ACTIVE</option>
                       <option>SUSPENDED</option>
                       <option>FROZEN</option>
                     </select>
                   </div>
                 </div>
-                <Button type="submit" className="w-full" variant="outline">Save Changes</Button>
+                <Button type="submit" className="w-full bg-[color:var(--heritage-navy)] hover:bg-[color:var(--heritage-navy)]/90 text-white">Save Changes</Button>
               </form>
-              <form action={async (fd) => {
-                 if(!confirm('Are you sure you want to permanently delete this account?')) return;
-                 fd.append('id', accountPanel.id);
-                 await deleteAccount(fd);
-                 setAccountPanel(null);
-              }}>
-                <Button type="submit" className="w-full text-red-600 border-red-200 hover:bg-red-50" variant="outline">Delete Account</Button>
-              </form>
+              
+              <div className="mt-8 pt-6 border-t border-red-100">
+                <h5 className="text-xs font-bold uppercase tracking-widest text-red-600 mb-4">Danger Zone</h5>
+                <form action={async (fd) => {
+                   if(!confirm('Are you absolutely sure you want to permanently delete this account? This cannot be undone.')) return;
+                   fd.append('id', accountPanel.id);
+                   await deleteAccount(fd);
+                   setAccountPanel(null);
+                   toast.success('Account deleted permanently');
+                }}>
+                  <Button type="submit" className="w-full text-red-600 border-red-200 hover:bg-red-50 hover:text-red-700" variant="outline">Delete Account</Button>
+                </form>
+              </div>
             </div>
           )}
         </DialogContent>
@@ -920,10 +1004,13 @@ export function AdminUserList({
           </DialogHeader>
           {cardPanel === 'new' ? (
              <form action={async (fd) => {
-               if(selectedUser!.accounts.length === 0) return alert('User has no accounts to attach a card to.');
+               if(selectedUser!.accounts.length === 0) {
+                 toast.error('User has no accounts to attach a card to.');
+                 return;
+               }
                await issueCard(fd);
                setCardPanel(null);
-               alert('Card issued.');
+               toast.success('Card issued.');
              }} className="space-y-4 pt-4">
                <div>
                  <label className="text-xs font-semibold text-muted-foreground uppercase">Attach to Account</label>
@@ -995,7 +1082,10 @@ export function AdminUserList({
           </DialogHeader>
           {chequePanel === 'new' ? (
              <form action={async (fd) => {
-               if(selectedUser!.accounts.length === 0) return alert('No accounts available.');
+               if(selectedUser!.accounts.length === 0) {
+                 toast.error('No accounts available.');
+                 return;
+               }
                await issueCheque(fd);
                setChequePanel(null);
              }} className="space-y-4 pt-4">
