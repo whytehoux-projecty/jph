@@ -15,7 +15,7 @@ export async function handleToggleAccountStatus(formData: FormData) {
     data: { status }
   });
   
-  revalidatePath('/admin/finance/accounts');
+  revalidatePath('/admin/customers/account-holders');
 }
 
 export async function handleUpdateAccountBalance(formData: FormData) {
@@ -32,5 +32,5 @@ export async function handleUpdateAccountBalance(formData: FormData) {
     data: { balance }
   });
   
-  revalidatePath('/admin/finance/accounts');
+  revalidatePath('/admin/customers/account-holders');
 }

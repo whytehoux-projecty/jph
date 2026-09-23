@@ -1,5 +1,5 @@
 import { AdminHubPage, QuickLink } from "@/components/admin/AdminHubPage";
-import { Users, UserPlus, KeyRound, FileText } from "lucide-react";
+import { Users, ClipboardList, FileCheck, KeyRound } from "lucide-react";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = 'force-dynamic';
@@ -18,10 +18,30 @@ export default async function CustomersHubPage() {
   ];
 
   const links: QuickLink[] = [
-    { title: "All Account Holders", description: "View and manage all customer accounts.", href: "/admin/customers/account-holders", icon: <Users className="w-6 h-6" /> },
-    { title: "Create New Customer", description: "Manually add a new customer to the system.", href: "/admin/customers/create", icon: <UserPlus className="w-6 h-6" /> },
-    { title: "New Applications", description: "Review pending account applications.", href: "/admin/customers/applications", icon: <FileText className="w-6 h-6" /> },
-    { title: "e-Portal Access", description: "Manage online banking access requests.", href: "/admin/customers/portal-requests", icon: <KeyRound className="w-6 h-6" /> },
+    { 
+      title: "All Account Holders", 
+      description: "Browse and manage detailed customer profiles, documents, and credentials.", 
+      href: "/admin/customers/account-holders", 
+      icon: <Users className="w-6 h-6" /> 
+    },
+    { 
+      title: "Application Management", 
+      description: "Centralized hub for all incoming onboarding and service activation requests.", 
+      href: "/admin/customers/application-management", 
+      icon: <ClipboardList className="w-6 h-6" /> 
+    },
+    { 
+      title: "Account Applications", 
+      description: "Review preliminary account registration requests and schedule identity verification.", 
+      href: "/admin/customers/application-management/account-applications", 
+      icon: <FileCheck className="w-6 h-6" /> 
+    },
+    { 
+      title: "e-Portal Requests", 
+      description: "Process online and internet banking activation requests from registered account holders.", 
+      href: "/admin/customers/application-management/portal-requests", 
+      icon: <KeyRound className="w-6 h-6" /> 
+    },
   ];
 
   return (

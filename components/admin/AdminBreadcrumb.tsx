@@ -5,6 +5,25 @@ import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 import { Fragment } from "react";
 
+const SEGMENT_LABELS: Record<string, string> = {
+  ebank: 'e-Bank',
+  'application-management': 'Application Management',
+  'account-applications': 'Account Applications',
+  'portal-requests': 'e-Portal Requests',
+  'portal-users': 'e-Portal Users',
+  'account-holders': 'Account Holders',
+  'bill-services': 'Bill Services',
+  transactions: 'Transactions',
+  customers: 'Customers',
+  settings: 'Settings',
+  support: 'Support Helpdesk',
+  notifications: 'Broadcasts & Alerts',
+  active: 'Active Accounts',
+  suspended: 'Suspended Accounts',
+  deactivated: 'Deactivated Accounts',
+  flagged: 'Flagged Accounts',
+};
+
 export function AdminBreadcrumb() {
   const pathname = usePathname();
   if (!pathname) return null;
@@ -19,7 +38,7 @@ export function AdminBreadcrumb() {
       {breadcrumbs.map((crumb, idx) => {
         const isLast = idx === breadcrumbs.length - 1;
         const href = `/admin/${breadcrumbs.slice(0, idx + 1).join('/')}`;
-        const label = crumb.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+        const label = SEGMENT_LABELS[crumb] || crumb.split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 
         return (
           <Fragment key={href}>

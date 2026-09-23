@@ -46,7 +46,8 @@ export async function handleApprove(formData: FormData) {
     `
   });
 
-  revalidatePath('/admin/customers/applications');
+  revalidatePath('/admin/customers/application-management/account-applications');
+  revalidatePath('/admin/customers/application-management');
   return registrationToken;
 }
 
@@ -75,7 +76,8 @@ export async function handleReject(formData: FormData) {
     `
   });
 
-  revalidatePath('/admin/customers/applications');
+  revalidatePath('/admin/customers/application-management/account-applications');
+  revalidatePath('/admin/customers/application-management');
 }
 
 export async function handleRequestVerification(formData: FormData) {
@@ -112,5 +114,6 @@ export async function handleRequestVerification(formData: FormData) {
     `
   });
 
-  revalidatePath('/admin/customers/applications');
+  revalidatePath('/admin/customers/application-management/account-applications');
+  revalidatePath('/admin/customers/application-management');
 }

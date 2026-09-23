@@ -19,7 +19,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/Button";
-import { resetUserPassword } from "@/app/actions/admin";
+import { resetUserPassword, toggleUserOnlineAccess, sendStatementEmail } from "@/app/actions/admin";
 
 type AdminUser = {
   id: string;
@@ -86,13 +86,15 @@ export function AdminUserList({
   onToggleStatus,
   onToggleTier,
   onDeletePin,
-  onLoginAs
+  onLoginAs,
+  onToggleOnlineAccess
 }: { 
   initialUsers: AdminUser[];
   onToggleStatus: (formData: FormData) => void;
   onToggleTier: (formData: FormData) => void;
   onDeletePin: (formData: FormData) => void;
   onLoginAs: (formData: FormData) => void;
+  onToggleOnlineAccess?: (formData: FormData) => void;
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -383,8 +385,52 @@ export function AdminUserList({
                                   <TableCell className="font-medium">{stmt.period}</TableCell>
                                   <TableCell className="text-sm text-muted-foreground">{format(new Date(stmt.generatedAt), 'PP')}</TableCell>
                                   <TableCell className="text-right space-x-2">
-                                    <Button variant="ghost" size="small" className="text-vintage-gold h-8"><Download className="w-3 h-3 mr-1" /> Download</Button>
-                                    <Button variant="ghost" size="small" className="text-charcoal h-8"><Mail className="w-3 h-3 mr-1" /> Email</Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="small" 
+                                      className="text-vintage-gold h-8"
+                                      onClick={() => {
+                                        const acc = selectedUser.accounts.find(a => a.id === stmt.accountId);
+                                        const content = `JP HERITAGE BANK - OFFICIAL ACCOUNT STATEMENT\n` +
+                                          `Statement Period: ${stmt.period}\n` +
+                                          `Account Number: ${acc?.accountNumber || 'Primary Account'}\n` +
+                                          `Customer Name: ${selectedUser.firstName} ${selectedUser.lastName}\n` +
+                                          `Email: ${selectedUser.email}\n` +
+                                          `Date Issued: ${format(new Date(stmt.generatedAt), 'PPpp')}\n` +
+                                          `Current Balance: $${acc?.balance?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}\n` +
+                                          `Status: Verified / Official Copy\n\n` +
+                                          `For questions regarding this statement, please contact JP Heritage Bank Support.`;
+                                        const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+                                        const url = URL.createObjectURL(blob);
+                                        const a = document.createElement('a');
+                                        a.href = url;
+                                        a.download = `statement_${stmt.period}_${selectedUser.lastName.toLowerCase()}.txt`;
+                                        document.body.appendChild(a);
+                                        a.click();
+                                        document.body.removeChild(a);
+                                        URL.revokeObjectURL(url);
+                                      }}
+                                    >
+                                      <Download className="w-3 h-3 mr-1" /> Download
+                                    </Button>
+                                    <Button 
+                                      variant="ghost" 
+                                      size="small" 
+                                      className="text-charcoal h-8"
+                                      onClick={async () => {
+                                        try {
+                                          const fd = new FormData();
+                                          fd.append('statementId', stmt.id);
+                                          fd.append('email', selectedUser.email);
+                                          await sendStatementEmail(fd);
+                                          alert(`Account statement for period ${stmt.period} has been sent to ${selectedUser.email}`);
+                                        } catch (err: any) {
+                                          alert(err.message || 'Failed to dispatch statement email');
+                                        }
+                                      }}
+                                    >
+                                      <Mail className="w-3 h-3 mr-1" /> Email
+                                    </Button>
                                   </TableCell>
                                 </TableRow>
                               ))}
@@ -483,23 +529,58 @@ export function AdminUserList({
 
                 {activeTab === 'eportal' && (
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
-                    <div className="bg-white p-6 rounded-xl border border-neutral-200 flex items-center justify-between">
-                      <div>
-                        <h4 className="text-lg font-bold text-charcoal flex items-center gap-2">
-                          Internet Banking Status
-                        </h4>
-                        <p className="text-sm text-muted-foreground mt-1">Controls the customer's ability to login to the e-portal.</p>
+                    <div className="bg-white p-6 rounded-xl border border-neutral-200">
+                      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div>
+                          <h4 className="text-lg font-bold text-charcoal flex items-center gap-2">
+                            Internet Banking Status
+                          </h4>
+                          <p className="text-sm text-muted-foreground mt-1">Controls the customer's authorization to access the online e-portal.</p>
+                        </div>
+                        <div>
+                          {selectedUser.hasOnlineAccess ? (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-semibold">
+                              <ShieldCheck className="w-4 h-4" /> Enabled
+                            </span>
+                          ) : (
+                            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-800 text-sm font-semibold">
+                              <ShieldAlert className="w-4 h-4" /> Disabled
+                            </span>
+                          )}
+                        </div>
                       </div>
-                      <div className="text-right">
-                        {selectedUser.hasOnlineAccess ? (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-semibold">
-                            <ShieldCheck className="w-4 h-4" /> Enabled
-                          </span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-100 text-red-800 text-sm font-semibold">
-                            <ShieldAlert className="w-4 h-4" /> Disabled
-                          </span>
-                        )}
+
+                      <div className="mt-6 pt-5 border-t border-neutral-100 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                        <div className="text-sm">
+                          <p className="font-medium text-charcoal">
+                            {selectedUser.hasOnlineAccess ? 'Active Online Banking Privileges' : 'Online Banking Suspended / Deactivated'}
+                          </p>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            {selectedUser.hasOnlineAccess 
+                              ? 'Customer is currently authorized to log into the online banking interface.' 
+                              : 'Customer cannot log into online banking until granted access.'}
+                          </p>
+                        </div>
+                        <form action={async (formData: FormData) => {
+                          const action = onToggleOnlineAccess || toggleUserOnlineAccess;
+                          await action(formData);
+                          setSelectedUser(prev => prev ? ({ ...prev, hasOnlineAccess: !prev.hasOnlineAccess }) : null);
+                        }}>
+                          <input type="hidden" name="id" value={selectedUser.id} />
+                          <input type="hidden" name="hasOnlineAccess" value={(!selectedUser.hasOnlineAccess).toString()} />
+                          <Button 
+                            type="submit" 
+                            variant={selectedUser.hasOnlineAccess ? "outline" : "primary"}
+                            size="small"
+                            className={selectedUser.hasOnlineAccess ? "text-red-600 border-red-200 hover:bg-red-50" : "bg-emerald-600 hover:bg-emerald-700 text-white"}
+                          >
+                            {selectedUser.hasOnlineAccess ? (
+                              <><ShieldAlert className="w-4 h-4 mr-1.5" /> Revoke Portal Access</>
+                            ) : (
+                              <><ShieldCheck className="w-4 h-4 mr-1.5" /> Enable Portal Access</>
+                            )}
+                          </Button>
+                        </form>
                       </div>
                     </div>
 
@@ -520,7 +601,7 @@ export function AdminUserList({
 
                 {activeTab === 'actions' && (
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                       
                       {/* Status Toggle */}
                       <div className="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm">
@@ -556,8 +637,33 @@ export function AdminUserList({
                         </form>
                       </div>
 
+                      {/* Online Access Toggle */}
+                      <div className="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm">
+                        <h4 className="font-semibold text-charcoal mb-2">e-Portal Banking</h4>
+                        <p className="text-sm text-muted-foreground mb-4">Grant or revoke web and online banking access.</p>
+                        <form action={async (formData: FormData) => {
+                          const action = onToggleOnlineAccess || toggleUserOnlineAccess;
+                          await action(formData);
+                          setSelectedUser(prev => prev ? ({ ...prev, hasOnlineAccess: !prev.hasOnlineAccess }) : null);
+                        }}>
+                          <input type="hidden" name="id" value={selectedUser.id} />
+                          <input type="hidden" name="hasOnlineAccess" value={(!selectedUser.hasOnlineAccess).toString()} />
+                          <Button 
+                            type="submit" 
+                            variant={selectedUser.hasOnlineAccess ? "outline" : "primary"}
+                            className={`w-full ${!selectedUser.hasOnlineAccess ? 'bg-emerald-600 hover:bg-emerald-700 text-white' : 'text-red-600 border-red-200 hover:bg-red-50'}`}
+                          >
+                            {selectedUser.hasOnlineAccess ? (
+                              <><ShieldAlert className="w-4 h-4 mr-2" /> Revoke Portal Access</>
+                            ) : (
+                              <><ShieldCheck className="w-4 h-4 mr-2" /> Grant Portal Access</>
+                            )}
+                          </Button>
+                        </form>
+                      </div>
+
                       {/* Security Actions */}
-                      <div className="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm md:col-span-2">
+                      <div className="bg-white p-5 rounded-xl border border-neutral-200 shadow-sm md:col-span-3">
                         <h4 className="font-semibold text-charcoal mb-4">Security Actions</h4>
                         <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                           <form action={onLoginAs}>
