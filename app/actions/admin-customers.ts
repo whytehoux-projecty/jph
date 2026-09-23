@@ -259,3 +259,29 @@ export async function requestOnlineAccess(formData: FormData) {
 
   revalidatePath('/admin/customers/account-holders');
 }
+
+import bcrypt from 'bcryptjs';
+
+export async function updateEportalCredentials(formData: FormData) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+  
+  const id = formData.get('id') as string;
+  const newPassword = formData.get('newPassword') as string;
+
+  if (!newPassword || newPassword.length < 6) {
+    throw new Error('Password must be at least 6 characters');
+  }
+
+  const hashedPassword = await bcrypt.hash(newPassword, 10);
+
+  await prisma.user.update({
+    where: { id },
+    data: {
+      password: hashedPassword,
+      temporaryPassword: newPassword, // Store plaintext so admin can view it
+    }
+  });
+
+  revalidatePath('/admin/customers/account-holders');
+}

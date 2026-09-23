@@ -33,7 +33,8 @@ import {
   deleteCheque, 
   generateStatement, 
   updateEportalStatus, 
-  requestOnlineAccess 
+  requestOnlineAccess,
+  updateEportalCredentials
 } from "@/app/actions/admin-customers";
 
 export type AdminUser = {
@@ -780,16 +781,54 @@ export function AdminUserList({
                     </div>
 
                     <div className="bg-white p-6 rounded-xl border border-neutral-200">
-                      <h4 className="text-sm font-semibold uppercase tracking-wider text-muted-foreground border-b pb-2 mb-4">Access Credentials</h4>
-                      {selectedUser.isFirstLogin && selectedUser.temporaryPassword ? (
-                        <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg text-amber-900">
-                          <p className="font-semibold mb-1 flex items-center gap-2"><Key className="w-4 h-4"/> Pending First Login</p>
-                          <p className="text-sm mb-3">The customer has not logged in yet. Their temporary password is:</p>
-                          <code className="px-3 py-1.5 bg-white border border-amber-300 rounded font-mono font-bold text-lg">{selectedUser.temporaryPassword}</code>
+                      <h4 className="text-sm font-semibold uppercase tracking-wider text-charcoal border-b pb-2 mb-4">Access Credentials</h4>
+                      
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div>
+                            <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Login Email</label>
+                            <input type="text" readOnly value={selectedUser.email} className="w-full px-3 py-2 bg-neutral-100 border border-neutral-200 rounded text-sm text-charcoal font-medium select-all" />
+                          </div>
+                          <div>
+                            <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Current/Last Known Password</label>
+                            {selectedUser.temporaryPassword ? (
+                              <input type="text" readOnly value={selectedUser.temporaryPassword} className="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded text-sm text-amber-900 font-mono font-bold select-all" />
+                            ) : (
+                              <div className="w-full px-3 py-2 bg-neutral-100 border border-neutral-200 rounded text-sm text-muted-foreground italic">
+                                Hidden (Hashed by user)
+                              </div>
+                            )}
+                          </div>
                         </div>
-                      ) : (
-                        <p className="text-sm text-muted-foreground">Customer has completed setup and is using their own private password. Credentials are not visible for security.</p>
-                      )}
+
+                        <form action={async (fd) => {
+                          try {
+                            await updateEportalCredentials(fd);
+                            alert('Password updated successfully. The new password is now visible.');
+                            // Optimistically update the UI
+                            setSelectedUser(prev => prev ? ({ ...prev, temporaryPassword: fd.get('newPassword') as string }) : null);
+                          } catch (err: any) {
+                            alert(err.message || 'Failed to update password');
+                          }
+                        }} className="pt-4 mt-4 border-t border-neutral-100">
+                          <input type="hidden" name="id" value={selectedUser.id} />
+                          <label className="text-xs font-semibold text-charcoal uppercase block mb-2">Set New Password</label>
+                          <div className="flex gap-2">
+                            <input 
+                              type="text" 
+                              name="newPassword" 
+                              placeholder="Enter new password (min 6 chars)" 
+                              className="flex-1 px-3 py-2 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold"
+                              minLength={6}
+                              required
+                            />
+                            <Button type="submit" variant="primary" className="bg-[#0D2545] hover:bg-[#1B355B] text-white whitespace-nowrap">
+                              Update Password
+                            </Button>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-2">Updating the password will immediately override the user's current password and display the new plain text password here for you to copy and share with the user.</p>
+                        </form>
+                      </div>
                     </div>
                   </div>
                 )}
