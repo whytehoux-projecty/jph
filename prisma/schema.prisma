@@ -184,6 +184,7 @@ model RegistrationForm {
   expirationDate         DateTime @map("expiration_date")
   idFrontDocumentUrl     String?  @map("id_front_document_url")
   idBackDocumentUrl      String?  @map("id_back_document_url")
+  passportPhotoUrl       String?  @map("passport_photo_url")
 
   // 5. Account Configuration & Preferences
   overdraftProtection Boolean @map("overdraft_protection")

@@ -42,6 +42,7 @@ export async function submitRegistrationForm(token: string, data: any) {
                 expirationDate: new Date(data.expirationDate),
                 idFrontDocumentUrl: data.idFrontDocumentUrl,
                 idBackDocumentUrl: data.idBackDocumentUrl,
+                passportPhotoUrl: data.passportPhotoUrl,
                 
                 overdraftProtection: data.overdraftProtection,
                 debitCardRequest: data.debitCardRequest,
@@ -130,5 +131,5 @@ export async function submitRegistrationForm(token: string, data: any) {
     revalidatePath('/admin/customers/account-holders');
     revalidatePath('/admin/customers/applications');
 
-    return result;
+    return { success: true, userId: result.user.id, accountId: result.account.id };
 }
