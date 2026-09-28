@@ -31,6 +31,7 @@ import {
   formatDate,
   languageToLocale,
   translate,
+  cn,
 } from "@/lib/utils";
 import {
   TransferMethodSelector,
@@ -111,8 +112,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [selectedTypeId, setSelectedTypeId] =
-    useState<UiTransferTypeId>("internal");
-  const [hasSelectedMethod, setHasSelectedMethod] = useState(false);
+    useState<UiTransferTypeId | null>(null);
   const [isPinStep, setIsPinStep] = useState(false);
   const [pinCode, setPinCode] = useState("");
   const [pinError, setPinError] = useState<string | null>(null);
@@ -194,7 +194,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
   const validateForReview = () => {
     const errors: Record<string, string> = {};
 
-    if (!hasSelectedMethod) {
+    if (!selectedTypeId) {
       errors.transferType = "Choose a payment type to continue.";
     }
 
@@ -208,24 +208,28 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
       errors.amount = "Amount exceeds available balance for this account.";
     }
 
-    if (!formData.toAccountNumber) {
-      errors.toAccountNumber = "Enter the recipient account number.";
-    }
-
     if (!formData.description) {
       errors.description = "Add a short reference for this transfer.";
     }
 
-    if (formData.transferType === "WIRE") {
-      if (!formData.recipientName) {
-        errors.recipientName = "Enter the recipient name.";
+    if (selectedTypeId === "internal") {
+      if (!formData.toAccountNumber) {
+        errors.toAccountNumber = "Select a recipient account.";
       }
-      if (!formData.swiftCode) {
-        errors.swiftCode = "Enter the SWIFT / BIC code.";
-      }
-      if (!formData.bankName) {
-        errors.bankName = "Enter the recipient bank name.";
-      }
+    } else if (selectedTypeId === "wire_domestic" || selectedTypeId === "ach") {
+      if (!formData.recipientName) errors.recipientName = "Enter the recipient name.";
+      if (!formData.toAccountNumber) errors.toAccountNumber = "Enter the account number.";
+      if (!formData.routingNumber) errors.routingNumber = "Enter the routing number.";
+      if (!formData.bankName) errors.bankName = "Enter the bank name.";
+    } else if (selectedTypeId === "wire_international") {
+      if (!formData.recipientName) errors.recipientName = "Enter the recipient name.";
+      if (!formData.toAccountNumber) errors.toAccountNumber = "Enter the IBAN or account number.";
+      if (!formData.swiftCode) errors.swiftCode = "Enter the SWIFT / BIC code.";
+      if (!formData.bankName) errors.bankName = "Enter the bank name and country.";
+    } else if (selectedTypeId === "crypto") {
+      if (!formData.toAccountNumber) errors.toAccountNumber = "Enter the destination wallet address.";
+    } else if (selectedTypeId === "zelle") {
+      if (!formData.toAccountNumber) errors.toAccountNumber = "Enter the email or phone number.";
     }
 
     if (exceedsDailyLimit) {
@@ -288,6 +292,10 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
         setIsPinStep(false);
         setPinCode("");
         setPinError(null);
+      } else {
+        const firstErrorField = Object.keys(errors)[0];
+        const el = document.getElementById(firstErrorField);
+        if (el) el.focus();
       }
       return;
     }
@@ -423,7 +431,6 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
     setSelectedTypeId(typeId);
     const backendType = typeId === "internal" ? "INTERNAL" : "WIRE";
     handleSelectChange("transferType", backendType);
-    setHasSelectedMethod(true);
     setIsReviewMode(false);
   };
 
@@ -488,7 +495,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
   };
 
   const getMethodLabel = () => {
-    if (!hasSelectedMethod) {
+    if (!selectedTypeId) {
       return "Not selected";
     }
     if (selectedTypeId === "internal") return "Internal transfer";
@@ -496,7 +503,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
     if (selectedTypeId === "wire_domestic") return "Domestic wire";
     if (selectedTypeId === "wire_international") return "International wire";
     if (selectedTypeId === "zelle") return "Zelle payment";
-    if (selectedTypeId === "rtp") return "Real-time payment";
+    if (selectedTypeId === "crypto") return "Crypto wallet transfer";
     return "Transfer";
   };
 
@@ -551,7 +558,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
 
   return (
     <>
-      <div className="max-w-5xl mx-auto p-4 space-y-8 animate-fade-in-up">
+      <div className="w-full max-w-7xl mx-auto space-y-8 animate-fade-in-up">
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-playfair font-bold text-charcoal">
@@ -718,7 +725,6 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                   />
                 </div>
 
-                {hasSelectedMethod && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-2">
                       <EnhancedAccountSelector
@@ -752,33 +758,36 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                         </span>
                         <Input
                           id="amount"
-                          type="number"
+                          type="text"
+                          inputMode="decimal"
                           placeholder="0.00"
-                          className="pl-7"
+                          className="pl-7 font-mono tabular-nums lining-nums"
                           value={formData.amount}
                           onChange={(e) =>
                             handleFieldChange("amount", e.target.value)
                           }
                           onBlur={() => handleFieldBlur("amount")}
                           required
-                          min="0"
-                          step="0.01"
                         />
+                        <button
+                          type="button"
+                          className="absolute right-2 top-2 text-[10px] font-semibold text-[color:var(--heritage-navy)] hover:underline"
+                          onClick={() => {
+                            if (selectedAccount) {
+                              handleFieldChange("amount", selectedAccount.balance.toString());
+                            }
+                          }}
+                        >
+                          Send max
+                        </button>
                       </div>
                       {fieldErrors.amount && (
                         <p className="text-xs text-red-600">
                           {fieldErrors.amount}
                         </p>
                       )}
-                      {!fieldErrors.amount && (
-                        <p className="text-xs text-muted-foreground">
-                          Remaining daily limit after this transfer:{" "}
-                          {formatCurrency(remainingAfter, "USD")}
-                        </p>
-                      )}
                     </div>
                   </div>
-                )}
 
                 {parsedAmount > 0 && (
                   <div className="space-y-2">
@@ -786,7 +795,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                       Fees and total cost
                     </Label>
                     <FeeCalculator
-                      methodId={selectedTypeId}
+                      methodId={selectedTypeId || "internal"}
                       amount={parsedAmount}
                       currency={selectedAccount?.currency || "USD"}
                       targetCurrency={
@@ -830,29 +839,24 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                   <BeneficiarySelector
                     selectedBeneficiary={selectedBeneficiary}
                     onSelect={handleBeneficiaryChosen}
-                    transferMethod={selectedTypeId}
+                    transferMethod={selectedTypeId || "internal"}
                   />
-                  <p className="text-xs text-muted-foreground">
-                    {translate(
-                      userPreferences.language,
-                      "transfer.recipientsHelper",
-                    )}
-                  </p>
                 </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="toAccountNumber">
-                    {translate(
-                      userPreferences.language,
-                      "transfer.toAccountLabel",
-                    )}
+                    {selectedTypeId === "crypto" ? "Wallet Address" :
+                     selectedTypeId === "zelle" ? "Email or Mobile Number" :
+                     selectedTypeId === "wire_international" ? "IBAN or Account Number" :
+                     "Account Number"}
                   </Label>
                   <Input
                     id="toAccountNumber"
-                    placeholder={translate(
-                      userPreferences.language,
-                      "transfer.toAccountPlaceholder",
-                    )}
+                    placeholder={
+                      selectedTypeId === "crypto" ? "Enter wallet address" :
+                      selectedTypeId === "zelle" ? "Enter email or phone" :
+                      "Enter account number"
+                    }
                     value={formData.toAccountNumber}
                     onChange={(e) =>
                       handleFieldChange("toAccountNumber", e.target.value)
@@ -860,35 +864,20 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                     onBlur={() => handleFieldBlur("toAccountNumber")}
                     required
                   />
-                  {fieldErrors.toAccountNumber ? (
+                  {fieldErrors.toAccountNumber && (
                     <p className="text-xs text-red-600">
                       {fieldErrors.toAccountNumber}
-                    </p>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">
-                      {translate(
-                        userPreferences.language,
-                        "transfer.toAccountHelper",
-                      )}
                     </p>
                   )}
                 </div>
 
-                {formData.transferType === "WIRE" && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-l-2 border-vintage-green/20 pl-4 animate-in fade-in slide-in-from-left-4">
+                {(selectedTypeId === "wire_domestic" || selectedTypeId === "ach" || selectedTypeId === "wire_international") && (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-l-2 border-[color:var(--heritage-gold)]/30 pl-4 animate-in fade-in slide-in-from-left-4">
                     <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="recipientName">
-                        {translate(
-                          userPreferences.language,
-                          "transfer.recipientNameLabel",
-                        )}
-                      </Label>
+                      <Label htmlFor="recipientName">Recipient Name</Label>
                       <Input
                         id="recipientName"
-                        placeholder={translate(
-                          userPreferences.language,
-                          "transfer.recipientNamePlaceholder",
-                        )}
+                        placeholder="Full name of recipient"
                         value={formData.recipientName}
                         onChange={(e) =>
                           handleFieldChange("recipientName", e.target.value)
@@ -896,65 +885,60 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                         onBlur={() => handleFieldBlur("recipientName")}
                         required
                       />
-                      {fieldErrors.recipientName ? (
+                      {fieldErrors.recipientName && (
                         <p className="text-xs text-red-600">
                           {fieldErrors.recipientName}
                         </p>
-                      ) : (
-                        <p className="text-xs text-muted-foreground">
-                          {translate(
-                            userPreferences.language,
-                            "transfer.recipientNameHelper",
-                          )}
-                        </p>
                       )}
                     </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="swiftCode">
-                        {translate(
-                          userPreferences.language,
-                          "transfer.swiftLabel",
+
+                    {selectedTypeId === "wire_international" && (
+                      <div className="space-y-2">
+                        <Label htmlFor="swiftCode">SWIFT / BIC</Label>
+                        <Input
+                          id="swiftCode"
+                          placeholder="8-11 character SWIFT code"
+                          value={formData.swiftCode}
+                          onChange={(e) =>
+                            handleFieldChange("swiftCode", e.target.value)
+                          }
+                          onBlur={() => handleFieldBlur("swiftCode")}
+                          required
+                        />
+                        {fieldErrors.swiftCode && (
+                          <p className="text-xs text-red-600">
+                            {fieldErrors.swiftCode}
+                          </p>
                         )}
-                      </Label>
-                      <Input
-                        id="swiftCode"
-                        placeholder={translate(
-                          userPreferences.language,
-                          "transfer.swiftPlaceholder",
+                      </div>
+                    )}
+
+                    {(selectedTypeId === "wire_domestic" || selectedTypeId === "ach") && (
+                      <div className="space-y-2">
+                        <Label htmlFor="routingNumber">Routing Number</Label>
+                        <Input
+                          id="routingNumber"
+                          placeholder="9-digit routing number"
+                          value={formData.routingNumber}
+                          onChange={(e) =>
+                            handleFieldChange("routingNumber", e.target.value)
+                          }
+                          onBlur={() => handleFieldBlur("routingNumber")}
+                          required
+                        />
+                        {fieldErrors.routingNumber && (
+                          <p className="text-xs text-red-600">
+                            {fieldErrors.routingNumber}
+                          </p>
                         )}
-                        value={formData.swiftCode}
-                        onChange={(e) =>
-                          handleFieldChange("swiftCode", e.target.value)
-                        }
-                        onBlur={() => handleFieldBlur("swiftCode")}
-                        required
-                      />
-                      {fieldErrors.swiftCode ? (
-                        <p className="text-xs text-red-600">
-                          {fieldErrors.swiftCode}
-                        </p>
-                      ) : (
-                        <p className="text-xs text-muted-foreground">
-                          {translate(
-                            userPreferences.language,
-                            "transfer.swiftHelper",
-                          )}
-                        </p>
-                      )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="bankName">
-                        {translate(
-                          userPreferences.language,
-                          "transfer.bankNameLabel",
-                        )}
-                      </Label>
+                      </div>
+                    )}
+
+                    <div className="space-y-2 md:col-span-2">
+                      <Label htmlFor="bankName">Bank Name {selectedTypeId === "wire_international" && "& Country"}</Label>
                       <Input
                         id="bankName"
-                        placeholder={translate(
-                          userPreferences.language,
-                          "transfer.bankNamePlaceholder",
-                        )}
+                        placeholder="Recipient's bank name"
                         value={formData.bankName}
                         onChange={(e) =>
                           handleFieldChange("bankName", e.target.value)
@@ -962,43 +946,11 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                         onBlur={() => handleFieldBlur("bankName")}
                         required
                       />
-                      {fieldErrors.bankName ? (
+                      {fieldErrors.bankName && (
                         <p className="text-xs text-red-600">
                           {fieldErrors.bankName}
                         </p>
-                      ) : (
-                        <p className="text-xs text-muted-foreground">
-                          {translate(
-                            userPreferences.language,
-                            "transfer.bankNameHelper",
-                          )}
-                        </p>
                       )}
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="routingNumber">
-                        {translate(
-                          userPreferences.language,
-                          "transfer.routingLabel",
-                        )}
-                      </Label>
-                      <Input
-                        id="routingNumber"
-                        placeholder={translate(
-                          userPreferences.language,
-                          "transfer.routingPlaceholder",
-                        )}
-                        value={formData.routingNumber}
-                        onChange={(e) =>
-                          handleFieldChange("routingNumber", e.target.value)
-                        }
-                      />
-                      <p className="text-xs text-muted-foreground">
-                        {translate(
-                          userPreferences.language,
-                          "transfer.routingHelper",
-                        )}
-                      </p>
                     </div>
                   </div>
                 )}
@@ -1088,10 +1040,44 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                   </Card>
                 )}
 
-                <div className="pt-4">
+                <div className="pt-6 space-y-4">
+                  {/* 3-step indicator */}
+                  <div className="flex items-center justify-center gap-2 text-xs font-medium text-muted-foreground">
+                    <span className={cn(
+                      "flex items-center gap-1",
+                      !isReviewMode && !isPinStep && "text-[color:var(--heritage-navy)] font-semibold"
+                    )}>
+                      <span className={cn(
+                        "flex h-4 w-4 items-center justify-center rounded-full border",
+                        !isReviewMode && !isPinStep ? "border-[color:var(--heritage-navy)] bg-[color:var(--heritage-navy)]/10" : "border-slate-300 bg-slate-100"
+                      )}>1</span> Details
+                    </span>
+                    <span className="w-8 h-[1px] bg-slate-200"></span>
+                    <span className={cn(
+                      "flex items-center gap-1",
+                      isReviewMode && !isPinStep && "text-[color:var(--heritage-navy)] font-semibold"
+                    )}>
+                      <span className={cn(
+                        "flex h-4 w-4 items-center justify-center rounded-full border",
+                        isReviewMode && !isPinStep ? "border-[color:var(--heritage-navy)] bg-[color:var(--heritage-navy)]/10" : "border-slate-300 bg-slate-100"
+                      )}>2</span> Review
+                    </span>
+                    <span className="w-8 h-[1px] bg-slate-200"></span>
+                    <span className={cn(
+                      "flex items-center gap-1",
+                      isPinStep && "text-[color:var(--heritage-navy)] font-semibold"
+                    )}>
+                      <span className={cn(
+                        "flex h-4 w-4 items-center justify-center rounded-full border",
+                        isPinStep ? "border-[color:var(--heritage-navy)] bg-[color:var(--heritage-navy)]/10" : "border-slate-300 bg-slate-100"
+                      )}>3</span> Verify
+                    </span>
+                  </div>
+
                   <Button
                     type="submit"
                     className="w-full h-12 text-lg"
+                    disabled={!selectedTypeId}
                     loading={isSubmitting}>
                     {isSubmitting
                       ? translate(
@@ -1125,123 +1111,77 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
           </Card>
 
           {/* Info Sidebar */}
-          <div className="space-y-6">
-            <Card className="bg-gradient-to-br from-soft-gold/10 to-transparent border-soft-gold/20">
-              <CardHeader>
-                <CardTitle className="text-lg">
-                  {translate(userPreferences.language, "transfer.limitsTitle")}
+          <div className="space-y-6 md:sticky md:top-24 h-fit">
+            <Card className="border-[color:var(--heritage-navy)]/10 shadow-sm bg-[#FDFBF7]">
+              <CardHeader className="pb-3 border-b border-slate-200/50">
+                <CardTitle className="text-lg text-[color:var(--heritage-navy)]">
+                  Transfer Summary
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">
-                    {translate(
-                      userPreferences.language,
-                      "transfer.dailyLimitLabel",
-                    ) || "Daily Limit"}
-                  </span>
-                  <span className="font-semibold">
-                    {formatCurrency(
-                      DAILY_LIMIT,
-                      userPreferences.currency,
-                      locale,
-                    )}
-                  </span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-muted-foreground">
-                    {translate(
-                      userPreferences.language,
-                      "transfer.usedTodayLabel",
-                    ) || "Used Today"}
-                  </span>
-                  <span className="font-semibold text-vintage-green">
-                    {formatCurrency(
-                      totalAfter,
-                      userPreferences.currency,
-                      locale,
-                    )}
-                  </span>
-                </div>
-                <div className="w-full bg-slate-200 h-1.5 rounded-full mt-2">
-                  <div
-                    className="bg-vintage-green h-1.5 rounded-full"
-                    style={{ width: `${limitUsageRatio * 100}%` }}></div>
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  {translate(
-                    userPreferences.language,
-                    "transfer.remainingLimitPrefix",
-                  ) || "Remaining daily limit after this transfer:"}{" "}
-                  {formatCurrency(
-                    remainingAfter,
-                    userPreferences.currency,
-                    locale,
-                  )}
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg">
-                  {translate(userPreferences.language, "transfer.feesTitle")}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                {parsedAmount > 0 ? (
-                  <FeeCalculator
-                    methodId={selectedTypeId}
-                    amount={parsedAmount}
-                    currency={selectedAccount?.currency || "USD"}
-                    targetCurrency={
-                      selectedTypeId === "wire_international"
-                        ? "USD"
-                        : selectedAccount?.currency || "USD"
-                    }
-                    variant="compact"
-                  />
-                ) : (
-                  <p className="text-xs text-muted-foreground">
-                    {translate(
-                      userPreferences.language,
-                      "transfer.feesEmpty",
-                    ) ||
-                      "Select an amount and payment type to see estimated fees."}
+              <CardContent className="pt-4 space-y-6">
+                <div className="space-y-3">
+                  <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                    Limits & Available
+                  </h4>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Daily Limit</span>
+                    <span className="font-medium text-[color:var(--heritage-navy)]">
+                      {formatCurrency(DAILY_LIMIT, userPreferences.currency, locale)}
+                    </span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-muted-foreground">Used Today</span>
+                    <span className="font-medium text-[color:var(--heritage-gold)]">
+                      {formatCurrency(totalAfter, userPreferences.currency, locale)}
+                    </span>
+                  </div>
+                  <div className="w-full bg-slate-200 h-1.5 rounded-full mt-2 overflow-hidden">
+                    <div
+                      className="bg-[color:var(--heritage-gold)] h-full rounded-full transition-all duration-500"
+                      style={{ width: `${limitUsageRatio * 100}%` }}></div>
+                  </div>
+                  <p className="text-[11px] text-muted-foreground">
+                    Remaining limit after transfer:{" "}
+                    <span className="font-medium">{formatCurrency(remainingAfter, userPreferences.currency, locale)}</span>
                   </p>
-                )}
-              </CardContent>
-            </Card>
+                </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-lg flex items-center gap-2">
-                  <VintageIcon icon={ShieldCheck} size="sm" variant="green" />
-                  {translate(
-                    userPreferences.language,
-                    "transfer.securityInfoTitle",
+                <div className="space-y-3 pt-4 border-t border-slate-200/50">
+                  <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+                    Fees & Total
+                  </h4>
+                  {parsedAmount > 0 ? (
+                    <FeeCalculator
+                      methodId={selectedTypeId || "internal"}
+                      amount={parsedAmount}
+                      currency={selectedAccount?.currency || "USD"}
+                      targetCurrency={
+                        selectedTypeId === "wire_international"
+                          ? "USD"
+                          : selectedAccount?.currency || "USD"
+                      }
+                      variant="compact"
+                    />
+                  ) : (
+                    <p className="text-[11px] text-muted-foreground">
+                      Select an amount and payment type to see estimated fees.
+                    </p>
                   )}
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="text-sm text-muted-foreground space-y-3">
-                <p>
-                  {translate(
-                    userPreferences.language,
-                    "transfer.securityLine1",
-                  )}
-                </p>
-                <p>
-                  {translate(
-                    userPreferences.language,
-                    "transfer.securityLine2",
-                  )}
-                </p>
-                <p>
-                  {translate(
-                    userPreferences.language,
-                    "transfer.securityLine3",
-                  )}
-                </p>
+                </div>
+
+                <div className="space-y-3 pt-4 border-t border-slate-200/50">
+                  <div className="flex items-start gap-2 text-muted-foreground">
+                    <ShieldCheck className="h-4 w-4 mt-0.5 text-[color:var(--heritage-navy)]" />
+                    <div className="text-[11px] space-y-2">
+                      <p>
+                        Your transfers are protected by bank-level encryption.
+                      </p>
+                      <p>
+                        Never transfer money to someone you do not know or trust.
+                      </p>
+                    </div>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </div>

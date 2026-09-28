@@ -121,7 +121,7 @@ export default async function DashboardPage() {
   };
 
   return (
-    <div className="flex-1 space-y-6 p-6 pt-4">
+    <div className="w-full max-w-7xl mx-auto space-y-6 pt-2">
       <div className="flex items-center justify-between space-y-2 pb-4 bg-[color:var(--heritage-navy)] text-white p-6 rounded-xl shadow-md mb-6 -mx-2 md:mx-0">
         <h2 className="text-3xl font-bold tracking-tight font-playfair text-white">
           {getGreeting()}, {user?.firstName || "there"}

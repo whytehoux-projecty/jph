@@ -46,7 +46,7 @@ const FEE_STRUCTURE: Partial<Record<UiTransferTypeId, FeeConfig>> = {
     expressAvailable: true,
     expressFee: 60,
   },
-  rtp: {
+  crypto: {
     baseFee: 0.5,
   },
 };
