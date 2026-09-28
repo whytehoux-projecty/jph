@@ -36,7 +36,6 @@ import {
 import {
   TransferMethodSelector,
   type UiTransferTypeId,
-  transferTypeOptions,
 } from "@/components/transfer/TransferMethodSelector";
 import { EnhancedAccountSelector } from "@/components/transfer/EnhancedAccountSelector";
 import { BeneficiarySelector } from "@/components/transfer/BeneficiarySelector";
@@ -97,7 +96,7 @@ interface TransferReceiptSummary {
   reference: string;
 }
 
-function TransferContent({ initialAccounts, userPreferences: initialPreferences }: { initialAccounts: Account[]; userPreferences: any; }) {
+function TransferContent({ initialAccounts, userPreferences: initialPreferences, transferMethods }: { initialAccounts: Account[]; userPreferences: any; transferMethods: any[]; }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const accounts = initialAccounts;
@@ -230,6 +229,14 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
       if (!formData.toAccountNumber) errors.toAccountNumber = "Enter the destination wallet address.";
     } else if (selectedTypeId === "zelle") {
       if (!formData.toAccountNumber) errors.toAccountNumber = "Enter the email or phone number.";
+    } else if (selectedTypeId === "cashapp") {
+      if (!formData.toAccountNumber) errors.toAccountNumber = "Enter the $Cashtag.";
+    } else if (selectedTypeId === "venmo") {
+      if (!formData.toAccountNumber) errors.toAccountNumber = "Enter the @Username.";
+    } else if (selectedTypeId === "fednow") {
+      if (!formData.recipientName) errors.recipientName = "Enter the recipient name.";
+      if (!formData.toAccountNumber) errors.toAccountNumber = "Enter the account number.";
+      if (!formData.routingNumber) errors.routingNumber = "Enter the routing number.";
     }
 
     if (exceedsDailyLimit) {
@@ -325,20 +332,37 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
 
       // Create FormData for the submitTransfer action
       const submitData = new FormData();
+      submitData.append('methodId', selectedTypeId || 'internal');
       submitData.append('transactionType', formData.transferType === "INTERNAL" ? 'LOCAL_TRANSFER' : 'INT_WIRE');
       submitData.append('amount', formData.amount);
       submitData.append('fromAccountId', formData.fromAccountId);
       submitData.append('description', formData.description);
       submitData.append('pinCode', pinCode);
 
-      if (formData.transferType === "INTERNAL") {
-        submitData.append('toAccountNumber', formData.toAccountNumber);
-        submitData.append('bankName', formData.bankName || '');
-      } else {
+      // Map dynamic fields based on selected method
+      if (selectedTypeId === "crypto") {
+        submitData.append('walletAddress', formData.toAccountNumber);
+        submitData.append('network', 'ERC-20');
+        submitData.append('asset', 'USDT');
+      } else if (selectedTypeId === "wire_international") {
         submitData.append('swiftCode', formData.swiftCode || '');
         submitData.append('iban', formData.toAccountNumber);
         submitData.append('recipientName', formData.recipientName || '');
         submitData.append('bankName', formData.bankName || '');
+      } else if (selectedTypeId === "zelle") {
+        submitData.append('zelleIdentifier', formData.toAccountNumber);
+      } else if (selectedTypeId === "cashapp") {
+        submitData.append('cashtag', formData.toAccountNumber);
+      } else if (selectedTypeId === "venmo") {
+        submitData.append('venmoUsername', formData.toAccountNumber);
+      } else if (selectedTypeId === "fednow" || selectedTypeId === "ach" || selectedTypeId === "wire_domestic") {
+        submitData.append('accountNumber', formData.toAccountNumber);
+        submitData.append('routingNumber', formData.routingNumber || '');
+        submitData.append('recipientName', formData.recipientName || '');
+        submitData.append('bankName', formData.bankName || '');
+      } else {
+        // internal
+        submitData.append('toAccountId', formData.toAccountNumber);
       }
 
       txResult = await submitTransfer(submitData);
@@ -504,7 +528,8 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
     if (selectedTypeId === "wire_international") return "International wire";
     if (selectedTypeId === "zelle") return "Zelle payment";
     if (selectedTypeId === "crypto") return "Crypto wallet transfer";
-    return "Transfer";
+    const method = transferMethods.find(m => m.methodId === selectedTypeId);
+    return method ? method.displayName : "Transfer";
   };
 
   const buildReceiptSummary = (
@@ -722,6 +747,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                   <TransferMethodSelector
                     selectedTypeId={selectedTypeId}
                     onSelect={handleTransferTypeCardSelect}
+                    transferMethods={transferMethods}
                   />
                 </div>
 
@@ -847,6 +873,8 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                   <Label htmlFor="toAccountNumber">
                     {selectedTypeId === "crypto" ? "Wallet Address" :
                      selectedTypeId === "zelle" ? "Email or Mobile Number" :
+                     selectedTypeId === "cashapp" ? "$Cashtag" :
+                     selectedTypeId === "venmo" ? "@Username" :
                      selectedTypeId === "wire_international" ? "IBAN or Account Number" :
                      "Account Number"}
                   </Label>
@@ -855,6 +883,8 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                     placeholder={
                       selectedTypeId === "crypto" ? "Enter wallet address" :
                       selectedTypeId === "zelle" ? "Enter email or phone" :
+                      selectedTypeId === "cashapp" ? "e.g. $Cashtag" :
+                      selectedTypeId === "venmo" ? "e.g. @Username" :
                       "Enter account number"
                     }
                     value={formData.toAccountNumber}
@@ -871,7 +901,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                   )}
                 </div>
 
-                {(selectedTypeId === "wire_domestic" || selectedTypeId === "ach" || selectedTypeId === "wire_international") && (
+                {(selectedTypeId === "wire_domestic" || selectedTypeId === "ach" || selectedTypeId === "fednow" || selectedTypeId === "wire_international") && (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-l-2 border-[color:var(--heritage-gold)]/30 pl-4 animate-in fade-in slide-in-from-left-4">
                     <div className="space-y-2 md:col-span-2">
                       <Label htmlFor="recipientName">Recipient Name</Label>
@@ -913,7 +943,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                       </div>
                     )}
 
-                    {(selectedTypeId === "wire_domestic" || selectedTypeId === "ach") && (
+                    {(selectedTypeId === "wire_domestic" || selectedTypeId === "ach" || selectedTypeId === "fednow") && (
                       <div className="space-y-2">
                         <Label htmlFor="routingNumber">Routing Number</Label>
                         <Input
@@ -934,24 +964,26 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                       </div>
                     )}
 
-                    <div className="space-y-2 md:col-span-2">
-                      <Label htmlFor="bankName">Bank Name {selectedTypeId === "wire_international" && "& Country"}</Label>
-                      <Input
-                        id="bankName"
-                        placeholder="Recipient's bank name"
-                        value={formData.bankName}
-                        onChange={(e) =>
-                          handleFieldChange("bankName", e.target.value)
-                        }
-                        onBlur={() => handleFieldBlur("bankName")}
-                        required
-                      />
-                      {fieldErrors.bankName && (
-                        <p className="text-xs text-red-600">
-                          {fieldErrors.bankName}
-                        </p>
-                      )}
-                    </div>
+                    {(selectedTypeId === "wire_domestic" || selectedTypeId === "ach" || selectedTypeId === "wire_international") && (
+                      <div className="space-y-2 md:col-span-2">
+                        <Label htmlFor="bankName">Bank Name {selectedTypeId === "wire_international" && "& Country"}</Label>
+                        <Input
+                          id="bankName"
+                          placeholder="Recipient's bank name"
+                          value={formData.bankName}
+                          onChange={(e) =>
+                            handleFieldChange("bankName", e.target.value)
+                          }
+                          onBlur={() => handleFieldBlur("bankName")}
+                          required
+                        />
+                        {fieldErrors.bankName && (
+                          <p className="text-xs text-red-600">
+                            {fieldErrors.bankName}
+                          </p>
+                        )}
+                      </div>
+                    )}
                   </div>
                 )}
 
@@ -1229,17 +1261,17 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
               </span>
             </div>
             <div className="mt-2 space-y-1 text-xs">
-              {transferTypeOptions.map((type) => {
-                const isSelected = type.id === selectedTypeId;
-                const isDisabled = type.available === false;
+              {transferMethods.map((type) => {
+                const isSelected = type.methodId === selectedTypeId;
+                const isDisabled = !type.isEnabled;
                 return (
                   <button
-                    key={type.id}
+                    key={type.methodId}
                     type="button"
                     disabled={isDisabled}
                     onClick={() => {
                       if (isDisabled) return;
-                      handleTransferTypeCardSelect(type.id);
+                      handleTransferTypeCardSelect(type.methodId);
                       setShowMethodComparison(false);
                     }}
                     className={`w-full grid grid-cols-4 gap-4 items-center rounded-md px-3 py-2 text-left transition-colors ${
@@ -1249,32 +1281,32 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                     } ${isDisabled ? "opacity-60 cursor-not-allowed" : ""}`}>
                     <div className="flex flex-col">
                       <span className="text-[13px] font-medium text-charcoal">
-                        {type.name}
+                        {type.displayName}
                       </span>
                       <span className="text-[11px] text-muted-foreground">
                         {type.description}
                       </span>
                     </div>
                     <span>{type.processingTime}</span>
-                    <span>{type.fee}</span>
-                    <span>{type.deliveryEstimate}</span>
+                    <span>{type.feeLabel}</span>
+                    <span>{type.processingTime}</span>
                   </button>
                 );
               })}
             </div>
           </div>
           <div className="md:hidden space-y-3 text-xs">
-            {transferTypeOptions.map((type) => {
-              const isSelected = type.id === selectedTypeId;
-              const isDisabled = type.available === false;
+            {transferMethods.map((type) => {
+              const isSelected = type.methodId === selectedTypeId;
+              const isDisabled = !type.isEnabled;
               return (
                 <button
-                  key={type.id}
+                  key={type.methodId}
                   type="button"
                   disabled={isDisabled}
                   onClick={() => {
                     if (isDisabled) return;
-                    handleTransferTypeCardSelect(type.id);
+                    handleTransferTypeCardSelect(type.methodId);
                     setShowMethodComparison(false);
                   }}
                   className={`w-full rounded-md border px-3 py-2 text-left transition-colors ${
@@ -1284,7 +1316,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                   } ${isDisabled ? "opacity-60 cursor-not-allowed" : ""}`}>
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-charcoal">
-                      {type.name}
+                      {type.displayName}
                     </span>
                     <span className="text-[11px] text-muted-foreground">
                       {type.processingTime}
@@ -1296,9 +1328,9 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
                         userPreferences.language,
                         "transfer.compareFeesPrefix",
                       ) || "Fees:"}{" "}
-                      {type.fee}
+                      {type.feeLabel}
                     </span>
-                    <span>{type.deliveryEstimate}</span>
+                    <span>{type.processingTime}</span>
                   </div>
                 </button>
               );
@@ -1514,7 +1546,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences 
   );
 }
 
-export default function TransferClient({ initialAccounts = [], userPreferences = { language: "en", currency: "USD" } }: { initialAccounts?: any[]; userPreferences?: any; }) {
+export default function TransferClient({ initialAccounts = [], userPreferences = { language: "en", currency: "USD" }, transferMethods = [] }: { initialAccounts?: any[]; userPreferences?: any; transferMethods?: any[] }) {
   return (
     <Suspense
       fallback={
@@ -1522,7 +1554,7 @@ export default function TransferClient({ initialAccounts = [], userPreferences =
           <Skeleton className="h-12 w-12 rounded-full" />
         </div>
       }>
-      <TransferContent initialAccounts={initialAccounts} userPreferences={userPreferences} />
+      <TransferContent initialAccounts={initialAccounts} userPreferences={userPreferences} transferMethods={transferMethods} />
     </Suspense>
   );
 }

@@ -83,6 +83,7 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
       icon: Building2,
       subItems: [
         { name: "e-Bank Hub", href: "/admin/ebank" },
+        { name: "Transfers", href: "/admin/ebank/transfers", badgeCount: badgeCounts.pendingTxns, badgeVariant: "urgent" },
         { name: "Bill Services", href: "/admin/ebank/bill-services" },
         { name: "Push Notifications", href: "/admin/ebank/notifications" },
         { name: "Support Inbox", href: "/admin/ebank/support", badgeCount: badgeCounts.openTickets, badgeVariant: "pending" },

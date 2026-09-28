@@ -12,6 +12,7 @@ export async function submitTransfer(formData: FormData) {
   }
 
   const userId = session.user.id;
+  const methodId = formData.get('methodId') as string;
   const transactionType = formData.get('transactionType') as string;
   const amount = parseFloat(formData.get('amount') as string);
   const user = await prisma.user.findUnique({
@@ -31,21 +32,12 @@ export async function submitTransfer(formData: FormData) {
 
   const description = formData.get('description') as string;
 
-  // Metadata based on type
+  // Dynamic Metadata based on method
   const metadata: any = {};
-  if (transactionType === 'INT_WIRE') {
-    metadata.swiftCode = formData.get('swiftCode');
-    metadata.iban = formData.get('iban');
-  } else if (transactionType === 'CRYPTO_WITHDRAWAL') {
-    metadata.walletAddress = formData.get('walletAddress');
-    metadata.network = formData.get('network');
-  } else if (transactionType === 'CRYPTO_DEPOSIT') {
-    metadata.fromWalletAddress = formData.get('fromWalletAddress');
-    metadata.txHash = formData.get('txHash');
-  } else {
-    // LOCAL_TRANSFER
-    metadata.accountNumber = formData.get('toAccountNumber');
-    metadata.bankName = formData.get('bankName');
+  for (const [key, value] of Array.from(formData.entries())) {
+    if (!['methodId', 'transactionType', 'amount', 'fromAccountId', 'description', 'pinCode'].includes(key)) {
+      metadata[key] = value;
+    }
   }
 
   // Basic validation
@@ -76,6 +68,7 @@ export async function submitTransfer(formData: FormData) {
       status: 'PENDING',
       description: description || 'Transfer',
       reference: Math.random().toString(36).substring(2, 10).toUpperCase(),
+      methodId,
       metadata: JSON.stringify(metadata)
     }
   });

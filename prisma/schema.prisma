@@ -268,10 +268,37 @@ model Transaction {
   processedAt     DateTime? @map("processed_at")
   createdAt       DateTime  @default(now()) @map("created_at")
   updatedAt       DateTime  @updatedAt @map("updated_at")
+  
+  methodId        String?   @map("method_id")
+  adminNote       String?   @map("admin_note")
+  rejectionReason String?   @map("rejection_reason")
+  modifiedAmount  Float?    @map("modified_amount")
 
   account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@map("transactions")
+}
+
+model TransferMethodConfig {
+  id               String   @id @default(cuid())
+  methodId         String   @unique @map("method_id") // internal, ach, wire_domestic, wire_international, zelle, crypto, fednow, cashapp, venmo
+  displayName      String   @map("display_name")
+  description      String
+  isEnabled        Boolean  @default(true) @map("is_enabled")
+  isVisibleToUser  Boolean  @default(true) @map("is_visible_to_user")
+  badge            String?  
+  processingTime   String   @map("processing_time")
+  feeLabel         String   @map("fee_label")
+  baseFee          Float    @default(0) @map("base_fee")
+  percentageFee    Float    @default(0) @map("percentage_fee")
+  dailyLimit       Float    @default(10000) @map("daily_limit")
+  perTransferLimit Float    @default(5000) @map("per_transfer_limit")
+  formConfig       String   @map("form_config") // JSON string defining required/optional fields
+  sortOrder        Int      @default(0) @map("sort_order")
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  @@map("transfer_method_configs")
 }
 
 model Beneficiary {

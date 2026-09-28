@@ -10,107 +10,62 @@ import {
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export type UiTransferTypeId =
-  | "internal"
-  | "wire_domestic"
-  | "ach"
-  | "zelle"
-  | "wire_international"
-  | "crypto";
+export type UiTransferTypeId = string;
 
-interface TransferTypeOption {
-  id: UiTransferTypeId;
-  name: string;
+interface TransferMethodConfig {
+  id: string;
+  methodId: string;
+  displayName: string;
   description: string;
-  icon: LucideIcon;
+  isEnabled: boolean;
+  isVisibleToUser: boolean;
+  badge: string | null;
   processingTime: string;
-  fee: string;
-  limit: number;
-  deliveryEstimate: string;
-  badge?: "NEW" | "BETA" | "COMING SOON";
-  available?: boolean;
+  feeLabel: string;
+  baseFee: number;
+  percentageFee: number;
+  dailyLimit: number;
+  perTransferLimit: number;
+  formConfig: string;
+  sortOrder: number;
 }
 
-const transferTypes: TransferTypeOption[] = [
-  {
-    id: "internal",
-    name: "Internal Transfer",
-    description: "Between your JP Heritage accounts",
-    icon: ArrowRightLeft,
-    processingTime: "Instant",
-    fee: "$0.00",
-    limit: 50000,
-    deliveryEstimate: "Instant, usually within seconds",
-    available: true,
-  },
-  {
-    id: "ach",
-    name: "ACH / Domestic Wire",
-    description: "To any US bank account",
-    icon: Building2,
-    processingTime: "1-3 days",
-    fee: "Free - $25",
-    limit: 100000,
-    deliveryEstimate: "Typically 1–3 business days",
-    available: true,
-  },
-  {
-    id: "wire_international",
-    name: "International Wire",
-    description: "Send money worldwide (SWIFT)",
-    icon: Globe2,
-    processingTime: "1-5 days",
-    fee: "From $45.00",
-    limit: 250000,
-    deliveryEstimate: "1–5 business days depending on destination",
-    available: true,
-  },
-  {
-    id: "zelle",
-    name: "Zelle",
-    description: "Send to email or phone number",
-    icon: Smartphone,
-    processingTime: "Instant",
-    fee: "$0.00",
-    limit: 2500,
-    deliveryEstimate: "Instant in most cases",
-    available: true,
-  },
-  {
-    id: "crypto",
-    name: "Crypto Wallet",
-    description: "Bank-to-wallet transfer",
-    icon: Wallet,
-    processingTime: "Instant",
-    fee: "Network fee",
-    limit: 25000,
-    deliveryEstimate: "Instant depending on network congestion",
-    badge: "NEW",
-    available: true,
+export const getIconForMethod = (methodId: string): LucideIcon => {
+  switch (methodId) {
+    case "internal": return ArrowRightLeft;
+    case "ach": return Building2;
+    case "wire_domestic": return Building2;
+    case "wire_international": return Globe2;
+    case "zelle": return Smartphone;
+    case "crypto": return Wallet;
+    case "fednow": return ArrowRightLeft;
+    case "cashapp": return Smartphone;
+    case "venmo": return Smartphone;
+    default: return Building2;
   }
-];
-
-export const transferTypeOptions = transferTypes;
+};
 
 interface TransferMethodSelectorProps {
   selectedTypeId: UiTransferTypeId | null;
   onSelect: (id: UiTransferTypeId) => void;
+  transferMethods: TransferMethodConfig[];
 }
 
 export function TransferMethodSelector({
   selectedTypeId,
   onSelect,
+  transferMethods,
 }: TransferMethodSelectorProps) {
   return (
     <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-3" aria-label="Transfer Method">
-      {transferTypes.map((type) => {
-        const Icon = type.icon;
-        const isActive = selectedTypeId === type.id;
-        const isDisabled = type.available === false;
+      {transferMethods.map((type) => {
+        const Icon = getIconForMethod(type.methodId);
+        const isActive = selectedTypeId === type.methodId;
+        const isDisabled = !type.isEnabled;
 
         return (
           <label
-            key={type.id}
+            key={type.methodId}
             className={cn(
               "relative flex flex-col items-start rounded-lg border p-3 text-left cursor-pointer transition-all min-h-[64px]",
               isActive
@@ -124,10 +79,10 @@ export function TransferMethodSelector({
             <input
               type="radio"
               name="transfer_method"
-              value={type.id}
+              value={type.methodId}
               checked={isActive}
               onChange={() => {
-                if (!isDisabled) onSelect(type.id);
+                if (!isDisabled) onSelect(type.methodId);
               }}
               disabled={isDisabled}
               className="sr-only"
@@ -149,7 +104,7 @@ export function TransferMethodSelector({
               <div className="flex flex-col min-w-0">
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium text-[color:var(--heritage-navy)] truncate">
-                    {type.name}
+                    {type.displayName}
                   </span>
                   {type.badge && (
                     <span className="shrink-0 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
@@ -158,7 +113,7 @@ export function TransferMethodSelector({
                   )}
                 </div>
                 <span className="text-[11px] text-muted-foreground truncate">
-                  {type.fee === "$0.00" ? "Free" : type.fee} • {type.processingTime}
+                  {type.feeLabel === "$0.00" ? "Free" : type.feeLabel} • {type.processingTime}
                 </span>
               </div>
             </div>
@@ -166,7 +121,7 @@ export function TransferMethodSelector({
             {/* Expandable description only shown when active to save space */}
             {isActive && (
               <div className="mt-3 text-[11px] text-muted-foreground animate-in fade-in slide-in-from-top-1">
-                {type.description}. {type.deliveryEstimate}.
+                {type.description}
               </div>
             )}
           </label>
