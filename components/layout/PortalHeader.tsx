@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { User, Globe, Menu } from "lucide-react";
+import { User, Globe, Menu, Shield } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import {
@@ -52,14 +52,14 @@ export function PortalHeader({
           </Button>
           
           <Link href="/dashboard" className="flex items-center gap-3 h-full ml-1 md:ml-0">
-            <div className="relative h-12 w-40 md:w-48">
-              <Image
-                src="/portal-logo.svg"
-                alt="JP Heritage"
-                fill
-                className="object-contain"
-                priority
-              />
+            <div className="flex items-center gap-3 ml-2">
+              <div className="w-9 h-9 rounded-xl bg-[color:var(--heritage-gold)] flex items-center justify-center shadow-gold-glow flex-shrink-0">
+                <Shield className="w-5 h-5 text-white" strokeWidth={2} />
+              </div>
+              <div className="flex flex-col leading-none">
+                <span className="text-[9px] font-medium text-[color:var(--heritage-gold)] tracking-[0.2em] uppercase">JP Heritage</span>
+                <span className="text-base font-bold text-white tracking-wide font-playfair">BANK</span>
+              </div>
             </div>
           </Link>
         </div>

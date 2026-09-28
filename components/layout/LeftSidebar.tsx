@@ -37,7 +37,7 @@ function SidebarTrigger({
     <Button
       variant="ghost"
       size="icon"
-      className={cn("h-[30px] w-[30px]", className)}
+      className={cn("h-[30px] w-[30px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-gold)]", className)}
       onClick={onClick}
       {...props}>
       <PanelLeft className="h-[18px] w-[18px]" />
@@ -63,11 +63,19 @@ export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside
-      className={cn(
-        "sticky top-0 h-screen border-r border-[color:var(--heritage-navy)]/15 bg-[color:var(--heritage-surface)]/95 backdrop-blur-md transition-all duration-300 ease-in-out z-[60] flex flex-col shrink-0",
-        isOpen ? "w-64" : "w-16"
-      )}>
+    <>
+      {/* Mobile overlay */}
+      {isOpen && (
+        <div
+          className="fixed inset-0 bg-black/50 z-[50] lg:hidden"
+          onClick={onToggle}
+        />
+      )}
+      <aside
+        className={cn(
+          "fixed inset-y-0 left-0 lg:sticky lg:top-0 h-screen border-r border-[color:var(--heritage-navy)]/15 bg-[color:var(--heritage-surface)]/95 backdrop-blur-md transition-all duration-300 ease-in-out z-[60] flex flex-col shrink-0",
+          isOpen ? "translate-x-0 w-64 shadow-2xl lg:shadow-none" : "-translate-x-full lg:translate-x-0 w-64 lg:w-16"
+        )}>
       {/* Sidebar Header with Trigger */}
       <div
         className={cn(
@@ -90,9 +98,8 @@ export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
                 <div key={item.name} className="relative group/item">
                   <Link
                     href={item.href}
-                    className={cn(
-                      // Fix #3: Replace gold accent-foreground active state with a clear navy highlight
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors",
+                      className={cn(
+                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-gold)]",
                       isActive
                         ? "bg-[color:var(--heritage-navy)] text-white shadow-sm"
                         : "text-[color:var(--heritage-navy)]/70 hover:bg-[color:var(--heritage-navy)]/10 hover:text-[color:var(--heritage-navy)]",
@@ -129,7 +136,7 @@ export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
             <button
               onClick={() => signOut({ callbackUrl: "/login" })} // Fix #33: fallback to /login not localhost:3002
               className={cn(
-                "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-red-600/80 hover:bg-red-50 hover:text-red-700",
+                "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-red-600/80 hover:bg-red-50 hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500",
                 !isOpen && "justify-center px-0 w-auto",
               )}>
               <VintageIcon
@@ -151,6 +158,7 @@ export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
           </div>
         </div>
       </div>
-    </aside>
+      </aside>
+    </>
   );
 }

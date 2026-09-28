@@ -27,12 +27,15 @@ export function MobileBottomNav() {
               key={item.name}
               href={item.href}
               className={cn(
-                "flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors",
+                "relative flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-gold)] focus-visible:ring-offset-2",
                 isActive 
-                  ? "text-[color:var(--heritage-gold)]" 
-                  : "text-muted-foreground hover:text-[color:var(--heritage-gold)]/80"
+                  ? "text-[color:var(--heritage-navy)] font-semibold" 
+                  : "text-muted-foreground hover:text-[color:var(--heritage-navy)]/80"
               )}
             >
+              {isActive && (
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-[color:var(--heritage-gold)] rounded-b-md" />
+              )}
               <Icon className="h-5 w-5" />
               <span className="text-[10px] font-medium">{item.name}</span>
             </Link>

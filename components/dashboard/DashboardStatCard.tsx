@@ -39,14 +39,12 @@ export function DashboardStatCard({
       )}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        {/* Fix #1: title contrast white/70 → white (full opacity) */}
         <CardTitle className="text-sm font-medium text-white/90">{title}</CardTitle>
         <Icon className="h-4 w-4 text-[color:var(--heritage-gold)]" />
       </CardHeader>
       <CardContent>
-        <div className="text-2xl font-bold font-playfair">{value}</div>
+        <div className="text-2xl font-bold font-inter tabular-nums lining-nums">{value}</div>
         {change && <p className={cn('text-xs mt-1 font-medium', changeColor)}>{change}</p>}
-        {/* Fix #1: subtitle contrast white/50 → white/75 */}
         {subtitle && <p className="text-xs text-white/75 mt-1">{subtitle}</p>}
       </CardContent>
     </Card>

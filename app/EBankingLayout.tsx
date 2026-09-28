@@ -142,17 +142,7 @@ export default function EBankingLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-white relative isolate">
-      {/* Background Image Layer */}
-      <div className="fixed inset-0 z-[-1] bg-black">
-        <Image
-          src="/images/portal-bg.webp"
-          alt="JP Heritage portal background"
-          fill
-          className="object-cover opacity-60"
-          priority
-        />
-      </div>
+    <div className="flex min-h-screen bg-[color:var(--heritage-surface)] relative isolate">
 
       <MobileInstallPrompt />
 
@@ -175,12 +165,12 @@ export default function EBankingLayout({ children }: { children: ReactNode }) {
         />
         <main
           className={cn(
-            "flex-1 px-4 py-6 md:px-8 pb-24 md:pb-6",
+            "flex-1 px-4 py-6 md:px-8 pb-[calc(4rem+env(safe-area-inset-bottom)+1rem)] md:pb-6",
             "transition-all duration-300 ease-in-out",
           )}>
           {children}
         </main>
-        <Footer />
+        <Footer isSlim={true} />
       </div>
 
       <RightSidebar

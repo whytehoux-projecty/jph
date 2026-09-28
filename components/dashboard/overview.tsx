@@ -7,6 +7,8 @@ import {
   XAxis,
   YAxis,
   Tooltip,
+  CartesianGrid,
+  Legend,
 } from "recharts";
 import Link from "next/link";
 import { BarChart3 } from "lucide-react";
@@ -55,15 +57,16 @@ export function Overview({ data, income, expense }: OverviewProps) {
   return (
     <ResponsiveContainer width="100%" height={350}>
       <BarChart data={chartData}>
+        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
         <XAxis
           dataKey="name"
-          stroke="#aaaaaa"
+          stroke="#888888"
           fontSize={12}
           tickLine={false}
           axisLine={false}
         />
         <YAxis
-          stroke="#aaaaaa"
+          stroke="#888888"
           fontSize={12}
           tickLine={false}
           axisLine={false}
@@ -73,19 +76,20 @@ export function Overview({ data, income, expense }: OverviewProps) {
           formatter={(value: number) => [`$${value.toFixed(2)}`, ""]}
           cursor={{ fill: "transparent" }}
         />
+        <Legend iconType="circle" wrapperStyle={{ fontSize: '12px' }} />
         <Bar
           dataKey="income"
           fill="#D4AF7A" // Gold
           name="Income"
           radius={[4, 4, 0, 0]}
-          barSize={60}
+          barSize={40}
         />
         <Bar
           dataKey="expense"
-          fill="#dc2626" // Red
+          fill="#8c3131" // Burgundy/Brick Red
           name="Expense"
           radius={[4, 4, 0, 0]}
-          barSize={60}
+          barSize={40}
         />
       </BarChart>
     </ResponsiveContainer>

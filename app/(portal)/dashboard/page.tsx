@@ -16,6 +16,8 @@ import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { DashboardStatCard } from "@/components/dashboard/DashboardStatCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { SpendingByCategory } from "@/components/dashboard/SpendingByCategory";
+import { AccountsList } from "@/components/dashboard/AccountsList";
+import { PendingApprovals } from "@/components/dashboard/PendingApprovals";
 import { getProfile } from "@/app/actions/profile";
 import { getAccounts } from "@/app/actions/accounts";
 import { getTransactions, getTransactionStats } from "@/app/actions/transactions";
@@ -87,6 +89,17 @@ export default async function DashboardPage() {
     processedAt: t.processedAt?.toISOString(),
   }));
 
+  const pendingItems = (allTransactions || [])
+    .filter((t: any) => t.status === "PENDING" || t.status === "processing")
+    .map((t: any) => ({
+      id: t.id,
+      type: t.transactionType || "Wire Transfer",
+      description: t.description || "Pending transaction",
+      amount: Math.abs(t.amount),
+      currency: t.currency || currency,
+      date: t.createdAt.toISOString(),
+    }));
+
   const getGreeting = () => {
     const hour = new Date().getHours();
     if (hour < 12) {
@@ -109,12 +122,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex-1 space-y-6 p-6 pt-4">
-      <div className="flex items-center justify-between space-y-2 pb-4">
-        <h2 className="text-3xl font-bold tracking-tight font-playfair">
+      <div className="flex items-center justify-between space-y-2 pb-4 bg-[color:var(--heritage-navy)] text-white p-6 rounded-xl shadow-md mb-6 -mx-2 md:mx-0">
+        <h2 className="text-3xl font-bold tracking-tight font-playfair text-white">
           {getGreeting()}, {user?.firstName || "there"}
         </h2>
         <div className="flex items-center space-x-2">
-          <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-[color:var(--heritage-navy)] text-white hover:bg-[color:var(--heritage-navy-mid)] shadow-vintage-md hover:shadow-vintage-lg hover:-translate-y-0.5 h-9 px-4 text-sm">
+          <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white text-[color:var(--heritage-navy)] hover:bg-gray-100 shadow-vintage-md hover:-translate-y-0.5 h-9 px-4 text-sm">
             Refresh Data
           </Link>
         </div>
@@ -139,7 +152,7 @@ export default async function DashboardPage() {
             </div>
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
             <DashboardStatCard
               title={translate(language, "overview.totalBalance") || "Total Balance"}
               value={formatCurrency(totalBalance, currency, languageToLocale(language))}
@@ -157,7 +170,7 @@ export default async function DashboardPage() {
             />
             <DashboardStatCard
               title={translate(language, "overview.expensesMonth") || "Expenses (Month)"}
-              value={`-${formatCurrency(expenses, currency, languageToLocale(language))}`}
+              value={`−${formatCurrency(expenses, currency, languageToLocale(language))}`}
               icon={ArrowUpRight}
               changeType="negative"
               subtitle={translate(language, "overview.withdrawalsTransfers") || "Withdrawals & transfers"}
@@ -172,23 +185,28 @@ export default async function DashboardPage() {
             />
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="col-span-4 animate-scale-in hover-lift">
+          <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
+            <Card className="col-span-1 lg:col-span-4 animate-scale-in hover-lift">
               <CardHeader>
                 <CardTitle>Overview</CardTitle>
               </CardHeader>
               <CardContent className="pl-2">
                 <ErrorBoundary>
-                  <Overview income={income} expense={expenses} />
+                  <Overview data={analyticsData.slice(-6)} />
                 </ErrorBoundary>
               </CardContent>
             </Card>
-            <Card className="col-span-3 animate-slide-in-right hover-lift">
-              <CardHeader>
-                <CardTitle>Recent Transactions</CardTitle>
-                <CardDescription>
-                  Latest activity across all accounts.
-                </CardDescription>
+            <Card className="col-span-1 lg:col-span-3 animate-slide-in-right hover-lift">
+              <CardHeader className="flex flex-row items-center justify-between pb-2">
+                <div className="space-y-1">
+                  <CardTitle>Recent Transactions</CardTitle>
+                  <CardDescription>
+                    Latest activity across all accounts.
+                  </CardDescription>
+                </div>
+                <Link href="/transactions" className="text-sm font-medium text-[color:var(--heritage-gold)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] rounded-md px-1">
+                  View all
+                </Link>
               </CardHeader>
               <CardContent>
                 <ErrorBoundary>
@@ -197,11 +215,24 @@ export default async function DashboardPage() {
               </CardContent>
             </Card>
           </div>
+
+          <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
+            <div className="col-span-1 lg:col-span-4">
+              <ErrorBoundary>
+                <AccountsList accounts={accounts} language={language} />
+              </ErrorBoundary>
+            </div>
+            <div className="col-span-1 lg:col-span-3">
+              <ErrorBoundary>
+                <PendingApprovals items={pendingItems} language={language} />
+              </ErrorBoundary>
+            </div>
+          </div>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-7">
-            <Card className="col-span-4">
+          <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
+            <Card className="col-span-1 lg:col-span-4">
               <CardHeader>
                 <CardTitle>Financial Analysis</CardTitle>
                 <CardDescription>Income vs Expenses over time</CardDescription>
@@ -212,7 +243,7 @@ export default async function DashboardPage() {
                 </ErrorBoundary>
               </CardContent>
             </Card>
-            <div className="col-span-3 space-y-4">
+            <div className="col-span-1 lg:col-span-3 space-y-4">
               <Card>
                 <CardHeader>
                   <CardTitle>Savings Progress</CardTitle>
@@ -223,7 +254,7 @@ export default async function DashboardPage() {
                 <CardContent className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
                     <span className="font-medium">Total Saved</span>
-                    <span className="font-bold">
+                    <span className="font-bold font-inter tabular-nums lining-nums">
                       {formatCurrency(totalBalance)}
                     </span>
                   </div>

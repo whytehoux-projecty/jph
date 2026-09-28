@@ -33,7 +33,7 @@ const quickActions: QuickAction[] = [
     description: "Utilities & cards",
     href: "/bills",
     icon: Receipt,
-    variant: "charcoal",
+    variant: "gold",
   },
   {
     title: "Add Transaction",
@@ -47,7 +47,7 @@ const quickActions: QuickAction[] = [
     description: "Balances & details",
     href: "/accounts",
     icon: Wallet,
-    variant: "green",
+    variant: "gold",
   },
 ];
 
@@ -55,29 +55,29 @@ export function QuickActions() {
   return (
     <Card className="border-none shadow-none bg-transparent">
       <CardHeader className="px-0 pt-0 pb-4">
-        <CardTitle className="text-lg font-playfair">Quick Actions</CardTitle>
+        <CardTitle className="text-xl font-playfair text-[color:var(--heritage-navy)]">Quick Actions</CardTitle>
       </CardHeader>
       <CardContent className="px-0">
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-1">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           {quickActions.map((action) => (
             <Link
               key={action.title}
               href={action.href}
-              className="group relative flex flex-col items-start p-4 rounded-none border bg-card hover:shadow-md transition-all duration-300 hover:-translate-y-1">
-              <div className="flex w-full items-start justify-between mb-3">
+              className="group relative flex flex-col items-start p-5 rounded-xl border border-[color:var(--heritage-navy)]/10 bg-white shadow-vintage-sm hover:shadow-vintage-md transition-all duration-300 hover:-translate-y-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-gold)]">
+              <div className="flex w-full items-start justify-between mb-4">
                 <VintageIcon
                   icon={action.icon}
                   variant={action.variant}
-                  size="sm"
-                  className="rounded-none"
+                  size="md"
+                  className="rounded-lg"
                 />
-                <ArrowUpRight className="h-4 w-4 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity duration-300 -mr-1 -mt-1" />
+                <ArrowUpRight className="h-4 w-4 text-[color:var(--heritage-navy)]/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
               </div>
 
-              <h4 className="font-semibold text-sm mb-1 group-hover:text-primary transition-colors">
+              <h4 className="font-semibold text-sm mb-1 text-[color:var(--heritage-navy)] group-hover:text-[color:var(--heritage-gold)] transition-colors">
                 {action.title}
               </h4>
-              <p className="text-xs text-muted-foreground line-clamp-1">
+              <p className="text-[13px] text-muted-foreground line-clamp-1">
                 {action.description}
               </p>
             </Link>

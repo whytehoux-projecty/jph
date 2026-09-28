@@ -90,18 +90,18 @@ const socialLinks = [
     { icon: LinkedinIcon, label: 'LinkedIn', href: '#' },
 ];
 
-export function Footer({ isAbsolute }: { isAbsolute?: boolean } = {}) {
-    if (isAbsolute) {
+export function Footer({ isAbsolute, isSlim }: { isAbsolute?: boolean, isSlim?: boolean } = {}) {
+    if (isAbsolute || isSlim) {
         return (
-            <footer className="absolute bottom-0 left-0 right-0 z-20 bg-[#091C38]/80 backdrop-blur-sm text-white py-3">
-                <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-2 max-w-7xl">
-                    <p className="text-xs text-white/40 text-center">
-                        &copy; {new Date().getFullYear()} JP Heritage Bank N.A. All rights reserved. Member FDIC.
+            <footer className={isAbsolute ? "absolute bottom-0 left-0 right-0 z-20 bg-[#091C38]/80 backdrop-blur-sm text-white py-3" : "w-full bg-[#091C38] text-white py-4 mt-auto"}>
+                <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 max-w-7xl">
+                    <p className="text-[11px] text-white/50 text-center">
+                        &copy; {new Date().getFullYear()} JP Heritage Bank N.A. All rights reserved. Member FDIC. Support: {BANK_INFO.phone}
                     </p>
                     <div className="flex gap-4">
-                        <a href="/privacy" className="text-xs text-white/40 hover:text-white/70 transition-colors">Privacy</a>
-                        <a href="/terms" className="text-xs text-white/40 hover:text-white/70 transition-colors">Terms</a>
-                        <a href="/security" className="text-xs text-white/40 hover:text-white/70 transition-colors">Security</a>
+                        <a href="/privacy" className="text-[11px] text-white/50 hover:text-white/80 transition-colors">Privacy</a>
+                        <a href="/terms" className="text-[11px] text-white/50 hover:text-white/80 transition-colors">Terms</a>
+                        <a href="/security" className="text-[11px] text-white/50 hover:text-white/80 transition-colors">Security</a>
                     </div>
                 </div>
             </footer>

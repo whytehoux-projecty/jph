@@ -5,10 +5,12 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { formatCurrency } from "@/lib/utils";
 import {
   Receipt,
-  ArrowRight,
+  ArrowDownLeft,
+  ArrowUpRight,
   Clock,
   AlertTriangle,
   ShieldAlert,
+  ArrowRight,
 } from "lucide-react";
 import Link from "next/link";
 import { Button, buttonVariants } from "@/components/ui/Button";
@@ -203,30 +205,40 @@ export function RecentTransactions({
           {filteredTransactions.map((tx) => {
             const isPositive =
               tx.type === "DEPOSIT" ||
-              (tx.type === "TRANSFER" && tx.amount > 0);
+              (tx.type === "TRANSFER" && tx.amount > 0) || tx.amount > 0;
             const amountColor = isPositive
-              ? "text-vintage-green"
-              : "text-red-600";
-            const sign = isPositive ? "+" : "";
+              ? "text-emerald-600 dark:text-emerald-400"
+              : "text-red-600 dark:text-red-400";
+            const sign = isPositive ? "+" : "−";
+            const Icon = isPositive ? ArrowDownLeft : ArrowUpRight;
+            const iconBg = isPositive ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600" : "bg-red-100 dark:bg-red-900/30 text-red-600";
+            const status = (tx.status || "COMPLETED").toUpperCase();
 
             return (
               <div key={tx.id} className="flex items-center">
-                <Avatar className="h-9 w-9">
-                  <AvatarFallback>
-                    {tx.description.substring(0, 2).toUpperCase()}
-                  </AvatarFallback>
-                </Avatar>
-                <div className="ml-4 space-y-1">
-                  <p className="text-sm font-medium leading-none truncate max-w-[200px]">
-                    {tx.description}
-                  </p>
-                  <p className="text-sm text-muted-foreground">
-                    {new Date(tx.createdAt).toLocaleDateString()}
+                <div className={cn("p-2 rounded-full shrink-0", iconBg)}>
+                  <Icon className="h-4 w-4" />
+                </div>
+                <div className="ml-4 space-y-1 overflow-hidden">
+                  <div className="flex items-center">
+                    <p className="text-sm font-medium leading-none truncate max-w-[200px]" title={tx.description}>
+                      {tx.description.charAt(0).toUpperCase() + tx.description.slice(1).toLowerCase()}
+                    </p>
+                    <span className={cn(
+                      "text-[10px] px-1.5 py-0.5 rounded-sm font-medium ml-2 uppercase shrink-0",
+                      status === "PENDING" ? "bg-amber-100 text-amber-700" :
+                      status === "REJECTED" ? "bg-red-100 text-red-700" :
+                      "bg-emerald-100 text-emerald-700"
+                    )}>
+                      {status}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {new Date(tx.createdAt).toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" })}
                   </p>
                 </div>
-                <div className={`ml-auto font-medium ${amountColor}`}>
-                  {sign}
-                  {formatCurrency(tx.amount)}
+                <div className={`ml-auto font-medium font-inter tabular-nums lining-nums ${amountColor}`}>
+                  {sign}{formatCurrency(Math.abs(tx.amount))}
                 </div>
               </div>
             );
