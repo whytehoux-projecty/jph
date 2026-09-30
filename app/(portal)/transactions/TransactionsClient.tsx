@@ -35,6 +35,13 @@ import {
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/input";
 import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import {
   Select,
   SelectContent,
   SelectItem,
@@ -93,20 +100,23 @@ function ExportOptions({
   onDownloadStatement,
 }: ExportOptionsProps) {
   return (
-    <div className="flex flex-col sm:flex-row gap-2">
-      <Button
-        variant="outline"
-        icon={<Download className="w-4 h-4" />}
-        onClick={onExportCsv}>
-        Export CSV
-      </Button>
-      <Button
-        variant="primary"
-        icon={<FileText className="w-4 h-4" />}
-        onClick={onDownloadStatement}>
-        Download statement
-      </Button>
-    </div>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline" className="h-9">
+          <Download className="w-4 h-4 mr-2" />
+          Export
+          <ChevronDown className="w-4 h-4 ml-2" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end" className="w-48">
+        <DropdownMenuItem onClick={onExportCsv}>
+          <FileText className="w-4 h-4 mr-2" /> Export CSV
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onDownloadStatement}>
+          <FileText className="w-4 h-4 mr-2" /> Download Statement
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }
 
@@ -335,21 +345,13 @@ function TransactionRow({
   return (
     <Fragment key={tx.id}>
       <TableRow data-testid="transaction-item">
-        <TableCell className="w-[40px]" onClick={(e) => e.stopPropagation()}>
-          <input
-            type="checkbox"
-            className="h-4 w-4"
-            checked={isSelected}
-            onChange={() => onToggleSelect(tx.id)}
-            aria-label="Select transaction"
-          />
-        </TableCell>
+        
         <TableCell>
           <div className="flex justify-center w-8">
-            {Number(tx.amount) > 0 ? (
+            {!(tx.type === "WITHDRAWAL" || tx.type === "DEBIT" || Number(tx.amount) < 0) ? (
               <ArrowDownLeft className="h-4 w-4 text-green-600" />
             ) : (
-              <ArrowUpRight className="h-4 w-4 text-red-600" />
+              <ArrowUpRight className="h-4 w-4 text-[#091C38]" />
             )}
           </div>
         </TableCell>
@@ -423,8 +425,8 @@ function TransactionRow({
           </div>
         </TableCell>
         <TableCell
-          className={`text-right font-mono font-semibold ${Number(tx.amount) > 0 ? "text-green-600" : "text-foreground"}`}>
-          {Number(tx.amount) > 0 ? "+" : ""}
+          className={`text-right font-mono font-semibold ${!(tx.type === "WITHDRAWAL" || tx.type === "DEBIT" || Number(tx.amount) < 0) ? "text-green-600" : "text-[#091C38]"}`}>
+          {!(tx.type === "WITHDRAWAL" || tx.type === "DEBIT" || Number(tx.amount) < 0) ? "+" : "-"}
           {new Intl.NumberFormat("en-US", {
             style: "currency",
             currency: "USD",
@@ -432,63 +434,37 @@ function TransactionRow({
         </TableCell>
         <TableCell className="text-right">
           {(() => {
-            const normalizedStatus = String(tx.status || "").toUpperCase();
-            let variant:
-              | "default"
-              | "secondary"
-              | "destructive"
-              | "outline"
-              | "success"
-              | "warning" = "default";
-            let label = normalizedStatus || "UNKNOWN";
-            let dotClasses = "";
-
+            const normalizedStatus = String(tx.status || "UNKNOWN").toUpperCase();
+            let sealClasses = "";
+            let label = normalizedStatus;
             switch (normalizedStatus) {
               case "COMPLETED":
-                variant = "success";
-                label = "Completed";
-                dotClasses = "bg-green-500";
+                sealClasses = "bg-[#091C38] text-white border-[#091C38]";
+                label = "COMPLETED";
                 break;
               case "PENDING":
-                variant = "warning";
-                label = "Pending";
-                dotClasses = "bg-yellow-500 animate-pulse";
+                sealClasses = "bg-transparent text-[#D4AF37] border-[#D4AF37]";
+                label = "PENDING";
                 break;
               case "FAILED":
-                variant = "destructive";
-                label = "Failed";
-                dotClasses = "bg-red-500";
+              case "REJECTED":
+              case "DISPUTED":
+                sealClasses = "bg-[#b91c1c] text-white border-[#b91c1c]";
+                label = normalizedStatus;
                 break;
               case "CANCELLED":
-                variant = "secondary";
-                label = "Cancelled";
-                dotClasses = "bg-slate-400";
-                break;
-              case "DISPUTED":
-                variant = "destructive";
-                label = "Disputed";
-                dotClasses = "bg-amber-500";
+                sealClasses = "bg-transparent text-slate-500 border-slate-400";
+                label = "CANCELLED";
                 break;
               default:
-                variant = "default";
-                label =
-                  normalizedStatus.charAt(0) +
-                    normalizedStatus.slice(1).toLowerCase() || "Unknown";
-                dotClasses = "";
+                sealClasses = "bg-transparent text-slate-500 border-slate-300";
+                label = normalizedStatus || "UNKNOWN";
                 break;
             }
-
             return (
-              <Badge
-                variant={variant}
-                className="text-[10px] inline-flex items-center">
-                {dotClasses && (
-                  <span
-                    className={`inline-block h-1.5 w-1.5 rounded-full mr-1.5 ${dotClasses}`}
-                  />
-                )}
+              <span className={`inline-block px-1.5 py-0.5 border text-[9px] uppercase tracking-wider font-semibold rounded-none ${sealClasses}`}>
                 {label}
-              </Badge>
+              </span>
             );
           })()}
         </TableCell>
@@ -727,6 +703,27 @@ function TransactionsAnalytics({
   filteredTransactions,
   liveMessage,
 }: TransactionsAnalyticsProps) {
+  const spendByCategory = new Map<string, number>();
+  let categorizedCount = 0;
+  for (const tx of filteredTransactions) {
+    if (!(tx.type === "WITHDRAWAL" || tx.type === "DEBIT" || Number(tx.amount) < 0)) continue;
+    if (tx.category) categorizedCount++;
+    const key = tx.category || "Uncategorized";
+    const current = spendByCategory.get(key) || 0;
+    spendByCategory.set(key, current + Math.abs(Number(tx.amount)));
+  }
+
+  if (categorizedCount < 3) {
+    return null; // Hide until there are at least a few categorized entries
+  }
+
+  const items = Array.from(spendByCategory.entries())
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 4);
+
+  const total = items.reduce((sum, [, val]) => sum + val, 0) || 1;
+  const colors = ['bg-[#091C38]', 'bg-[#D4AF37]', 'bg-slate-400', 'bg-[#b91c1c]'];
+
   return (
     <Card>
       <CardHeader>
@@ -738,114 +735,24 @@ function TransactionsAnalytics({
           {liveMessage || `Showing ${filteredTransactions.length} transactions`}
         </div>
       </CardHeader>
-      <CardContent className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div>
-          <p className="text-xs font-semibold text-muted-foreground mb-2">
-            Top categories by spend
-          </p>
-          {(() => {
-            const spendByCategory = new Map<string, number>();
-            for (const tx of filteredTransactions) {
-              const amount = Number(tx.amount);
-              if (!(tx.type === "WITHDRAWAL" || amount < 0)) continue;
-              const key = tx.category || "Uncategorized";
-              const current = spendByCategory.get(key) || 0;
-              spendByCategory.set(key, current + Math.abs(amount));
-            }
-            const items = Array.from(spendByCategory.entries())
-              .sort((a, b) => b[1] - a[1])
-              .slice(0, 3);
-            if (items.length === 0) {
-              return (
-                <p className="text-xs text-muted-foreground">
-                  No spending data for the selected filters.
-                </p>
-              );
-            }
-            const max = items[0][1] || 1;
-            return (
-              <ul className="space-y-2">
-                {items.map(([cat, value]) => (
-                  <li key={cat} className="flex items-center gap-2">
-                    <div className="flex-1">
-                      <div className="flex justify-between text-[11px] mb-1">
-                        <span className="font-medium text-charcoal">{cat}</span>
-                        <span className="text-muted-foreground">
-                          {new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: "USD",
-                          }).format(value)}
-                        </span>
-                      </div>
-                      <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-red-300"
-                          style={{
-                            width: `${Math.max(6, (value / max) * 100)}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            );
-          })()}
+      <CardContent>
+        <div className="flex h-3 w-full rounded-full overflow-hidden mb-6">
+          {items.map(([cat, val], i) => (
+            <div key={cat} className={colors[i % colors.length]} style={{ width: `${(val / total) * 100}%` }} />
+          ))}
         </div>
-        <div>
-          <p className="text-xs font-semibold text-muted-foreground mb-2">
-            Top merchants by spend
-          </p>
-          {(() => {
-            const spendByMerchant = new Map<string, number>();
-            for (const tx of filteredTransactions) {
-              const amount = Number(tx.amount);
-              if (!(tx.type === "WITHDRAWAL" || amount < 0)) continue;
-              const key = tx.merchantName || tx.description || "Merchant";
-              const current = spendByMerchant.get(key) || 0;
-              spendByMerchant.set(key, current + Math.abs(amount));
-            }
-            const items = Array.from(spendByMerchant.entries())
-              .sort((a, b) => b[1] - a[1])
-              .slice(0, 3);
-            if (items.length === 0) {
-              return (
-                <p className="text-xs text-muted-foreground">
-                  No merchant data for the selected filters.
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {items.slice(0, 3).map(([cat, val], i) => (
+            <div key={cat} className="flex items-center gap-2">
+              <div className={`w-3 h-3 rounded-sm ${colors[i % colors.length]}`} />
+              <div className="flex-1 min-w-0">
+                <p className="text-[11px] font-semibold text-slate-900 truncate">{cat}</p>
+                <p className="text-xs text-slate-500 font-mono">
+                  {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(val)}
                 </p>
-              );
-            }
-            const max = items[0][1] || 1;
-            return (
-              <ul className="space-y-2">
-                {items.map(([merchant, value]) => (
-                  <li key={merchant} className="flex items-center gap-2">
-                    <div className="flex-1">
-                      <div className="flex justify-between text-[11px] mb-1">
-                        <span className="font-medium text-charcoal">
-                          {merchant}
-                        </span>
-                        <span className="text-muted-foreground">
-                          {new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: "USD",
-                          }).format(value)}
-                        </span>
-                      </div>
-                      <div className="h-1.5 rounded-full bg-slate-100 overflow-hidden">
-                        <div
-                          className="h-full rounded-full bg-red-300"
-                          style={{
-                            width: `${Math.max(6, (value / max) * 100)}%`,
-                          }}
-                        />
-                      </div>
-                    </div>
-                  </li>
-                ))}
-              </ul>
-            );
-          })()}
+              </div>
+            </div>
+          ))}
         </div>
       </CardContent>
     </Card>
@@ -1637,7 +1544,7 @@ export default function TransactionsClient({
   }
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto p-4 animate-fade-in-up">
+    <div className="space-y-8 max-w-7xl mx-auto animate-fade-in-up">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
@@ -1664,138 +1571,32 @@ export default function TransactionsClient({
         />
       </div>
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card
-          className={`flex flex-row items-center justify-between p-6 cursor-pointer transition-shadow hover:shadow-sm ${
-            kpiQuickFilter === "all" ? "ring-1 ring-charcoal/60 shadow-sm" : ""
-          }`}
-          onClick={() => handleKpiCardClick("all")}>
-          <div>
-            <p className="text-sm font-medium text-muted-foreground">
-              Total Transactions
-            </p>
-            <h2 className="text-2xl font-bold mt-1 text-charcoal">
-              {filteredTransactions.length}
-            </h2>
-            <p className="text-xs text-muted-foreground mt-1">{periodLabel}</p>
-            {transactionsDeltaPercent != null && (
-              <p className="text-xs mt-1 flex items-center gap-2">
-                <span
-                  className={`inline-flex items-center gap-1 ${
-                    transactionsDeltaPercent >= 0
-                      ? "text-vintage-green-dark"
-                      : "text-red-600"
-                  }`}>
-                  {transactionsDeltaPercent >= 0 ? (
-                    <TrendingUp className="h-3 w-3" />
-                  ) : (
-                    <TrendingDown className="h-3 w-3" />
-                  )}
-                  <span>{Math.abs(transactionsDeltaPercent).toFixed(1)}%</span>
-                </span>
-                <span className="text-muted-foreground">
-                  {datePreset === "30d"
-                    ? "vs previous 30 days"
-                    : datePreset === "7d"
-                      ? "vs previous 7 days"
-                      : "vs previous period"}
-                </span>
-              </p>
-            )}
+      {/* Summary Strip */}
+      <Card className="overflow-hidden border-t-[3px] border-t-[#D4AF37]">
+        <div className="grid grid-cols-3 md:grid-cols-4 divide-x divide-slate-100">
+          <div className="p-4 md:p-5 flex flex-col justify-center bg-white cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => handleKpiCardClick("income")}>
+            <span className="text-[11px] uppercase tracking-[0.1em] text-slate-500 font-semibold mb-1 font-inter">Money in</span>
+            <span className="font-mono text-[15px] md:text-lg text-green-700 tabular-nums lining-nums font-medium">+{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(totalIncome)}</span>
           </div>
-          <VintageIcon icon={Briefcase} variant="charcoal" size="lg" />
-        </Card>
-        <Card
-          className={`flex flex-row items-center justify-between p-6 bg-gradient-to-br from-vintage-green/10 to-transparent border-vintage-green/20 cursor-pointer transition-shadow hover:shadow-sm ${
-            kpiQuickFilter === "income"
-              ? "ring-1 ring-vintage-green-dark shadow-sm"
-              : ""
-          }`}
-          onClick={() => handleKpiCardClick("income")}>
-          <div>
-            <p className="text-sm font-medium text-vintage-green-dark">
-              Total Income
-            </p>
-            <h2 className="text-2xl font-bold mt-1 text-vintage-green font-mono">
-              +
-              {new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-              }).format(totalIncome)}
-            </h2>
-            <p className="text-xs text-muted-foreground mt-1">{periodLabel}</p>
-            {incomeDeltaPercent != null && (
-              <p className="text-xs mt-1 flex items-center gap-2">
-                <span
-                  className={`inline-flex items-center gap-1 ${
-                    incomeDeltaPercent >= 0
-                      ? "text-vintage-green-dark"
-                      : "text-red-600"
-                  }`}>
-                  {incomeDeltaPercent >= 0 ? (
-                    <TrendingUp className="h-3 w-3" />
-                  ) : (
-                    <TrendingDown className="h-3 w-3" />
-                  )}
-                  <span>{Math.abs(incomeDeltaPercent).toFixed(1)}%</span>
-                </span>
-                <span className="text-muted-foreground">
-                  {datePreset === "30d"
-                    ? "vs previous 30 days"
-                    : datePreset === "7d"
-                      ? "vs previous 7 days"
-                      : "vs previous period"}
-                </span>
-              </p>
-            )}
+          <div className="p-4 md:p-5 flex flex-col justify-center bg-white cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => handleKpiCardClick("expenses")}>
+            <span className="text-[11px] uppercase tracking-[0.1em] text-slate-500 font-semibold mb-1 font-inter">Money out</span>
+            <span className="font-mono text-[15px] md:text-lg text-slate-900 tabular-nums lining-nums font-medium">-{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(totalExpenses)}</span>
           </div>
-          <VintageIcon icon={TrendingUp} variant="green" size="lg" />
-        </Card>
-        <Card
-          className={`flex flex-row items-center justify-between p-6 bg-gradient-to-br from-red-50 to-transparent border-red-100 cursor-pointer transition-shadow hover:shadow-sm ${
-            kpiQuickFilter === "expenses" ? "ring-1 ring-red-500 shadow-sm" : ""
-          }`}
-          onClick={() => handleKpiCardClick("expenses")}>
-          <div>
-            <p className="text-sm font-medium text-red-700">Total Expenses</p>
-            <h2 className="text-2xl font-bold mt-1 text-red-600 font-mono">
-              -
-              {new Intl.NumberFormat("en-US", {
-                style: "currency",
-                currency: "USD",
-              }).format(totalExpenses)}
-            </h2>
-            <p className="text-xs text-muted-foreground mt-1">{periodLabel}</p>
-            {expensesDeltaPercent != null && (
-              <p className="text-xs mt-1 flex items-center gap-2">
-                <span
-                  className={`inline-flex items-center gap-1 ${
-                    expensesDeltaPercent <= 0
-                      ? "text-vintage-green-dark"
-                      : "text-red-600"
-                  }`}>
-                  {expensesDeltaPercent <= 0 ? (
-                    <TrendingDown className="h-3 w-3" />
-                  ) : (
-                    <TrendingUp className="h-3 w-3" />
-                  )}
-                  <span>{Math.abs(expensesDeltaPercent).toFixed(1)}%</span>
-                </span>
-                <span className="text-muted-foreground">
-                  {datePreset === "30d"
-                    ? "vs previous 30 days"
-                    : datePreset === "7d"
-                      ? "vs previous 7 days"
-                      : "vs previous period"}
-                </span>
-              </p>
-            )}
+          <div className="p-4 md:p-5 flex flex-col justify-center bg-white cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => handleKpiCardClick("all")}>
+            <span className="text-[11px] uppercase tracking-[0.1em] text-slate-500 font-semibold mb-1 font-inter">Net</span>
+            <span className="font-mono text-[15px] md:text-lg text-slate-900 tabular-nums lining-nums font-semibold">
+              {(totalIncome - totalExpenses) >= 0 ? "+" : ""}
+              {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(totalIncome - totalExpenses)}
+            </span>
           </div>
-          <VintageIcon icon={TrendingDown} variant="gold" size="lg" />{" "}
-          {/* Gold usage for contrast/vintage feel, or create Red variant if preferred */}
-        </Card>
-      </div>
+          <div className="hidden md:flex p-4 md:p-5 flex-col justify-center bg-white cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => setStatusFilters((prev) => prev.includes('PENDING') ? prev.filter(p => p !== 'PENDING') : [...prev, 'PENDING'])}>
+            <span className="text-[11px] uppercase tracking-[0.1em] text-slate-500 font-semibold mb-1 font-inter">Pending</span>
+            <span className="font-mono text-[15px] md:text-lg text-slate-900 tabular-nums lining-nums font-medium">
+              {filteredTransactions.filter(t => String(t.status).toUpperCase() === 'PENDING').length}
+            </span>
+          </div>
+        </div>
+      </Card>
 
       <TransactionsAnalytics
         filteredTransactions={filteredTransactions}
@@ -1819,42 +1620,23 @@ export default function TransactionsClient({
               )}
             </div>
 
-            {/* Search & Filter Toggles */}
+                        {/* Search & Filter Toggles */}
             <div className="flex flex-col md:flex-row items-stretch md:items-center gap-3 w-full md:w-auto">
               <div className="relative flex-1 md:w-64">
                 <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by merchant, description, category, or amount..."
+                  placeholder="Search description, reference or amount..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-9"
+                  className="pl-9 h-9"
                 />
               </div>
-              <Select
-                value={searchScope}
-                onValueChange={(value) =>
-                  setSearchScope(value as typeof searchScope)
-                }>
-                <SelectTrigger className="h-10 w-[160px] text-xs">
-                  <SelectValue placeholder="All fields" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All fields</SelectItem>
-                  <SelectItem value="description">
-                    Description & merchant
-                  </SelectItem>
-                  <SelectItem value="category">Category</SelectItem>
-                  <SelectItem value="amount">Amount</SelectItem>
-                  <SelectItem value="idref">ID or reference</SelectItem>
-                  <SelectItem value="notes">Notes</SelectItem>
-                </SelectContent>
-              </Select>
               <div className="flex items-center gap-2">
-                <div className="inline-flex rounded-full border bg-background px-1 py-0.5 text-[11px]">
+                <div className="inline-flex rounded bg-slate-100 p-0.5 text-[11px] font-medium">
                   {[
-                    { id: "30d", label: "Last 30 days" },
-                    { id: "7d", label: "Last 7 days" },
-                    { id: "all", label: "All time" },
+                    { id: "30d", label: "30D" },
+                    { id: "7d", label: "7D" },
+                    { id: "all", label: "All" },
                   ].map((preset) => (
                     <button
                       key={preset.id}
@@ -1862,45 +1644,26 @@ export default function TransactionsClient({
                       onClick={() =>
                         setDatePreset(preset.id as "30d" | "7d" | "all")
                       }
-                      className={`rounded-full px-3 py-1 transition-colors ${
+                      className={`rounded px-3 py-1 transition-colors ${
                         datePreset === preset.id
-                          ? "bg-charcoal text-white"
-                          : "text-muted-foreground hover:bg-slate-100/80"
+                          ? "bg-white text-charcoal shadow-sm"
+                          : "text-muted-foreground hover:text-charcoal"
                       }`}>
                       {preset.label}
-                    </button>
-                  ))}
-                </div>
-                <div className="hidden md:inline-flex rounded-full border bg-background px-1 py-0.5 text-[11px]">
-                  {[
-                    { id: "large", label: "Large transactions" },
-                    { id: "thisMonth", label: "This month" },
-                  ].map((view) => (
-                    <button
-                      key={view.id}
-                      type="button"
-                      onClick={() =>
-                        setQuickView((prev) =>
-                          prev === view.id
-                            ? "none"
-                            : (view.id as typeof quickView),
-                        )
-                      }
-                      className={`rounded-full px-3 py-1 transition-colors ${
-                        quickView === view.id
-                          ? "bg-charcoal text-white"
-                          : "text-muted-foreground hover:bg-slate-100/80"
-                      }`}>
-                      {view.label}
                     </button>
                   ))}
                 </div>
                 <Button
                   variant={showFilters ? "primary" : "outline"}
                   size="small"
-                  className="h-10"
+                  className="h-9 relative"
                   onClick={() => setShowFilters(!showFilters)}>
-                  <Filter className="w-4 h-4" />
+                  <Filter className="w-4 h-4 mr-1" /> Filters
+                  {(categoryFilters.length > 0 || transactionTypes.length > 0 || statusFilters.length > 0) && (
+                    <span className="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-[#B8960C] text-white text-[10px] flex items-center justify-center">
+                      {categoryFilters.length + transactionTypes.length + statusFilters.length}
+                    </span>
+                  )}
                 </Button>
               </div>
             </div>
@@ -2027,18 +1790,11 @@ export default function TransactionsClient({
             </div>
           )}
 
-          <Table wrapperClassName="max-h-[360px] md:max-h-[480px]">
+          <div className="hidden md:block">
+            <Table wrapperClassName="max-h-[480px]">
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[40px] sticky top-0 z-10 bg-background">
-                  <input
-                    type="checkbox"
-                    className="h-4 w-4"
-                    checked={allSelected}
-                    onChange={toggleSelectAll}
-                    aria-label="Select all transactions"
-                  />
-                </TableHead>
+                
                 <TableHead className="w-[80px] sticky top-0 z-10 bg-background">
                   Type
                 </TableHead>
@@ -2108,9 +1864,69 @@ export default function TransactionsClient({
                 </TableRow>
               )}
             </TableBody>
-          </Table>
+            </Table>
+          </div>
 
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-4 py-2 border-t text-xs text-muted-foreground">
+          {/* Mobile Ledger List */}
+          <ul className="md:hidden divide-y divide-slate-100 max-h-[480px] overflow-y-auto border-t border-slate-100">
+            {filteredTransactions.length > 0 ? (
+              pagedTransactions.map((tx) => {
+                const isSelected = selectedIds.includes(tx.id);
+                const isExpanded = expandedRows.includes(tx.id);
+                const amount = Number(tx.amount);
+                const out = tx.type === "WITHDRAWAL" || tx.type === "DEBIT" || amount < 0;
+                const normalizedStatus = String(tx.status || "UNKNOWN").toUpperCase();
+                
+                let sealClasses = "bg-transparent text-slate-500 border-slate-300";
+                if (normalizedStatus === "COMPLETED") sealClasses = "bg-[#091C38] text-white border-[#091C38]";
+                else if (normalizedStatus === "PENDING") sealClasses = "bg-transparent text-[#D4AF37] border-[#D4AF37]";
+                else if (["FAILED", "REJECTED", "DISPUTED"].includes(normalizedStatus)) sealClasses = "bg-[#b91c1c] text-white border-[#b91c1c]";
+                else if (normalizedStatus === "CANCELLED") sealClasses = "bg-transparent text-slate-500 border-slate-400";
+                
+                return (
+                  <li key={tx.id} className="grid grid-cols-[auto,1fr,auto] gap-3 p-4 bg-white" onClick={() => toggleRowExpanded(tx.id)}>
+                    <div className="flex items-start pt-1">
+                      {out ? (
+                        <div className="w-5 h-5 bg-[#091C38] rounded-full flex items-center justify-center text-white" aria-label="Money out"><ArrowDownLeft className="w-3 h-3" /></div>
+                      ) : (
+                        <div className="w-5 h-5 bg-green-700 rounded-full flex items-center justify-center text-white" aria-label="Money in"><ArrowUpRight className="w-3 h-3" /></div>
+                      )}
+                    </div>
+                    <div className="min-w-0">
+                      <p className="truncate font-medium text-slate-900 text-sm">{tx.title || tx.description}</p>
+                      <p className="font-mono text-[11px] text-slate-500 mt-0.5 truncate">
+                        {tx.reference || tx.id.slice(0, 8)} · {tx.methodLabel || tx.category || "Transfer"}
+                      </p>
+                      {isExpanded && (
+                        <div className="mt-3 pt-3 border-t border-slate-100 space-y-2 text-xs text-slate-600">
+                          <div className="grid grid-cols-2 gap-2">
+                            <div><span className="block text-[10px] text-slate-400 uppercase tracking-widest font-semibold mb-0.5">Date</span>{new Date(tx.createdAt || tx.date).toLocaleDateString()}</div>
+                            <div><span className="block text-[10px] text-slate-400 uppercase tracking-widest font-semibold mb-0.5">Account</span>{tx.accountName || "—"}</div>
+                          </div>
+                          <div className="flex flex-wrap gap-2 pt-2">
+                             <Button variant="outline" size="small" className="h-7 text-[10px]" onClick={(e) => { e.stopPropagation(); handleExportReceipt(tx); }}>Receipt</Button>
+                             <Button variant="outline" size="small" className="h-7 text-[10px]" onClick={(e) => { e.stopPropagation(); handleDisputeStart(tx); }}>Dispute</Button>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    <div className="text-right flex flex-col items-end">
+                      <div className={cn("font-mono text-sm font-medium tabular-nums lining-nums mb-1.5", out ? "text-slate-900" : "text-green-700")}>
+                        {out ? "" : "+"}{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Math.abs(Number(tx.amount)))}
+                      </div>
+                      <span className={`inline-block px-1.5 py-0.5 border text-[9px] uppercase tracking-wider font-semibold rounded-none ${sealClasses}`}>
+                        {normalizedStatus}
+                      </span>
+                    </div>
+                  </li>
+                );
+              })
+            ) : (
+              <li className="p-8 text-center text-sm text-slate-500">No entries match these filters</li>
+            )}
+          </ul>
+
+          {totalPages > 1 && (<div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 px-4 py-2 border-t text-xs text-muted-foreground">
             <div className="flex items-center gap-3">
               <div>
                 {filteredTransactions.length === 0 ? (
@@ -2201,7 +2017,7 @@ export default function TransactionsClient({
                 Last
               </Button>
             </div>
-          </div>
+          </div>)}
         </CardContent>
       </Card>
 

@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ArrowLeftRight, CreditCard, Settings } from "lucide-react";
+import { LayoutDashboard, ArrowLeftRight, CreditCard, Menu, List } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const navItems = [
   { name: "Home", href: "/dashboard", icon: LayoutDashboard },
+  { name: "Activity", href: "/transactions", icon: List },
   { name: "Transfer", href: "/transfer", icon: ArrowLeftRight },
   { name: "Cards", href: "/cards", icon: CreditCard },
-  { name: "Settings", href: "/settings", icon: Settings },
+  { name: "More", href: "/settings", icon: Menu }, // Or another appropriate icon for More
 ];
 
 export function MobileBottomNav() {

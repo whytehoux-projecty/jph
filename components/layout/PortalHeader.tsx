@@ -50,15 +50,15 @@ export function PortalHeader({
             onClick={onToggleLeftSidebar}>
             <Menu className="h-5 w-5" />
           </Button>
-          
-          <Link href="/dashboard" className="flex items-center gap-3 h-full ml-1 md:ml-0">
-            <div className="flex items-center gap-3 ml-2">
-              <div className="w-9 h-9 rounded-xl bg-[color:var(--heritage-gold)] flex items-center justify-center shadow-gold-glow flex-shrink-0">
-                <Shield className="w-5 h-5 text-white" strokeWidth={2} />
+
+          <Link href="/dashboard" className="flex items-center gap-2 h-full ml-1 md:ml-0 min-w-0">
+            <div className="flex items-center gap-2 ml-1 min-w-0">
+              <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-[color:var(--heritage-gold)] flex items-center justify-center shadow-gold-glow flex-shrink-0">
+                <Shield className="w-4 h-4 md:w-5 md:h-5 text-white" strokeWidth={2} />
               </div>
-              <div className="flex flex-col leading-none">
-                <span className="text-[9px] font-medium text-[color:var(--heritage-gold)] tracking-[0.2em] uppercase">JP Heritage</span>
-                <span className="text-base font-bold text-white tracking-wide font-playfair">BANK</span>
+              <div className="flex flex-col leading-none whitespace-nowrap overflow-hidden min-w-0">
+                <span className="text-[9px] font-medium text-[color:var(--heritage-gold)] tracking-wider md:tracking-[0.2em] uppercase truncate">JP Heritage</span>
+                <span className="text-sm md:text-base font-bold text-white tracking-wide font-playfair truncate">BANK</span>
               </div>
             </div>
           </Link>
@@ -66,12 +66,13 @@ export function PortalHeader({
 
         {/* Right Side: Notifications & User Profile */}
         <div className="flex items-center gap-2">
-          {/* Fix #23: Language Selector now has an onChange handler */}
-          <div className="mr-1">
+          <div className="mr-1 flex-shrink-0">
             <Select defaultValue="en" onValueChange={handleLanguageChange}>
-              <SelectTrigger className="w-auto gap-2 bg-transparent border border-white/20 text-white hover:bg-white/10 focus:ring-0 focus:ring-offset-0 px-2 h-8 rounded-md transition-colors">
-                <Globe className="h-4 w-4" />
-                <SelectValue placeholder="EN" />
+              <SelectTrigger className="w-auto gap-0 sm:gap-2 bg-transparent border border-white/20 text-white hover:bg-white/10 focus:ring-0 focus:ring-offset-0 px-1 sm:px-2 h-8 rounded-md transition-colors">
+                <Globe className="h-4 w-4 flex-shrink-0" />
+                <span className="hidden sm:inline">
+                  <SelectValue placeholder="EN" />
+                </span>
               </SelectTrigger>
               <SelectContent
                 align="end"

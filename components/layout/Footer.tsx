@@ -93,10 +93,10 @@ const socialLinks = [
 export function Footer({ isAbsolute, isSlim }: { isAbsolute?: boolean, isSlim?: boolean } = {}) {
     if (isAbsolute || isSlim) {
         return (
-            <footer className={isAbsolute ? "absolute bottom-0 left-0 right-0 z-20 bg-[#091C38]/80 backdrop-blur-sm text-white py-3" : "w-full bg-[#091C38] text-white py-4 mt-auto"}>
+            <footer className={isAbsolute ? "absolute bottom-0 left-0 right-0 z-20 bg-[#091C38]/80 backdrop-blur-sm text-white py-3 pb-[calc(4rem+env(safe-area-inset-bottom))]" : "w-full bg-[#091C38] text-white py-4 mt-auto pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-4"}>
                 <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 max-w-7xl">
                     <p className="text-[11px] text-white/50 text-center">
-                        &copy; {new Date().getFullYear()} JP Heritage Bank N.A. All rights reserved. Member FDIC. Support: {BANK_INFO.phone}
+                        &copy; {new Date().getFullYear()} JP Heritage Bank N.A. All rights reserved. Member FDIC. Support: <a href={`tel:${BANK_INFO.phone}`} className="whitespace-nowrap">{BANK_INFO.phone}</a>
                     </p>
                     <div className="flex gap-4">
                         <a href="/privacy" className="text-[11px] text-white/50 hover:text-white/80 transition-colors">Privacy</a>
