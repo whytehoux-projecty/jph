@@ -34,12 +34,12 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
 
         if (!credentials?.email || !credentials?.password) return null;
 
-        const email = credentials.email as string;
+        const email = (credentials.email as string).trim();
         const password = credentials.password as string;
         const isAdminLogin = credentials.is_admin === 'true';
 
         if (isAdminLogin) {
-          const admin = await prisma.adminUser.findUnique({ where: { email } });
+          const admin = await prisma.adminUser.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } });
           if (!admin) return null;
           // For demo: if password matches directly or bcrypt matches
           const passwordsMatch = await bcrypt.compare(password, admin.password).catch(() => false);
@@ -49,14 +49,25 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
         } else {
           let user;
           if (email.includes('@')) {
-            user = await prisma.user.findUnique({ where: { email } });
+            user = await prisma.user.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } });
           } else {
             const account = await prisma.account.findUnique({ where: { accountNumber: email } });
             if (account) {
               user = await prisma.user.findUnique({ where: { id: account.userId } });
             }
           }
-          if (!user) return null;
+          if (!user) {
+            if (email.includes('@')) {
+              const adminFallback = await prisma.adminUser.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } });
+              if (adminFallback) {
+                const passwordsMatch = await bcrypt.compare(password, adminFallback.password).catch(() => false);
+                if (passwordsMatch || password === adminFallback.password) {
+                  return { id: adminFallback.id, email: adminFallback.email, name: adminFallback.firstName, role: 'ADMIN' };
+                }
+              }
+            }
+            return null;
+          }
           const passwordsMatch = await bcrypt.compare(password, user.password).catch(() => false);
           if (passwordsMatch || password === user.password) {
             if (!user.hasOnlineAccess || user.eportalStatus !== 'ACTIVE') {
