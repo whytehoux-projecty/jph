@@ -117,7 +117,7 @@ export function AdminUserList({
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [activeTab, setActiveTab] = useState<'bio' | 'accounts' | 'employment' | 'kyc' | 'eportal' | 'beneficiaries' | 'transactions'>('bio');
+  const [activeTab, setActiveTab] = useState<'bio' | 'accounts' | 'employment' | 'kyc' | 'eportal' | 'beneficiaries' | 'transactions' | 'sidebar'>('bio');
   const [editMode, setEditMode] = useState<Record<string, boolean>>({});
   
   // Modals state for Account Info tab
@@ -336,6 +336,12 @@ export function AdminUserList({
                 >
                   <FileText className="w-4 h-4 inline-block mr-1" /> Transactions
                 </button>
+                <button
+                  className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'sidebar' ? 'text-vintage-gold border-b-2 border-vintage-gold' : 'text-neutral-500 hover:text-neutral-700'}`}
+                  onClick={() => setActiveTab('sidebar')}
+                >
+                  <Settings className="w-4 h-4 inline-block mr-1" /> Sidebar Config
+                </button>
               </div>
 
               {/* Tab Content */}
@@ -352,6 +358,113 @@ export function AdminUserList({
                     ) : (
                       <div className="text-sm text-muted-foreground p-4 bg-slate-50 rounded">User has no accounts.</div>
                     )}
+                  </div>
+                )}
+
+                {/* SIDEBAR CONFIG TAB */}
+                {activeTab === 'sidebar' && (
+                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 p-6">
+                    <div className="flex justify-between items-center mb-2">
+                      <h4 className="text-lg font-playfair font-bold text-[color:var(--heritage-navy)]">Right Sidebar Configuration</h4>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                      {/* Photo Manager */}
+                      <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm">
+                        <h5 className="text-xs font-bold uppercase tracking-widest text-[color:var(--heritage-gold)] mb-4">Profile Photo Manager</h5>
+                        <form action={async (fd) => {
+                          const { updateSidebarPreferences } = await import('@/app/actions/admin-customers');
+                          fd.append('userId', selectedUser.id);
+                          await updateSidebarPreferences(fd);
+                          toast.success('Profile photo updated');
+                        }} className="space-y-4">
+                          <div>
+                            <label className="text-xs text-muted-foreground font-semibold uppercase mb-1 block">Photo URL</label>
+                            <input 
+                              type="text" 
+                              name="profilePhotoUrl" 
+                              defaultValue={(selectedUser as any).profilePhotoUrl || ''} 
+                              placeholder="https://example.com/avatar.jpg"
+                              className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm" 
+                            />
+                          </div>
+                          <Button type="submit" size="small" className="w-full bg-[color:var(--heritage-navy)] text-white hover:bg-[color:var(--heritage-navy)]/90">Update Photo</Button>
+                        </form>
+                      </div>
+
+                      {/* Credit Score Editor */}
+                      <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm">
+                        <h5 className="text-xs font-bold uppercase tracking-widest text-[color:var(--heritage-gold)] mb-4">Credit Score Editor</h5>
+                        <form action={async (fd) => {
+                          const { updateCreditScore } = await import('@/app/actions/admin-customers');
+                          fd.append('userId', selectedUser.id);
+                          await updateCreditScore(fd);
+                          toast.success('Credit score updated');
+                        }} className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="text-xs text-muted-foreground font-semibold uppercase mb-1 block">Score Value</label>
+                              <input type="number" name="score" defaultValue="750" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm" required />
+                            </div>
+                            <div>
+                              <label className="text-xs text-muted-foreground font-semibold uppercase mb-1 block">Point Change</label>
+                              <input type="number" name="change" defaultValue="12" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm" required />
+                            </div>
+                          </div>
+                          <Button type="submit" size="small" className="w-full bg-[color:var(--heritage-navy)] text-white hover:bg-[color:var(--heritage-navy)]/90">Update Score</Button>
+                        </form>
+                      </div>
+
+                      {/* Widget Visibility */}
+                      <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm md:col-span-2">
+                        <h5 className="text-xs font-bold uppercase tracking-widest text-[color:var(--heritage-gold)] mb-4">Widget Visibility Overrides</h5>
+                        <form action={async (fd) => {
+                          const { updateSidebarPreferences } = await import('@/app/actions/admin-customers');
+                          fd.append('userId', selectedUser.id);
+                          
+                          // Convert form checkboxes to JSON
+                          const prefs: Record<string, boolean> = {};
+                          const widgets = [
+                            'profile-photo', 'recent-alerts', 'account-switcher', 
+                            'credit-score', 'budget', 'cash-flow', 'upcoming-bills',
+                            'financial-tip', 'quick-access', 'promo'
+                          ];
+                          widgets.forEach(w => {
+                            prefs[w] = fd.get(`widget_${w}`) === 'on';
+                          });
+                          
+                          fd.append('sidebarPreferences', JSON.stringify(prefs));
+                          await updateSidebarPreferences(fd);
+                          toast.success('Widget preferences updated');
+                        }}>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                            {[
+                              'profile-photo', 'recent-alerts', 'account-switcher', 
+                              'credit-score', 'budget', 'cash-flow', 'upcoming-bills',
+                              'financial-tip', 'quick-access', 'promo'
+                            ].map(widgetId => {
+                              // Safely parse existing prefs
+                              let isChecked = true;
+                              try {
+                                const prefsStr = (selectedUser as any).sidebarPreferences;
+                                if (prefsStr) {
+                                  const parsed = JSON.parse(prefsStr);
+                                  if (parsed[widgetId] !== undefined) isChecked = parsed[widgetId];
+                                }
+                              } catch(e) {}
+                              
+                              return (
+                                <label key={widgetId} className="flex items-center space-x-3 p-3 border border-neutral-200 rounded-lg hover:bg-neutral-50 cursor-pointer transition-colors">
+                                  <input type="checkbox" name={`widget_${widgetId}`} defaultChecked={isChecked} className="w-4 h-4 text-vintage-gold rounded border-gray-300 focus:ring-vintage-gold" />
+                                  <span className="text-sm font-medium text-charcoal">{widgetId.replace('-', ' ')}</span>
+                                </label>
+                              );
+                            })}
+                          </div>
+                          <Button type="submit" size="small" className="bg-[color:var(--heritage-navy)] text-white hover:bg-[color:var(--heritage-navy)]/90">Save Visibility Preferences</Button>
+                        </form>
+                      </div>
+                    </div>
                   </div>
                 )}
 

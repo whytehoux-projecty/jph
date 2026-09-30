@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/Card";
 import { Progress } from "@/components/ui/progress";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/Button";
@@ -14,7 +13,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import {
-  CreditCard,
   TrendingUp,
   AlertCircle,
   Calendar,
@@ -36,12 +34,15 @@ import { formatDistanceToNow } from "date-fns";
 
 export function FinancialTipWidget() {
   return (
-    <div className="p-4 bg-muted/30 rounded-lg border border-dashed">
-      <h4 className="text-xs font-semibold mb-2 flex items-center gap-2">
-        <Lightbulb className="h-3 w-3 text-yellow-500" />
+    <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50/30 rounded-2xl border border-amber-100 shadow-sm relative overflow-hidden group">
+      <div className="absolute -right-4 -top-4 w-16 h-16 bg-amber-200/20 rounded-full blur-xl group-hover:bg-amber-300/30 transition-all duration-500" />
+      <h4 className="text-xs font-bold mb-2 flex items-center gap-2 text-amber-900 tracking-tight">
+        <div className="p-1.5 bg-amber-100 text-amber-600 rounded-lg">
+          <Lightbulb className="h-3.5 w-3.5" />
+        </div>
         Daily Tip
       </h4>
-      <p className="text-xs text-muted-foreground italic">
+      <p className="text-[11px] text-amber-800/80 italic leading-relaxed font-medium">
         "Review your subscriptions monthly to avoid paying for unused services."
       </p>
     </div>
@@ -58,39 +59,41 @@ export function BudgetWidget() {
   }, []);
 
   return (
-    <div className="space-y-4">
+    <div className="p-5 bg-white rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-4 hover:shadow-[0_4px_15px_rgba(0,0,0,0.04)] transition-shadow duration-300">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm font-semibold flex items-center gap-2">
-          <TrendingUp className="h-4 w-4 text-primary" />
+        <h4 className="text-[13px] font-bold text-slate-800 tracking-tight flex items-center gap-2">
+          <div className="p-1.5 bg-indigo-50 text-indigo-500 rounded-lg">
+            <TrendingUp className="h-3.5 w-3.5" />
+          </div>
           Monthly Budget
         </h4>
       </div>
-      <div className="space-y-3">
+      <div className="space-y-4">
         {categories.map((cat) => (
-          <div key={cat.name} className="space-y-1">
-            <div className="flex justify-between text-xs">
-              <span className="font-medium">{cat.name}</span>
-              <span className="text-muted-foreground">
-                {formatCurrency(cat.spent)} / {formatCurrency(cat.limit)}
+          <div key={cat.name} className="space-y-1.5 group">
+            <div className="flex justify-between text-xs items-end">
+              <span className="font-semibold text-slate-700">{cat.name}</span>
+              <span className="text-[10px] text-slate-400 font-mono font-medium">
+                <span className="text-slate-700">{formatCurrency(cat.spent)}</span> / {formatCurrency(cat.limit)}
               </span>
             </div>
             <Progress
               value={(cat.spent / cat.limit) * 100}
-              className="h-1.5"
+              className="h-2 bg-slate-100"
               indicatorClassName={cat.color}
             />
           </div>
         ))}
       </div>
-      <Button variant="ghost" size="small" className="w-full text-xs h-7">
-        View All Budgets <ChevronRight className="h-3 w-3 ml-1" />
+      <Button variant="ghost" size="small" className="w-full text-xs h-8 rounded-xl font-semibold text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors">
+        View All Budgets <ChevronRight className="h-3 w-3 ml-1 opacity-50" />
       </Button>
     </div>
   );
 }
 
 export function UpcomingBillsWidget() {
-  const router = useRouter(); // Fix #27
+  const router = useRouter();
   const [bills, setBills] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -105,40 +108,41 @@ export function UpcomingBillsWidget() {
   }, []);
 
   return (
-    <div className="space-y-3">
-      <h4 className="text-sm font-semibold flex items-center gap-2">
-        <AlertCircle className="h-4 w-4 text-amber-500" />
+    <div className="p-5 bg-white rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-4 hover:shadow-[0_4px_15px_rgba(0,0,0,0.04)] transition-shadow duration-300">
+      <h4 className="text-[13px] font-bold text-slate-800 tracking-tight flex items-center gap-2">
+        <div className="p-1.5 bg-rose-50 text-rose-500 rounded-lg">
+          <AlertCircle className="h-3.5 w-3.5" />
+        </div>
         Upcoming Bills
       </h4>
       <div className="space-y-2">
         {bills.map((bill) => (
           <div
             key={bill.id || bill.payee?.name || bill.amount}
-            className="flex items-center justify-between p-2 rounded-lg bg-muted/50 text-xs">
-            <div className="flex items-center gap-2">
-              <div className="p-1.5 rounded-full bg-background border">
-                <Calendar className="h-3 w-3 text-muted-foreground" />
+            className="flex items-center justify-between p-3 rounded-xl bg-slate-50/80 border border-slate-100/50 hover:border-slate-200 transition-colors group cursor-pointer text-xs">
+            <div className="flex items-center gap-3">
+              <div className="p-2 rounded-lg bg-white shadow-sm border border-slate-100 group-hover:scale-105 transition-transform">
+                <Calendar className="h-3.5 w-3.5 text-slate-400" />
               </div>
               <div>
-                <p className="font-medium">{bill.payee?.name || "Scheduled Bill"}</p>
-                <p className="text-[10px] text-muted-foreground">Due soon</p>
+                <p className="font-semibold text-slate-800">{bill.payee?.name || "Scheduled Bill"}</p>
+                <p className="text-[10px] text-rose-500 font-medium">Due soon</p>
               </div>
             </div>
-            <span className="font-semibold">{formatCurrency(bill.amount)}</span>
+            <span className="font-bold text-slate-800 font-mono tracking-tight">{formatCurrency(bill.amount)}</span>
           </div>
         ))}
         {bills.length === 0 && !loading && (
-          <p className="text-xs text-muted-foreground text-center py-2">No pending bills</p>
+          <p className="text-xs text-slate-400 text-center py-3 bg-slate-50/50 rounded-xl border border-slate-100 border-dashed">No pending bills</p>
         )}
       </div>
-      {/* Fix #27: use router.push instead of window.location.href */}
       <Button
         variant="ghost"
         size="small"
-        className="w-full text-xs h-7"
+        className="w-full text-xs h-8 rounded-xl font-semibold text-slate-500 hover:text-slate-900 hover:bg-slate-50 transition-colors"
         onClick={() => router.push('/bills')}
       >
-        See All Bills <ChevronRight className="h-3 w-3 ml-1" />
+        See All Bills <ChevronRight className="h-3 w-3 ml-1 opacity-50" />
       </Button>
     </div>
   );
@@ -155,29 +159,31 @@ export function CreditScoreWidget() {
   const change = scoreData?.change || 12;
 
   return (
-    <div className="p-3 rounded-xl bg-gradient-to-br from-slate-900 to-slate-800 text-white">
-      <div className="flex justify-between items-start mb-2">
-        <div className="flex items-center gap-1.5">
-          <ShieldCheck className="h-4 w-4 text-green-400" />
-          <span className="text-xs font-medium text-slate-300">
+    <div className="p-5 rounded-2xl bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-slate-800 to-slate-900 text-white shadow-[0_8px_20px_rgba(15,23,42,0.15)] border border-slate-700/50 group overflow-hidden relative">
+      <div className="absolute -inset-24 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 rotate-12 pointer-events-none" />
+      
+      <div className="flex justify-between items-start mb-4 relative z-10">
+        <div className="flex items-center gap-2">
+          <div className="p-1.5 bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/20">
+            <ShieldCheck className="h-3.5 w-3.5" />
+          </div>
+          <span className="text-[11px] font-bold text-slate-300 uppercase tracking-widest">
             Credit Score
           </span>
         </div>
-        <div className="flex items-center gap-1.5">
-          <Badge
-            variant="outline"
-            className="text-[10px] border-green-500/50 text-green-400 bg-green-500/10 px-1.5 py-0 h-5">
-            Excellent
-          </Badge>
-        </div>
+        <Badge
+          variant="outline"
+          className="text-[10px] border-emerald-500/30 text-emerald-400 bg-emerald-500/10 px-2 py-0.5 h-auto rounded-full font-semibold shadow-[0_0_10px_rgba(16,185,129,0.1)]">
+          Excellent
+        </Badge>
       </div>
-      <div className="flex items-end gap-2 mb-1">
-        <span className="text-3xl font-bold">{score}</span>
-        <span className="text-xs text-green-400 mb-1.5 flex items-center">
-          +{change} pts <TrendingUp className="h-3 w-3 ml-0.5" />
+      <div className="flex items-end gap-2 mb-1.5 relative z-10">
+        <span className="text-4xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-white to-slate-400">{score}</span>
+        <span className="text-xs text-emerald-400 mb-2 flex items-center font-medium bg-emerald-400/10 px-1.5 py-0.5 rounded text-[10px]">
+          +{change} pts <TrendingUp className="h-2.5 w-2.5 ml-1" />
         </span>
       </div>
-      <p className="text-[10px] text-slate-400">Updated today</p>
+      <p className="text-[10px] text-slate-400/80 font-medium relative z-10">Updated today</p>
     </div>
   );
 }
@@ -199,37 +205,42 @@ export function CashFlowProjectionWidget() {
   }, []);
 
   const net = inflow - outflow;
-  // Fix #4: vintage-green is actually navy (#0d2545), use emerald-600 for positive net
   const netColor = net >= 0 ? "text-emerald-600" : "text-red-600";
 
   return (
-    <div className="space-y-3">
-      <h4 className="text-sm font-semibold flex items-center gap-2">
-        <TrendingUp className="h-4 w-4 text-primary" />
+    <div className="p-5 bg-white rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-4 hover:shadow-[0_4px_15px_rgba(0,0,0,0.04)] transition-shadow duration-300">
+      <h4 className="text-[13px] font-bold text-slate-800 tracking-tight flex items-center gap-2">
+        <div className="p-1.5 bg-blue-50 text-blue-500 rounded-lg">
+          <TrendingUp className="h-3.5 w-3.5" />
+        </div>
         Cash Flow Projection
       </h4>
-      <div className="space-y-2 text-xs">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <ArrowDownLeft className="h-3.5 w-3.5 text-vintage-green" />
-            Projected inflow
+      <div className="space-y-3 text-xs">
+        <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100/50">
+          <div className="flex items-center gap-2 text-slate-500 font-medium">
+            <div className="bg-emerald-100 p-1 rounded-md text-emerald-600">
+              <ArrowDownLeft className="h-3 w-3" />
+            </div>
+            Inflow
           </div>
-          <span className="font-semibold text-vintage-green">
+          <span className="font-bold text-slate-800 font-mono tracking-tight">
             {formatCurrency(inflow)}
           </span>
         </div>
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2 text-muted-foreground">
-            <ArrowUpRight className="h-3.5 w-3.5 text-red-600" />
-            Projected outflow
+        <div className="flex items-center justify-between p-2 rounded-xl bg-slate-50/80 border border-slate-100/50">
+          <div className="flex items-center gap-2 text-slate-500 font-medium">
+            <div className="bg-rose-100 p-1 rounded-md text-rose-600">
+              <ArrowUpRight className="h-3 w-3" />
+            </div>
+            Outflow
           </div>
-          <span className="font-semibold text-red-600">
+          <span className="font-bold text-slate-800 font-mono tracking-tight">
             {formatCurrency(outflow)}
           </span>
         </div>
-        <div className="flex items-center justify-between border-t pt-2">
-          <span className="text-xs text-muted-foreground">Projected net</span>
-          <span className={`font-semibold ${netColor}`}>
+        <div className="flex items-center justify-between border-t border-slate-100 pt-3 mt-1">
+          <span className="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Projected net</span>
+          <span className={`font-black font-mono tracking-tighter text-sm ${netColor}`}>
             {formatCurrency(net)}
           </span>
         </div>
@@ -239,7 +250,7 @@ export function CashFlowProjectionWidget() {
 }
 
 export function RecentAlertsWidget() {
-  const router = useRouter(); // Fix #27, #28
+  const router = useRouter();
   const [alerts, setAlerts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -260,41 +271,49 @@ export function RecentAlertsWidget() {
   }, []);
 
   return (
-    <div className="space-y-3">
-      <h4 className="text-sm font-semibold flex items-center gap-2">
-        <BellRing className="h-4 w-4 text-primary" />
+    <div className="p-5 bg-white rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-4 hover:shadow-[0_4px_15px_rgba(0,0,0,0.04)] transition-shadow duration-300">
+      <h4 className="text-[13px] font-bold text-slate-800 tracking-tight flex items-center gap-2">
+        <div className="p-1.5 bg-amber-50 text-amber-500 rounded-lg">
+          <BellRing className="h-3.5 w-3.5" />
+        </div>
         Recent Alerts
       </h4>
       <div className="space-y-2">
-        {alerts.map((alert) => (
-          <div
-            key={alert.id || alert.title}
-            className="flex items-start justify-between p-2 rounded-lg bg-muted/50 text-xs">
-            <div className="flex-1 min-w-0 mr-2">
-              <p className="font-medium truncate">{alert.title}</p>
-              <p className="text-[10px] text-muted-foreground line-clamp-1">
-                {alert.message} • {formatDistanceToNow(new Date(alert.createdAt || Date.now()), { addSuffix: true })}
-              </p>
+        {alerts.map((alert) => {
+           // Use a subtle red background for urgent-sounding alerts
+           const isUrgent = alert.title?.toLowerCase().includes("failed") || alert.title?.toLowerCase().includes("declined");
+           return (
+            <div
+              key={alert.id || alert.title}
+              className={`flex items-start justify-between p-3 rounded-xl border transition-colors group cursor-pointer ${isUrgent ? 'bg-rose-50/50 border-rose-100 hover:border-rose-200' : 'bg-slate-50/80 border-slate-100/50 hover:border-slate-200'} text-xs`}>
+              <div className="flex-1 min-w-0 mr-3">
+                <p className={`font-semibold truncate ${isUrgent ? 'text-rose-900' : 'text-slate-800'}`}>{alert.title}</p>
+                <p className={`text-[10px] mt-0.5 line-clamp-1 ${isUrgent ? 'text-rose-600/80' : 'text-slate-500'}`}>
+                  {alert.message}
+                </p>
+                <p className={`text-[9px] mt-1 font-mono uppercase tracking-widest ${isUrgent ? 'text-rose-400' : 'text-slate-400'}`}>
+                  {formatDistanceToNow(new Date(alert.createdAt || Date.now()), { addSuffix: true })}
+                </p>
+              </div>
+              <Button
+                variant="ghost"
+                size="small"
+                className={`h-7 w-7 p-0 rounded-lg shrink-0 ${isUrgent ? 'text-rose-600 hover:bg-rose-100 hover:text-rose-700' : 'text-slate-400 hover:bg-slate-100 hover:text-slate-700'}`}
+                onClick={() => {
+                  const title = (alert.title || '').toLowerCase();
+                  if (title.includes('transfer') || title.includes('transaction')) router.push('/transactions');
+                  else if (title.includes('card')) router.push('/cards');
+                  else if (title.includes('bill')) router.push('/bills');
+                  else router.push('/dashboard');
+                }}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
             </div>
-            {/* Fix #28: Navigate to a relevant page based on alert title keywords */}
-            <Button
-              variant="ghost"
-              size="small"
-              className="h-6 text-[10px] shrink-0"
-              onClick={() => {
-                const title = (alert.title || '').toLowerCase();
-                if (title.includes('transfer') || title.includes('transaction')) router.push('/transactions');
-                else if (title.includes('card')) router.push('/cards');
-                else if (title.includes('bill')) router.push('/bills');
-                else router.push('/dashboard');
-              }}
-            >
-              View
-            </Button>
-          </div>
-        ))}
+          );
+        })}
         {alerts.length === 0 && !loading && (
-          <p className="text-xs text-muted-foreground text-center py-2">No new alerts</p>
+          <p className="text-xs text-slate-400 text-center py-3 bg-slate-50/50 rounded-xl border border-slate-100 border-dashed">No new alerts</p>
         )}
       </div>
     </div>
@@ -311,24 +330,29 @@ export function AccountSwitcherWidget() {
   }, []);
 
   return (
-    <div className="space-y-3">
-      <h4 className="text-sm font-semibold flex items-center gap-2">
-        <Wallet className="h-4 w-4 text-primary" />
+    <div className="p-5 bg-white rounded-2xl border border-slate-100 shadow-[0_2px_10px_rgba(0,0,0,0.02)] space-y-4 hover:shadow-[0_4px_15px_rgba(0,0,0,0.04)] transition-shadow duration-300">
+      <h4 className="text-[13px] font-bold text-slate-800 tracking-tight flex items-center gap-2">
+        <div className="p-1.5 bg-sky-50 text-sky-500 rounded-lg">
+          <Wallet className="h-3.5 w-3.5" />
+        </div>
         Account Switcher
       </h4>
       <Select defaultValue={accounts[0]?.id || ""}>
-        <SelectTrigger className="h-9">
+        <SelectTrigger className="h-10 bg-slate-50 border-slate-200 rounded-xl focus:ring-1 focus:ring-primary/20 text-xs font-semibold text-slate-700 shadow-sm">
           <SelectValue placeholder={accounts.length > 0 ? "Select account" : "Loading accounts..."} />
         </SelectTrigger>
-        <SelectContent>
+        <SelectContent className="rounded-xl border-slate-200 shadow-xl">
           {accounts.length > 0 ? (
             accounts.map((a) => (
-              <SelectItem key={a.id} value={a.id}>
-                {a.accountType} ••••{a.accountNumber.slice(-4)} ({formatCurrency(a.balance, a.currency || 'USD')})
+              <SelectItem key={a.id} value={a.id} className="text-xs font-medium focus:bg-slate-50 rounded-lg">
+                <span className="flex items-center justify-between w-full gap-4">
+                  <span>{a.accountType} ••••{a.accountNumber.slice(-4)}</span>
+                  <span className="font-mono text-slate-500">{formatCurrency(a.balance, a.currency || 'USD')}</span>
+                </span>
               </SelectItem>
             ))
           ) : (
-            <SelectItem value="none" disabled>
+            <SelectItem value="none" disabled className="text-xs">
               No accounts available
             </SelectItem>
           )}

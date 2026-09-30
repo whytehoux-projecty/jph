@@ -127,6 +127,8 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
               lastName: user.lastName,
               tier: user.tier,
               pinSetupComplete: user.pinSetupComplete,
+              profilePhotoUrl: user.profilePhotoUrl,
+              sidebarPreferences: user.sidebarPreferences,
             });
           }
         })

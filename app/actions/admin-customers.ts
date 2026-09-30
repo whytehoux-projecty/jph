@@ -393,3 +393,55 @@ export async function adminDeleteBeneficiary(formData: FormData) {
   revalidatePath('/admin/customers/account-holders');
   revalidatePath('/admin/customers/portal-users');
 }
+
+export async function updateSidebarPreferences(formData: FormData) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+
+  const userId = formData.get('userId') as string;
+  const profilePhotoUrl = formData.get('profilePhotoUrl') as string;
+  const sidebarPreferences = formData.get('sidebarPreferences') as string;
+
+  const data: any = {};
+  if (profilePhotoUrl !== null) data.profilePhotoUrl = profilePhotoUrl;
+  if (sidebarPreferences !== null) data.sidebarPreferences = sidebarPreferences;
+
+  await prisma.user.update({
+    where: { id: userId },
+    data
+  });
+
+  revalidatePath('/admin/customers/account-holders');
+  revalidatePath('/admin/customers/portal-users');
+}
+
+export async function updateCreditScore(formData: FormData) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+
+  const userId = formData.get('userId') as string;
+  const score = parseInt(formData.get('score') as string, 10);
+  const change = parseInt(formData.get('change') as string, 10) || 0;
+  const month = new Date().toISOString().slice(0, 7); // YYYY-MM
+
+  if (isNaN(score)) throw new Error('Invalid score');
+
+  // Find if a score for this month already exists
+  const existing = await prisma.creditScore.findFirst({
+    where: { userId, month }
+  });
+
+  if (existing) {
+    await prisma.creditScore.update({
+      where: { id: existing.id },
+      data: { score, change }
+    });
+  } else {
+    await prisma.creditScore.create({
+      data: { userId, score, change, month }
+    });
+  }
+
+  revalidatePath('/admin/customers/account-holders');
+  revalidatePath('/admin/customers/portal-users');
+}
