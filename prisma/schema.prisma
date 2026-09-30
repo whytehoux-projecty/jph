@@ -274,6 +274,17 @@ model Transaction {
   rejectionReason String?   @map("rejection_reason")
   modifiedAmount  Float?    @map("modified_amount")
 
+  // Phase 2: Rich editorial fields
+  category        String?
+  channel         String?
+  counterparty    String?   // JSON string
+  runningBalance  Float?    @map("running_balance")
+  notes           String?   // JSON array
+
+  // Phase 5: Integrity & audit
+  isAdminEntry    Boolean   @default(false) @map("is_admin_entry")
+  adminAuditTrail String?   @map("admin_audit_trail") // JSON string
+
   account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@map("transactions")
