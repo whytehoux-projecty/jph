@@ -35,9 +35,14 @@ export default async function TransactionsPage() {
     amount: tx.amount,
     date: tx.createdAt.toISOString(),
     type: tx.type === 'CREDIT' ? 'credit' : 'debit',
-    category: tx.metadata ? JSON.parse(tx.metadata).category || 'General' : 'General',
+    category: tx.category || (tx.metadata ? JSON.parse(tx.metadata).category : null) || 'General',
     status: tx.status.toLowerCase(),
     accountId: tx.accountId,
+    reference: tx.reference,
+    runningBalance: tx.runningBalance,
+    notes: tx.notes ? JSON.parse(tx.notes) : [],
+    channel: tx.channel,
+    counterparty: tx.counterparty ? JSON.parse(tx.counterparty) : null
   }));
 
   const initialStats = {

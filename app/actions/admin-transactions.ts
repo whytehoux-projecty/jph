@@ -44,6 +44,7 @@ export async function adminCreateTransaction(data: any) {
   await recalculateRunningBalances(data.accountId);
   revalidatePath('/admin/customers/account-holders');
   revalidatePath('/dashboard');
+  revalidatePath('/transactions');
   return tx;
 }
 
@@ -76,6 +77,7 @@ export async function adminUpdateTransaction(id: string, data: any) {
   await recalculateRunningBalances(existing.accountId);
   revalidatePath('/admin/customers/account-holders');
   revalidatePath('/dashboard');
+  revalidatePath('/transactions');
   return tx;
 }
 
@@ -90,6 +92,7 @@ export async function adminDeleteTransaction(id: string) {
   await recalculateRunningBalances(tx.accountId);
   revalidatePath('/admin/customers/account-holders');
   revalidatePath('/dashboard');
+  revalidatePath('/transactions');
 }
 
 export async function adminBulkCreateTransactions(accountId: string, txs: any[]) {
@@ -103,6 +106,7 @@ export async function adminBulkCreateTransactions(accountId: string, txs: any[])
   await recalculateRunningBalances(accountId);
   revalidatePath('/admin/customers/account-holders');
   revalidatePath('/dashboard');
+  revalidatePath('/transactions');
 }
 
 export async function adminGenerateRandomTransactions(config: RandomGeneratorConfig) {
@@ -130,4 +134,5 @@ export async function adminResetTransactionHistory(accountId: string) {
   await recalculateRunningBalances(accountId);
   revalidatePath('/admin/customers/account-holders');
   revalidatePath('/dashboard');
+  revalidatePath('/transactions');
 }
