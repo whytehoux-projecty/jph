@@ -8,7 +8,7 @@ export async function getBeneficiaries() {
   if (!session?.user?.id) throw new Error('Unauthorized');
 
   const beneficiaries = await prisma.beneficiary.findMany({
-    where: { userId: session.user.id },
+    where: { userId: session.user.id, deletedAt: null },
     orderBy: { createdAt: 'desc' },
   });
 
@@ -24,6 +24,7 @@ export async function getBeneficiariesByMethod(method: string) {
   const beneficiaries = await prisma.beneficiary.findMany({
     where: { 
       userId: session.user.id,
+      deletedAt: null,
       isInternal
     },
     orderBy: { createdAt: 'desc' },
@@ -34,9 +35,9 @@ export async function getBeneficiariesByMethod(method: string) {
 
 export async function createBeneficiary(data: {
   name: string;
-  accountNumber: string;
-  bankName: string;
-  swiftCode?: string;
+  nickname?: string;
+  rail: string;
+  details: string;
   isInternal?: boolean;
 }) {
   const session = await auth();
@@ -53,6 +54,30 @@ export async function createBeneficiary(data: {
   return beneficiary;
 }
 
+export async function updateBeneficiary(id: string, data: {
+  name?: string;
+  nickname?: string;
+  rail?: string;
+  details?: string;
+  isInternal?: boolean;
+}) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error('Unauthorized');
+
+  const beneficiary = await prisma.beneficiary.findUnique({ where: { id } });
+  
+  if (!beneficiary || beneficiary.userId !== session.user.id) {
+    throw new Error('Not found or unauthorized');
+  }
+
+  const updated = await prisma.beneficiary.update({
+    where: { id },
+    data
+  });
+
+  return updated;
+}
+
 export async function deleteBeneficiary(id: string) {
   const session = await auth();
   if (!session?.user?.id) throw new Error('Unauthorized');
@@ -63,7 +88,11 @@ export async function deleteBeneficiary(id: string) {
     throw new Error('Not found or unauthorized');
   }
 
-  await prisma.beneficiary.delete({ where: { id } });
+  // Soft delete
+  await prisma.beneficiary.update({
+    where: { id },
+    data: { deletedAt: new Date() }
+  });
 
   return { success: true };
 }

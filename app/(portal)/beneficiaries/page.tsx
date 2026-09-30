@@ -12,11 +12,10 @@ export default async function BeneficiariesPage() {
     beneficiaries = rawBeneficiaries.map((b: any) => ({
       id: b.id,
       name: b.name,
-      accountNumber: b.accountNumber,
-      bankName: b.bankName,
-      swiftCode: b.swiftCode,
+      rail: b.rail || "us_bank",
+      details: b.details || "{}",
+      status: b.status || "ACTIVE",
       nickname: b.nickname,
-      email: b.email,
       isInternal: b.isInternal,
     }));
   } catch (error) {

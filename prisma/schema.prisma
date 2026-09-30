@@ -302,14 +302,22 @@ model TransferMethodConfig {
 }
 
 model Beneficiary {
-  id            String   @id @default(cuid())
-  userId        String   @map("user_id")
+  id            String    @id @default(cuid())
+  userId        String    @map("user_id")
   name          String
-  accountNumber String   @map("account_number")
-  bankName      String   @map("bank_name")
-  swiftCode     String?  @map("swift_code")
-  isInternal    Boolean  @default(false) @map("is_internal")
-  createdAt     DateTime @default(now()) @map("created_at")
+  nickname      String?
+  rail          String    @default("us_bank")
+  details       String?   // JSON string storing dynamic rail fields
+  status        String    @default("ACTIVE") // ACTIVE, PENDING, BLOCKED, VERIFIED
+  notes         String?
+  auditTrail    String?   // JSON array of changes
+  accountNumber String?   @map("account_number")
+  bankName      String?   @map("bank_name")
+  swiftCode     String?   @map("swift_code")
+  isInternal    Boolean   @default(false) @map("is_internal")
+  createdAt     DateTime  @default(now()) @map("created_at")
+  updatedAt     DateTime  @default(now()) @updatedAt @map("updated_at")
+  deletedAt     DateTime? @map("deleted_at")
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 

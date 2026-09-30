@@ -9,15 +9,17 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
 import type { UiTransferTypeId } from "@/components/transfer/TransferMethodSelector";
 
+import { beneficiaryRails } from "@/lib/beneficiary-rails";
+import { DynamicBeneficiaryForm } from "@/components/beneficiaries/DynamicBeneficiaryForm";
+
 type TabKey = "saved" | "recent" | "new";
 
 interface BeneficiarySummary {
   id: string;
   name: string;
-  accountNumber: string;
-  bankName: string;
-  swiftCode?: string;
   nickname?: string;
+  rail: string;
+  details: string;
   isInternal?: boolean;
   method?: UiTransferTypeId;
   verified?: boolean;
@@ -41,16 +43,7 @@ export function BeneficiarySelector({
   const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [newForm, setNewForm] = useState({
-    name: "",
-    accountNumber: "",
-    bankName: "",
-    swiftCode: "",
-    nickname: "",
-    contactType: "email" as "email" | "phone",
-    contactValue: "",
-    saveAsBeneficiary: true,
-  });
+  const [saveAsBeneficiary, setSaveAsBeneficiary] = useState(true);
   const [recent, setRecent] = useState<BeneficiarySummary[]>([]);
 
   useEffect(() => {
@@ -92,16 +85,16 @@ export function BeneficiarySelector({
         {
           id: "1",
           name: "Alice Smith",
-          accountNumber: "123456789",
-          bankName: "Chase Bank",
+          rail: "us_bank",
+          details: JSON.stringify({ accountNumber: "123456789", bankName: "Chase Bank" }),
           nickname: "Family",
           isInternal: false,
         },
         {
           id: "2",
           name: "Bob Jones",
-          accountNumber: "987654321",
-          bankName: "JP Heritage",
+          rail: "us_bank",
+          details: JSON.stringify({ accountNumber: "987654321", bankName: "JP Heritage" }),
           nickname: "Investments",
           isInternal: true,
         },
@@ -133,22 +126,43 @@ export function BeneficiarySelector({
   };
 
   const filteredSaved = useMemo(() => {
-    if (!searchTerm) return saved;
+    let result = saved;
+
+    if (transferMethod) {
+      result = result.filter((b: any) => {
+        if (transferMethod === 'internal') return b.isInternal;
+        if (transferMethod === 'ach' || transferMethod === 'wire_domestic' || transferMethod === 'fednow') return b.rail === 'us_bank' && !b.isInternal;
+        if (transferMethod === 'wire_international') return b.rail === 'swift';
+        if (transferMethod === 'zelle') return b.rail === 'zelle';
+        if (transferMethod === 'cashapp') return b.rail === 'cashapp';
+        if (transferMethod === 'venmo') return b.rail === 'venmo';
+        if (transferMethod === 'crypto') return b.rail === 'crypto';
+        return true;
+      });
+    }
+
+    if (!searchTerm) return result;
     const term = searchTerm.toLowerCase();
-    return saved.filter((b) => {
+    return result.filter((b: any) => {
+      let detailsText = "";
+      try {
+         const parsed = JSON.parse(b.details || "{}");
+         detailsText = Object.values(parsed).join(" ").toLowerCase();
+      } catch (e) {}
+
       return (
         b.name.toLowerCase().includes(term) ||
-        b.nickname?.toLowerCase().includes(term) ||
-        b.bankName.toLowerCase().includes(term) ||
-        b.accountNumber.includes(term)
+        (b.nickname && b.nickname.toLowerCase().includes(term)) ||
+        (b.rail && b.rail.toLowerCase().includes(term)) ||
+        detailsText.includes(term)
       );
     });
-  }, [saved, searchTerm]);
+  }, [saved, searchTerm, transferMethod]);
 
   const recentRecipients = useMemo(() => {
     if (recent.length) return recent;
-    return saved.slice(0, 3);
-  }, [recent, saved]);
+    return filteredSaved.slice(0, 3);
+  }, [recent, filteredSaved]);
 
   const handleSelect = (beneficiary: BeneficiarySummary) => {
     onSelect(beneficiary);
@@ -187,74 +201,30 @@ export function BeneficiarySelector({
     }
   };
 
-  const handleCreateNew = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newForm.name || !newForm.accountNumber || !newForm.bankName) return;
+  
+  const handleCreateNew = async (data: any) => {
     setIsSubmitting(true);
     setError(null);
     try {
-      if (!newForm.saveAsBeneficiary) {
+      if (!saveAsBeneficiary) {
         const temp: BeneficiarySummary = {
           id: Math.random().toString(36).slice(2),
-          name: newForm.name,
-          accountNumber: newForm.accountNumber,
-          bankName: newForm.bankName,
-          swiftCode: newForm.swiftCode || undefined,
-          nickname: newForm.nickname || undefined,
+          name: data.name,
+          nickname: data.nickname,
+          rail: data.rail,
+          details: data.details,
           isInternal: transferMethod === "internal",
           method: transferMethod,
         };
-        setNewForm({
-          name: "",
-          accountNumber: "",
-          bankName: "",
-          swiftCode: "",
-          nickname: "",
-          contactType: "email",
-          contactValue: "",
-          saveAsBeneficiary: true,
-        });
         setTab("saved");
         handleSelect(temp);
         return;
       }
-      await createBeneficiary({
-        name: newForm.name,
-        accountNumber: newForm.accountNumber,
-        bankName: newForm.bankName,
-        swiftCode: newForm.swiftCode || undefined,
-        isInternal: transferMethod === "internal",
-      });
+      await createBeneficiary(data);
       const updated = await loadSaved(transferMethod);
-      const created =
-        updated.find(
-          (b) =>
-            b.accountNumber === newForm.accountNumber &&
-            b.name === newForm.name &&
-            b.bankName === newForm.bankName,
-        ) ||
-        ({
-          id: Math.random().toString(36).slice(2),
-          name: newForm.name,
-          accountNumber: newForm.accountNumber,
-          bankName: newForm.bankName,
-          swiftCode: newForm.swiftCode || undefined,
-          nickname: newForm.nickname || undefined,
-          isInternal: transferMethod === "internal",
-          method: transferMethod,
-        } as BeneficiarySummary);
-      setNewForm({
-        name: "",
-        accountNumber: "",
-        bankName: "",
-        swiftCode: "",
-        nickname: "",
-        contactType: "email",
-        contactValue: "",
-        saveAsBeneficiary: true,
-      });
+      const created = updated.find(b => b.name === data.name) || updated[0];
       setTab("saved");
-      handleSelect(created);
+      if (created) handleSelect(created);
     } catch (err) {
       console.error("Failed to add beneficiary:", err);
       setError("Could not save this recipient. Please try again.");
@@ -262,6 +232,7 @@ export function BeneficiarySelector({
       setIsSubmitting(false);
     }
   };
+
 
   const activeTabClasses = "bg-white text-charcoal shadow-sm";
   const inactiveTabClasses =
@@ -327,9 +298,15 @@ export function BeneficiarySelector({
             </p>
           ) : (
             <div className="space-y-2 max-h-40 overflow-y-auto pr-1">
-              {filteredSaved.map((b, index) => {
-                const isActive = selectedBeneficiary?.id === b.id;
-                return (
+              
+                  {filteredSaved.map((b, index) => {
+                  const isActive = selectedBeneficiary?.id === b.id;
+                  const rail = beneficiaryRails[b.rail || 'us_bank'];
+                  const details = b.details ? JSON.parse(b.details) : {};
+                  const displayAccount = rail ? rail.getDisplayAccount(details) : 'Unknown';
+                  const maskedAccount = displayAccount.replace(/[a-zA-Z0-9](?=.*[a-zA-Z0-9]{4})/g, '•');
+
+                  return (
                   <button
                     key={b.id}
                     id={`beneficiary-${b.id}`}
@@ -359,7 +336,7 @@ export function BeneficiarySelector({
                           )}
                         </div>
                         <p className="text-[11px] text-muted-foreground">
-                          ••••{b.accountNumber.slice(-4)} · {b.bankName}
+                          {maskedAccount} · {rail?.displayName}
                         </p>
                       </div>
                       <div className="flex flex-col items-end gap-1">
@@ -373,6 +350,7 @@ export function BeneficiarySelector({
                   </button>
                 );
               })}
+
             </div>
           )}
         </div>
@@ -403,7 +381,15 @@ export function BeneficiarySelector({
                     <div>
                       <p className="font-medium text-charcoal">{b.name}</p>
                       <p className="text-[11px] text-muted-foreground">
-                        ••••{b.accountNumber.slice(-4)} · {b.bankName}
+                        {(() => {
+                          try {
+                            const rail = beneficiaryRails[b.rail || 'us_bank'];
+                            const details = JSON.parse(b.details || '{}');
+                            return rail ? rail.getDisplayAccount(details) : 'Unknown';
+                          } catch (e) {
+                            return 'Unknown';
+                          }
+                        })()}
                       </p>
                     </div>
                     <Badge
@@ -418,153 +404,26 @@ export function BeneficiarySelector({
           )}
         </div>
       ) : (
-        <form onSubmit={handleCreateNew} className="space-y-3">
+        <div className="space-y-3">
           {error && <p className="text-xs text-red-600">{error}</p>}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs">Full Name</Label>
-              <Input
-                value={newForm.name}
-                onChange={(e) =>
-                  setNewForm({ ...newForm, name: e.target.value })
-                }
-                placeholder="e.g. John Doe"
-                className="h-9"
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">Nickname (Optional)</Label>
-              <Input
-                value={newForm.nickname}
-                onChange={(e) =>
-                  setNewForm({ ...newForm, nickname: e.target.value })
-                }
-                placeholder="Family, Rent, Business"
-                className="h-9"
-              />
-            </div>
-          </div>
-          {transferMethod === "zelle" && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-              <div className="space-y-1.5">
-                <Label className="text-xs">Contact Method</Label>
-                <div className="inline-flex rounded-full bg-slate-100 p-1 text-[11px]">
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setNewForm({ ...newForm, contactType: "email" })
-                    }
-                    className={`px-3 py-1 rounded-full transition ${
-                      newForm.contactType === "email"
-                        ? "bg-white text-charcoal shadow-sm"
-                        : "text-muted-foreground hover:text-charcoal hover:bg-white/60"
-                    }`}>
-                    Email
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() =>
-                      setNewForm({ ...newForm, contactType: "phone" })
-                    }
-                    className={`px-3 py-1 rounded-full transition ${
-                      newForm.contactType === "phone"
-                        ? "bg-white text-charcoal shadow-sm"
-                        : "text-muted-foreground hover:text-charcoal hover:bg-white/60"
-                    }`}>
-                    Mobile
-                  </button>
-                </div>
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-xs">
-                  {newForm.contactType === "email"
-                    ? "Email Address"
-                    : "Mobile Number"}
-                </Label>
-                <Input
-                  value={newForm.contactValue}
-                  onChange={(e) =>
-                    setNewForm({ ...newForm, contactValue: e.target.value })
-                  }
-                  placeholder={
-                    newForm.contactType === "email"
-                      ? "name@example.com"
-                      : "e.g. +1 555 123 4567"
-                  }
-                  className="h-9"
-                />
-              </div>
-            </div>
-          )}
-          <div className="space-y-1.5">
-            <Label className="text-xs">Account Number / IBAN</Label>
-            <Input
-              value={newForm.accountNumber}
-              onChange={(e) =>
-                setNewForm({ ...newForm, accountNumber: e.target.value })
-              }
-              placeholder="Enter account number"
-              className="h-9 font-mono"
-              required
+          <DynamicBeneficiaryForm 
+              onSubmit={handleCreateNew}
+              onCancel={() => setTab("saved")}
+              isSubmitting={isSubmitting}
+          />
+          <div className="flex items-center gap-2 mt-4 pt-4 border-t border-slate-100">
+            <input
+              id="saveAsBeneficiary"
+              type="checkbox"
+              checked={saveAsBeneficiary}
+              onChange={(e) => setSaveAsBeneficiary(e.target.checked)}
+              className="h-3 w-3 rounded border-slate-300 text-[color:var(--heritage-navy)]"
             />
+            <Label htmlFor="saveAsBeneficiary" className="text-[11px] text-muted-foreground">
+              Save this recipient to your address book
+            </Label>
           </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div className="space-y-1.5">
-              <Label className="text-xs">Bank Name</Label>
-              <Input
-                value={newForm.bankName}
-                onChange={(e) =>
-                  setNewForm({ ...newForm, bankName: e.target.value })
-                }
-                placeholder="e.g. JP Heritage"
-                className="h-9"
-                required
-              />
-            </div>
-            <div className="space-y-1.5">
-              <Label className="text-xs">SWIFT / BIC (Optional)</Label>
-              <Input
-                value={newForm.swiftCode}
-                onChange={(e) =>
-                  setNewForm({ ...newForm, swiftCode: e.target.value })
-                }
-                placeholder="e.g. BOFAUS3N"
-                className="h-9 font-mono uppercase"
-              />
-            </div>
-          </div>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
-              <input
-                id="saveAsBeneficiary"
-                type="checkbox"
-                checked={newForm.saveAsBeneficiary}
-                onChange={(e) =>
-                  setNewForm({
-                    ...newForm,
-                    saveAsBeneficiary: e.target.checked,
-                  })
-                }
-                title="Save this recipient to your address book"
-                className="h-3 w-3 rounded border-slate-300 text-[color:var(--heritage-navy)]"
-              />
-              <Label
-                htmlFor="saveAsBeneficiary"
-                className="text-[11px] text-muted-foreground">
-                Save this recipient to your address book
-              </Label>
-            </div>
-            <Button
-              type="submit"
-              size="small"
-              className="inline-flex items-center gap-2"
-              disabled={isSubmitting}>
-              <UserPlus className="h-3 w-3" />
-              {isSubmitting ? "Saving..." : "Save recipient"}
-            </Button>
-          </div>
-        </form>
+        </div>
       )}
     </div>
   );

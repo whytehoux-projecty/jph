@@ -1573,7 +1573,7 @@ export default function TransactionsClient({
 
       {/* Summary Strip */}
       <Card className="overflow-hidden border-t-[3px] border-t-[#D4AF37]">
-        <div className="grid grid-cols-3 md:grid-cols-4 divide-x divide-slate-100">
+        <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
           <div className="p-4 md:p-5 flex flex-col justify-center bg-white cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => handleKpiCardClick("income")}>
             <span className="text-[11px] uppercase tracking-[0.1em] text-slate-500 font-semibold mb-1 font-inter">Money in</span>
             <span className="font-mono text-[15px] md:text-lg text-green-700 tabular-nums lining-nums font-medium">+{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(totalIncome)}</span>

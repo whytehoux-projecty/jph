@@ -1,42 +1,9 @@
-'use client';
+const fs = require('fs');
 
+// 1. Rewrite BeneficiariesClient.tsx
+let clientCode = fs.readFileSync('app/(portal)/beneficiaries/BeneficiariesClient.tsx', 'utf8');
 
-import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import Link from 'next/link';
-import { createBeneficiary, deleteBeneficiary } from '@/app/actions/beneficiaries';
-import { toast } from '@/lib/toast';
-import {
-    Plus,
-    Trash2,
-    Search,
-    User,
-    Building2,
-    CreditCard,
-    Globe,
-    Send,
-    MoreHorizontal,
-    Briefcase
-} from 'lucide-react';
-
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/input';
-import { Card, CardHeader, CardContent, CardTitle, CardFooter } from '@/components/ui/Card';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import {
-    Dialog,
-    DialogContent,
-    DialogDescription,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-    DialogFooter
-} from '@/components/ui/dialog';
-import { Badge } from '@/components/ui/badge';
-import { Label } from '@/components/ui/label';
-import { VintageIcon } from '@/components/ui/vintage-icon';
-
-import { beneficiaryRails } from '@/lib/beneficiary-rails';
+const clientInterfaceReplace = `import { beneficiaryRails } from '@/lib/beneficiary-rails';
 import { DynamicBeneficiaryForm } from '@/components/beneficiaries/DynamicBeneficiaryForm';
 import { updateBeneficiary } from '@/app/actions/beneficiaries';
 import { Eye, EyeOff, Edit2 } from 'lucide-react';
@@ -49,20 +16,11 @@ interface Beneficiary {
     details: string;
     status: string;
     isInternal: boolean;
-}
+}`;
+clientCode = clientCode.replace(/interface Beneficiary \{[\s\S]*?\}/, clientInterfaceReplace);
 
-export default function BeneficiariesClient({ initialBeneficiaries }: { initialBeneficiaries: Beneficiary[] }) {
-    const router = useRouter();
-    const [beneficiaries, setBeneficiaries] = useState<Beneficiary[]>(initialBeneficiaries);
-    const [isLoading, setIsLoading] = useState(false);
-    const [isDialogOpen, setIsDialogOpen] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [searchTerm, setSearchTerm] = useState('');
-    const [error, setError] = useState<string | null>(null);
-    const [deleteTarget, setDeleteTarget] = useState<string | null>(null);
-
-    // New Beneficiary Form State
-    
+// Remove the old form state
+clientCode = clientCode.replace(/const \[formData, setFormData\] = useState\(\{[\s\S]*?\}\);/, `
     const [editingId, setEditingId] = useState<string | null>(null);
     const [revealedIds, setRevealedIds] = useState<Set<string>>(new Set());
 
@@ -74,17 +32,10 @@ export default function BeneficiariesClient({ initialBeneficiaries }: { initialB
             return next;
         });
     };
+`);
 
-
-    useEffect(() => {
-        // Data is loaded via Server Component props
-    }, []);
-
-    const loadBeneficiaries = async () => {
-        router.refresh();
-    };
-
-        const handleSubmit = async (data: any) => {
+// Update handleAddBeneficiary to onSubmit
+const handleAddReplace = `    const handleSubmit = async (data: any) => {
         setIsSubmitting(true);
         setError(null);
         try {
@@ -106,44 +57,16 @@ export default function BeneficiariesClient({ initialBeneficiaries }: { initialB
         } finally {
             setIsSubmitting(false);
         }
-    };
+    };`;
+clientCode = clientCode.replace(/const handleAddBeneficiary = async \(e: React\.FormEvent\) => \{[\s\S]*?finally \{\s*setIsSubmitting\(false\);\s*\}\s*\};/, handleAddReplace);
 
-    const confirmDelete = async () => {
-        if (!deleteTarget) return;
-        try {
-            await deleteBeneficiary(deleteTarget);
-            setBeneficiaries(prev => prev.filter(b => b.id !== deleteTarget));
-            router.refresh();
-            toast.success({ title: 'Beneficiary removed.' });
-        } catch {
-            toast.error({ title: 'Failed to remove beneficiary.' });
-        } finally {
-            setDeleteTarget(null);
-        }
-    };
-
-        const filteredBeneficiaries = beneficiaries.filter(b =>
+const filteredReplace = `    const filteredBeneficiaries = beneficiaries.filter(b =>
         b.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (b.nickname || '').toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    );`;
+clientCode = clientCode.replace(/const filteredBeneficiaries = beneficiaries\.filter[\s\S]*?\);/, filteredReplace);
 
-    return (
-        <div className="space-y-8 max-w-7xl mx-auto p-4 animate-fade-in-up">
-
-            {/* Header */}
-            <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-6">
-                <div>
-                    <h1 className="text-3xl font-playfair font-bold text-charcoal">Beneficiaries</h1>
-                    <p className="text-muted-foreground mt-1">Manage trusted contacts for faster transfers.</p>
-                </div>
-
-                <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                    <DialogTrigger asChild onClick={() => setEditingId(null)}>
-                        <Button variant="primary" icon={<Plus className="w-4 h-4" />}>
-                            Add Beneficiary
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent className="sm:max-w-[600px]">
+const formUIReplace = `<DialogContent className="sm:max-w-[600px]">
                         <DialogHeader>
                             <DialogTitle>{editingId ? 'Edit Beneficiary' : 'Add New Beneficiary'}</DialogTitle>
                             <DialogDescription>
@@ -156,31 +79,14 @@ export default function BeneficiariesClient({ initialBeneficiaries }: { initialB
                             onCancel={() => { setIsDialogOpen(false); setEditingId(null); }}
                             isSubmitting={isSubmitting}
                         />
-                    </DialogContent>
-                </Dialog>
-            </div>
+                    </DialogContent>`;
+clientCode = clientCode.replace(/<DialogContent className="sm:max-w-\[600px\]">[\s\S]*?<\/DialogContent>/, formUIReplace);
 
-            {/* Search Bar */}
-            <div className="relative max-w-md">
-                <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                    placeholder="Search by name, bank, or nickname..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="pl-9"
-                />
-            </div>
+// Update Add button to clear edit state
+clientCode = clientCode.replace(/<DialogTrigger asChild>/, `<DialogTrigger asChild onClick={() => setEditingId(null)}>`);
 
-            {/* Grid */}
-            {isLoading ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {[1, 2, 3].map(i => (
-                        <div key={i} className="h-48 bg-muted animate-pulse rounded-xl" />
-                    ))}
-                </div>
-            ) : filteredBeneficiaries.length > 0 ? (
-                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredBeneficiaries.map((beneficiary) => {
+// Replace the card content mapping
+const cardMappingReplace = `{filteredBeneficiaries.map((beneficiary) => {
                         const rail = beneficiaryRails[beneficiary.rail || 'us_bank'];
                         const details = JSON.parse(beneficiary.details || '{}');
                         const displayAccount = rail ? rail.getDisplayAccount(details) : 'Unknown';
@@ -247,7 +153,7 @@ export default function BeneficiariesClient({ initialBeneficiaries }: { initialB
                                     <Badge variant={beneficiary.status === "ACTIVE" ? "success" : "secondary"} className="text-[10px] font-normal px-2">
                                         {beneficiary.status}
                                     </Badge>
-                                    <Link href={`/transfer?beneficiaryId=${beneficiary.id}`}>
+                                    <Link href={\`/transfer?beneficiaryId=\${beneficiary.id}\`}>
                                         <Button
                                             size="small"
                                             variant="outline"
@@ -259,42 +165,8 @@ export default function BeneficiariesClient({ initialBeneficiaries }: { initialB
                                 </div>
                             </CardContent>
                         </Card>
-                    )})}
-                </div>
-            ) : (
-                <div className="text-center py-16 bg-white rounded-xl border border-dashed border-gray-200">
-                    <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
-                        <User className="w-8 h-8 text-gray-300" />
-                    </div>
-                    <h3 className="text-lg font-medium text-charcoal">No beneficiaries found</h3>
-                    <p className="text-muted-foreground max-w-sm mx-auto mt-2 mb-6">
-                        Add people or businesses you frequently transfer money to.
-                    </p>
-                    <Button variant="outline" onClick={() => setIsDialogOpen(true)}>
-                        Create First Beneficiary
-                    </Button>
-                </div>
-            )}
+                    )})}`;
+clientCode = clientCode.replace(/\{filteredBeneficiaries\.map\(\(beneficiary\) => \([\s\S]*?<\/Card>\s*\)\)\}/, cardMappingReplace);
 
-            {/* Delete Confirmation Dialog */}
-            <Dialog open={deleteTarget !== null} onOpenChange={(open) => { if (!open) setDeleteTarget(null); }}>
-                <DialogContent className="sm:max-w-[400px]">
-                    <DialogHeader>
-                        <DialogTitle>Remove Beneficiary</DialogTitle>
-                        <DialogDescription>
-                            Are you sure you want to remove this beneficiary? You can add them again later.
-                        </DialogDescription>
-                    </DialogHeader>
-                    <DialogFooter className="gap-2">
-                        <Button variant="ghost" onClick={() => setDeleteTarget(null)}>Cancel</Button>
-                        <Button
-                            onClick={confirmDelete}
-                            className="bg-red-600 text-white hover:bg-red-700">
-                            Remove
-                        </Button>
-                    </DialogFooter>
-                </DialogContent>
-            </Dialog>
-        </div>
-    );
-}
+fs.writeFileSync('app/(portal)/beneficiaries/BeneficiariesClient.tsx', clientCode);
+console.log('BeneficiariesClient updated.');

@@ -25,7 +25,11 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/Button";
+import { beneficiaryRails } from "@/lib/beneficiary-rails";
+import { DynamicBeneficiaryForm } from "@/components/beneficiaries/DynamicBeneficiaryForm";
+import { adminCreateBeneficiary, adminUpdateBeneficiary, adminDeleteBeneficiary } from "@/app/actions/admin-customers";
 import { sendStatementEmail } from "@/app/actions/admin";
+
 import { toast } from "sonner";
 import { 
   updateRegistrationForm, 
@@ -88,6 +92,17 @@ export type AdminUser = {
     accountId: string;
   }[];
   registrationForm?: any | null;
+  beneficiaries?: {
+    id: string;
+    name: string;
+    nickname?: string | null;
+    rail: string;
+    details: string | null;
+    status: string;
+    notes?: string | null;
+    auditTrail?: string | null;
+    createdAt: Date;
+  }[];
 };
 
 export function AdminUserList({ 
@@ -100,13 +115,14 @@ export function AdminUserList({
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [activeTab, setActiveTab] = useState<'bio' | 'accounts' | 'employment' | 'kyc' | 'eportal'>('bio');
+  const [activeTab, setActiveTab] = useState<'bio' | 'accounts' | 'employment' | 'kyc' | 'eportal' | 'beneficiaries'>('bio');
   const [editMode, setEditMode] = useState<Record<string, boolean>>({});
   
   // Modals state for Account Info tab
   const [accountPanel, setAccountPanel] = useState<any>(null);
   const [cardPanel, setCardPanel] = useState<any>(null);
   const [chequePanel, setChequePanel] = useState<any>(null);
+  const [beneficiaryPanel, setBeneficiaryPanel] = useState<any>(null);
 
   const filtered = initialUsers.filter((user) => {
     const matchesSearch = 
@@ -305,6 +321,12 @@ export function AdminUserList({
                   onClick={() => setActiveTab('eportal')}
                 >
                   <ShieldCheck className="w-4 h-4 inline-block mr-1" /> e-Portal
+                </button>
+                <button
+                  className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'beneficiaries' ? 'text-vintage-gold border-b-2 border-vintage-gold' : 'text-neutral-500 hover:text-neutral-700'}`}
+                  onClick={() => setActiveTab('beneficiaries')}
+                >
+                  <Users className="w-4 h-4 inline-block mr-1" /> Beneficiaries
                 </button>
               </div>
 
@@ -905,10 +927,97 @@ export function AdminUserList({
                     </div>
                   </div>
                 )}
+
+                {/* BENEFICIARIES TAB */}
+                {activeTab === 'beneficiaries' && (
+                  <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 p-6">
+                    <div className="flex justify-between items-center mb-4">
+                      <div>
+                        <h4 className="text-lg font-playfair font-bold text-[color:var(--heritage-navy)]">Beneficiaries</h4>
+                        <p className="text-xs text-muted-foreground">Manage payment recipients and audit trails for this customer.</p>
+                      </div>
+                      <Button variant="outline" size="small" onClick={() => setBeneficiaryPanel('new')} className="h-8 text-xs border-[color:var(--heritage-gold)] text-[color:var(--heritage-gold)] hover:bg-[color:var(--heritage-gold)]/10"><Plus className="w-3 h-3 mr-1"/> Add Beneficiary</Button>
+                    </div>
+
+                    {!selectedUser.beneficiaries || selectedUser.beneficiaries.length === 0 ? (
+                      <div className="bg-neutral-50 p-12 rounded-2xl border border-dashed border-neutral-300 flex flex-col items-center justify-center text-center">
+                        <Users className="w-10 h-10 text-neutral-400 mb-3" />
+                        <h4 className="text-sm font-bold text-charcoal mb-1">No Beneficiaries</h4>
+                        <p className="text-xs text-muted-foreground mb-4">This customer has not saved any external payment recipients.</p>
+                        <Button onClick={() => setBeneficiaryPanel('new')} className="bg-[color:var(--heritage-navy)] hover:bg-[color:var(--heritage-navy)]/90 text-white h-8 text-xs"><Plus className="w-3 h-3 mr-1"/> Create Beneficiary</Button>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {selectedUser.beneficiaries.map(ben => {
+                          const rail = beneficiaryRails[ben.rail || 'us_bank'];
+                          const details = ben.details ? JSON.parse(ben.details) : {};
+                          return (
+                            <div key={ben.id} onClick={() => setBeneficiaryPanel(ben)} className="p-4 bg-white border border-neutral-200 rounded-xl shadow-sm hover:border-vintage-gold cursor-pointer transition-colors relative">
+                               <div className="flex justify-between items-start mb-2">
+                                  <div>
+                                    <h5 className="font-semibold text-sm text-charcoal">{ben.name}</h5>
+                                    <p className="text-xs text-muted-foreground">{ben.nickname || rail?.displayName}</p>
+                                  </div>
+                                  <span className={`text-[9px] font-bold uppercase px-2 py-1 rounded-full ${ben.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : ben.status === 'BLOCKED' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{ben.status}</span>
+                               </div>
+                               <div className="text-xs text-slate-600 bg-slate-50 p-2 rounded mt-2 font-mono">
+                                  {rail ? rail.getDisplayAccount(details) : 'Unknown'}
+                               </div>
+                               {ben.notes && <p className="text-[10px] text-slate-500 mt-2 italic line-clamp-1">"{ben.notes}"</p>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                )}
+
               </div>
             </div>
           )}
-        </SheetContent>
+        
+
+          <Dialog open={!!beneficiaryPanel} onOpenChange={(open) => !open && setBeneficiaryPanel(null)}>
+            <DialogContent className="sm:max-w-[650px] max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{beneficiaryPanel === 'new' ? 'Create Beneficiary' : 'Manage Beneficiary'}</DialogTitle>
+              </DialogHeader>
+              {beneficiaryPanel && (
+                <div className="pt-4 border-t border-slate-100">
+                  <DynamicBeneficiaryForm
+                    initialData={beneficiaryPanel === 'new' ? undefined : beneficiaryPanel}
+                    isAdmin={true}
+                    onCancel={() => setBeneficiaryPanel(null)}
+                    onSubmit={async (data: any) => {
+                      const fd = new FormData();
+                      fd.append('userId', selectedUser!.id);
+                      fd.append('name', data.name);
+                      fd.append('nickname', data.nickname || '');
+                      fd.append('rail', data.rail);
+                      fd.append('details', data.details);
+                      fd.append('status', data.status || 'ACTIVE');
+                      fd.append('notes', data.notes || '');
+                      
+                      if (data.isDelete) {
+                        fd.append('id', beneficiaryPanel.id);
+                        await adminDeleteBeneficiary(fd);
+                        toast.success('Beneficiary deleted');
+                      } else if (beneficiaryPanel !== 'new') {
+                        fd.append('id', beneficiaryPanel.id);
+                        await adminUpdateBeneficiary(fd);
+                        toast.success('Beneficiary updated');
+                      } else {
+                        await adminCreateBeneficiary(fd);
+                        toast.success('Beneficiary created');
+                      }
+                      setBeneficiaryPanel(null);
+                    }}
+                  />
+                </div>
+              )}
+            </DialogContent>
+          </Dialog>
+</SheetContent>
       </Sheet>
 
       {/* Account Management Panel (Sub-modal) */}

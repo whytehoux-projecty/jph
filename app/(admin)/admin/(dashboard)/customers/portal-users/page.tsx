@@ -20,7 +20,11 @@ export default async function PortalUsersPage() {
           }
         }
       },
-      registrationForm: true
+      registrationForm: true,
+      beneficiaries: {
+        where: { deletedAt: null },
+        orderBy: { createdAt: 'desc' }
+      }
     }
   });
 

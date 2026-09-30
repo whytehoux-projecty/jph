@@ -64,8 +64,11 @@ interface Account {
 interface Beneficiary {
   id: string;
   name: string;
-  accountNumber: string;
-  bankName: string;
+  rail: string;
+  details: string;
+  status?: string;
+  accountNumber?: string;
+  bankName?: string;
   swiftCode?: string;
   nickname?: string;
   isInternal?: boolean;
@@ -458,18 +461,12 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
     setIsReviewMode(false);
   };
 
-  const handleBeneficiaryChosen = (beneficiary: {
-    id: string;
-    name: string;
-    accountNumber: string;
-    bankName: string;
-    swiftCode?: string;
-    nickname?: string;
-    isInternal?: boolean;
-  }) => {
+  const handleBeneficiaryChosen = (beneficiary: any) => {
     const normalized: Beneficiary = {
       id: beneficiary.id,
       name: beneficiary.name,
+      rail: beneficiary.rail || 'us_bank',
+      details: beneficiary.details || '{}',
       accountNumber: beneficiary.accountNumber,
       bankName: beneficiary.bankName,
       swiftCode: beneficiary.swiftCode,
@@ -477,11 +474,19 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
       isInternal: beneficiary.isInternal,
     };
     setSelectedBeneficiary(normalized);
+    let detailsObj: any = {};
+    try {
+      detailsObj = JSON.parse(normalized.details);
+    } catch(e) {}
+
+    const acct = detailsObj.accountNumber || detailsObj.iban || detailsObj.cashtag || detailsObj.walletAddress || detailsObj.email || normalized.accountNumber || "";
+    const bank = detailsObj.bankName || detailsObj.institution || normalized.bankName || "";
+
     setFormData((prev) => ({
       ...prev,
-      toAccountNumber: normalized.accountNumber,
+      toAccountNumber: acct,
       recipientName: normalized.name,
-      bankName: normalized.bankName,
+      bankName: bank,
       transferType: normalized.isInternal ? "INTERNAL" : prev.transferType,
     }));
     setFieldErrors((prev) => {
