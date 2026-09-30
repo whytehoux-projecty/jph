@@ -380,7 +380,7 @@ export default function AccountsClient({ initialAccounts, userPreferences }: { i
   const renderEmptyState = () => (
     <div className="text-center py-16 bg-muted/20 rounded-xl border border-dashed border-muted-foreground/20">
       <div className="mx-auto w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mb-4">
-        <VintageIcon name="pillars" className="w-8 h-8 text-muted-foreground" />
+        <Landmark className="w-8 h-8 text-muted-foreground stroke-[2]" />
       </div>
       <h3 className="text-xl font-medium text-charcoal mb-2">
         No Accounts Found
