@@ -7,6 +7,7 @@ interface AccountAnalyticsProps {
   currency?: string;
   totalLiquidAssets?: number;
   activeAccountsCount?: number;
+  pendingActionsCount?: number;
   onDrilldown?: (type: "liquid" | "active" | "pending") => void;
 }
 
@@ -14,9 +15,8 @@ export function AccountAnalytics({
   currency = "USD",
   totalLiquidAssets = 0,
   activeAccountsCount = 0,
+  pendingActionsCount = 0,
 }: AccountAnalyticsProps) {
-  // Hardcoded pending actions for now, as it was in the original
-  const pendingActionsCount = 3;
 
   return (
     <div className="space-y-4">

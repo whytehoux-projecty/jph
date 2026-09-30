@@ -59,7 +59,14 @@ interface Transaction {
 
 import { Sentry } from "@/lib/sentry-mock";
 
-export default function AccountsClient({ initialAccounts, userPreferences }: { initialAccounts: Account[], userPreferences: { language: string; currency: string } }) {
+interface AccountsClientProps {
+  initialAccounts: Account[];
+  userPreferences: { language: string; currency: string };
+  pendingActionsCount: number;
+  promoMessage: string | null;
+}
+
+export default function AccountsClient({ initialAccounts, userPreferences, pendingActionsCount, promoMessage }: AccountsClientProps) {
   const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [detailsInitialTab, setDetailsInitialTab] =
@@ -431,11 +438,11 @@ export default function AccountsClient({ initialAccounts, userPreferences }: { i
         {liveMessage}
       </div>
 
-      {showPromo && (
+      {showPromo && promoMessage && (
         <PromoBanner
-          title="Private concierge upgrade"
-          body="Unlock tailored wealth management with our private concierge team."
-          ctaLabel="Learn more"
+          title="Important Notice"
+          body={promoMessage}
+          ctaLabel="View Details"
           onCtaClick={() => {
             if (typeof window !== "undefined") {
               window.location.href = "/support";
@@ -479,6 +486,7 @@ export default function AccountsClient({ initialAccounts, userPreferences }: { i
         currency={userPreferences.currency}
         totalLiquidAssets={totalLiquidAssets}
         activeAccountsCount={activeAccountsCount}
+        pendingActionsCount={pendingActionsCount}
         onDrilldown={handleKpiDrilldown}
       />
 

@@ -2,15 +2,24 @@ import { getAccounts } from "@/app/actions/accounts";
 import { getProfile } from "@/app/actions/profile";
 import AccountsClient from "./AccountsClient";
 import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
 export default async function AccountsPage() {
-  let user, rawAccounts;
+  let user, rawAccounts, pendingActionsCount = 0;
   
   try {
     user = await getProfile();
     rawAccounts = await getAccounts();
+    if (user?.id) {
+      // Calculate pending actions for the user
+      const unreadNotifications = await prisma.notification.count({ where: { userId: user.id, isRead: false } });
+      const pendingTx = await prisma.transaction.count({ where: { account: { userId: user.id }, status: 'PENDING' } });
+      const pendingTickets = await prisma.supportTicket.count({ where: { userId: user.id, status: 'OPEN' } });
+      
+      pendingActionsCount = unreadNotifications + pendingTx + pendingTickets;
+    }
   } catch (error) {
     redirect('/login');
   }
@@ -46,6 +55,8 @@ export default async function AccountsPage() {
     <AccountsClient 
       initialAccounts={initialAccounts}
       userPreferences={userPreferences}
+      pendingActionsCount={pendingActionsCount}
+      promoMessage={user?.eportalNotificationMessage || null}
     />
   );
 }
