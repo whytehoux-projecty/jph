@@ -44,6 +44,10 @@ import {
   LinkExternalAccountDialog,
 } from "./components/AccountActionDialogs";
 import { AccountCard, Account } from "./components/AccountCard";
+import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { SearchInput } from "@/components/ui/SearchInput";
+import { SortSelect } from "@/components/ui/SortSelect";
+import { PromoBanner } from "@/components/ui/PromoBanner";
 
 interface Transaction {
   id: string;
@@ -288,6 +292,7 @@ export default function AccountsClient({ initialAccounts, userPreferences }: { i
   }, [accounts]);
 
   const locale = languageToLocale(userPreferences.language);
+  const hasAccounts = accounts.length > 0;
 
   const getAccountIcon = (type: string) => {
     switch (type) {
@@ -375,7 +380,7 @@ export default function AccountsClient({ initialAccounts, userPreferences }: { i
   const renderEmptyState = () => (
     <div className="text-center py-16 bg-muted/20 rounded-xl border border-dashed border-muted-foreground/20">
       <div className="mx-auto w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mb-4">
-        <Landmark className="w-8 h-8 text-muted-foreground" />
+        <VintageIcon name="pillars" className="w-8 h-8 text-muted-foreground" />
       </div>
       <h3 className="text-xl font-medium text-charcoal mb-2">
         No Accounts Found
@@ -427,35 +432,17 @@ export default function AccountsClient({ initialAccounts, userPreferences }: { i
       </div>
 
       {showPromo && (
-        <div className="flex items-start justify-between gap-3 rounded-xl border border-[color:var(--heritage-navy)]/15 bg-[color:var(--heritage-surface)]/90 px-4 py-3 shadow-sm">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-wider text-[color:var(--heritage-navy)]">
-              Private concierge upgrade
-            </p>
-            <p className="text-xs text-muted-foreground">
-              Unlock tailored wealth management with our private concierge team.
-            </p>
-          </div>
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="small"
-              className="h-8 border-[color:var(--heritage-navy)]/40 text-[color:var(--heritage-navy)] text-xs"
-              onClick={() => {
-                if (typeof window !== "undefined") {
-                  window.location.href = "/support";
-                }
-              }}>
-              Learn more
-            </Button>
-            <button
-              type="button"
-              onClick={handlePromoDismiss}
-              className="text-xs text-muted-foreground hover:text-charcoal">
-              Dismiss
-            </button>
-          </div>
-        </div>
+        <PromoBanner
+          title="Private concierge upgrade"
+          body="Unlock tailored wealth management with our private concierge team."
+          ctaLabel="Learn more"
+          onCtaClick={() => {
+            if (typeof window !== "undefined") {
+              window.location.href = "/support";
+            }
+          }}
+          onDismiss={handlePromoDismiss}
+        />
       )}
 
       {/* Page Header — not sticky, scrolls away */}
@@ -473,20 +460,20 @@ export default function AccountsClient({ initialAccounts, userPreferences }: { i
             variant="outline"
             onClick={() => window.location.reload()}
             disabled={isLoading}>
-            <RefreshCw
-              className={`w-4 h-4 mr-2 ${isLoading ? "animate-spin" : ""}`}
-            />
+            <RefreshCw className={`w-4 h-4 mr-2 stroke-[2] ${isLoading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
           <Button
             className="bg-[color:var(--heritage-navy)] hover:bg-[color:var(--heritage-navy)]/90 text-white"
             onClick={() => setIsOpenAccountOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
+            <Plus className="w-4 h-4 mr-2 stroke-[2]" />
             Open Account
           </Button>
         </div>
       </div>
 
+      {hasAccounts && (
+      <>
       {/* KPI Analytics — not sticky, scrolls away */}
       <AccountAnalytics
         currency={userPreferences.currency}
@@ -498,44 +485,20 @@ export default function AccountsClient({ initialAccounts, userPreferences }: { i
       {/* Filter Bar — sticky, stays visible while scrolling the account grid */}
       <div className="sticky top-[70px] z-30 bg-white/95 backdrop-blur-md border border-border shadow-sm rounded-xl px-4 py-3">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 no-scrollbar">
-            {(["all", "checking", "savings", "credit", "investment"] as const).map((type) => (
-              <Button
-                key={type}
-                variant={filterType === type ? "primary" : "ghost"}
-                size="small"
-                onClick={() => setFilterType(type)}
-                className="capitalize shrink-0">
-                {type === "all" ? "All" : type.charAt(0).toUpperCase() + type.slice(1)}
-              </Button>
-            ))}
-          </div>
+          <SegmentedControl
+              options={["all", "checking", "savings", "credit", "investment"]}
+              value={filterType}
+              onChange={setFilterType}
+            />
 
-          <div className="flex items-center gap-2 w-full md:w-auto">
-            <div className="relative flex-1 md:w-64">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-              <Input
-                placeholder="Search by nickname or last 4 digits..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-9 h-9 text-sm"
-              />
+          <div className="flex items-center gap-2 w-full md:w-auto flex-1 md:flex-none justify-end">
+              <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder="Search by nickname or last 4 digits..." />
+              <SortSelect value={sortOrder} onChange={setSortOrder} />
             </div>
-            <Select value={sortOrder} onValueChange={setSortOrder}>
-              <SelectTrigger className="w-[200px]">
-                <SlidersHorizontal className="w-4 h-4 mr-2" />
-                <SelectValue placeholder="Sort by" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="balance-desc">Balance (High → Low)</SelectItem>
-                <SelectItem value="balance-asc">Balance (Low → High)</SelectItem>
-                <SelectItem value="name-asc">Name (A → Z)</SelectItem>
-                <SelectItem value="name-desc">Name (Z → A)</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </div>
-      </div>
+      </>
+      )}
 
       {/* Accounts Grid */}
       {error ? (
