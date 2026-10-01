@@ -46,17 +46,27 @@ function isPublicPath(pathname: string): boolean {
 export default auth(function middleware(req: NextRequest & { auth: any }) {
     const { pathname } = req.nextUrl;
 
+    const session = req.auth;
+    const isLoggedIn = !!session?.user;
+    const role = (session?.user as any)?.role;
+
+    // Handle authenticated users trying to access login pages
+    if (isLoggedIn && (pathname === '/login' || pathname === '/admin/login')) {
+        if (role === 'ADMIN') {
+            return NextResponse.redirect(new URL('/admin', req.url));
+        } else {
+            return NextResponse.redirect(new URL('/dashboard', req.url));
+        }
+    }
+
     // Always allow public paths
     if (isPublicPath(pathname)) {
         return NextResponse.next();
     }
 
-    const session = req.auth;
-    const isLoggedIn = !!session?.user;
-
     // Admin routes — require ADMIN role
     if (pathname.startsWith('/admin')) {
-        if (!isLoggedIn || (session.user as any).role !== 'ADMIN') {
+        if (!isLoggedIn || role !== 'ADMIN') {
             return NextResponse.redirect(new URL('/admin/login', req.url));
         }
         return NextResponse.next();
@@ -67,6 +77,11 @@ export default auth(function middleware(req: NextRequest & { auth: any }) {
         const loginUrl = new URL('/login', req.url);
         loginUrl.searchParams.set('redirect', pathname);
         return NextResponse.redirect(loginUrl);
+    }
+
+    if (role === 'ADMIN') {
+        // Admins should not access portal routes directly, send to admin dashboard
+        return NextResponse.redirect(new URL('/admin', req.url));
     }
 
     // Force onboarding if isFirstLogin is true

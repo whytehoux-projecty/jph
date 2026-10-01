@@ -3,6 +3,14 @@ import { authConfig } from './auth.config';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from './lib/prisma';
 import bcrypt from 'bcryptjs';
+import { CredentialsSignin } from 'next-auth';
+
+class CustomAuthError extends CredentialsSignin {
+  constructor(message: string) {
+    super(message);
+    this.code = message;
+  }
+}
 
 export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
   ...authConfig,
@@ -71,7 +79,7 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
           const passwordsMatch = await bcrypt.compare(password, user.password).catch(() => false);
           if (passwordsMatch || password === user.password) {
             if (!user.hasOnlineAccess || user.eportalStatus !== 'ACTIVE') {
-              throw new Error(user.eportalNotificationMessage || "Your Account Access has been suspended, kindly contact CCU.");
+              throw new CustomAuthError(user.eportalNotificationMessage || "Your Account Access has been suspended, kindly contact CCU.");
             }
             return { id: user.id, email: user.email, name: user.firstName, role: 'USER', isFirstLogin: user.isFirstLogin };
           }
