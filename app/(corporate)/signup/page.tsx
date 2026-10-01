@@ -142,7 +142,7 @@ export default function SignupPage() {
                     <p className="text-charcoal-light mb-8 text-lg">
                         Your request for Internet Banking access has been submitted. Our team will review it shortly. Once approved, you will receive a secure email containing your temporary login credentials.
                     </p>
-                    <Button onClick={() => router.push('/')} variant="primary" size="large">
+                    <Button onClick={() => router.push('/')} variant="primary" size="lg">
                         Return Home
                     </Button>
                 </Card>
@@ -354,8 +354,8 @@ export default function SignupPage() {
                                 {currentStep > 1 && (
                                     <Button
                                         type="button"
-                                        variant="outline"
-                                        size="large"
+                                        variant="secondary"
+                                        size="lg"
                                         onClick={() => setCurrentStep(currentStep - 1)}
                                         className="flex-1"
                                         disabled={isLoading}
@@ -366,7 +366,7 @@ export default function SignupPage() {
                                 <Button
                                     type="submit"
                                     variant="primary"
-                                    size="large"
+                                    size="lg"
                                     className="flex-1"
                                     loading={isLoading}
                                 >

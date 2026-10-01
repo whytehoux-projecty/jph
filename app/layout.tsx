@@ -27,16 +27,17 @@ export const metadata: Metadata = {
   },
   appleWebApp: {
     capable: true,
-    statusBarStyle: "default",
-    title: "JPHeritage",
+    statusBarStyle: 'default',
+    title: 'Heritage Trust',
   },
 };
 
 export const viewport: Viewport = {
-  themeColor: "#0D2545",
-  width: "device-width",
+  // Heritage Trust brand colour on Ledger identity
+  themeColor: '#FBF9F4',
+  width: 'device-width',
   initialScale: 1,
-  maximumScale: 1,
+  // maximumScale removed — blocking pinch-zoom is a WCAG failure (A6 fix)
 };
 
 export default function RootLayout({

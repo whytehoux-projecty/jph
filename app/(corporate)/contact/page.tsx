@@ -132,11 +132,11 @@ export default function ContactPage() {
                                 </div>
                                 <h3 className="text-2xl font-playfair font-bold text-charcoal">Message Sent</h3>
                                 <p className="text-charcoal-light">
-                                    Thank you for contacting JP Heritage Bank. A member of our concierge team will respond to your inquiry shortly.
+                                    Thank you for contacting Heritage Trust. A member of our team will respond to your inquiry shortly.
                                 </p>
                                 <Button
                                     onClick={() => setIsSuccess(false)}
-                                    variant="outline"
+                                    variant="secondary"
                                     className="mt-6"
                                     aria-label="Send another message"
                                 >
@@ -204,7 +204,7 @@ export default function ContactPage() {
                                 <Button
                                     type="submit"
                                     className="w-full"
-                                    size="large"
+                                    size="lg"
                                     loading={isSubmitting}
                                 >
                                     <Send className="w-4 h-4 mr-2" />

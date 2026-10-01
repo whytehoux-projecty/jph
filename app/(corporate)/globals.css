@@ -1,89 +1,147 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap');
+/* ─── Heritage Trust Bank — Ledger Identity ────────────────────────────────── */
+/* Fonts loaded via next/font/google in layout.tsx (self-hosted at build time). */
+/* This file handles: Ledger CSS tokens, base reset, theme-ink, utilities.      */
 
 @layer base {
   :root {
-    --heritage-navy: #0D2545;
-    --heritage-navy-light: #1B355B;
-    --heritage-navy-dark: #091C38;
-    --soft-gold: #B8960C;
-    --soft-gold-light: #D4AF7A;
-    --charcoal: #3D3D3D;
-    --off-white: #FAF9F6;
-    --warm-cream: #F5F1E8;
-    --heritage-surface: #F0F4FA;
+    /* Ledger surface tokens */
+    --bg:           #FBF9F4; /* paper-50 */
+    --surface:      #F3EFE4; /* paper-100 */
+    --line:         #E6E0D0; /* paper-200 */
+    --text:         #14181B; /* ink-900 */
+    --text-muted:   #5B646C; /* ink-500 */
+    --action:       #C93A14; /* vermilion-600 */
+    --action-hover: #A62F0E; /* vermilion-700 */
+    --focus:        #14181B; /* ink-900 focus ring */
 
-    --font-heading: 'Playfair Display', serif;
-    --font-body: 'Inter', sans-serif;
-    --font-mono: 'JetBrains Mono', monospace;
+    /* Legacy tokens (kept for any components still referencing them) */
+    --heritage-navy:       #0D2545;
+    --heritage-navy-light: #1B355B;
+    --heritage-navy-dark:  #091C38;
+    --soft-gold:           #B8960C;
+    --soft-gold-light:     #D4AF7A;
+    --charcoal:            #3D3D3D;
+    --off-white:           #FAF9F6;
+    --warm-cream:          #F5F1E8;
+    --heritage-surface:    #F0F4FA;
+    --heritage-gold:       #B8960C;
+
+    /* Ledger font stacks (used via CSS var for non-Tailwind contexts) */
+    --font-display: 'Familjen Grotesk', ui-sans-serif, system-ui, sans-serif;
+    --font-body:    'Public Sans', ui-sans-serif, system-ui, sans-serif;
+    --font-mono:    'IBM Plex Mono', ui-monospace, SFMono-Regular, monospace;
+  }
+
+  /* Dark / ink surface theme — applied to footer and dark sections */
+  .theme-ink {
+    --bg:           #14181B; /* ink-900 */
+    --surface:      #1C2226;
+    --line:         #2E353B; /* ink-700 */
+    --text:         #FBF9F4; /* paper-50 */
+    --text-muted:   #B9B3A3;
+    --action:       #F2714B; /* vermilion-400 */
+    --action-hover: #F58B6A;
+    --focus:        #FBF9F4; /* paper-50 focus ring on dark */
+  }
+
+  /* Base reset for marketing site */
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 1rem;
+    line-height: 1.6;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: var(--font-heading);
+    font-family: var(--font-display);
+  }
+
+  /* Universal focus ring — Ledger uses solid 2px ink ring */
+  :focus-visible {
+    outline: 2px solid var(--focus);
+    outline-offset: 2px;
   }
 }
 
 @layer utilities {
-  .animate-fade-in-up {
-    animation: fadeInUp 0.6s ease-out both;
+  /* Tabular numerals for financial data */
+  .tabular {
+    font-variant-numeric: tabular-nums;
   }
 
-  .animate-fade-in {
-    animation: fadeIn 0.4s ease-out both;
+  /* Body copy measure limit */
+  .measure {
+    max-width: 62ch;
   }
 
-  .animate-slide-up {
-    animation: slideUp 0.5s ease-out both;
+  /* Ledger animations — wrapped in motion-safe as required */
+  @media (prefers-reduced-motion: no-preference) {
+    .animate-fade-in-up {
+      animation: ledger-fade-up 0.2s ease-out both;
+    }
+
+    .animate-fade-in {
+      animation: ledger-fade-in 0.15s ease-out both;
+    }
+
+    .animate-delay-100 { animation-delay: 100ms; }
+    .animate-delay-200 { animation-delay: 200ms; }
+    .animate-delay-300 { animation-delay: 300ms; }
+    .animate-delay-400 { animation-delay: 400ms; }
   }
 
-  .animate-delay-100 { animation-delay: 100ms; }
-  .animate-delay-200 { animation-delay: 200ms; }
-  .animate-delay-300 { animation-delay: 300ms; }
-  .animate-delay-400 { animation-delay: 400ms; }
-  .animate-delay-500 { animation-delay: 500ms; }
-
-  @keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(24px); }
+  @keyframes ledger-fade-up {
+    from { opacity: 0; transform: translateY(8px); }
     to   { opacity: 1; transform: translateY(0); }
   }
 
-  @keyframes fadeIn {
+  @keyframes ledger-fade-in {
     from { opacity: 0; }
     to   { opacity: 1; }
   }
 
-  @keyframes slideUp {
-    from { opacity: 0; transform: translateY(40px); }
-    to   { opacity: 1; transform: translateY(0); }
+  /* Section entrance reveal — one per section */
+  .reveal {
+    opacity: 0;
+    transform: translateY(8px);
+    transition: opacity 0.2s ease-out, transform 0.2s ease-out;
+  }
+  .reveal.in-view {
+    opacity: 1;
+    transform: translateY(0);
   }
 
+  /* Hairline divider */
+  .hairline {
+    border-top: 1px solid var(--line);
+  }
+
+  /* Ledger label style (uppercase mono, +0.08em) */
+  .label-mono {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  /* Text balance for headings */
   .text-balance { text-wrap: balance; }
 
-  /* Gradient text utility */
-  .text-gradient-gold {
-    background: linear-gradient(135deg, #D4AF7A, #B8960C);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+  /* Toast exit */
+  .toast-exit {
+    opacity: 0;
+    transform: translateX(100%);
+    transition: all 0.3s ease-out;
   }
+}
 
-  /* Glass morphism utility */
-  .glass-navy {
-    background: rgba(13, 37, 69, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-
-  .glass-white {
-    background: rgba(255, 255, 255, 0.85);
-    backdrop-filter: blur(12px);
-    -webkit-backdrop-filter: blur(12px);
-  }
-
-  /* Hover lift */
-  .hover-lift {
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-  }
-  .hover-lift:hover {
-    transform: translateY(-2px);
+/* ─── Prefers-reduced-motion global override ───────────────────────────────── */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
   }
 }
