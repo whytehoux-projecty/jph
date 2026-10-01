@@ -3,7 +3,7 @@ import { PrismaClient } from '@prisma/client';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Clearing mocked data from JPHeritage database (preserving Admin users)...');
+  console.log('Clearing mocked data from heritagetrust database (preserving Admin users)...');
 
   // Wipe existing records cleanly
   await prisma.statement.deleteMany();

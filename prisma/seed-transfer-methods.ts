@@ -13,7 +13,7 @@ async function main() {
     {
       methodId: "internal",
       displayName: "Internal Transfer",
-      description: "Between your JP Heritage accounts",
+      description: "Between your Heritage Trust accounts",
       processingTime: "Instant",
       feeLabel: "$0.00",
       baseFee: 0,

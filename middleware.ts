@@ -10,7 +10,7 @@ const PUBLIC_PATHS = [
     '/login',
     '/admin/login',
     '/unavailable',
-    // Corporate marketing pages
+    // Corporate marketing pages (existing)
     '/',
     '/personal-banking',
     '/business-banking',
@@ -19,8 +19,21 @@ const PUBLIC_PATHS = [
     '/contact',
     '/apply',
     '/signup',
+    '/enroll',      // enrollment request (replaces /signup)
     '/privacy',
     '/terms',
+    // New marketing routes (Phase 6)
+    '/security',
+    '/help',
+    '/status',
+    '/locations',
+    '/rates-and-fees',
+    '/accessibility',
+    '/careers',
+    '/press',
+    '/investors',
+    // Product pages — the existing startsWith logic covers /products/* slugs
+    '/products',
 ];
 
 // Prefixes that are always public

@@ -153,7 +153,7 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
         <div className={cn("flex items-center gap-3 overflow-hidden", isCollapsed && "hidden")}>
           <Landmark className="w-6 h-6 text-vintage-gold shrink-0" />
           <div className="truncate">
-            <h2 className="font-playfair font-bold text-lg tracking-wide truncate">JPHeritage</h2>
+            <h2 className="font-playfair font-bold text-lg tracking-wide truncate">heritagetrust</h2>
           </div>
         </div>
         

@@ -30,7 +30,7 @@ export async function handleApprove(formData: FormData) {
 
   await sendEmail({
     to: app.email,
-    subject: 'Action Required: Complete Your JP Heritage Bank Registration',
+    subject: 'Action Required: Complete Your Heritage Trust Bank Registration',
     html: `
       <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto;">
         <h2>Preliminary Approval Granted</h2>
@@ -39,7 +39,7 @@ export async function handleApprove(formData: FormData) {
         <p>To finalize your account setup, please complete our secure registration form by clicking the link below:</p>
         <a href="${registerLink}" style="display: inline-block; padding: 10px 20px; background-color: #0b2545; color: #fff; text-decoration: none; border-radius: 5px; margin: 20px 0;">Complete Registration</a>
         <p>If the button doesn't work, copy and paste this link into your browser:<br/>${registerLink}</p>
-        <p>Best regards,<br/>JP Heritage Bank Team</p>
+        <p>Best regards,<br/>Heritage Trust Bank Team</p>
       </div>
     `
   });
@@ -60,14 +60,14 @@ export async function handleReject(formData: FormData) {
 
   await sendEmail({
     to: app.email,
-    subject: 'JP Heritage Bank - Application Update',
+    subject: 'Heritage Trust Bank - Application Update',
     html: `
       <div style="font-family: Arial, sans-serif; max-w: 600px; margin: 0 auto;">
         <h2>Application Update</h2>
         <p>Dear ${app.firstName},</p>
-        <p>Thank you for applying to JP Heritage Bank. After careful review, we regret to inform you that we are unable to approve your application at this time.</p>
+        <p>Thank you for applying to Heritage Trust Bank. After careful review, we regret to inform you that we are unable to approve your application at this time.</p>
         <p>If you believe this is a mistake or have additional information to provide, please contact our support team.</p>
-        <p>Best regards,<br/>JP Heritage Bank Team</p>
+        <p>Best regards,<br/>Heritage Trust Bank Team</p>
       </div>
     `
   });
@@ -103,7 +103,7 @@ export async function handleRequestVerification(formData: FormData) {
         <p>Please click the link below to securely schedule your meeting slot and choose your preferred communication method (Zoom, WhatsApp, etc.):</p>
         <a href="${scheduleLink}" style="display: inline-block; padding: 10px 20px; background-color: #0b2545; color: #fff; text-decoration: none; border-radius: 5px; margin: 20px 0;">Schedule Verification Meeting</a>
         <p>If the button doesn't work, copy and paste this link into your browser:<br/>${scheduleLink}</p>
-        <p>Best regards,<br/>JP Heritage Bank Team</p>
+        <p>Best regards,<br/>Heritage Trust Bank Team</p>
       </div>
     `
   });

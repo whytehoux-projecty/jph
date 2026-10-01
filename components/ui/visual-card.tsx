@@ -141,7 +141,7 @@ export function VisualCard({ name, number, expiry, cvc, type, scheme, frozen = f
                     </div>
 
                     <div className="absolute bottom-6 left-6 text-[10px] opacity-70 max-w-[70%] leading-tight">
-                        This card is property of JP Heritage Bank. If found, please return to any branch or call 1-800-HERITAGE.
+                        This card is property of Heritage Trust Bank. If found, please return to any branch or call 1-800-HERITAGE.
                     </div>
 
                     <div className="absolute bottom-6 right-6">

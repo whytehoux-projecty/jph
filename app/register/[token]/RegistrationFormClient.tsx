@@ -478,8 +478,8 @@ export default function RegistrationFormClient({ application }: { application: a
                 <div className="hidden print:block p-6 bg-neutral-50 border-b-2 border-dashed border-neutral-300">
                     <h3 className="font-bold uppercase mb-2 text-[#0D2545] text-sm">Hard Copy Submission Instructions</h3>
                     <p className="mb-1 text-xs text-neutral-800">If you are filling out this form by hand, please return the completed and signed physical copy to our central post office address:</p>
-                    <p className="font-mono mt-2 mb-3 text-xs font-bold text-[#0D2545]">JP Heritage Bank, N.A.<br/>PO Box 10293, Wall Street Station<br/>New York, NY 10005</p>
-                    <p className="text-xs text-neutral-800">Alternatively, you may scan the complete, signed form along with copies of your ID and email them securely to: <strong>onboarding@jpheritage.com</strong></p>
+                    <p className="font-mono mt-2 mb-3 text-xs font-bold text-[#0D2545]">Heritage Trust Bank, N.A.<br/>PO Box 10293, Wall Street Station<br/>New York, NY 10005</p>
+                    <p className="text-xs text-neutral-800">Alternatively, you may scan the complete, signed form along with copies of your ID and email them securely to: <strong>onboarding@heritagetrust.com</strong></p>
                     {downloadTimestamp && (
                         <p className="mt-4 pt-3 border-t border-neutral-300 font-mono text-[10px] text-neutral-500 font-bold uppercase">
                             DOCUMENT GENERATED ON: {downloadTimestamp}
@@ -495,7 +495,7 @@ export default function RegistrationFormClient({ application }: { application: a
                             <div className="inline-flex items-center justify-center bg-[#0D2545] px-5 py-3 rounded shadow-md mb-2 print:border-2 print:border-black print:bg-[#0D2545] print:shadow-none">
                                 <img
                                     src="/bank-logo.svg"
-                                    alt="JP Heritage Bank Logo"
+                                    alt="Heritage Trust Bank Logo"
                                     className="h-10 md:h-12 w-auto object-contain"
                                 />
                             </div>
@@ -1305,7 +1305,7 @@ export default function RegistrationFormClient({ application }: { application: a
 
                                 <tr>
                                     <td className="border border-neutral-300 p-2.5 text-neutral-800 leading-snug">
-                                        <strong>Deposit Account Agreement & Truth in Savings:</strong> I have received, read, and agree to the JP Heritage Bank Deposit Account Agreement, Fee Schedule, and Funds Availability Policy.
+                                        <strong>Deposit Account Agreement & Truth in Savings:</strong> I have received, read, and agree to the Heritage Trust Bank Deposit Account Agreement, Fee Schedule, and Funds Availability Policy.
                                         {errors.depositAccountAgreement && <p className="text-red-600 font-bold mt-1">{errors.depositAccountAgreement}</p>}
                                     </td>
                                     <td className="border border-neutral-300 p-2.5 text-center bg-neutral-50/50">
@@ -1363,7 +1363,7 @@ export default function RegistrationFormClient({ application }: { application: a
                     </div>
 
                     <div className="p-4 bg-neutral-50 border border-neutral-300 text-[11px] text-neutral-700 leading-relaxed mb-6">
-                        <strong>DECLARATION:</strong> I/We hereby apply for the opening of account(s) with JP Heritage Bank, N.A. I/We understand that the information given herein and the documents supplied are the basis for opening such account(s) and I/We therefore warrant that such information is correct, complete, and not misleading. I/We further undertake to indemnify the Bank for any loss suffered as a result of any false information provided.
+                        <strong>DECLARATION:</strong> I/We hereby apply for the opening of account(s) with Heritage Trust Bank, N.A. I/We understand that the information given herein and the documents supplied are the basis for opening such account(s) and I/We therefore warrant that such information is correct, complete, and not misleading. I/We further undertake to indemnify the Bank for any loss suffered as a result of any false information provided.
                     </div>
 
                     {/* Two Working Buttons */}

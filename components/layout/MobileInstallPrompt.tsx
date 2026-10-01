@@ -127,7 +127,7 @@ export function MobileInstallPrompt() {
             </div>
             <div className="flex flex-col">
               <span className="font-semibold text-sm">
-                Install JPHeritage Mobile
+                Install heritagetrust Mobile
               </span>
               <span className="text-xs text-white/80">
                 Get the full banking experience
@@ -175,7 +175,7 @@ export function MobileInstallPrompt() {
               <span>
                 {installStatus === "success"
                   ? "Installation Complete"
-                  : "Installing JPHeritage..."}
+                  : "Installing heritagetrust..."}
               </span>
             </DialogTitle>
             <DialogDescription className="text-center">

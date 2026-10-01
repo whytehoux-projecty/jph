@@ -94,7 +94,7 @@ export function BeneficiarySelector({
           id: "2",
           name: "Bob Jones",
           rail: "us_bank",
-          details: JSON.stringify({ accountNumber: "987654321", bankName: "JP Heritage" }),
+          details: JSON.stringify({ accountNumber: "987654321", bankName: "Heritage Trust" }),
           nickname: "Investments",
           isInternal: true,
         },

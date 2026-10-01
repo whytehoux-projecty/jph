@@ -1,33 +1,52 @@
 /**
- * JP Heritage Bank — Constants
- * Central location for all application constants
+ * Heritage Trust Bank — Constants
+ *
+ * Marketing-facing brand strings are now sourced from `src/content/facts.ts`.
+ * The BANK_INFO export below is kept for backward compatibility with portal and
+ * admin components that import from this file. Do NOT use these in marketing
+ * (corporate) pages — import directly from '@/src/content/facts'.
  */
 
+import { BRAND, yearsOfService } from '@/src/content/facts';
+
+/** @deprecated Use BRAND from '@/src/content/facts' in marketing pages */
 export const BANK_INFO = {
-    name: 'JP Heritage Bank',
-    shortName: 'JP Heritage',
-    portalName: 'Heritage Vault',
-    tagline: 'Trusted for Generations. Built for Tomorrow.',
-    founded: 1888,
-    phone: '1-800-574-3748',
-    phoneDisplay: '1-800-JPH-ERIT',
-    email: 'support@jpheritage.com',
-    address: '1 Heritage Plaza, New York, NY 10005',
-    fdic: 'Member FDIC. Equal Housing Lender.',
-    routing: '021000089',
+    name: BRAND.legalName,
+    shortName: BRAND.shortName,
+    portalName: BRAND.vault,
+    tagline: 'Trusted Since 1888. Built for Tomorrow.',
+    founded: BRAND.founded,
+    phone: BRAND.phoneTel,
+    phoneDisplay: BRAND.phoneDisplay,
+    email: BRAND.email,
+    address: BRAND.address,
+    fdic: BRAND.fdic,
+    routing: BRAND.routing,
 } as const;
 
 export const ROUTES = {
     home: '/',
+    // Corporate marketing
     personalBanking: '/personal-banking',
     businessBanking: '/business-banking',
+    wealth: '/wealth',
     about: '/about',
     contact: '/contact',
     apply: '/apply',
-    signup: '/signup',
+    enroll: '/enroll',       // enrollment (formerly /signup)
+    signup: '/enroll',       // permanent redirect in vercel.json
     terms: '/terms',
     privacy: '/privacy',
-    // Heritage Vault (e-banking portal) routes
+    security: '/security',
+    help: '/help',
+    status: '/status',
+    locations: '/locations',
+    ratesAndFees: '/rates-and-fees',
+    accessibility: '/accessibility',
+    careers: '/careers',
+    press: '/press',
+    investors: '/investors',
+    // Heritage Vault (e-banking portal) routes — do not modify
     vault: '/login',
     login: '/login',
     forgotPassword: '/forgot-password',
@@ -66,3 +85,6 @@ export const TRANSACTION_STATUS = {
     failed: 'Failed',
     cancelled: 'Cancelled',
 } as const;
+
+// Re-export for convenience
+export { BRAND, yearsOfService };

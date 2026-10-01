@@ -1,0 +1,5 @@
+# Heritage Trust Bank — robots.txt
+# Site is currently private (pre-launch). All crawling disallowed.
+# Remove this file or replace with a permissive version when the site goes public.
+User-agent: *
+Disallow: /

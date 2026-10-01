@@ -58,7 +58,7 @@ export function PortalHeader({
                 <Shield className="w-4 h-4 md:w-5 md:h-5 text-white" strokeWidth={2} />
               </div>
               <div className="flex flex-col leading-none whitespace-nowrap overflow-hidden min-w-0">
-                <span className="text-[9px] font-medium text-[color:var(--heritage-gold)] tracking-wider md:tracking-[0.2em] uppercase truncate">JP Heritage</span>
+                <span className="text-[9px] font-medium text-[color:var(--heritage-gold)] tracking-wider md:tracking-[0.2em] uppercase truncate">Heritage Trust</span>
                 <span className="text-sm md:text-base font-bold text-white tracking-wide font-playfair truncate">BANK</span>
               </div>
             </div>

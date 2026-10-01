@@ -16,7 +16,7 @@ export function SecurityNoticeBanner() {
                         <Shield className="w-5 h-5 text-heritage-navy flex-shrink-0" />
                         <p className="text-sm text-charcoal">
                             <span className="font-semibold">Important Security Notice:</span>{' '}
-                            JP Heritage Bank will never ask for your password, PIN, or OTP via email or phone.{' '}
+                            Heritage Trust will never ask for your password, PIN, or OTP via email or phone.{' '}
                             <a href="/security" className="text-heritage-navy hover:text-heritage-navy-dark font-semibold underline">
                                 Learn more about staying safe
                             </a>

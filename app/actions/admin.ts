@@ -126,11 +126,11 @@ export async function sendStatementEmail(formData: FormData) {
     subject: `Your Account Statement for Period ${statement.period} is Available`,
     html: `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #1a1a1a;">
-        <h2 style="color: #0b2545;">JP Heritage Bank Statement</h2>
+        <h2 style="color: #0b2545;">Heritage Trust Bank Statement</h2>
         <p>Dear ${statement.account.user.firstName},</p>
         <p>Your electronic bank statement for account ending in <strong>${statement.account.accountNumber.slice(-4)}</strong> for statement period <strong>${statement.period}</strong> has been generated and is now accessible via your online banking portal.</p>
         <p>Log in securely to view or download full transaction histories.</p>
-        <p style="margin-top: 24px; font-size: 12px; color: #666;">JP Heritage Bank &bull; Secure Banking Services</p>
+        <p style="margin-top: 24px; font-size: 12px; color: #666;">Heritage Trust Bank &bull; Secure Banking Services</p>
       </div>
     `
   });
