@@ -153,7 +153,7 @@ export default function BillsClient({ initialAccounts, initialProviders }: { ini
   return (
     <div className="space-y-8 max-w-7xl mx-auto p-4 animate-fade-in-up">
       {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-border pb-6">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-paper-200 pb-6">
         <div>
           <h1 className="text-3xl font-display font-bold text-ink-900">
             Global Bill Payments
@@ -169,9 +169,9 @@ export default function BillsClient({ initialAccounts, initialProviders }: { ini
         <div
           onClick={() => setActiveTab("quick")}
           className={cn(
-            "flex-1 p-6 rounded-xl border cursor-pointer transition-all hover:shadow-md flex items-center gap-4",
+            "flex-1 p-6 rounded-xl border cursor-pointer transition-all hover:shadow-none flex items-center gap-4",
             activeTab === "quick"
-              ? "bg-ink-900 text-white shadow-lg border-ink-900"
+              ? "bg-ink-900 text-white shadow-none border-ink-900"
               : "bg-white text-muted-foreground hover:bg-gray-50",
           )}>
           <div className="p-3 bg-white/10 rounded-full">
@@ -186,9 +186,9 @@ export default function BillsClient({ initialAccounts, initialProviders }: { ini
         <div
           onClick={() => setActiveTab("invoice")}
           className={cn(
-            "flex-1 p-6 rounded-xl border cursor-pointer transition-all hover:shadow-md flex items-center gap-4",
+            "flex-1 p-6 rounded-xl border cursor-pointer transition-all hover:shadow-none flex items-center gap-4",
             activeTab === "invoice"
-              ? "bg-vintage-gold text-white shadow-lg border-vintage-gold"
+              ? "bg-vintage-gold text-white shadow-none border-vintage-gold"
               : "bg-white text-muted-foreground hover:bg-gray-50",
           )}>
           <div className="p-3 bg-white/10 rounded-full">
@@ -363,7 +363,7 @@ export default function BillsClient({ initialAccounts, initialProviders }: { ini
         {activeTab === "invoice" && (
           <div className="space-y-8 max-w-3xl mx-auto animate-in fade-in">
             {!invoiceData ? (
-              <Card className="border-none shadow-lg">
+              <Card className="border-none shadow-none">
                 <CardContent className="p-8">
                   <InvoiceUploader
                     onFileSelect={handleInvoiceUpload}

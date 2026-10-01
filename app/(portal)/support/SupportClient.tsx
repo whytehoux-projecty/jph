@@ -104,7 +104,7 @@ export default function SupportClient() {
                 <div className="max-w-xl mx-auto pt-4 relative">
                     <Search className="absolute left-3 top-7 h-5 w-5 text-muted-foreground" />
                     <Input
-                        className="pl-10 h-12 text-lg shadow-sm"
+                        className="pl-10 h-12 text-lg shadow-none"
                         placeholder="Search for answers..."
                         value={searchQuery}
                         onChange={(e) => setSearchQuery(e.target.value)}
@@ -114,7 +114,7 @@ export default function SupportClient() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Contact Options */}
-                <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-pine-700">
+                <Card className="hover:shadow-none transition-shadow cursor-pointer border-paper-200">
                     <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
                         <div className="h-12 w-12 rounded-full bg-pine-700/10 flex items-center justify-center text-pine-700">
                             <Phone className="w-6 h-6" />
@@ -128,7 +128,7 @@ export default function SupportClient() {
                     </CardContent>
                 </Card>
 
-                <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-vintage-gold">
+                <Card className="hover:shadow-none transition-shadow cursor-pointer border-paper-200">
                     <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
                         <div className="h-12 w-12 rounded-full bg-vintage-gold/10 flex items-center justify-center text-vintage-gold">
                             <MessageCircle className="w-6 h-6" />
@@ -142,7 +142,7 @@ export default function SupportClient() {
                     </CardContent>
                 </Card>
 
-                <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-blue-400">
+                <Card className="hover:shadow-none transition-shadow cursor-pointer border-paper-200">
                     <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
                         <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
                             <Mail className="w-6 h-6" />
@@ -235,7 +235,7 @@ export default function SupportClient() {
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-linear-to-br from-gray-50 to-gray-100 border-none shadow-inner">
+                    <Card className="bg-paper-100 border-none shadow-none">
                         <CardContent className="p-6 space-y-3">
                             <h4 className="font-semibold flex items-center gap-2">
                                 <Clock className="w-4 h-4 text-muted-foreground" /> Support Hours

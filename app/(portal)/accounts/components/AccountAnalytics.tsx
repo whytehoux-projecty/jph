@@ -21,7 +21,7 @@ export function AccountAnalytics({
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <Card className="border-border shadow-sm">
+        <Card className="border-paper-200 shadow-none">
           <CardContent className="p-6">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Total Liquid Assets
@@ -32,7 +32,7 @@ export function AccountAnalytics({
           </CardContent>
         </Card>
 
-        <Card className="border-border shadow-sm">
+        <Card className="border-paper-200 shadow-none">
           <CardContent className="p-6">
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Active Accounts

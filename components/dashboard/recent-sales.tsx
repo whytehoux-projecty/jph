@@ -63,19 +63,19 @@ export function RecentTransactions({
   if (transactions.length === 0) {
     return (
       <div className="space-y-6">
-        <div className="flex flex-col items-center justify-center py-8 text-center px-4 bg-muted/30 rounded-xl border border-dashed">
-          <div className="rounded-full bg-background p-3 mb-3 shadow-sm">
-            <Receipt className="h-6 w-6 text-muted-foreground" />
+        <div className="flex flex-col items-center justify-center py-8 text-center px-4 bg-paper-100 rounded border border-dashed border-paper-200">
+          <div className="rounded bg-paper-200 p-3 mb-3 shadow-none">
+            <Receipt className="h-6 w-6 text-ink-500" />
           </div>
-          <h4 className="font-semibold text-sm mb-1">No recent transactions</h4>
-          <p className="text-xs text-muted-foreground mb-4 max-w-[200px]">
+          <h4 className="font-semibold text-sm mb-1 text-ink-900">No recent transactions</h4>
+          <p className="text-xs text-ink-500 mb-4 max-w-[200px]">
             Your account activity will appear here once you start transacting.
           </p>
           <Link
             href="/transfer"
             className={cn(
               buttonVariants({ variant: "outline", size: "small" }),
-              "h-8 text-xs",
+              "h-8 text-xs border-paper-200 text-ink-900 hover:bg-paper-200",
             )}>
             Make a transfer <ArrowRight className="h-3 w-3 ml-1" />
           </Link>
@@ -83,57 +83,57 @@ export function RecentTransactions({
 
         <div className="space-y-3">
           <div className="flex items-center justify-between">
-            <h4 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            <h4 className="text-xs font-semibold text-ink-500 uppercase tracking-wider">
               Upcoming & Pending
             </h4>
-            <span className="text-[10px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded">
+            <span className="text-[10px] text-ink-500 bg-paper-200 px-1.5 py-0.5 rounded">
               Simulated
             </span>
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+          <div className="flex items-center justify-between p-3 rounded border border-paper-200 bg-paper-50 hover:border-ink-900 transition-colors">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-amber-100/80 dark:bg-amber-900/30 rounded-full">
-                <Clock className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <div className="p-2 bg-warning-bg rounded">
+                <Clock className="h-4 w-4 text-warning" />
               </div>
               <div className="space-y-0.5">
-                <p className="text-sm font-medium">Netflix Subscription</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm font-medium text-ink-900">Netflix Subscription</p>
+                <p className="text-xs text-ink-500">
                   Auto-pay • Tomorrow
                 </p>
               </div>
             </div>
-            <span className="text-sm font-medium">-$15.99</span>
+            <span className="text-sm font-bold font-mono tabular-nums text-ink-900">-$15.99</span>
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+          <div className="flex items-center justify-between p-3 rounded border border-paper-200 bg-paper-50 hover:border-ink-900 transition-colors">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-rose-100/80 dark:bg-rose-900/30 rounded-full">
-                <AlertTriangle className="h-4 w-4 text-rose-600 dark:text-rose-400" />
+              <div className="p-2 bg-error-bg rounded">
+                <AlertTriangle className="h-4 w-4 text-error" />
               </div>
               <div className="space-y-0.5">
-                <p className="text-sm font-medium">Pending Transfer</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm font-medium text-ink-900">Pending Transfer</p>
+                <p className="text-xs text-ink-500">
                   Review details • Today
                 </p>
               </div>
             </div>
-            <span className="text-sm font-medium">-$220.00</span>
+            <span className="text-sm font-bold font-mono tabular-nums text-ink-900">-$220.00</span>
           </div>
 
-          <div className="flex items-center justify-between p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors">
+          <div className="flex items-center justify-between p-3 rounded border border-paper-200 bg-paper-50 hover:border-ink-900 transition-colors">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100/80 dark:bg-blue-900/30 rounded-full">
-                <ShieldAlert className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+              <div className="p-2 bg-info-bg rounded">
+                <ShieldAlert className="h-4 w-4 text-info" />
               </div>
               <div className="space-y-0.5">
-                <p className="text-sm font-medium">Security Check</p>
-                <p className="text-xs text-muted-foreground">
+                <p className="text-sm font-medium text-ink-900">Security Check</p>
+                <p className="text-xs text-ink-500">
                   Review recent login
                 </p>
               </div>
             </div>
-            <Button variant="ghost" size="small" className="h-7 text-xs">
+            <Button variant="ghost" size="small" className="h-7 text-xs rounded hover:bg-paper-200">
               Review
             </Button>
           </div>
@@ -178,20 +178,20 @@ export function RecentTransactions({
       </div>
 
       {filteredTransactions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-8 text-center px-4 bg-muted/30 rounded-xl border border-dashed">
-          <div className="rounded-full bg-background p-3 mb-3 shadow-sm">
-            <Receipt className="h-6 w-6 text-muted-foreground" />
+        <div className="flex flex-col items-center justify-center py-8 text-center px-4 bg-paper-100 rounded border border-dashed border-paper-200">
+          <div className="rounded bg-paper-200 p-3 mb-3 shadow-none">
+            <Receipt className="h-6 w-6 text-ink-500" />
           </div>
-          <h4 className="font-semibold text-sm mb-1">
+          <h4 className="font-semibold text-sm mb-1 text-ink-900">
             No transactions match your filters
           </h4>
-          <p className="text-xs text-muted-foreground mb-4 max-w-[220px]">
+          <p className="text-xs text-ink-500 mb-4 max-w-[220px]">
             Try adjusting your search or filters to see more results.
           </p>
           <Button
             variant="outline"
             size="small"
-            className="h-8 text-xs"
+            className="h-8 text-xs border-paper-200 text-ink-900 hover:bg-paper-200"
             onClick={() => {
               setSearchQuery("");
               setTypeFilter("all");
@@ -205,18 +205,21 @@ export function RecentTransactions({
           {filteredTransactions.map((tx) => {
             const isPositive =
               tx.type === "DEPOSIT" ||
-              (tx.type === "TRANSFER" && tx.amount > 0) || tx.amount > 0;
+              (tx.type === "TRANSFER" && tx.amount > 0);
+            
+            // Ledger specifies negative uses ink-900, but error is also acceptable.
+            // We use standard colors: success for positive, ink-900 for neutral/negative.
             const amountColor = isPositive
-              ? "text-emerald-600 dark:text-emerald-400"
-              : "text-red-600 dark:text-red-400";
+              ? "text-success"
+              : "text-ink-900";
             const sign = isPositive ? "+" : "−";
             const Icon = isPositive ? ArrowDownLeft : ArrowUpRight;
-            const iconBg = isPositive ? "bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600" : "bg-red-100 dark:bg-red-900/30 text-red-600";
+            const iconBg = isPositive ? "bg-success-bg text-success" : "bg-paper-200 text-ink-900";
             const status = (tx.status || "COMPLETED").toUpperCase();
 
             return (
-              <div key={tx.id} className="flex items-center">
-                <div className={cn("p-2 rounded-full shrink-0", iconBg)}>
+              <div key={tx.id} className="flex items-center py-2 border-b border-paper-200 last:border-0">
+                <div className={cn("p-2 rounded shrink-0", iconBg)}>
                   <Icon className="h-4 w-4" />
                 </div>
                 <div className="ml-4 space-y-1 overflow-hidden">
@@ -225,19 +228,19 @@ export function RecentTransactions({
                       {tx.description.charAt(0).toUpperCase() + tx.description.slice(1).toLowerCase()}
                     </p>
                     <span className={cn(
-                      "text-[10px] px-1.5 py-0.5 rounded-sm font-medium ml-2 uppercase shrink-0",
-                      status === "PENDING" ? "bg-amber-100 text-amber-700" :
-                      status === "REJECTED" ? "bg-red-100 text-red-700" :
-                      "bg-emerald-100 text-emerald-700"
+                      "text-[10px] px-1.5 py-0.5 rounded font-medium ml-2 uppercase shrink-0",
+                      status === "PENDING" ? "bg-warning-bg text-warning" :
+                      status === "REJECTED" ? "bg-error-bg text-error" :
+                      "bg-success-bg text-success"
                     )}>
                       {status}
                     </span>
                   </div>
-                  <p className="text-xs text-muted-foreground">
+                  <p className="text-xs text-ink-500">
                     {new Date(tx.createdAt).toLocaleDateString("en-US", { month: "2-digit", day: "2-digit", year: "numeric" })}
                   </p>
                 </div>
-                <div className={`ml-auto font-medium font-inter tabular-nums lining-nums ${amountColor}`}>
+                <div className={`ml-auto font-bold font-mono tabular-nums ${amountColor}`}>
                   {sign}{formatCurrency(Math.abs(tx.amount))}
                 </div>
               </div>

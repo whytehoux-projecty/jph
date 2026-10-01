@@ -106,13 +106,11 @@ export function Footer({ isAbsolute, isSlim }: { isAbsolute?: boolean; isSlim?: 
                                 href={ROUTES.home}
                                 aria-label={`${BRAND.shortName} — Home`}
                                 className="
-                                    font-display font-semibold tracking-tight
-                                    transition-colors hover:text-vermilion-400
+                                    inline-block transition-opacity hover:opacity-80
                                     focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-paper-50
                                 "
-                                style={{ fontSize: '1.25rem', color: 'var(--text)' }}
                             >
-                                {BRAND.shortName}
+                                <img src="/images/logos/heritage-trust-logo.svg" alt="Heritage Trust Logo" className="h-7 w-auto" />
                             </Link>
                             <p className="label-mono mt-1" style={{ color: 'var(--text-muted)' }}>
                                 Trusted since {BRAND.founded}

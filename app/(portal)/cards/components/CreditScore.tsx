@@ -13,7 +13,7 @@ const COLORS = ['#7D9B7B', '#E5E7EB']
 
 export function CreditScore() {
     return (
-        <Card className="shadow-sm">
+        <Card className="shadow-none">
             <CardHeader className="pb-2 flex flex-row items-center justify-between space-y-0">
                 <div className="flex items-center gap-2">
                     <CardTitle className="text-base font-medium">Credit Score</CardTitle>

@@ -106,7 +106,7 @@ export function VirtualCardGenerator({ physicalCardId }: { physicalCardId: strin
                                         key={type.type}
                                         onClick={() => !isCreating && createVirtualCard(type.type)}
                                         className={cn(
-                                            "cursor-pointer rounded-xl border p-4 transition-all hover:shadow-md hover:border-pine-700/50 flex flex-col gap-3 group",
+                                            "cursor-pointer rounded-xl border p-4 transition-all hover:shadow-none hover:border-pine-700/50 flex flex-col gap-3 group",
                                             isCreating ? "opacity-50 pointer-events-none" : ""
                                         )}
                                     >
@@ -143,7 +143,7 @@ export function VirtualCardGenerator({ physicalCardId }: { physicalCardId: strin
                             {virtualCards.map((card) => (
                                 <div 
                                     key={card.id}
-                                    className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-white shadow-sm transition-all hover:shadow-md"
+                                    className="flex items-center justify-between p-4 rounded-xl border border-gray-100 bg-white shadow-none transition-all hover:shadow-none"
                                 >
                                     <div className="flex items-center gap-4">
                                         <div className={cn("w-10 h-10 rounded-full flex items-center justify-center", card.color)}>

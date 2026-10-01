@@ -98,12 +98,10 @@ export function Header() {
                         href={ROUTES.home}
                         aria-label={`${BRAND.shortName} — Home`}
                         className="
-                            font-display font-semibold text-ink-900 text-h4
-                            tracking-tight hover:text-vermilion-600 transition-colors
                             focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900
                         "
                     >
-                        {BRAND.shortName}
+                        <img src="/images/logos/heritage-trust-logo.svg" alt="Heritage Trust Logo" className="h-7 w-auto" />
                     </Link>
                 </div>
 

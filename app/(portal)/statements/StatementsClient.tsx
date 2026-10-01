@@ -100,7 +100,7 @@ export default function StatementsClient({ initialStatements, initialAccounts }:
                 </Button>
             </div>
 
-            <Card className="border-border/60 shadow-sm">
+            <Card className="border-paper-200 shadow-none">
                 <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
                     <div className="space-y-1">
                         <CardTitle className="text-base font-medium">Document History</CardTitle>

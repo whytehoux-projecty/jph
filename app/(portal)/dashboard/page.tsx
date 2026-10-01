@@ -122,12 +122,20 @@ export default async function DashboardPage() {
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 pt-2">
-      <div className="flex items-center justify-between space-y-2 pb-4 bg-ink-900 text-white p-6 rounded-xl shadow-md mb-6 -mx-2 md:mx-0">
-        <h2 className="text-3xl font-bold tracking-tight font-display text-white">
-          {getGreeting()}, {user?.firstName || "there"}
-        </h2>
-        <div className="flex items-center space-x-2">
-          <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white text-ink-900 hover:bg-gray-100 shadow-md hover:-translate-y-0.5 h-9 px-4 text-sm">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 theme-ink bg-ink-900 text-paper-50 p-6 md:p-8 rounded shadow-none mb-6 -mx-2 md:mx-0">
+        <div className="space-y-4">
+          <h2 className="text-3xl md:text-h2 font-bold tracking-tight font-display text-paper-50">
+            {getGreeting()}, {user?.firstName || "there"}
+          </h2>
+          <div>
+            <p className="text-xs font-medium text-ink-500 mb-1 uppercase tracking-widest">Total Deposit Balance</p>
+            <p className="text-4xl md:text-display-lg font-mono font-bold tabular-nums text-paper-50">
+              {formatCurrency(totalBalance, currency, languageToLocale(language))}
+            </p>
+          </div>
+        </div>
+        <div className="flex items-center">
+          <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 rounded font-semibold transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vermilion-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900 disabled:pointer-events-none disabled:opacity-50 border border-paper-200/20 bg-transparent text-paper-50 hover:bg-paper-50/10 shadow-none h-10 px-6 text-sm">
             Refresh Data
           </Link>
         </div>
@@ -186,7 +194,7 @@ export default async function DashboardPage() {
           </div>
 
           <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
-            <Card className="col-span-1 lg:col-span-4 animate-scale-in hover-lift">
+            <Card className="col-span-1 lg:col-span-4 bg-white border-paper-200 shadow-none animate-scale-in hover-lift">
               <CardHeader>
                 <CardTitle>Overview</CardTitle>
               </CardHeader>
@@ -196,7 +204,7 @@ export default async function DashboardPage() {
                 </ErrorBoundary>
               </CardContent>
             </Card>
-            <Card className="col-span-1 lg:col-span-3 animate-slide-in-right hover-lift">
+            <Card className="col-span-1 lg:col-span-3 bg-white border-paper-200 shadow-none animate-slide-in-right hover-lift">
               <CardHeader className="flex flex-row items-center justify-between pb-2">
                 <div className="space-y-1">
                   <CardTitle>Recent Transactions</CardTitle>
@@ -204,7 +212,7 @@ export default async function DashboardPage() {
                     Latest activity across all accounts.
                   </CardDescription>
                 </div>
-                <Link href="/transactions" className="text-sm font-medium text-vermilion-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-900 rounded-md px-1">
+                <Link href="/transactions" className="text-sm font-medium text-ink-900 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-900 rounded-md px-1">
                   View all
                 </Link>
               </CardHeader>
@@ -232,7 +240,7 @@ export default async function DashboardPage() {
 
         <TabsContent value="analytics" className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
           <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
-            <Card className="col-span-1 lg:col-span-4">
+            <Card className="col-span-1 lg:col-span-4 bg-white border-paper-200 shadow-none">
               <CardHeader>
                 <CardTitle>Financial Analysis</CardTitle>
                 <CardDescription>Income vs Expenses over time</CardDescription>
