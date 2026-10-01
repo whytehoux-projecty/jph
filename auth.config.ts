@@ -4,6 +4,7 @@ export const authConfig = {
   pages: {
     signIn: '/login',
   },
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "fallback_secret_do_not_use_in_prod_1234567890",
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       return true; // Let middleware.ts handle the routing and authorization logic completely
