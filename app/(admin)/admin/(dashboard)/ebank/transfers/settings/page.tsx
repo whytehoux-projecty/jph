@@ -16,7 +16,7 @@ export default async function TransfersSettingsPage() {
       action={
         <Link 
           href="/admin/ebank/transfers" 
-          className="flex items-center gap-2 px-4 py-2 bg-white text-charcoal border border-neutral-200 rounded-md text-sm font-medium hover:bg-neutral-50 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 bg-white text-ink-900 border border-neutral-200 rounded-md text-sm font-medium hover:bg-neutral-50 transition-colors"
         >
           <ArrowLeft className="w-4 h-4" /> Back to Queue
         </Link>

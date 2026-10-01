@@ -165,11 +165,11 @@ export function AdminTransactionList({
       <Dialog open={!!selectedTx} onOpenChange={(open) => !open && setSelectedTx(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-playfair flex items-center gap-2">
+            <DialogTitle className="text-xl font-display flex items-center gap-2">
               <ArrowRightLeft className="w-5 h-5" /> Transaction Review
             </DialogTitle>
             <DialogDescription>
-              Reference: <span className="font-mono text-charcoal">{selectedTx?.reference}</span>
+              Reference: <span className="font-mono text-ink-900">{selectedTx?.reference}</span>
             </DialogDescription>
           </DialogHeader>
 
@@ -179,13 +179,13 @@ export function AdminTransactionList({
               <div className="grid grid-cols-2 gap-4">
                 <div className="bg-neutral-50 p-4 rounded-lg border border-neutral-200">
                   <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1">Customer Details</p>
-                  <p className="font-medium text-charcoal">{selectedTx.account.user.firstName} {selectedTx.account.user.lastName}</p>
+                  <p className="font-medium text-ink-900">{selectedTx.account.user.firstName} {selectedTx.account.user.lastName}</p>
                   <p className="text-sm text-muted-foreground">{selectedTx.account.user.email}</p>
                   <p className="text-sm font-mono text-muted-foreground mt-2">Acc: {selectedTx.account.accountNumber}</p>
                 </div>
                 <div className="bg-neutral-50 p-4 rounded-lg border border-neutral-200">
                   <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1">Transaction Summary</p>
-                  <p className="font-bold text-2xl text-charcoal">${selectedTx.amount.toFixed(2)} <span className="text-sm text-muted-foreground font-normal">{selectedTx.currency}</span></p>
+                  <p className="font-bold text-2xl text-ink-900">${selectedTx.amount.toFixed(2)} <span className="text-sm text-muted-foreground font-normal">{selectedTx.currency}</span></p>
                   <p className="text-sm mt-1">{selectedTx.transactionType.replace('_', ' ')} ({selectedTx.type})</p>
                   <p className="text-xs text-muted-foreground mt-2">Initiated: {format(new Date(selectedTx.createdAt), 'PPP p')}</p>
                 </div>
@@ -194,12 +194,12 @@ export function AdminTransactionList({
               {/* Description & Metadata */}
               <div className="bg-neutral-50 p-4 rounded-lg border border-neutral-200">
                 <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-2">Description</p>
-                <p className="text-sm text-charcoal bg-white p-3 rounded border border-neutral-200">{selectedTx.description}</p>
+                <p className="text-sm text-ink-900 bg-white p-3 rounded border border-neutral-200">{selectedTx.description}</p>
                 
                 {selectedTx.metadata && (
                   <div className="mt-4">
                     <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-2">Technical Metadata</p>
-                    <pre className="bg-charcoal text-green-400 p-4 rounded border border-neutral-800 text-xs overflow-x-auto font-mono shadow-inner">
+                    <pre className="bg-ink-900 text-green-400 p-4 rounded border border-neutral-800 text-xs overflow-x-auto font-mono shadow-inner">
                       {JSON.stringify(JSON.parse(selectedTx.metadata), null, 2)}
                     </pre>
                   </div>

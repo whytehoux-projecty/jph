@@ -234,9 +234,9 @@ export function BeneficiarySelector({
   };
 
 
-  const activeTabClasses = "bg-white text-charcoal shadow-sm";
+  const activeTabClasses = "bg-white text-ink-900 shadow-sm";
   const inactiveTabClasses =
-    "text-muted-foreground hover:text-charcoal hover:bg-white/60";
+    "text-muted-foreground hover:text-ink-900 hover:bg-white/60";
 
   return (
     <div className="space-y-3">
@@ -247,7 +247,7 @@ export function BeneficiarySelector({
             onClick={() => setTab("saved")}
             className={`px-3 py-1 rounded-full transition ${
               tab === "saved" ? activeTabClasses : inactiveTabClasses
-            } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}>
+            } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}>
             Saved
           </button>
           <button
@@ -255,7 +255,7 @@ export function BeneficiarySelector({
             onClick={() => setTab("recent")}
             className={`px-3 py-1 rounded-full transition ${
               tab === "recent" ? activeTabClasses : inactiveTabClasses
-            } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}>
+            } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}>
             Recent
           </button>
           <button
@@ -263,7 +263,7 @@ export function BeneficiarySelector({
             onClick={() => setTab("new")}
             className={`px-3 py-1 rounded-full transition ${
               tab === "new" ? activeTabClasses : inactiveTabClasses
-            } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}>
+            } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}>
             New
           </button>
         </div>
@@ -314,9 +314,9 @@ export function BeneficiarySelector({
                     onClick={() => handleSelect(b)}
                     className={`w-full rounded-md border px-3 py-2 text-left text-xs transition ${
                       isActive
-                        ? "border-[color:var(--heritage-navy)] bg-soft-gold/10"
-                        : "border-slate-200 hover:border-soft-gold/60 hover:bg-slate-50"
-                    } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}
+                        ? "border-(--ink-900) bg-vermilion-600/10"
+                        : "border-slate-200 hover:border-vermilion-600/60 hover:bg-slate-50"
+                    } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}
                     tabIndex={isActive ? 0 : -1}
                     onKeyDown={(event) =>
                       handleRecipientKeyDown(event, filteredSaved, index)
@@ -324,13 +324,13 @@ export function BeneficiarySelector({
                     <div className="flex items-center justify-between gap-2">
                       <div className="space-y-0.5">
                         <div className="flex items-center gap-2">
-                          <span className="font-medium text-charcoal">
+                          <span className="font-medium text-ink-900">
                             {b.name}
                           </span>
                           {b.nickname && (
                             <Badge
                               variant="outline"
-                              className="text-[10px] px-1.5 py-0 h-4 border-soft-gold/60 text-muted-foreground">
+                              className="text-[10px] px-1.5 py-0 h-4 border-vermilion-600/60 text-muted-foreground">
                               {b.nickname}
                             </Badge>
                           )}
@@ -368,7 +368,7 @@ export function BeneficiarySelector({
                   id={`beneficiary-${b.id}`}
                   type="button"
                   onClick={() => handleSelect(b)}
-                  className="w-full rounded-md border border-slate-200 px-3 py-2 text-left text-xs hover:border-soft-gold/60 hover:bg-slate-50 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50"
+                  className="w-full rounded-md border border-slate-200 px-3 py-2 text-left text-xs hover:border-vermilion-600/60 hover:bg-slate-50 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50"
                   tabIndex={
                     selectedBeneficiary && selectedBeneficiary.id === b.id
                       ? 0
@@ -379,7 +379,7 @@ export function BeneficiarySelector({
                   }>
                   <div className="flex items-center justify-between gap-2">
                     <div>
-                      <p className="font-medium text-charcoal">{b.name}</p>
+                      <p className="font-medium text-ink-900">{b.name}</p>
                       <p className="text-[11px] text-muted-foreground">
                         {(() => {
                           try {
@@ -417,7 +417,7 @@ export function BeneficiarySelector({
               type="checkbox"
               checked={saveAsBeneficiary}
               onChange={(e) => setSaveAsBeneficiary(e.target.checked)}
-              className="h-3 w-3 rounded border-slate-300 text-[color:var(--heritage-navy)]"
+              className="h-3 w-3 rounded border-slate-300 text-(--ink-900)"
             />
             <Label htmlFor="saveAsBeneficiary" className="text-[11px] text-muted-foreground">
               Save this recipient to your address book

@@ -107,7 +107,7 @@ export function AdminRequestList({
             ) : (
               filtered.map((req) => (
                 <TableRow key={req.id}>
-                  <TableCell className="font-mono font-medium text-charcoal">
+                  <TableCell className="font-mono font-medium text-ink-900">
                     {req.accountNumber}
                   </TableCell>
                   <TableCell className="text-sm">
@@ -150,7 +150,7 @@ export function AdminRequestList({
       <Dialog open={!!selectedReq} onOpenChange={(open) => !open && setSelectedReq(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-xl font-playfair flex items-center gap-2">
+            <DialogTitle className="text-xl font-display flex items-center gap-2">
               <KeyRound className="w-5 h-5" /> Online Access Request
             </DialogTitle>
             <DialogDescription>
@@ -164,11 +164,11 @@ export function AdminRequestList({
                 <div className="grid grid-cols-1 gap-y-4 text-sm">
                   <div>
                     <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1">Account Number</p>
-                    <p className="font-mono font-medium text-lg text-charcoal">{selectedReq.accountNumber}</p>
+                    <p className="font-mono font-medium text-lg text-ink-900">{selectedReq.accountNumber}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1">Email Address</p>
-                    <p className="font-medium text-charcoal">{selectedReq.email}</p>
+                    <p className="font-medium text-ink-900">{selectedReq.email}</p>
                   </div>
                   <div>
                     <p className="text-xs text-muted-foreground font-semibold uppercase tracking-wider mb-1">Status</p>
@@ -233,7 +233,7 @@ export function AdminRequestList({
                 <form action={async (formData) => { await onReject(formData); setSelectedReq(null); }} className="space-y-3 pt-4 border-t border-neutral-200">
                   <input type="hidden" name="id" value={selectedReq.id} />
                   <div className="space-y-1">
-                    <label className="text-xs font-semibold text-charcoal">Reason for Rejection (sent to customer)</label>
+                    <label className="text-xs font-semibold text-ink-900">Reason for Rejection (sent to customer)</label>
                     <textarea 
                       name="rejectionReason"
                       required

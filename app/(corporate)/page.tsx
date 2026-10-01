@@ -223,7 +223,7 @@ export default function Home() {
                                 <h3 className="font-display text-h3 text-ink-900 mb-3 text-balance">
                                     {seg.heading}
                                 </h3>
-                                <p className="text-body text-ink-700 mb-6 flex-grow">{seg.body}</p>
+                                <p className="text-body text-ink-700 mb-6 grow">{seg.body}</p>
 
                                 {/* Key stat */}
                                 <div className="border-t border-paper-200 pt-4 mb-6">

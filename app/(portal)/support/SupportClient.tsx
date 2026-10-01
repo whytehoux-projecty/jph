@@ -98,7 +98,7 @@ export default function SupportClient() {
         <div className="space-y-8 max-w-7xl mx-auto p-4 animate-fade-in-up">
 
             <div className="text-center py-6 space-y-2">
-                <h1 className="text-4xl font-playfair font-bold text-charcoal">How can we help you?</h1>
+                <h1 className="text-4xl font-display font-bold text-ink-900">How can we help you?</h1>
                 <p className="text-muted-foreground text-lg">Search our knowledge base or get in touch with support.</p>
 
                 <div className="max-w-xl mx-auto pt-4 relative">
@@ -114,16 +114,16 @@ export default function SupportClient() {
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Contact Options */}
-                <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-vintage-green">
+                <Card className="hover:shadow-md transition-shadow cursor-pointer border-l-4 border-l-pine-700">
                     <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
-                        <div className="h-12 w-12 rounded-full bg-vintage-green/10 flex items-center justify-center text-vintage-green">
+                        <div className="h-12 w-12 rounded-full bg-pine-700/10 flex items-center justify-center text-pine-700">
                             <Phone className="w-6 h-6" />
                         </div>
                         <div>
                             <h3 className="font-bold text-lg">Call Us</h3>
                             <p className="text-muted-foreground text-sm">24/7 Priority Support</p>
                         </div>
-                        <p className="font-mono text-charcoal font-semibold">1-800-AURUM-VAULT</p>
+                        <p className="font-mono text-ink-900 font-semibold">1-800-AURUM-VAULT</p>
                         <Button variant="outline" size="small" className="w-full" onClick={() => { window.location.href = 'tel:+18002878664'; }}>Call Now</Button>
                     </CardContent>
                 </Card>
@@ -151,7 +151,7 @@ export default function SupportClient() {
                             <h3 className="font-bold text-lg">Email Support</h3>
                             <p className="text-muted-foreground text-sm">Response within 24h</p>
                         </div>
-                        <p className="font-mono text-charcoal font-semibold">support@heritagetrust.com</p>
+                        <p className="font-mono text-ink-900 font-semibold">support@heritagetrust.com</p>
                         <Button variant="outline" size="small" className="w-full" onClick={() => { window.location.href = 'mailto:support@heritagetrust.com'; }}>Send Email</Button>
                     </CardContent>
                 </Card>
@@ -162,15 +162,15 @@ export default function SupportClient() {
                 {/* FAQs Column */}
                 <div className="lg:col-span-2 space-y-6">
                     <div className="flex items-center gap-2 mb-2">
-                        <HelpCircle className="w-5 h-5 text-vintage-green" />
-                        <h2 className="text-2xl font-bold font-playfair">Frequently Asked Questions</h2>
+                        <HelpCircle className="w-5 h-5 text-pine-700" />
+                        <h2 className="text-2xl font-bold font-display">Frequently Asked Questions</h2>
                     </div>
 
                     <Accordion type="single" collapsible className="w-full">
                         {filteredFaqs.length > 0 ? (
                             filteredFaqs.map((faq) => (
                                 <AccordionItem key={faq.id} value={faq.id}>
-                                    <AccordionTrigger className="text-left font-medium text-charcoal">
+                                    <AccordionTrigger className="text-left font-medium text-ink-900">
                                         {faq.question}
                                     </AccordionTrigger>
                                     <AccordionContent className="text-muted-foreground leading-relaxed">
@@ -189,8 +189,8 @@ export default function SupportClient() {
                 {/* Contact Form Column */}
                 <div className="space-y-6">
                     <div className="flex items-center gap-2 mb-2">
-                        <Send className="w-5 h-5 text-vintage-green" />
-                        <h2 className="text-2xl font-bold font-playfair">Send a Message</h2>
+                        <Send className="w-5 h-5 text-pine-700" />
+                        <h2 className="text-2xl font-bold font-display">Send a Message</h2>
                     </div>
 
                     <Card>
@@ -229,13 +229,13 @@ export default function SupportClient() {
                                 />
                             </div>
 
-                            <Button onClick={handleSubmitContact} disabled={isSubmitting} className="w-full bg-vintage-green hover:bg-vintage-green-dark text-white">
+                            <Button onClick={handleSubmitContact} disabled={isSubmitting} className="w-full bg-pine-700 hover:bg-pine-800 text-white">
                                 {isSubmitting ? 'Sending...' : 'Send Message'}
                             </Button>
                         </CardContent>
                     </Card>
 
-                    <Card className="bg-gradient-to-br from-gray-50 to-gray-100 border-none shadow-inner">
+                    <Card className="bg-linear-to-br from-gray-50 to-gray-100 border-none shadow-inner">
                         <CardContent className="p-6 space-y-3">
                             <h4 className="font-semibold flex items-center gap-2">
                                 <Clock className="w-4 h-4 text-muted-foreground" /> Support Hours
@@ -243,11 +243,11 @@ export default function SupportClient() {
                             <ul className="space-y-2 text-sm text-muted-foreground">
                                 <li className="flex justify-between">
                                     <span>Phone & Email</span>
-                                    <span className="font-medium text-charcoal">24/7</span>
+                                    <span className="font-medium text-ink-900">24/7</span>
                                 </li>
                                 <li className="flex justify-between">
                                     <span>Live Chat</span>
-                                    <span className="font-medium text-charcoal">M-F, 9am - 6pm</span>
+                                    <span className="font-medium text-ink-900">M-F, 9am - 6pm</span>
                                 </li>
                             </ul>
                         </CardContent>

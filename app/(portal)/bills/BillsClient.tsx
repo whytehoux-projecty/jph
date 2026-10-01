@@ -155,7 +155,7 @@ export default function BillsClient({ initialAccounts, initialProviders }: { ini
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-4 border-b border-border pb-6">
         <div>
-          <h1 className="text-3xl font-playfair font-bold text-charcoal">
+          <h1 className="text-3xl font-display font-bold text-ink-900">
             Global Bill Payments
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -171,7 +171,7 @@ export default function BillsClient({ initialAccounts, initialProviders }: { ini
           className={cn(
             "flex-1 p-6 rounded-xl border cursor-pointer transition-all hover:shadow-md flex items-center gap-4",
             activeTab === "quick"
-              ? "bg-charcoal text-white shadow-lg border-charcoal"
+              ? "bg-ink-900 text-white shadow-lg border-ink-900"
               : "bg-white text-muted-foreground hover:bg-gray-50",
           )}>
           <div className="p-3 bg-white/10 rounded-full">
@@ -210,7 +210,7 @@ export default function BillsClient({ initialAccounts, initialProviders }: { ini
               <div className="animate-in fade-in slide-in-from-left-4 space-y-8">
                 <section>
                   <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                    <span className="bg-charcoal text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">
+                    <span className="bg-ink-900 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">
                       1
                     </span>
                     Select Region
@@ -226,7 +226,7 @@ export default function BillsClient({ initialAccounts, initialProviders }: { ini
                 {selectedCountry && (
                   <section className="animate-in fade-in slide-in-from-bottom-4">
                     <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                      <span className="bg-charcoal text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">
+                      <span className="bg-ink-900 text-white w-6 h-6 rounded-full flex items-center justify-center text-xs">
                         2
                       </span>
                       Choose Service Category
@@ -257,11 +257,11 @@ export default function BillsClient({ initialAccounts, initialProviders }: { ini
                     <CardTitle>Payment Details</CardTitle>
                     <CardDescription>
                       Paying for{" "}
-                      <span className="font-semibold text-charcoal">
+                      <span className="font-semibold text-ink-900">
                         {selectedCategory}
                       </span>{" "}
                       in{" "}
-                      <span className="font-semibold text-charcoal capitalize">
+                      <span className="font-semibold text-ink-900 capitalize">
                         {selectedCountry}
                       </span>
                     </CardDescription>
@@ -345,7 +345,7 @@ export default function BillsClient({ initialAccounts, initialProviders }: { ini
                 <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-6">
                   <Check className="w-10 h-10" />
                 </div>
-                <h2 className="text-2xl font-bold text-charcoal mb-2">
+                <h2 className="text-2xl font-bold text-ink-900 mb-2">
                   Payment Successful!
                 </h2>
                 <p className="text-muted-foreground text-center max-w-md mb-8">
@@ -363,7 +363,7 @@ export default function BillsClient({ initialAccounts, initialProviders }: { ini
         {activeTab === "invoice" && (
           <div className="space-y-8 max-w-3xl mx-auto animate-in fade-in">
             {!invoiceData ? (
-              <Card className="border-none shadow-vintage-lg">
+              <Card className="border-none shadow-lg">
                 <CardContent className="p-8">
                   <InvoiceUploader
                     onFileSelect={handleInvoiceUpload}
@@ -391,7 +391,7 @@ export default function BillsClient({ initialAccounts, initialProviders }: { ini
                       <p className="text-xs text-blue-600 uppercase font-semibold mb-1">
                         Total Amount
                       </p>
-                      <p className="text-2xl font-bold font-mono text-charcoal">
+                      <p className="text-2xl font-bold font-mono text-ink-900">
                         ${Number(amount).toLocaleString()}
                       </p>
                     </div>
@@ -399,7 +399,7 @@ export default function BillsClient({ initialAccounts, initialProviders }: { ini
                       <p className="text-xs text-blue-600 uppercase font-semibold mb-1">
                         Invoice Number
                       </p>
-                      <p className="text-lg font-mono text-charcoal">
+                      <p className="text-lg font-mono text-ink-900">
                         {invoiceData.invoiceNumber || "N/A"}
                       </p>
                     </div>
@@ -450,7 +450,7 @@ export default function BillsClient({ initialAccounts, initialProviders }: { ini
                 <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center text-green-600 mb-6">
                   <Check className="w-10 h-10" />
                 </div>
-                <h2 className="text-2xl font-bold text-charcoal mb-2">
+                <h2 className="text-2xl font-bold text-ink-900 mb-2">
                   Invoice Paid!
                 </h2>
                 <p className="text-muted-foreground text-center max-w-md mb-8">

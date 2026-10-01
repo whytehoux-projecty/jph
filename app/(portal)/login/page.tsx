@@ -112,7 +112,7 @@ export default function LoginPage() {
 
         {/* Login Form */}
         {/* Fix #7: responsive width — full on mobile, fixed on larger screens */}
-        <div className="w-full max-w-[360px] bg-white/90 backdrop-blur-md shadow-2xl rounded-sm p-6 border border-[color:var(--heritage-navy)]/20">
+        <div className="w-full max-w-[360px] bg-white/90 backdrop-blur-md shadow-2xl rounded-sm p-6 border border-ink-900/20">
           {/* General Error Message */}
           {errors.general && (
             <div className="p-3 bg-red-50 border border-red-200 rounded-sm mb-4">
@@ -224,7 +224,7 @@ export default function LoginPage() {
               <button
                 type="submit"
                 disabled={isLoading}
-                className="w-full h-10 bg-[color:var(--heritage-navy)] text-white text-base font-bold rounded-[3px] hover:bg-[color:var(--heritage-navy-mid)] transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
+                className="w-full h-10 bg-ink-900 text-white text-base font-bold rounded-[3px] hover:bg-(--ink-700) transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
                 {isLoading ? (
                   <span className="flex items-center gap-2">
                     <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
@@ -239,12 +239,12 @@ export default function LoginPage() {
               <div className="flex flex-col gap-2 items-center">
                 <Link
                   href="/contact"
-                  className="text-sm text-[color:var(--heritage-navy)] hover:underline font-medium flex items-center justify-center gap-1">
+                  className="text-sm text-ink-900 hover:underline font-medium flex items-center justify-center gap-1">
                   Forgot username/password? <span className="text-xs">›</span>
                 </Link>
                 <Link
                   href="/apply"
-                  className="text-sm text-[color:var(--heritage-navy)] hover:underline font-medium flex items-center justify-center gap-1">
+                  className="text-sm text-ink-900 hover:underline font-medium flex items-center justify-center gap-1">
                   Not enrolled? Sign up now.{" "}
                   <span className="text-xs">›</span>
                 </Link>

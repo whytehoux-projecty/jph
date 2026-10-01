@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Button } from '@/components/commercial-ui/Button';
+import { LedgerInput } from '@/components/commercial-ui/LedgerInput';
 import { FileSearch, Search, ArrowRight, ShieldAlert, CheckCircle, Clock } from 'lucide-react';
 import { BRAND } from '@/src/content/facts';
 
@@ -44,20 +45,21 @@ export default function StatusPage() {
         }
 
         setIsLoading(true);
-        // Simulate API call
-        setTimeout(() => {
-            setIsLoading(false);
-            // Mock result based on reference ID
-            if (formData.referenceId.toUpperCase().includes('REJ')) {
-                setResult('rejected');
-            } else if (formData.referenceId.toUpperCase().includes('APP')) {
-                setResult('approved');
-            } else if (formData.referenceId.toUpperCase().includes('ERR')) {
-                setResult('not_found');
+        try {
+            const res = await fetch(`/api/status?ref=&email=`);
+            const data = await res.json();
+            
+            if (res.ok && data.status) {
+                setResult(data.status); // backend should return 'pending', 'approved', 'rejected', or 'not_found'
             } else {
-                setResult('pending');
+                setResult('not_found');
             }
-        }, 1000);
+        } catch (error) {
+            console.error('Error fetching status:', error);
+            setResult('not_found');
+        } finally {
+            setIsLoading(false);
+        }
     };
 
     return (
@@ -71,31 +73,26 @@ export default function StatusPage() {
 
                 <div className="bg-paper-50 rounded border border-paper-200 p-8 shadow-sm">
                     <form onSubmit={handleSubmit} className="space-y-6">
-                        <div className="space-y-1.5">
-                            <label htmlFor="email" className="block text-small font-medium text-ink-900">Email address</label>
-                            <input
-                                id="email"
-                                type="email"
-                                value={formData.email}
-                                onChange={(e) => updateField('email', e.target.value)}
-                                className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.email ? 'border-vermilion-600' : 'border-paper-300'}`}
-                                placeholder="name@example.com"
-                            />
-                            {errors.email && <p className="text-xs text-vermilion-600">{errors.email}</p>}
-                        </div>
+                        <LedgerInput
+                            id="email"
+                            label="Email address"
+                            type="email"
+                            value={formData.email}
+                            onChange={(e) => updateField('email', e.target.value)}
+                            placeholder="name@example.com"
+                            error={errors.email}
+                        />
 
-                        <div className="space-y-1.5">
-                            <label htmlFor="referenceId" className="block text-small font-medium text-ink-900">Reference ID</label>
-                            <input
-                                id="referenceId"
-                                type="text"
-                                value={formData.referenceId}
-                                onChange={(e) => updateField('referenceId', e.target.value)}
-                                className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none uppercase focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.referenceId ? 'border-vermilion-600' : 'border-paper-300'}`}
-                                placeholder={`${BRAND.shortName.substring(0,3).toUpperCase()}-123456`}
-                            />
-                            {errors.referenceId && <p className="text-xs text-vermilion-600">{errors.referenceId}</p>}
-                        </div>
+                        <LedgerInput
+                            id="referenceId"
+                            label="Reference ID"
+                            type="text"
+                            value={formData.referenceId}
+                            onChange={(e) => updateField('referenceId', e.target.value)}
+                            placeholder={`${BRAND.shortName.substring(0,3).toUpperCase()}-123456`}
+                            error={errors.referenceId}
+                            className="uppercase"
+                        />
 
                         <div className="pt-4 flex justify-end">
                             <Button type="submit" variant="primary" disabled={isLoading} className="w-full sm:w-auto">

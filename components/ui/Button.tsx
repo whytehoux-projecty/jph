@@ -5,19 +5,19 @@ import { cva, type VariantProps } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 
 const buttonVariants = cva(
-    'inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+    'inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-900 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
     {
         variants: {
             variant: {
                 primary:
-                    'bg-[color:var(--heritage-navy)] text-white hover:bg-[color:var(--heritage-navy-mid)] shadow-vintage-md hover:shadow-vintage-lg hover:-translate-y-0.5',
+                    'bg-ink-900 text-white hover:bg-(--ink-700) shadow-md hover:shadow-lg hover:-translate-y-0.5',
                 secondary:
-                    'bg-transparent text-[color:var(--heritage-navy)] border-2 border-[color:var(--heritage-navy)] hover:bg-[color:var(--heritage-navy)] hover:text-white',
+                    'bg-transparent text-ink-900 border-2 border-ink-900 hover:bg-ink-900 hover:text-white',
                 outline:
-                    'bg-transparent text-charcoal border-2 border-faded-gray hover:border-[color:var(--heritage-navy)] hover:text-[color:var(--heritage-navy)]',
+                    'bg-transparent text-ink-900 border-2 border-paper-300 hover:border-ink-900 hover:text-ink-900',
                 ghost:
-                    'bg-transparent text-charcoal hover:bg-warm-cream',
-                link: 'text-[color:var(--heritage-navy)] underline-offset-4 hover:underline',
+                    'bg-transparent text-ink-900 hover:bg-paper-50',
+                link: 'text-ink-900 underline-offset-4 hover:underline',
             },
             size: {
                 small: 'h-9 px-4 text-sm',

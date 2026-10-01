@@ -3,6 +3,9 @@
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Button } from '@/components/commercial-ui/Button';
+import { LedgerInput } from '@/components/commercial-ui/LedgerInput';
+import { LedgerSelect } from '@/components/commercial-ui/LedgerSelect';
+import { LedgerCheckbox } from '@/components/commercial-ui/LedgerCheckbox';
 import { CheckCircle, Shield, ArrowRight, User, Building2, MapPin, Phone, Mail, FileText } from 'lucide-react';
 import { requestAccountOpening } from '@/app/(corporate)/actions';
 import { BRAND } from '@/src/content/facts';
@@ -14,7 +17,8 @@ function ApplicationFormContent() {
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [errors, setErrors] = useState<Record<string, string>>({});
-    const [referenceId] = useState(() => `${BRAND.shortName.substring(0,3).toUpperCase()}-${Math.floor(100000 + Math.random() * 900000)}`);
+    const urlRef = searchParams.get('ref');
+    const [referenceId] = useState(() => urlRef || `${BRAND.shortName.substring(0,3).toUpperCase()}-${Math.floor(100000 + Math.random() * 900000)}`);
 
     const [formData, setFormData] = useState({
         applicationType: 'PERSONAL',
@@ -28,6 +32,10 @@ function ApplicationFormContent() {
         isUsCitizenOrResident: false,
         consentComms: false,
         consentPrivacy: false,
+        businessName: '',
+        ein: '',
+        industry: '',
+        website: '',
     });
 
     const updateField = (field: string, value: any) => {
@@ -48,6 +56,12 @@ function ApplicationFormContent() {
             if (!formData.lastName) stepErrors.lastName = 'Last name is required';
             if (!formData.email) stepErrors.email = 'Email is required';
             else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) stepErrors.email = 'Invalid email';
+
+            if (formData.applicationType === 'BUSINESS') {
+                if (!formData.businessName) stepErrors.businessName = 'Business name is required';
+                if (!formData.ein) stepErrors.ein = 'EIN is required';
+                if (!formData.industry) stepErrors.industry = 'Industry is required';
+            }
         }
         if (step === 2) {
             if (!formData.phone) stepErrors.phone = 'Phone is required';
@@ -80,8 +94,8 @@ function ApplicationFormContent() {
 
         setIsSubmitting(true);
         try {
-            await requestAccountOpening(formData);
-            window.location.href = '/apply?submitted=true';
+            const res = await requestAccountOpening(formData);
+            window.location.href = `/apply?submitted=true&ref=${res.referenceId}`;
         } catch (error) {
             console.error('Application error:', error);
             setErrors({ submit: 'Failed to submit request. Please try again.' });
@@ -208,6 +222,55 @@ function ApplicationFormContent() {
                                         {errors.lastName && <p className="text-xs text-vermilion-600">{errors.lastName}</p>}
                                     </div>
                                 </div>
+                                {formData.applicationType === 'BUSINESS' && (
+                                    <>
+                                        <div className="space-y-1.5">
+                                            <label htmlFor="businessName" className="block text-small font-medium text-ink-900">Legal Business Name</label>
+                                            <input
+                                                id="businessName"
+                                                type="text"
+                                                value={formData.businessName}
+                                                onChange={(e) => updateField('businessName', e.target.value)}
+                                                className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.businessName ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                            />
+                                            {errors.businessName && <p className="text-xs text-vermilion-600">{errors.businessName}</p>}
+                                        </div>
+                                        <div className="grid md:grid-cols-2 gap-4">
+                                            <div className="space-y-1.5">
+                                                <label htmlFor="ein" className="block text-small font-medium text-ink-900">Employer Identification Number (EIN)</label>
+                                                <input
+                                                    id="ein"
+                                                    type="text"
+                                                    value={formData.ein}
+                                                    onChange={(e) => updateField('ein', e.target.value)}
+                                                    className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.ein ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                                />
+                                                {errors.ein && <p className="text-xs text-vermilion-600">{errors.ein}</p>}
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <label htmlFor="industry" className="block text-small font-medium text-ink-900">Industry</label>
+                                                <input
+                                                    id="industry"
+                                                    type="text"
+                                                    value={formData.industry}
+                                                    onChange={(e) => updateField('industry', e.target.value)}
+                                                    className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.industry ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                                />
+                                                {errors.industry && <p className="text-xs text-vermilion-600">{errors.industry}</p>}
+                                            </div>
+                                        </div>
+                                        <div className="space-y-1.5">
+                                            <label htmlFor="website" className="block text-small font-medium text-ink-900">Website URL (Optional)</label>
+                                            <input
+                                                id="website"
+                                                type="url"
+                                                value={formData.website}
+                                                onChange={(e) => updateField('website', e.target.value)}
+                                                className="w-full h-12 rounded border border-paper-300 bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow"
+                                            />
+                                        </div>
+                                    </>
+                                )}
 
                                 <div className="space-y-1.5">
                                     <label htmlFor="email" className="block text-small font-medium text-ink-900">Email address</label>
@@ -263,46 +326,33 @@ function ApplicationFormContent() {
                                     </div>
                                 </div>
 
-                                <div className="space-y-1.5">
-                                    <label htmlFor="desiredAccountType" className="block text-small font-medium text-ink-900">Desired Account</label>
-                                    <select
+                                <LedgerSelect
                                         id="desiredAccountType"
+                                        label="Desired Account"
                                         value={formData.desiredAccountType}
                                         onChange={(e) => updateField('desiredAccountType', e.target.value)}
-                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.desiredAccountType ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                        error={errors.desiredAccountType}
                                     >
                                         <option value="CHECKING">Checking Account</option>
                                         <option value="SAVINGS">Savings Account</option>
                                         <option value="MONEY_MARKET">Money Market Account</option>
                                         <option value="CERTIFICATE_OF_DEPOSIT">Certificate of Deposit</option>
                                         <option value="OTHER">Other / Not Sure</option>
-                                    </select>
-                                    {errors.desiredAccountType && <p className="text-xs text-vermilion-600">{errors.desiredAccountType}</p>}
-                                </div>
+                                    </LedgerSelect>
 
                                 <div className="space-y-3 pt-4">
-                                    <label className="flex items-center gap-3 cursor-pointer group">
-                                        <input
-                                            type="checkbox"
+                                    <LedgerCheckbox
+                                            id="isUsCitizenOrResident"
                                             checked={formData.isUsCitizenOrResident}
                                             onChange={(e) => updateField('isUsCitizenOrResident', e.target.checked)}
-                                            className="w-5 h-5 rounded border-paper-300 text-ink-900 focus:ring-ink-900 cursor-pointer"
+                                            label="I am a US Citizen or permanent resident"
                                         />
-                                        <span className="text-body text-ink-700 group-hover:text-ink-900 transition-colors">
-                                            I am a US Citizen or permanent resident
-                                        </span>
-                                    </label>
-                                    <label className="flex items-center gap-3 cursor-pointer group">
-                                        <input
-                                            type="checkbox"
+                                    <LedgerCheckbox
+                                            id="isExistingCustomer"
                                             checked={formData.isExistingCustomer}
                                             onChange={(e) => updateField('isExistingCustomer', e.target.checked)}
-                                            className="w-5 h-5 rounded border-paper-300 text-ink-900 focus:ring-ink-900 cursor-pointer"
+                                            label={`I am an existing ${BRAND.shortName} customer`}
                                         />
-                                        <span className="text-body text-ink-700 group-hover:text-ink-900 transition-colors">
-                                            I am an existing {BRAND.shortName} customer
-                                        </span>
-                                    </label>
                                 </div>
                             </div>
 
@@ -406,7 +456,7 @@ export default function ApplyPage() {
         <div className="min-h-screen bg-paper-100 flex flex-col md:flex-row">
             {/* Left Sidebar - Split Screen Design */}
             <div className="w-full md:w-1/3 lg:w-[40%] bg-ink-900 text-paper-50 p-8 md:p-12 lg:p-16 flex flex-col justify-between relative overflow-hidden">
-                <div className="absolute inset-0 z-0 opacity-20 bg-[radial-gradient(circle_at_top_right,_var(--tw-gradient-stops))] from-paper-100/40 via-transparent to-transparent" />
+                <div className="absolute inset-0 z-0 opacity-20 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-paper-100/40 via-transparent to-transparent" />
                 
                 <div className="relative z-10">
                     <Shield className="w-10 h-10 text-paper-50 mb-8" aria-hidden="true" />

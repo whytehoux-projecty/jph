@@ -17,7 +17,7 @@ export function MobileBottomNav() {
   const pathname = usePathname();
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-[color:var(--heritage-surface)]/95 backdrop-blur-md border-t border-[color:var(--heritage-navy)]/15 safe-area-pb">
+    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-paper-100/95 backdrop-blur-md border-t border-ink-900/15 safe-area-pb">
       <nav className="flex items-center justify-around h-16">
         {navItems.map((item) => {
           const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
@@ -28,14 +28,14 @@ export function MobileBottomNav() {
               key={item.name}
               href={item.href}
               className={cn(
-                "relative flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-gold)] focus-visible:ring-offset-2",
+                "relative flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vermilion-600 focus-visible:ring-offset-2",
                 isActive 
-                  ? "text-[color:var(--heritage-navy)] font-semibold" 
-                  : "text-muted-foreground hover:text-[color:var(--heritage-navy)]/80"
+                  ? "text-ink-900 font-semibold" 
+                  : "text-muted-foreground hover:text-ink-900/80"
               )}
             >
               {isActive && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-[color:var(--heritage-gold)] rounded-b-md" />
+                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-vermilion-600 rounded-b-md" />
               )}
               <Icon className="h-5 w-5" />
               <span className="text-[10px] font-medium">{item.name}</span>

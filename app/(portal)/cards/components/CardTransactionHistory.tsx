@@ -169,8 +169,8 @@ export function CardTransactionHistory({ cardId }: { cardId: string }) {
                                 className={cn(
                                     "px-3 py-1 rounded-full text-xs font-medium border transition-all",
                                     period === value
-                                        ? "bg-vintage-green text-white border-vintage-green shadow-sm"
-                                        : "bg-white text-muted-foreground border-border hover:border-vintage-green/40 hover:text-charcoal"
+                                        ? "bg-pine-700 text-white border-pine-700 shadow-sm"
+                                        : "bg-white text-muted-foreground border-border hover:border-pine-700/40 hover:text-ink-900"
                                 )}
                             >
                                 {label}
@@ -235,7 +235,7 @@ export function CardTransactionHistory({ cardId }: { cardId: string }) {
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="font-medium text-charcoal text-sm">{tx.merchant}</div>
+                                                    <div className="font-medium text-ink-900 text-sm">{tx.merchant}</div>
                                                     {tx.status === 'Pending' && (
                                                         <span className="text-[10px] text-amber-600 bg-amber-50 px-1.5 py-0.5 rounded-full">Pending</span>
                                                     )}
@@ -249,13 +249,13 @@ export function CardTransactionHistory({ cardId }: { cardId: string }) {
                                                     </Badge>
                                                 </TableCell>
                                                 <TableCell className="text-right font-semibold font-mono text-sm">
-                                                    <span className={tx.amount > 0 ? 'text-emerald-600' : 'text-charcoal'}>
+                                                    <span className={tx.amount > 0 ? 'text-emerald-600' : 'text-ink-900'}>
                                                         {tx.amount > 0 ? '+' : ''}
                                                         {tx.amount.toLocaleString('en-US', { style: 'currency', currency: tx.currency })}
                                                     </span>
                                                 </TableCell>
                                                 <TableCell>
-                                                    <div className="text-muted-foreground group-hover:text-charcoal transition-colors">
+                                                    <div className="text-muted-foreground group-hover:text-ink-900 transition-colors">
                                                         {isExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
                                                     </div>
                                                 </TableCell>
@@ -266,11 +266,11 @@ export function CardTransactionHistory({ cardId }: { cardId: string }) {
                                                         <div className="flex items-center justify-between gap-4">
                                                             <div className="text-xs text-muted-foreground space-y-0.5">
                                                                 <p>
-                                                                    <span className="font-medium text-charcoal">Full date:</span>{' '}
+                                                                    <span className="font-medium text-ink-900">Full date:</span>{' '}
                                                                     {new Date(tx.date).toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}
                                                                 </p>
                                                                 <p>
-                                                                    <span className="font-medium text-charcoal">Status:</span>{' '}
+                                                                    <span className="font-medium text-ink-900">Status:</span>{' '}
                                                                     {tx.status}
                                                                 </p>
                                                             </div>

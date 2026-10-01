@@ -53,7 +53,7 @@ export function CreditScore() {
                     </div>
                 </div>
 
-                <div className="mt-4 flex items-center gap-2 text-sm text-vintage-green bg-vintage-green/10 px-3 py-1 rounded-full">
+                <div className="mt-4 flex items-center gap-2 text-sm text-pine-700 bg-pine-700/10 px-3 py-1 rounded-full">
                     <BarChart2 className="w-4 h-4" />
                     <span>Based on account history</span>
                 </div>

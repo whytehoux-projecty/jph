@@ -26,7 +26,7 @@ export function SegmentedControl({ options, value, onChange, className }: Segmen
             className={cn(
               "px-4 py-1.5 rounded-full text-sm font-medium transition-all duration-200 capitalize",
               isActive
-                ? "bg-[color:var(--heritage-navy)] text-white shadow-sm"
+                ? "bg-ink-900 text-white shadow-sm"
                 : "text-slate-600 hover:text-slate-900 hover:bg-slate-200/50"
             )}
           >

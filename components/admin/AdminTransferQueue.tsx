@@ -116,7 +116,7 @@ export function AdminTransferQueue({
             ) : (
               filtered.map((tx) => (
                 <TableRow key={tx.id}>
-                  <TableCell className="font-mono text-xs text-charcoal">{tx.reference}</TableCell>
+                  <TableCell className="font-mono text-xs text-ink-900">{tx.reference}</TableCell>
                   <TableCell className="text-sm">
                     <div className="flex items-center gap-1.5">
                       <Clock className="w-3.5 h-3.5 text-amber-500" />
@@ -124,14 +124,14 @@ export function AdminTransferQueue({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="font-medium text-sm text-charcoal">{tx.account.user.firstName} {tx.account.user.lastName}</div>
+                    <div className="font-medium text-sm text-ink-900">{tx.account.user.firstName} {tx.account.user.lastName}</div>
                     <div className="text-xs text-muted-foreground font-mono">{tx.account.accountNumber}</div>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm font-medium">{tx.methodId || tx.transactionType}</div>
                     <div className="text-xs text-muted-foreground">{tx.type}</div>
                   </TableCell>
-                  <TableCell className="text-right font-mono font-bold text-charcoal">
+                  <TableCell className="text-right font-mono font-bold text-ink-900">
                     ${tx.amount.toFixed(2)}
                   </TableCell>
                   <TableCell className="text-right">

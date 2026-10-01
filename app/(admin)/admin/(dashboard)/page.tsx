@@ -31,7 +31,7 @@ export default async function AdminDashboard() {
   return (
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500">
       <div>
-        <h2 className="text-2xl font-bold text-charcoal">Dashboard Overview</h2>
+        <h2 className="text-2xl font-bold text-ink-900">Dashboard Overview</h2>
         <p className="text-sm text-muted-foreground mt-1">Welcome back. Here's what's happening today.</p>
       </div>
 
@@ -75,7 +75,7 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 bg-white rounded-xl border border-neutral-200 shadow-sm">
           <div className="p-6 border-b border-neutral-100 flex justify-between items-center">
-            <h3 className="font-semibold text-charcoal">Recent Activity</h3>
+            <h3 className="font-semibold text-ink-900">Recent Activity</h3>
           </div>
           <div className="p-0">
             <div className="divide-y divide-neutral-100">
@@ -86,7 +86,7 @@ export default async function AdminDashboard() {
                       <ArrowRightLeft className="w-4 h-4" />
                     </div>
                     <div>
-                      <p className="font-medium text-sm text-charcoal">
+                      <p className="font-medium text-sm text-ink-900">
                         {tx.account.user.firstName} {tx.account.user.lastName} 
                         <span className="text-muted-foreground font-normal ml-1">initiated a {tx.transactionType.toLowerCase().replace('_', ' ')}</span>
                       </p>
@@ -118,7 +118,7 @@ export default async function AdminDashboard() {
 
         <div className="bg-white rounded-xl border border-neutral-200 shadow-sm flex flex-col">
           <div className="p-6 border-b border-neutral-100">
-            <h3 className="font-semibold text-charcoal">System Overview</h3>
+            <h3 className="font-semibold text-ink-900">System Overview</h3>
           </div>
           <div className="p-6 flex-1 flex flex-col gap-6">
             <div>
@@ -137,7 +137,7 @@ export default async function AdminDashboard() {
                 <span className="font-semibold">{totalAccounts}</span>
               </div>
               <div className="w-full bg-neutral-100 h-2 rounded-full overflow-hidden">
-                <div className="bg-blue-500 h-full w-[100%]"></div>
+                <div className="bg-blue-500 h-full w-full"></div>
               </div>
             </div>
 

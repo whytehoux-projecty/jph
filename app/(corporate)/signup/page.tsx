@@ -4,6 +4,8 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/commercial-ui/Button';
+import { LedgerInput } from '@/components/commercial-ui/LedgerInput';
+import { LedgerCheckbox } from '@/components/commercial-ui/LedgerCheckbox';
 import { Lock, Mail, User, CreditCard, CheckCircle, ArrowRight, ShieldCheck } from 'lucide-react';
 import { requestOnlineAccess } from '@/app/(corporate)/actions';
 import { BRAND } from '@/src/content/facts';
@@ -25,6 +27,7 @@ export default function SignupPage() {
     const [errors, setErrors] = useState<Record<string, string>>({});
     const [isLoading, setIsLoading] = useState(false);
     const [success, setSuccess] = useState(false);
+    const [referenceId, setReferenceId] = useState('');
 
     const updateField = (field: string, value: any) => {
         setFormData(prev => ({ ...prev, [field]: value }));
@@ -107,10 +110,11 @@ export default function SignupPage() {
 
         setIsLoading(true);
         try {
-            await requestOnlineAccess({
-                accountNumber: formData.accountNumber,
-                email: formData.email,
+            const res = await requestOnlineAccess({
+                ...formData
+                
             });
+            setReferenceId(res.referenceId);
             setSuccess(true);
         } catch (error: any) {
             console.error('Registration failed:', error);
@@ -128,9 +132,13 @@ export default function SignupPage() {
                         <CheckCircle className="w-8 h-8 text-pine-700" aria-hidden="true" />
                     </div>
                     <h1 className="font-display text-h2 text-ink-900 mb-4">Access Request Received</h1>
-                    <p className="text-body-lg text-ink-700 mb-8">
-                        Your request for {BRAND.vault} digital access has been submitted securely. Our team will verify your information shortly. Once approved, you will receive an email containing a secure link to create your password.
-                    </p>
+                    <div className="bg-paper-100 p-6 rounded border border-paper-200 mb-8 text-left">
+                        <p className="label-mono text-ink-500 mb-1">Reference ID</p>
+                        <p className="font-mono text-xl font-medium text-ink-900 mb-6">{referenceId}</p>
+                        <p className="text-body-lg text-ink-700">
+                            Your request for {BRAND.vault} digital access has been submitted securely. Our team will verify your information shortly. Once approved, you will receive an email containing a secure link to create your password.
+                        </p>
+                    </div>
                     <Button onClick={() => router.push('/')} variant="primary" className="w-full sm:w-auto">
                         Return to Homepage
                     </Button>

@@ -220,7 +220,7 @@ export default function SettingsClient({ initialProfile }: { initialProfile: any
   return (
     <div className="space-y-8 max-w-5xl mx-auto p-4 animate-fade-in-up">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-playfair font-bold text-charcoal">
+        <h1 className="text-3xl font-display font-bold text-ink-900">
           {translate(preferences.language, "settings.title") || "Settings"}
         </h1>
         <p className="text-muted-foreground">

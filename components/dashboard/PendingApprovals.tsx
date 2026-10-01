@@ -19,7 +19,7 @@ interface PendingItem {
 export function PendingApprovals({ items, language = "en" }: { items: PendingItem[], language?: string }) {
   if (!items || items.length === 0) {
     return (
-      <Card className="h-full border border-[color:var(--heritage-navy)]/10 bg-white shadow-vintage-sm">
+      <Card className="h-full border border-(--ink-900)/10 bg-white shadow-sm">
         <CardHeader className="pb-2">
           <CardTitle>Pending Approvals</CardTitle>
           <CardDescription>Items requiring your attention</CardDescription>
@@ -33,7 +33,7 @@ export function PendingApprovals({ items, language = "en" }: { items: PendingIte
   }
 
   return (
-    <Card className="h-full border border-[color:var(--heritage-navy)]/10 bg-white shadow-vintage-sm hover-lift">
+    <Card className="h-full border border-(--ink-900)/10 bg-white shadow-sm hover-lift">
       <CardHeader className="flex flex-row items-center justify-between pb-2">
         <div className="space-y-1">
           <CardTitle>Pending Approvals</CardTitle>
@@ -50,14 +50,14 @@ export function PendingApprovals({ items, language = "en" }: { items: PendingIte
           {items.slice(0, 3).map((item) => (
             <div
               key={item.id}
-              className="group flex flex-col sm:flex-row sm:items-center justify-between rounded-lg border border-[color:var(--heritage-navy)]/5 bg-slate-50/50 p-3 gap-3 transition-colors hover:bg-slate-50"
+              className="group flex flex-col sm:flex-row sm:items-center justify-between rounded-lg border border-(--ink-900)/5 bg-slate-50/50 p-3 gap-3 transition-colors hover:bg-slate-50"
             >
               <div className="flex items-start gap-3">
                 <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-amber-100 text-amber-600">
                   <Clock className="h-4 w-4" />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-sm font-medium text-[color:var(--heritage-navy)]">
+                  <span className="text-sm font-medium text-(--ink-900)">
                     {item.type}
                   </span>
                   <span className="text-xs text-muted-foreground line-clamp-1">
@@ -69,7 +69,7 @@ export function PendingApprovals({ items, language = "en" }: { items: PendingIte
                 </div>
               </div>
               <div className="flex items-center justify-between sm:justify-end sm:flex-col gap-2 shrink-0">
-                <span className="text-sm font-semibold text-[color:var(--heritage-navy)] font-inter tabular-nums lining-nums text-right">
+                <span className="text-sm font-semibold text-(--ink-900) font-inter tabular-nums lining-nums text-right">
                   {formatCurrency(item.amount, item.currency, languageToLocale(language))}
                 </span>
                 <div className="flex items-center gap-1">
@@ -84,7 +84,7 @@ export function PendingApprovals({ items, language = "en" }: { items: PendingIte
             </div>
           ))}
           {items.length > 3 && (
-            <Link href="/approvals" className="flex items-center justify-center text-xs font-medium text-[color:var(--heritage-gold)] hover:underline py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] rounded-md">
+            <Link href="/approvals" className="flex items-center justify-center text-xs font-medium text-(--heritage-gold) hover:underline py-2 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) rounded-md">
               View {items.length - 3} more
             </Link>
           )}

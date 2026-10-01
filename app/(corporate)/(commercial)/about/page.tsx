@@ -156,7 +156,7 @@ export default function AboutPage() {
                                     'Pay equity certified by third-party auditors'
                                 ].map((item) => (
                                     <div key={item} className="flex items-center gap-3 text-body text-ink-700">
-                                        <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0" />
+                                        <CheckCircle className="w-5 h-5 text-pine-700 shrink-0" />
                                         {item}
                                     </div>
                                 ))}
@@ -192,7 +192,7 @@ export default function AboutPage() {
                         <div className="space-y-12">
                             {timeline.map((item) => (
                                 <div key={item.year} className="relative flex gap-8 items-start">
-                                    <div className="relative z-10 flex-shrink-0 w-20 h-20 bg-paper-50 rounded border border-paper-200 flex flex-col items-center justify-center">
+                                    <div className="relative z-10 shrink-0 w-20 h-20 bg-paper-50 rounded border border-paper-200 flex flex-col items-center justify-center">
                                         <Landmark className="w-5 h-5 text-vermilion-600 mb-1" aria-hidden="true" />
                                         <span className="font-mono text-small text-ink-900 font-medium">{item.year}</span>
                                     </div>
@@ -224,7 +224,7 @@ export default function AboutPage() {
                             return (
                                 <div key={leader.name} className="flex flex-col sm:flex-row gap-6 p-8 rounded border border-paper-200 bg-paper-100">
                                     {/* Monogram tile */}
-                                    <div className="w-20 h-20 rounded bg-ink-900 flex-shrink-0 flex items-center justify-center text-paper-50">
+                                    <div className="w-20 h-20 rounded bg-ink-900 shrink-0 flex items-center justify-center text-paper-50">
                                         <span className="font-display text-2xl">{initials}</span>
                                     </div>
                                     <div>
@@ -272,7 +272,7 @@ export default function AboutPage() {
                     <div className="grid md:grid-cols-3 gap-6">
                         {recognitions.map((rec) => (
                             <div key={rec.award} className="p-6 bg-paper-100 rounded border border-paper-200 flex items-start gap-4">
-                                <Award className="w-6 h-6 text-vermilion-600 flex-shrink-0" aria-hidden="true" />
+                                <Award className="w-6 h-6 text-vermilion-600 shrink-0" aria-hidden="true" />
                                 <div>
                                     <p className="font-medium text-ink-900 text-body mb-1">{rec.award}</p>
                                     <p className="text-small text-ink-500">{rec.body} · {rec.year}</p>

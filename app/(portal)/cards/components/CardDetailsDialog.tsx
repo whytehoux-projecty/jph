@@ -100,7 +100,7 @@ export function CardDetailsDialog({ card }: CardDetailsDialogProps) {
             <Label className="text-base font-semibold">PIN Management</Label>
             <div className="flex items-center gap-3 bg-blue-50/60 p-3 rounded-md border border-blue-200">
               <Building2 className="h-5 w-5 text-blue-500 shrink-0" />
-              <p className="text-sm text-charcoal leading-snug">
+              <p className="text-sm text-ink-900 leading-snug">
                 To change your PIN, visit any branch or use an ATM with your card.
               </p>
             </div>

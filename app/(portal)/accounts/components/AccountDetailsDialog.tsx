@@ -117,9 +117,9 @@ export function AccountDetailsDialog({
       case "savings":
         return "gold";
       case "credit":
-        return "charcoal";
+        return "ink-900";
       default:
-        return "charcoal";
+        return "ink-900";
     }
   };
 
@@ -180,7 +180,7 @@ export function AccountDetailsDialog({
               size="lg"
             />
             <div>
-              <DialogTitle className="text-2xl font-playfair text-charcoal">
+              <DialogTitle className="text-2xl font-display text-ink-900">
                 {account.name}
               </DialogTitle>
               <DialogDescription className="flex items-center gap-2 mt-1">
@@ -192,7 +192,7 @@ export function AccountDetailsDialog({
                 <Button
                   variant="ghost"
                   size="icon"
-                  className="h-4 w-4 text-muted-foreground hover:text-charcoal"
+                  className="h-4 w-4 text-muted-foreground hover:text-ink-900"
                   onClick={() => setShowAccountNumber(!showAccountNumber)}>
                   {showAccountNumber ? (
                     <EyeOff className="w-3 h-3" />
@@ -213,7 +213,7 @@ export function AccountDetailsDialog({
               </p>
               <p
                 className={`text-2xl font-bold font-mono ${
-                  account.balance < 0 ? "text-red-600" : "text-charcoal"
+                  account.balance < 0 ? "text-red-600" : "text-ink-900"
                 }`}>
                 {formatCurrency(
                   Math.abs(account.balance),
@@ -280,7 +280,7 @@ export function AccountDetailsDialog({
                         <p className="text-xs text-muted-foreground uppercase">
                           Interest Rate
                         </p>
-                        <p className="text-lg font-mono font-semibold text-vintage-green">
+                        <p className="text-lg font-mono font-semibold text-pine-700">
                           {account.interestRate}
                         </p>
                       </CardContent>
@@ -296,7 +296,7 @@ export function AccountDetailsDialog({
                       </CardHeader>
                       <CardContent className="space-y-4">
                         <div className="flex justify-between items-end">
-                          <span className="text-2xl font-bold text-charcoal">
+                          <span className="text-2xl font-bold text-ink-900">
                             {(
                               (Math.abs(account.balance) /
                                 account.creditLimit) *
@@ -359,7 +359,7 @@ export function AccountDetailsDialog({
                                     ["credit", "deposit"].includes(tx.type) ||
                                     tx.amount > 0
                                       ? "bg-green-100 text-green-700"
-                                      : "bg-charcoal/10 text-charcoal"
+                                      : "bg-ink-900/10 text-ink-900"
                                   }`}>
                                   {["credit", "deposit"].includes(tx.type) ||
                                   tx.amount > 0 ? (
@@ -369,7 +369,7 @@ export function AccountDetailsDialog({
                                   )}
                                 </div>
                                 <div>
-                                  <p className="font-medium text-sm text-charcoal">
+                                  <p className="font-medium text-sm text-ink-900">
                                     {tx.description}
                                   </p>
                                   <p className="text-xs text-muted-foreground">
@@ -382,7 +382,7 @@ export function AccountDetailsDialog({
                                   ["credit", "deposit"].includes(tx.type) ||
                                   tx.amount > 0
                                     ? "text-green-600"
-                                    : "text-charcoal"
+                                    : "text-ink-900"
                                 }`}>
                                 {["credit", "deposit"].includes(tx.type) ||
                                 tx.amount > 0
@@ -434,7 +434,7 @@ export function AccountDetailsDialog({
                     </CardContent>
                   </Card>
 
-                  <Card className="bg-gradient-to-br from-soft-gold/10 to-transparent border-soft-gold/20 rounded-none">
+                  <Card className="bg-linear-to-br from-vermilion-600/10 to-transparent border-vermilion-600/20 rounded-none">
                     <CardHeader>
                       <CardTitle className="text-base flex items-center gap-2">
                         <TrendingUp className="w-4 h-4 text-vintage-gold" />{" "}
@@ -489,11 +489,11 @@ export function AccountDetailsDialog({
                               {["credit", "deposit"].includes(tx.type) ? (
                                 <ArrowDownLeft className="w-5 h-5 text-green-600" />
                               ) : (
-                                <ArrowUpRight className="w-5 h-5 text-charcoal" />
+                                <ArrowUpRight className="w-5 h-5 text-ink-900" />
                               )}
                             </div>
                             <div>
-                              <p className="font-medium text-charcoal">
+                              <p className="font-medium text-ink-900">
                                 {tx.description}
                               </p>
                               <p className="text-xs text-muted-foreground">
@@ -506,7 +506,7 @@ export function AccountDetailsDialog({
                               ["credit", "deposit"].includes(tx.type) ||
                               tx.amount > 0
                                 ? "text-green-600"
-                                : "text-charcoal"
+                                : "text-ink-900"
                             }`}>
                             {["credit", "deposit"].includes(tx.type) ||
                             tx.amount > 0
@@ -574,7 +574,7 @@ export function AccountDetailsDialog({
                                 <FileText size={20} />
                               </div>
                               <div>
-                                <p className="font-medium text-charcoal">
+                                <p className="font-medium text-ink-900">
                                   {periodLabel}
                                 </p>
                                 <p className="text-xs text-muted-foreground">
@@ -607,11 +607,11 @@ export function AccountDetailsDialog({
                 <CardContent>
                   <div className="flex items-center justify-between p-3 border border-border/40 hover:bg-muted/30 transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-charcoal/5 text-charcoal flex items-center justify-center">
+                      <div className="w-10 h-10 bg-ink-900/5 text-ink-900 flex items-center justify-center">
                         <FileText size={20} />
                       </div>
                       <div>
-                        <p className="font-medium text-charcoal">
+                        <p className="font-medium text-ink-900">
                           2025 Form 1099-INT
                         </p>
                         <p className="text-xs text-muted-foreground">

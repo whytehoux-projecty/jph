@@ -103,7 +103,7 @@ export function AdminApplicationList({
               filtered.map((app) => (
                 <TableRow key={app.id}>
                   <TableCell>
-                    <div className="font-medium text-charcoal">{app.firstName} {app.lastName}</div>
+                    <div className="font-medium text-ink-900">{app.firstName} {app.lastName}</div>
                     <div className="text-sm text-muted-foreground">{app.email}</div>
                   </TableCell>
                   <TableCell>
@@ -165,11 +165,11 @@ export function AdminApplicationList({
       }}>
         <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl font-playfair flex items-center gap-2">
+            <DialogTitle className="text-xl font-display flex items-center gap-2">
               <FileText className="w-5 h-5" /> Account Application Review
             </DialogTitle>
             <DialogDescription>
-              Applicant: <span className="font-medium text-charcoal">{selectedApp?.firstName} {selectedApp?.lastName}</span>
+              Applicant: <span className="font-medium text-ink-900">{selectedApp?.firstName} {selectedApp?.lastName}</span>
             </DialogDescription>
           </DialogHeader>
 

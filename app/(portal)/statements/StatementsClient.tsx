@@ -76,7 +76,7 @@ export default function StatementsClient({ initialStatements, initialAccounts }:
     if (loading) {
         return (
             <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-vintage-green"></div>
+                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pine-700"></div>
                 <div className="text-muted-foreground animate-pulse">Retrieving archived statements...</div>
             </div>
         );
@@ -87,7 +87,7 @@ export default function StatementsClient({ initialStatements, initialAccounts }:
 
             <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
                 <div>
-                    <h1 className="text-3xl font-playfair font-bold text-charcoal">Account Statements</h1>
+                    <h1 className="text-3xl font-display font-bold text-ink-900">Account Statements</h1>
                     <p className="text-muted-foreground mt-1">Access your monthly financial records securely.</p>
                 </div>
                 <Button
@@ -141,7 +141,7 @@ export default function StatementsClient({ initialStatements, initialAccounts }:
                                         </TableCell>
                                         <TableCell>
                                             <div className="flex flex-col">
-                                                <span className="text-sm font-semibold text-charcoal">{statement.account.accountType}</span>
+                                                <span className="text-sm font-semibold text-ink-900">{statement.account.accountType}</span>
                                                 <span className="text-xs text-muted-foreground font-mono">****{statement.account.accountNumber.slice(-4)}</span>
                                             </div>
                                         </TableCell>
@@ -158,7 +158,7 @@ export default function StatementsClient({ initialStatements, initialAccounts }:
                                                 variant="ghost"
                                                 size="small"
                                                 onClick={() => handleDownload(statement.id, `Statement-${new Date(statement.periodStart).toISOString().slice(0, 7)}.pdf`)}
-                                                className="text-muted-foreground hover:text-vintage-green h-8 w-8 p-0"
+                                                className="text-muted-foreground hover:text-pine-700 h-8 w-8 p-0"
                                             >
                                                 <Download className="w-4 h-4" />
                                             </Button>

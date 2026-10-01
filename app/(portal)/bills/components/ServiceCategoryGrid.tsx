@@ -30,14 +30,14 @@ export function ServiceCategoryGrid({ value, onChange }: ServiceCategoryGridProp
                     className={cn(
                         "cursor-pointer p-4 rounded-xl border flex flex-col items-center justify-center gap-3 transition-all duration-200 hover:shadow-md",
                         value === cat.id
-                            ? "bg-vintage-green/5 border-vintage-green ring-1 ring-vintage-green"
-                            : "bg-white border-border hover:border-vintage-green/30"
+                            ? "bg-pine-700/5 border-pine-700 ring-1 ring-pine-700"
+                            : "bg-white border-border hover:border-pine-700/30"
                     )}
                 >
-                    <div className={cn("p-2 rounded-full bg-opacity-10", value === cat.id ? "bg-vintage-green bg-opacity-10" : "bg-gray-100")}>
+                    <div className={cn("p-2 rounded-full bg-opacity-10", value === cat.id ? "bg-pine-700 bg-opacity-10" : "bg-gray-100")}>
                         <cat.icon className={cn("w-6 h-6", cat.color)} />
                     </div>
-                    <span className="text-sm font-medium text-center text-charcoal">{cat.label}</span>
+                    <span className="text-sm font-medium text-center text-ink-900">{cat.label}</span>
                 </div>
             ))}
         </div>

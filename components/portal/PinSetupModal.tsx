@@ -50,7 +50,7 @@ export function PinSetupModal() {
           <div className="mx-auto w-12 h-12 bg-vintage-gold/10 rounded-full flex items-center justify-center text-vintage-gold">
             <ShieldAlert className="w-6 h-6" />
           </div>
-          <CardTitle className="text-2xl font-playfair font-bold text-charcoal">Action Required</CardTitle>
+          <CardTitle className="text-2xl font-display font-bold text-ink-900">Action Required</CardTitle>
           <CardDescription>
             To secure your transactions, you must set up a Transaction PIN before using the portal.
           </CardDescription>

@@ -112,7 +112,7 @@ export function EnhancedAccountSelector({
   if (isLoading) {
     return (
       <div className="space-y-2">
-        <p className="text-xs font-medium text-charcoal">{label}</p>
+        <p className="text-xs font-medium text-ink-900">{label}</p>
         <Skeleton className="h-20 w-full rounded-lg" />
       </div>
     );
@@ -121,7 +121,7 @@ export function EnhancedAccountSelector({
   if (error) {
     return (
       <div className="space-y-2">
-        <p className="text-xs font-medium text-charcoal">{label}</p>
+        <p className="text-xs font-medium text-ink-900">{label}</p>
         <div className="flex items-center justify-between rounded-lg border border-red-200 bg-red-50 px-3 py-2 text-xs text-red-700">
           <span>{error}</span>
           <button
@@ -138,7 +138,7 @@ export function EnhancedAccountSelector({
   if (!accounts.length) {
     return (
       <div className="space-y-2">
-        <p className="text-xs font-medium text-charcoal">{label}</p>
+        <p className="text-xs font-medium text-ink-900">{label}</p>
         <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-muted-foreground space-y-1">
           <p>No accounts are available for transfers from this profile.</p>
           <p>
@@ -185,7 +185,7 @@ export function EnhancedAccountSelector({
 
   return (
     <div className="space-y-2">
-      <p className="text-xs font-medium text-charcoal">{label}</p>
+      <p className="text-xs font-medium text-ink-900">{label}</p>
       <div className="grid grid-cols-1 gap-3">
         {accounts.map((account, index) => {
           const isSelected = account.id === value;
@@ -201,20 +201,20 @@ export function EnhancedAccountSelector({
               onClick={() => onChange(account.id)}
               className={`w-full text-left transition ${
                 isSelected
-                  ? "ring-2 ring-[color:var(--heritage-navy)] ring-offset-2 ring-offset-slate-50"
+                  ? "ring-2 ring-(--ink-900) ring-offset-2 ring-offset-slate-50"
                   : ""
-              } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}
+              } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}
               tabIndex={isSelected ? 0 : -1}
               onKeyDown={(event) => handleKeyDown(event, index)}>
-              <Card className="flex items-center justify-between gap-3 border border-slate-200 px-3 py-3 shadow-none hover:border-soft-gold/70 hover:shadow-vintage-md">
+              <Card className="flex items-center justify-between gap-3 border border-slate-200 px-3 py-3 shadow-none hover:border-vermilion-600/70 hover:shadow-md">
                 <div className="flex items-center gap-3">
                   <VintageIcon
                     icon={getAccountIcon(account.accountType)}
                     size="sm"
-                    variant={isSelected ? "gold" : "charcoal"}
+                    variant={isSelected ? "gold" : "ink-900"}
                   />
                   <div className="space-y-0.5">
-                    <div className="text-sm font-semibold text-charcoal">
+                    <div className="text-sm font-semibold text-ink-900">
                       {account.name || account.accountType}
                     </div>
                     <div className="text-xs font-mono text-muted-foreground">
@@ -224,7 +224,7 @@ export function EnhancedAccountSelector({
                 </div>
                 <div className="text-right">
                   <div className="text-xs text-muted-foreground">Available</div>
-                  <div className="text-sm font-semibold text-charcoal">
+                  <div className="text-sm font-semibold text-ink-900">
                     {formatMoney(available, account.currency)}
                   </div>
                 </div>

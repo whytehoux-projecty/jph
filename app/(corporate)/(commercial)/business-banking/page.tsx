@@ -73,7 +73,7 @@ export default function BusinessBankingPage() {
                                 </Button>
                             </div>
                         </div>
-                        <div className="animate-fade-in-up animate-delay-200 relative aspect-[4/3] w-full rounded border border-paper-300 bg-paper-50 overflow-hidden shadow-sm">
+                        <div className="animate-fade-in-up animate-delay-200 relative aspect-4/3 w-full rounded border border-paper-300 bg-paper-50 overflow-hidden shadow-sm">
                             <picture className="absolute inset-0">
                                 <source srcSet="/images/new/business-hero.jpg" type="image/jpeg" />
                                 <img
@@ -104,7 +104,7 @@ export default function BusinessBankingPage() {
                                     <span className="text-small text-ink-500">{cs.size}</span>
                                 </div>
                                 <h3 className="font-display text-h4 text-ink-900 mb-3">{cs.company}</h3>
-                                <p className="text-body text-ink-700 flex-grow">{cs.result}</p>
+                                <p className="text-body text-ink-700 grow">{cs.result}</p>
                                 <div className="mt-6 pt-6 border-t border-paper-200">
                                     <Shield className="w-5 h-5 text-pine-700" aria-hidden="true" />
                                 </div>
@@ -136,7 +136,7 @@ export default function BusinessBankingPage() {
                                 'QuickBooks® and Xero® direct integration',
                             ].map((feature) => (
                                 <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
                                     {feature}
                                 </li>
                             ))}
@@ -167,7 +167,7 @@ export default function BusinessBankingPage() {
                                 'Dedicated merchant support line, 7 days a week',
                             ].map((feature) => (
                                 <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
                                     {feature}
                                 </li>
                             ))}
@@ -198,7 +198,7 @@ export default function BusinessBankingPage() {
                                 'Commercial real estate mortgages at competitive rates',
                             ].map((feature) => (
                                 <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
                                     {feature}
                                 </li>
                             ))}
@@ -225,7 +225,7 @@ export default function BusinessBankingPage() {
                                 'Compliance reporting and audit-ready record keeping',
                             ].map((feature) => (
                                 <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
                                     {feature}
                                 </li>
                             ))}
@@ -251,7 +251,7 @@ export default function BusinessBankingPage() {
                                 'Custom API integration for ERP systems',
                             ].map((feature) => (
                                 <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
                                     {feature}
                                 </li>
                             ))}

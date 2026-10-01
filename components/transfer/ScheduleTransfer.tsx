@@ -133,13 +133,13 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
     "flex-1 px-3 py-1.5 rounded-full text-xs font-medium transition";
 
   const pillActive =
-    "bg-[color:var(--heritage-navy)] text-white shadow-sm border border-[color:var(--heritage-navy)]";
+    "bg-(--ink-900) text-white shadow-sm border border-(--ink-900)";
 
   const pillInactive =
     "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200";
 
   const frequencyButtonClasses =
-    "px-3 py-1.5 rounded-full text-xs transition border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50";
+    "px-3 py-1.5 rounded-full text-xs transition border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50";
 
   return (
     <div className="space-y-4">
@@ -153,7 +153,7 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
           }
           className={`${scheduleTypeButtonClasses} ${
             value.type === "now" ? pillActive : pillInactive
-          } flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}>
+          } flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}>
           <Clock3 className="h-3 w-3" />
           <span>Send now</span>
         </button>
@@ -166,7 +166,7 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
           }
           className={`${scheduleTypeButtonClasses} ${
             value.type === "once" ? pillActive : pillInactive
-          } flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}>
+          } flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}>
           <Calendar className="h-3 w-3" />
           <span>Schedule once</span>
         </button>
@@ -179,7 +179,7 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
           }
           className={`${scheduleTypeButtonClasses} ${
             value.type === "recurring" ? pillActive : pillInactive
-          } flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}>
+          } flex items-center justify-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}>
           <Repeat className="h-3 w-3" />
           <span>Recurring</span>
         </button>
@@ -300,7 +300,7 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
                     }
                     className={`${frequencyButtonClasses} ${
                       value.frequency === option.id
-                        ? "border-[color:var(--heritage-navy)] bg-soft-gold/10 text-charcoal"
+                        ? "border-(--ink-900) bg-vermilion-600/10 text-ink-900"
                         : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
                     }`}>
                     {option.label}
@@ -327,7 +327,7 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
               }
               className={`px-3 py-1.5 rounded-full border ${
                 value.endType === "never"
-                  ? "border-[color:var(--heritage-navy)] bg-soft-gold/10 text-charcoal"
+                  ? "border-(--ink-900) bg-vermilion-600/10 text-ink-900"
                   : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
               }`}>
               No end date
@@ -342,7 +342,7 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
               }
               className={`px-3 py-1.5 rounded-full border ${
                 value.endType === "after"
-                  ? "border-[color:var(--heritage-navy)] bg-soft-gold/10 text-charcoal"
+                  ? "border-(--ink-900) bg-vermilion-600/10 text-ink-900"
                   : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
               }`}>
               After
@@ -357,7 +357,7 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
               }
               className={`px-3 py-1.5 rounded-full border ${
                 value.endType === "on"
-                  ? "border-[color:var(--heritage-navy)] bg-soft-gold/10 text-charcoal"
+                  ? "border-(--ink-900) bg-vermilion-600/10 text-ink-900"
                   : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
               }`}>
               On date
@@ -486,7 +486,7 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
                 <p className="text-[10px] uppercase text-muted-foreground tracking-wide">
                   First transfer
                 </p>
-                <p className="text-xs text-charcoal">
+                <p className="text-xs text-ink-900">
                   {recurringSummary.firstTransfer}
                 </p>
               </div>
@@ -494,7 +494,7 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
                 <p className="text-[10px] uppercase text-muted-foreground tracking-wide">
                   Frequency
                 </p>
-                <p className="text-xs text-charcoal">
+                <p className="text-xs text-ink-900">
                   {recurringSummary.frequencyLabel}
                 </p>
               </div>
@@ -502,7 +502,7 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
                 <p className="text-[10px] uppercase text-muted-foreground tracking-wide">
                   Total transfers
                 </p>
-                <p className="text-xs text-charcoal">
+                <p className="text-xs text-ink-900">
                   {recurringSummary.totalText}
                 </p>
               </div>
@@ -510,7 +510,7 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
                 <p className="text-[10px] uppercase text-muted-foreground tracking-wide">
                   Last transfer
                 </p>
-                <p className="text-xs text-charcoal">
+                <p className="text-xs text-ink-900">
                   {recurringSummary.lastTransfer || "Not set"}
                 </p>
               </div>

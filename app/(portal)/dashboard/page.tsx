@@ -122,12 +122,12 @@ export default async function DashboardPage() {
 
   return (
     <div className="w-full max-w-7xl mx-auto space-y-6 pt-2">
-      <div className="flex items-center justify-between space-y-2 pb-4 bg-[color:var(--heritage-navy)] text-white p-6 rounded-xl shadow-md mb-6 -mx-2 md:mx-0">
-        <h2 className="text-3xl font-bold tracking-tight font-playfair text-white">
+      <div className="flex items-center justify-between space-y-2 pb-4 bg-ink-900 text-white p-6 rounded-xl shadow-md mb-6 -mx-2 md:mx-0">
+        <h2 className="text-3xl font-bold tracking-tight font-display text-white">
           {getGreeting()}, {user?.firstName || "there"}
         </h2>
         <div className="flex items-center space-x-2">
-          <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white text-[color:var(--heritage-navy)] hover:bg-gray-100 shadow-vintage-md hover:-translate-y-0.5 h-9 px-4 text-sm">
+          <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 rounded-lg font-semibold transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-white text-ink-900 hover:bg-gray-100 shadow-md hover:-translate-y-0.5 h-9 px-4 text-sm">
             Refresh Data
           </Link>
         </div>
@@ -204,7 +204,7 @@ export default async function DashboardPage() {
                     Latest activity across all accounts.
                   </CardDescription>
                 </div>
-                <Link href="/transactions" className="text-sm font-medium text-[color:var(--heritage-gold)] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] rounded-md px-1">
+                <Link href="/transactions" className="text-sm font-medium text-vermilion-600 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-900 rounded-md px-1">
                   View all
                 </Link>
               </CardHeader>

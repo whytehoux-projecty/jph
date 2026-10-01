@@ -68,7 +68,7 @@ export function AdminNotificationList({
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
         <div className="flex items-center gap-2 mb-4 border-b border-neutral-100 pb-4">
           <Send className="w-5 h-5 text-vintage-gold" />
-          <h3 className="font-playfair text-lg font-bold text-charcoal">Send New Notification</h3>
+          <h3 className="font-display text-lg font-bold text-ink-900">Send New Notification</h3>
         </div>
 
         <form onSubmit={handleSend} className="space-y-4 max-w-2xl">
@@ -114,7 +114,7 @@ export function AdminNotificationList({
             />
           </div>
 
-          <Button type="submit" className="bg-charcoal text-white hover:bg-neutral-800">
+          <Button type="submit" className="bg-ink-900 text-white hover:bg-neutral-800">
             Push Notification
           </Button>
         </form>
@@ -123,7 +123,7 @@ export function AdminNotificationList({
       {/* History */}
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
         <div className="p-4 border-b border-neutral-200 flex justify-between items-center bg-neutral-50">
-          <h3 className="font-semibold text-charcoal">Notification History</h3>
+          <h3 className="font-semibold text-ink-900">Notification History</h3>
           <div className="relative max-w-xs w-full">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input 
@@ -158,11 +158,11 @@ export function AdminNotificationList({
                     {format(new Date(n.createdAt), 'MMM d, yyyy HH:mm')}
                   </TableCell>
                   <TableCell>
-                    <div className="font-medium text-sm text-charcoal">{n.user.firstName} {n.user.lastName}</div>
+                    <div className="font-medium text-sm text-ink-900">{n.user.firstName} {n.user.lastName}</div>
                     <div className="text-xs text-muted-foreground">{n.user.email}</div>
                   </TableCell>
                   <TableCell>
-                    <div className="font-semibold text-sm text-charcoal">{n.title}</div>
+                    <div className="font-semibold text-sm text-ink-900">{n.title}</div>
                     <div className="text-xs text-muted-foreground truncate max-w-md">{n.message}</div>
                   </TableCell>
                   <TableCell className="text-right">

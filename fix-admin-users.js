@@ -41,10 +41,10 @@ const tabContent = `
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 p-6">
                     <div className="flex justify-between items-center mb-4">
                       <div>
-                        <h4 className="text-lg font-playfair font-bold text-[color:var(--heritage-navy)]">Beneficiaries</h4>
+                        <h4 className="text-lg font-playfair font-bold text-(--heritage-navy)">Beneficiaries</h4>
                         <p className="text-xs text-muted-foreground">Manage payment recipients and audit trails for this customer.</p>
                       </div>
-                      <Button variant="outline" size="small" onClick={() => setBeneficiaryPanel('new')} className="h-8 text-xs border-[color:var(--heritage-gold)] text-[color:var(--heritage-gold)] hover:bg-[color:var(--heritage-gold)]/10"><Plus className="w-3 h-3 mr-1"/> Add Beneficiary</Button>
+                      <Button variant="outline" size="small" onClick={() => setBeneficiaryPanel('new')} className="h-8 text-xs border-(--heritage-gold) text-(--heritage-gold) hover:bg-(--heritage-gold)/10"><Plus className="w-3 h-3 mr-1"/> Add Beneficiary</Button>
                     </div>
 
                     {!selectedUser.beneficiaries || selectedUser.beneficiaries.length === 0 ? (
@@ -52,7 +52,7 @@ const tabContent = `
                         <Users className="w-10 h-10 text-neutral-400 mb-3" />
                         <h4 className="text-sm font-bold text-charcoal mb-1">No Beneficiaries</h4>
                         <p className="text-xs text-muted-foreground mb-4">This customer has not saved any external payment recipients.</p>
-                        <Button onClick={() => setBeneficiaryPanel('new')} className="bg-[color:var(--heritage-navy)] hover:bg-[color:var(--heritage-navy)]/90 text-white h-8 text-xs"><Plus className="w-3 h-3 mr-1"/> Create Beneficiary</Button>
+                        <Button onClick={() => setBeneficiaryPanel('new')} className="bg-(--heritage-navy) hover:bg-(--heritage-navy)/90 text-white h-8 text-xs"><Plus className="w-3 h-3 mr-1"/> Create Beneficiary</Button>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

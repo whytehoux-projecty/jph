@@ -39,7 +39,7 @@ export function PortalHeader({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[#0B1B30] bg-[color:var(--heritage-navy)]/95 backdrop-blur-md shadow-sm text-white">
+    <header className="sticky top-0 z-50 w-full border-b border-[#0B1B30] bg-ink-900/95 backdrop-blur-md shadow-sm text-white">
       <div className="flex h-[70px] items-center px-4 md:px-6 justify-between">
         {/* Left Side: Logo */}
         <div className="flex items-center gap-2 h-full">
@@ -54,12 +54,12 @@ export function PortalHeader({
 
           <Link href="/dashboard" className="flex items-center gap-2 h-full ml-1 md:ml-0 min-w-0">
             <div className="flex items-center gap-2 ml-1 min-w-0">
-              <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-[color:var(--heritage-gold)] flex items-center justify-center shadow-gold-glow flex-shrink-0">
+              <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-vermilion-600 flex items-center justify-center shadow-gold-glow shrink-0">
                 <Shield className="w-4 h-4 md:w-5 md:h-5 text-white" strokeWidth={2} />
               </div>
               <div className="flex flex-col leading-none whitespace-nowrap overflow-hidden min-w-0">
-                <span className="text-[9px] font-medium text-[color:var(--heritage-gold)] tracking-wider md:tracking-[0.2em] uppercase truncate">Heritage Trust</span>
-                <span className="text-sm md:text-base font-bold text-white tracking-wide font-playfair truncate">BANK</span>
+                <span className="text-[9px] font-medium text-vermilion-600 tracking-wider md:tracking-[0.2em] uppercase truncate">Heritage Trust</span>
+                <span className="text-sm md:text-base font-bold text-white tracking-wide font-display truncate">BANK</span>
               </div>
             </div>
           </Link>
@@ -67,17 +67,17 @@ export function PortalHeader({
 
         {/* Right Side: Notifications & User Profile */}
         <div className="flex items-center gap-2">
-          <div className="mr-1 flex-shrink-0">
+          <div className="mr-1 shrink-0">
             <Select defaultValue="en" onValueChange={handleLanguageChange}>
               <SelectTrigger className="w-auto gap-0 sm:gap-2 bg-transparent border border-white/20 text-white hover:bg-white/10 focus:ring-0 focus:ring-offset-0 px-1 sm:px-2 h-8 rounded-md transition-colors">
-                <Globe className="h-4 w-4 flex-shrink-0" />
+                <Globe className="h-4 w-4 shrink-0" />
                 <span className="hidden sm:inline">
                   <SelectValue placeholder="EN" />
                 </span>
               </SelectTrigger>
               <SelectContent
                 align="end"
-                className="bg-[color:var(--heritage-surface)]/95 backdrop-blur-md border-[color:var(--heritage-navy)]/20 rounded-sm text-[color:var(--heritage-navy)]">
+                className="bg-paper-100/95 backdrop-blur-md border-ink-900/20 rounded-sm text-ink-900">
                 <SelectItem value="en">English (EN)</SelectItem>
                 <SelectItem value="fr">Français (FR)</SelectItem>
                 <SelectItem value="de">Deutsch (DE)</SelectItem>

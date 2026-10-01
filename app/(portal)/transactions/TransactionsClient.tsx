@@ -159,7 +159,7 @@ function TransactionFiltersPanel({
             onClick={() => setCategoryFilters([])}
             className={`rounded-full border px-3 py-1 text-xs transition-colors ${
               categoryFilters.length === 0
-                ? "bg-charcoal text-white border-charcoal"
+                ? "bg-ink-900 text-white border-ink-900"
                 : "text-muted-foreground hover:bg-slate-100/80"
             }`}>
             All
@@ -177,7 +177,7 @@ function TransactionFiltersPanel({
               }
               className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                 categoryFilters.includes(cat)
-                  ? "bg-charcoal text-white border-charcoal"
+                  ? "bg-ink-900 text-white border-ink-900"
                   : "text-muted-foreground hover:bg-slate-100/80"
               }`}>
               {cat}
@@ -206,7 +206,7 @@ function TransactionFiltersPanel({
               }
               className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                 transactionTypes.includes(type.id)
-                  ? "bg-charcoal text-white border-charcoal"
+                  ? "bg-ink-900 text-white border-ink-900"
                   : "text-muted-foreground hover:bg-slate-100/80"
               }`}>
               {type.label}
@@ -233,7 +233,7 @@ function TransactionFiltersPanel({
                 }
                 className={`rounded-full border px-3 py-1 text-xs transition-colors ${
                   statusFilters.includes(status)
-                    ? "bg-charcoal text-white border-charcoal"
+                    ? "bg-ink-900 text-white border-ink-900"
                     : "text-muted-foreground hover:bg-slate-100/80"
                 }`}>
                 {status.charAt(0) + status.slice(1).toLowerCase()}
@@ -498,7 +498,7 @@ function TransactionRow({
                   <div className="font-semibold text-[11px] uppercase tracking-wide text-slate-500">
                     Transaction ID
                   </div>
-                  <div className="font-mono text-[12px] text-charcoal">
+                  <div className="font-mono text-[12px] text-ink-900">
                     {tx.id}
                   </div>
                 </div>
@@ -1548,7 +1548,7 @@ export default function TransactionsClient({
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-playfair font-bold text-charcoal">
+          <h1 className="text-3xl font-display font-bold text-ink-900">
             Transactions
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -1575,22 +1575,22 @@ export default function TransactionsClient({
       <Card className="overflow-hidden border-t-[3px] border-t-[#D4AF37]">
         <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
           <div className="p-4 md:p-5 flex flex-col justify-center bg-white cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => handleKpiCardClick("income")}>
-            <span className="text-[11px] uppercase tracking-[0.1em] text-slate-500 font-semibold mb-1 font-inter">Money in</span>
+            <span className="text-[11px] uppercase tracking-widest text-slate-500 font-semibold mb-1 font-inter">Money in</span>
             <span className="font-mono text-[15px] md:text-lg text-green-700 tabular-nums lining-nums font-medium">+{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(totalIncome)}</span>
           </div>
           <div className="p-4 md:p-5 flex flex-col justify-center bg-white cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => handleKpiCardClick("expenses")}>
-            <span className="text-[11px] uppercase tracking-[0.1em] text-slate-500 font-semibold mb-1 font-inter">Money out</span>
+            <span className="text-[11px] uppercase tracking-widest text-slate-500 font-semibold mb-1 font-inter">Money out</span>
             <span className="font-mono text-[15px] md:text-lg text-slate-900 tabular-nums lining-nums font-medium">-{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(totalExpenses)}</span>
           </div>
           <div className="p-4 md:p-5 flex flex-col justify-center bg-white cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => handleKpiCardClick("all")}>
-            <span className="text-[11px] uppercase tracking-[0.1em] text-slate-500 font-semibold mb-1 font-inter">Net</span>
+            <span className="text-[11px] uppercase tracking-widest text-slate-500 font-semibold mb-1 font-inter">Net</span>
             <span className="font-mono text-[15px] md:text-lg text-slate-900 tabular-nums lining-nums font-semibold">
               {(totalIncome - totalExpenses) >= 0 ? "+" : ""}
               {new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(totalIncome - totalExpenses)}
             </span>
           </div>
           <div className="hidden md:flex p-4 md:p-5 flex-col justify-center bg-white cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => setStatusFilters((prev) => prev.includes('PENDING') ? prev.filter(p => p !== 'PENDING') : [...prev, 'PENDING'])}>
-            <span className="text-[11px] uppercase tracking-[0.1em] text-slate-500 font-semibold mb-1 font-inter">Pending</span>
+            <span className="text-[11px] uppercase tracking-widest text-slate-500 font-semibold mb-1 font-inter">Pending</span>
             <span className="font-mono text-[15px] md:text-lg text-slate-900 tabular-nums lining-nums font-medium">
               {filteredTransactions.filter(t => String(t.status).toUpperCase() === 'PENDING').length}
             </span>
@@ -1612,7 +1612,7 @@ export default function TransactionsClient({
               {activeKpiLabel && (
                 <p className="mt-1 text-[11px] text-muted-foreground">
                   Showing:{" "}
-                  <span className="font-semibold text-charcoal">
+                  <span className="font-semibold text-ink-900">
                     {activeKpiLabel}
                   </span>{" "}
                   · {periodLabel}
@@ -1646,8 +1646,8 @@ export default function TransactionsClient({
                       }
                       className={`rounded px-3 py-1 transition-colors ${
                         datePreset === preset.id
-                          ? "bg-white text-charcoal shadow-sm"
-                          : "text-muted-foreground hover:text-charcoal"
+                          ? "bg-white text-ink-900 shadow-sm"
+                          : "text-muted-foreground hover:text-ink-900"
                       }`}>
                       {preset.label}
                     </button>
@@ -1700,7 +1700,7 @@ export default function TransactionsClient({
             </div>
           )}
           {!error && hasNewData && (
-            <div className="flex items-center gap-2 px-4 py-3 text-xs text-charcoal bg-amber-50 border-b border-amber-100">
+            <div className="flex items-center gap-2 px-4 py-3 text-xs text-ink-900 bg-amber-50 border-b border-amber-100">
               <AlertTriangle className="w-4 h-4 text-amber-600" />
               <span className="flex-1">
                 New transactions may be available based on your recent activity.
@@ -1717,7 +1717,7 @@ export default function TransactionsClient({
           {selectedIds.length > 0 && (
             <div className="flex items-center justify-between px-4 py-2 border-b bg-slate-50 text-xs">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-charcoal">
+                <span className="font-semibold text-ink-900">
                   {selectedIds.length} selected
                 </span>
               </div>
@@ -1884,7 +1884,7 @@ export default function TransactionsClient({
                 else if (normalizedStatus === "CANCELLED") sealClasses = "bg-transparent text-slate-500 border-slate-400";
                 
                 return (
-                  <li key={tx.id} className="grid grid-cols-[auto,1fr,auto] gap-3 p-4 bg-white" onClick={() => toggleRowExpanded(tx.id)}>
+                  <li key={tx.id} className="grid grid-cols-[auto_1fr_auto] gap-3 p-4 bg-white" onClick={() => toggleRowExpanded(tx.id)}>
                     <div className="flex items-start pt-1">
                       {out ? (
                         <div className="w-5 h-5 bg-[#091C38] rounded-full flex items-center justify-center text-white" aria-label="Money out"><ArrowDownLeft className="w-3 h-3" /></div>

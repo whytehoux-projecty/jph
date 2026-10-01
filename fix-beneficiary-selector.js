@@ -70,7 +70,7 @@ const formUIReplace = `<div className="space-y-3">
               type="checkbox"
               checked={saveAsBeneficiary}
               onChange={(e) => setSaveAsBeneficiary(e.target.checked)}
-              className="h-3 w-3 rounded border-slate-300 text-[color:var(--heritage-navy)]"
+              className="h-3 w-3 rounded border-slate-300 text-(--heritage-navy)"
             />
             <Label htmlFor="saveAsBeneficiary" className="text-[11px] text-muted-foreground">
               Save this recipient to your address book
@@ -96,9 +96,9 @@ const savedCardReplace = `
                     onClick={() => handleSelect(b)}
                     className={\`w-full rounded-md border px-3 py-2 text-left text-xs transition \${
                       isActive
-                        ? "border-[color:var(--heritage-navy)] bg-soft-gold/10"
+                        ? "border-(--heritage-navy) bg-soft-gold/10"
                         : "border-slate-200 hover:border-soft-gold/60 hover:bg-slate-50"
-                    } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[color:var(--heritage-navy)] focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50\`}
+                    } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--heritage-navy) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50\`}
                     tabIndex={isActive ? 0 : -1}
                     onKeyDown={(event) =>
                       handleRecipientKeyDown(event, filteredSaved, index)

@@ -18,13 +18,13 @@ export function VisualCard({ name, number, expiry, cvc, type, scheme, frozen = f
 
     const getBackground = (type: string) => {
         switch (type) {
-            case 'gold': return 'bg-gradient-to-br from-[#D4AF7A] via-[#E5C596] to-[#B8941F] border-[#F9F7F4]/20';
-            case 'platinum': return 'bg-gradient-to-br from-[#E5E4E2] via-[#F4F4F4] to-[#B0B0B0] border-white/30';
+            case 'gold': return 'bg-linear-to-br from-[#D4AF7A] via-[#E5C596] to-[#B8941F] border-[#F9F7F4]/20';
+            case 'platinum': return 'bg-linear-to-br from-[#E5E4E2] via-[#F4F4F4] to-[#B0B0B0] border-white/30';
             case 'metal':
-            case 'credit': return 'bg-gradient-to-br from-[#2C2C2C] via-[#4A4A4A] to-[#1A1A1A] border-white/10 text-white';
+            case 'credit': return 'bg-linear-to-br from-[#2C2C2C] via-[#4A4A4A] to-[#1A1A1A] border-white/10 text-white';
             case 'standard':
-            case 'debit': return 'bg-gradient-to-br from-vintage-green to-vintage-green-dark border-white/20 text-white';
-            default: return 'bg-gradient-to-br from-vintage-green to-vintage-green-dark border-white/20 text-white';
+            case 'debit': return 'bg-linear-to-br from-pine-700 to-pine-800 border-white/20 text-white';
+            default: return 'bg-linear-to-br from-pine-700 to-pine-800 border-white/20 text-white';
         }
     }
 
@@ -52,8 +52,8 @@ export function VisualCard({ name, number, expiry, cvc, type, scheme, frozen = f
             onClick={onFlip}
         >
             <div className={cn(
-                "relative w-full aspect-[1.586/1] transition-all duration-700 [transform-style:preserve-3d]",
-                flipped ? "[transform:rotateY(180deg)]" : ""
+                "relative w-full aspect-[1.586/1] transition-all duration-700 transform-3d",
+                flipped ? "transform-[rotateY(180deg)]" : ""
             )}>
                 {/* Frozen overlay */}
                 {frozen && !flipped && (
@@ -66,21 +66,21 @@ export function VisualCard({ name, number, expiry, cvc, type, scheme, frozen = f
                 )}
                 {/* Front Face */}
                 <div className={cn(
-                    "absolute w-full h-full rounded-2xl p-6 shadow-2xl flex flex-col justify-between overflow-hidden border [backface-visibility:hidden]",
+                    "absolute w-full h-full rounded-2xl p-6 shadow-2xl flex flex-col justify-between overflow-hidden border backface-hidden",
                     getBackground(type),
                     getTextColor(type)
                 )}>
                     {/* Glossy Overlay Effect */}
-                    <div className="absolute top-0 left-0 w-full h-full bg-gradient-to-br from-white/20 to-transparent opacity-50 pointer-events-none" />
+                    <div className="absolute top-0 left-0 w-full h-full bg-linear-to-br from-white/20 to-transparent opacity-50 pointer-events-none" />
                     <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-3xl" />
 
                     {/* Header: Chip and Contactless */}
                     <div className="relative z-10 flex justify-between items-start">
                         <div className="w-12 h-9 bg-yellow-200/40 rounded-md border border-yellow-400/30 flex items-center justify-center overflow-hidden">
                             {/* Chip Detail simulation */}
-                            <div className="w-full h-[1px] bg-yellow-600/20 absolute top-1/2" />
-                            <div className="h-full w-[1px] bg-yellow-600/20 absolute left-1/3" />
-                            <div className="h-full w-[1px] bg-yellow-600/20 absolute right-1/3" />
+                            <div className="w-full h-px bg-yellow-600/20 absolute top-1/2" />
+                            <div className="h-full w-px bg-yellow-600/20 absolute left-1/3" />
+                            <div className="h-full w-px bg-yellow-600/20 absolute right-1/3" />
                         </div>
                         <Wifi className="w-6 h-6 opacity-80 rotate-90" />
                     </div>
@@ -123,7 +123,7 @@ export function VisualCard({ name, number, expiry, cvc, type, scheme, frozen = f
 
                 {/* Back Face */}
                 <div className={cn(
-                    "absolute w-full h-full rounded-2xl shadow-2xl overflow-hidden border [backface-visibility:hidden] [transform:rotateY(180deg)]",
+                    "absolute w-full h-full rounded-2xl shadow-2xl overflow-hidden border backface-hidden transform-[rotateY(180deg)]",
                     getBackground(type),
                     getTextColor(type)
                 )}>

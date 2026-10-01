@@ -18,7 +18,7 @@ export function StatCard({ title, value, icon, subtitle, trend, trendPositive }:
         {icon && <div className="text-vintage-gold">{icon}</div>}
       </div>
       <div className="mt-auto">
-        <p className="text-2xl font-bold text-charcoal">{value}</p>
+        <p className="text-2xl font-bold text-ink-900">{value}</p>
         {(subtitle || trend) && (
           <p className="text-xs mt-1 flex items-center gap-1 text-muted-foreground">
             {trend && (
@@ -47,7 +47,7 @@ export function AdminPageShell({ title, subtitle, children, stats, action }: Adm
     <div className="space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-charcoal font-playfair tracking-wide">{title}</h2>
+          <h2 className="text-2xl font-bold text-ink-900 font-display tracking-wide">{title}</h2>
           {subtitle && <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>}
         </div>
         {action && (

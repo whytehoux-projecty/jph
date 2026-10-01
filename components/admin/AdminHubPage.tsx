@@ -20,7 +20,7 @@ export function AdminHubPage({ title, subtitle, stats, links }: AdminHubPageProp
   return (
     <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-500 pb-12">
       <div>
-        <h2 className="text-2xl font-bold text-charcoal font-playfair tracking-wide">{title}</h2>
+        <h2 className="text-2xl font-bold text-ink-900 font-display tracking-wide">{title}</h2>
         <p className="text-sm text-muted-foreground mt-1">{subtitle}</p>
       </div>
 
@@ -33,7 +33,7 @@ export function AdminHubPage({ title, subtitle, stats, links }: AdminHubPageProp
                 {stat.icon && <div className="text-vintage-gold">{stat.icon}</div>}
               </div>
               <div className="mt-auto">
-                <p className="text-2xl font-bold text-charcoal">{stat.value}</p>
+                <p className="text-2xl font-bold text-ink-900">{stat.value}</p>
                 {(stat.subtitle || stat.trend) && (
                   <p className="text-xs mt-1 flex items-center gap-1 text-muted-foreground">
                     {stat.trend && (
@@ -51,7 +51,7 @@ export function AdminHubPage({ title, subtitle, stats, links }: AdminHubPageProp
       )}
 
       <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6">
-        <h3 className="text-lg font-semibold text-charcoal mb-4 border-b border-neutral-100 pb-4">Management Areas</h3>
+        <h3 className="text-lg font-semibold text-ink-900 mb-4 border-b border-neutral-100 pb-4">Management Areas</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {links.map((link) => (
             <Link 
@@ -63,7 +63,7 @@ export function AdminHubPage({ title, subtitle, stats, links }: AdminHubPageProp
                 {link.icon}
               </div>
               <div className="flex-1">
-                <h4 className="font-semibold text-charcoal flex items-center justify-between">
+                <h4 className="font-semibold text-ink-900 flex items-center justify-between">
                   {link.title}
                   <ChevronRight className="w-4 h-4 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity translate-x-[-10px] group-hover:translate-x-0" />
                 </h4>

@@ -142,7 +142,7 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
 
   return (
     <aside className={cn(
-      "bg-charcoal text-white flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out shrink-0",
+      "bg-ink-900 text-white flex flex-col h-full overflow-hidden transition-all duration-300 ease-in-out shrink-0",
       isCollapsed ? "w-[72px]" : "w-[280px]"
     )}>
       {/* Header */}
@@ -153,7 +153,7 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
         <div className={cn("flex items-center gap-3 overflow-hidden", isCollapsed && "hidden")}>
           <Landmark className="w-6 h-6 text-vintage-gold shrink-0" />
           <div className="truncate">
-            <h2 className="font-playfair font-bold text-lg tracking-wide truncate">heritagetrust</h2>
+            <h2 className="font-display font-bold text-lg tracking-wide truncate">heritagetrust</h2>
           </div>
         </div>
         
@@ -222,7 +222,7 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
 
                   {isCollapsed && totalBadges > 0 && (
                     <div className={cn(
-                      "absolute top-1 right-1 w-2.5 h-2.5 rounded-full border-2 border-charcoal",
+                      "absolute top-1 right-1 w-2.5 h-2.5 rounded-full border-2 border-ink-900",
                       hasUrgent ? "bg-red-500" : "bg-amber-500"
                     )} />
                   )}

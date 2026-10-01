@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import bcrypt from 'bcryptjs';
+import { encryptDeterministic } from '@/lib/encryption';
 
 export async function submitRegistrationForm(token: string, data: any) {
     const application = await prisma.accountApplication.findUnique({
@@ -22,7 +23,7 @@ export async function submitRegistrationForm(token: string, data: any) {
             data: {
                 fullLegalName: data.fullLegalName,
                 dateOfBirth: new Date(data.dateOfBirth),
-                ssnItin: data.ssnItin, // In real world, hash/encrypt this
+                ssnItin: encryptDeterministic(data.ssnItin), // encrypted
                 mothersMaidenName: data.mothersMaidenName,
                 
                 residentialAddress: data.residentialAddress,
@@ -36,7 +37,7 @@ export async function submitRegistrationForm(token: string, data: any) {
                 estimatedAnnualIncome: data.estimatedAnnualIncome,
                 
                 primaryIdType: data.primaryIdType,
-                idNumber: data.idNumber,
+                idNumber: encryptDeterministic(data.idNumber),
                 stateCountryOfIssuance: data.stateCountryOfIssuance,
                 issueDate: new Date(data.issueDate),
                 expirationDate: new Date(data.expirationDate),
@@ -50,8 +51,8 @@ export async function submitRegistrationForm(token: string, data: any) {
                 statementPreference: data.statementPreference,
                 
                 fundingMethod: data.fundingMethod,
-                externalAccountRoutingNumber: data.externalAccountRoutingNumber,
-                externalAccountNumber: data.externalAccountNumber,
+                externalAccountRoutingNumber: encryptDeterministic(data.externalAccountRoutingNumber),
+                externalAccountNumber: encryptDeterministic(data.externalAccountNumber),
                 initialDepositAmount: data.initialDepositAmount,
                 
                 w9Certification: data.w9Certification,

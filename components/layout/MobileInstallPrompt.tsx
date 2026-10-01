@@ -117,7 +117,7 @@ export function MobileInstallPrompt() {
       {/* Slide-out Header Notification */}
       <div
         className={cn(
-          "fixed top-0 left-0 w-full z-[100] bg-gradient-to-r from-[#1E4B35] to-[#2a6649] text-white shadow-lg transform transition-transform duration-500 ease-in-out",
+          "fixed top-0 left-0 w-full z-100 bg-linear-to-r from-[#1E4B35] to-[#2a6649] text-white shadow-lg transform transition-transform duration-500 ease-in-out",
           isVisible ? "translate-y-0" : "-translate-y-full",
         )}>
         <div className="container mx-auto px-4 py-3 flex items-center justify-between">

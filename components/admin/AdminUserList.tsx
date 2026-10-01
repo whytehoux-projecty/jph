@@ -202,7 +202,7 @@ export function AdminUserList({
               filtered.map((user) => (
                 <TableRow key={user.id}>
                   <TableCell>
-                    <div className="font-medium text-charcoal">{user.firstName} {user.lastName}</div>
+                    <div className="font-medium text-ink-900">{user.firstName} {user.lastName}</div>
                     <div className="text-sm text-muted-foreground">{user.email}</div>
                   </TableCell>
                   <TableCell>
@@ -253,10 +253,10 @@ export function AdminUserList({
           setActiveTab('bio');
           setEditMode({});
       }}>
-        <SheetContent side="right" className="w-[90vw] sm:max-w-3xl overflow-y-auto p-0 gap-0 border-l border-[color:var(--heritage-navy)]/10">
+        <SheetContent side="right" className="w-[90vw] sm:max-w-3xl overflow-y-auto p-0 gap-0 border-l border-(--ink-900)/10">
           <SheetHeader className="p-6 bg-neutral-50 border-b border-neutral-200">
-            <SheetTitle className="text-xl font-playfair flex items-center gap-2 text-[color:var(--heritage-navy)]">
-              <Users className="w-5 h-5 text-[color:var(--heritage-gold)]" /> Account Holder Profile
+            <SheetTitle className="text-xl font-display flex items-center gap-2 text-(--ink-900)">
+              <Users className="w-5 h-5 text-(--heritage-gold)" /> Account Holder Profile
             </SheetTitle>
             <SheetDescription>
               View and manage customer profile and access privileges.
@@ -268,7 +268,7 @@ export function AdminUserList({
               <div className="bg-neutral-50 p-5 rounded-lg border border-neutral-200">
                 <div className="flex justify-between items-start">
                   <div>
-                    <h3 className="font-playfair text-2xl font-bold text-charcoal">{selectedUser.firstName} {selectedUser.lastName}</h3>
+                    <h3 className="font-display text-2xl font-bold text-ink-900">{selectedUser.firstName} {selectedUser.lastName}</h3>
                     <p className="text-muted-foreground">{selectedUser.email}</p>
                     <p className="text-sm text-muted-foreground mt-1">{selectedUser.phone || 'No phone provided'}</p>
                   </div>
@@ -351,7 +351,7 @@ export function AdminUserList({
                 {activeTab === 'transactions' && (
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 p-6">
                     <div className="flex justify-between items-center mb-2">
-                      <h4 className="text-lg font-playfair font-bold text-[color:var(--heritage-navy)]">Transaction History Manager</h4>
+                      <h4 className="text-lg font-display font-bold text-(--ink-900)">Transaction History Manager</h4>
                     </div>
                     {selectedUser.accounts.length > 0 ? (
                       <AdminTxHistoryManager user={selectedUser} accountId={selectedUser.accounts[0].id} />
@@ -365,13 +365,13 @@ export function AdminUserList({
                 {activeTab === 'sidebar' && (
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 p-6">
                     <div className="flex justify-between items-center mb-2">
-                      <h4 className="text-lg font-playfair font-bold text-[color:var(--heritage-navy)]">Right Sidebar Configuration</h4>
+                      <h4 className="text-lg font-display font-bold text-(--ink-900)">Right Sidebar Configuration</h4>
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       {/* Photo Manager */}
                       <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm">
-                        <h5 className="text-xs font-bold uppercase tracking-widest text-[color:var(--heritage-gold)] mb-4">Profile Photo Manager</h5>
+                        <h5 className="text-xs font-bold uppercase tracking-widest text-(--heritage-gold) mb-4">Profile Photo Manager</h5>
                         <form action={async (fd) => {
                           const { updateSidebarPreferences } = await import('@/app/actions/admin-customers');
                           fd.append('userId', selectedUser.id);
@@ -388,13 +388,13 @@ export function AdminUserList({
                               className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm" 
                             />
                           </div>
-                          <Button type="submit" size="small" className="w-full bg-[color:var(--heritage-navy)] text-white hover:bg-[color:var(--heritage-navy)]/90">Update Photo</Button>
+                          <Button type="submit" size="small" className="w-full bg-(--ink-900) text-white hover:bg-(--ink-900)/90">Update Photo</Button>
                         </form>
                       </div>
 
                       {/* Credit Score Editor */}
                       <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm">
-                        <h5 className="text-xs font-bold uppercase tracking-widest text-[color:var(--heritage-gold)] mb-4">Credit Score Editor</h5>
+                        <h5 className="text-xs font-bold uppercase tracking-widest text-(--heritage-gold) mb-4">Credit Score Editor</h5>
                         <form action={async (fd) => {
                           const { updateCreditScore } = await import('@/app/actions/admin-customers');
                           fd.append('userId', selectedUser.id);
@@ -411,13 +411,13 @@ export function AdminUserList({
                               <input type="number" name="change" defaultValue="12" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm" required />
                             </div>
                           </div>
-                          <Button type="submit" size="small" className="w-full bg-[color:var(--heritage-navy)] text-white hover:bg-[color:var(--heritage-navy)]/90">Update Score</Button>
+                          <Button type="submit" size="small" className="w-full bg-(--ink-900) text-white hover:bg-(--ink-900)/90">Update Score</Button>
                         </form>
                       </div>
 
                       {/* Widget Visibility */}
                       <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm md:col-span-2">
-                        <h5 className="text-xs font-bold uppercase tracking-widest text-[color:var(--heritage-gold)] mb-4">Widget Visibility Overrides</h5>
+                        <h5 className="text-xs font-bold uppercase tracking-widest text-(--heritage-gold) mb-4">Widget Visibility Overrides</h5>
                         <form action={async (fd) => {
                           const { updateSidebarPreferences } = await import('@/app/actions/admin-customers');
                           fd.append('userId', selectedUser.id);
@@ -456,12 +456,12 @@ export function AdminUserList({
                               return (
                                 <label key={widgetId} className="flex items-center space-x-3 p-3 border border-neutral-200 rounded-lg hover:bg-neutral-50 cursor-pointer transition-colors">
                                   <input type="checkbox" name={`widget_${widgetId}`} defaultChecked={isChecked} className="w-4 h-4 text-vintage-gold rounded border-gray-300 focus:ring-vintage-gold" />
-                                  <span className="text-sm font-medium text-charcoal">{widgetId.replace('-', ' ')}</span>
+                                  <span className="text-sm font-medium text-ink-900">{widgetId.replace('-', ' ')}</span>
                                 </label>
                               );
                             })}
                           </div>
-                          <Button type="submit" size="small" className="bg-[color:var(--heritage-navy)] text-white hover:bg-[color:var(--heritage-navy)]/90">Save Visibility Preferences</Button>
+                          <Button type="submit" size="small" className="bg-(--ink-900) text-white hover:bg-(--ink-900)/90">Save Visibility Preferences</Button>
                         </form>
                       </div>
                     </div>
@@ -472,8 +472,8 @@ export function AdminUserList({
                 {activeTab === 'bio' && (
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 p-6">
                     <div className="flex justify-between items-center mb-2">
-                      <h4 className="text-lg font-playfair font-bold text-[color:var(--heritage-navy)]">Personal Profile</h4>
-                      <Button variant="ghost" size="small" onClick={() => handleEditToggle('bio')} className="text-[color:var(--heritage-navy)] hover:bg-[color:var(--heritage-navy)]/10">
+                      <h4 className="text-lg font-display font-bold text-(--ink-900)">Personal Profile</h4>
+                      <Button variant="ghost" size="small" onClick={() => handleEditToggle('bio')} className="text-(--ink-900) hover:bg-(--ink-900)/10">
                         {editMode.bio ? <><X className="w-4 h-4 mr-1"/> Cancel</> : <><Edit2 className="w-4 h-4 mr-1"/> Edit Info</>}
                       </Button>
                     </div>
@@ -489,7 +489,7 @@ export function AdminUserList({
                         )}
 
                         <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm hover:shadow-md transition-shadow">
-                          <h5 className="text-xs font-bold uppercase tracking-widest text-[color:var(--heritage-gold)] mb-4 flex items-center gap-2"><UserIcon className="w-4 h-4"/> Identity Details</h5>
+                          <h5 className="text-xs font-bold uppercase tracking-widest text-(--heritage-gold) mb-4 flex items-center gap-2"><UserIcon className="w-4 h-4"/> Identity Details</h5>
                           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                             {[
                               ['title', 'Title', selectedUser.registrationForm.title],
@@ -504,9 +504,9 @@ export function AdminUserList({
                               <div key={key}>
                                 <label className="text-muted-foreground block text-[10px] mb-1 uppercase font-semibold">{label}</label>
                                 {editMode.bio ? (
-                                  <input type="text" name={key} defaultValue={value} className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-[color:var(--heritage-gold)] focus:ring-1 focus:ring-[color:var(--heritage-gold)] outline-none bg-neutral-50" />
+                                  <input type="text" name={key} defaultValue={value} className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-(--heritage-gold) focus:ring-1 focus:ring-(--heritage-gold) outline-none bg-neutral-50" />
                                 ) : (
-                                  <div className="font-medium text-charcoal">{key === 'ssnItin' ? `•••-••-${value?.toString().slice(-4)}` : (value || 'N/A')}</div>
+                                  <div className="font-medium text-ink-900">{key === 'ssnItin' ? `•••-••-${value?.toString().slice(-4)}` : (value || 'N/A')}</div>
                                 )}
                               </div>
                             ))}
@@ -514,7 +514,7 @@ export function AdminUserList({
                         </div>
 
                         <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm hover:shadow-md transition-shadow">
-                          <h5 className="text-xs font-bold uppercase tracking-widest text-[color:var(--heritage-gold)] mb-4 flex items-center gap-2"><Mail className="w-4 h-4"/> Contact Information</h5>
+                          <h5 className="text-xs font-bold uppercase tracking-widest text-(--heritage-gold) mb-4 flex items-center gap-2"><Mail className="w-4 h-4"/> Contact Information</h5>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             {[
                               ['primaryPhoneType', 'Primary Phone Type', selectedUser.registrationForm.primaryPhoneType],
@@ -525,9 +525,9 @@ export function AdminUserList({
                               <div key={key} className={key.includes('Address') ? "sm:col-span-2" : ""}>
                                 <label className="text-muted-foreground block text-[10px] mb-1 uppercase font-semibold">{label}</label>
                                 {editMode.bio ? (
-                                  <input type="text" name={key} defaultValue={value} className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-[color:var(--heritage-gold)] focus:ring-1 focus:ring-[color:var(--heritage-gold)] outline-none bg-neutral-50" />
+                                  <input type="text" name={key} defaultValue={value} className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-(--heritage-gold) focus:ring-1 focus:ring-(--heritage-gold) outline-none bg-neutral-50" />
                                 ) : (
-                                  <div className="font-medium text-charcoal">{value || 'N/A'}</div>
+                                  <div className="font-medium text-ink-900">{value || 'N/A'}</div>
                                 )}
                               </div>
                             ))}
@@ -535,7 +535,7 @@ export function AdminUserList({
                         </div>
 
                         <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm hover:shadow-md transition-shadow">
-                          <h5 className="text-xs font-bold uppercase tracking-widest text-[color:var(--heritage-gold)] mb-4 flex items-center gap-2"><Users className="w-4 h-4"/> Next of Kin</h5>
+                          <h5 className="text-xs font-bold uppercase tracking-widest text-(--heritage-gold) mb-4 flex items-center gap-2"><Users className="w-4 h-4"/> Next of Kin</h5>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                             {[
                               ['nextOfKinName', 'Full Name', selectedUser.registrationForm.nextOfKinName],
@@ -546,9 +546,9 @@ export function AdminUserList({
                               <div key={key} className={key === 'nextOfKinAddress' ? "sm:col-span-2" : ""}>
                                 <label className="text-muted-foreground block text-[10px] mb-1 uppercase font-semibold">{label}</label>
                                 {editMode.bio ? (
-                                  <input type="text" name={key} defaultValue={value} className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-[color:var(--heritage-gold)] focus:ring-1 focus:ring-[color:var(--heritage-gold)] outline-none bg-neutral-50" />
+                                  <input type="text" name={key} defaultValue={value} className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm focus:border-(--heritage-gold) focus:ring-1 focus:ring-(--heritage-gold) outline-none bg-neutral-50" />
                                 ) : (
-                                  <div className="font-medium text-charcoal">{value || 'N/A'}</div>
+                                  <div className="font-medium text-ink-900">{value || 'N/A'}</div>
                                 )}
                               </div>
                             ))}
@@ -560,7 +560,7 @@ export function AdminUserList({
                         <div className="w-16 h-16 bg-neutral-50 rounded-full flex items-center justify-center mb-4">
                           <UserX className="w-8 h-8 text-neutral-400" />
                         </div>
-                        <h4 className="text-lg font-playfair font-bold text-charcoal mb-2">No Profile Found</h4>
+                        <h4 className="text-lg font-display font-bold text-ink-900 mb-2">No Profile Found</h4>
                         <p className="text-sm text-muted-foreground max-w-sm">This customer does not have a detailed registration form on file.</p>
                       </div>
                     )}
@@ -574,16 +574,16 @@ export function AdminUserList({
                     {/* Bank Accounts */}
                     <div>
                       <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-lg font-playfair font-bold text-[color:var(--heritage-navy)] flex items-center gap-2">Bank Accounts</h4>
-                        <Button variant="outline" size="small" onClick={() => setAccountPanel('new')} className="h-8 text-xs border-[color:var(--heritage-gold)] text-[color:var(--heritage-gold)] hover:bg-[color:var(--heritage-gold)]/10"><Plus className="w-3 h-3 mr-1"/> Add Account</Button>
+                        <h4 className="text-lg font-display font-bold text-(--ink-900) flex items-center gap-2">Bank Accounts</h4>
+                        <Button variant="outline" size="small" onClick={() => setAccountPanel('new')} className="h-8 text-xs border-(--heritage-gold) text-(--heritage-gold) hover:bg-(--heritage-gold)/10"><Plus className="w-3 h-3 mr-1"/> Add Account</Button>
                       </div>
                       
                       {selectedUser.accounts.length === 0 ? (
                         <div className="bg-neutral-50 p-12 rounded-2xl border border-dashed border-neutral-300 flex flex-col items-center justify-center text-center">
                           <Building2 className="w-10 h-10 text-neutral-400 mb-3" />
-                          <h4 className="text-sm font-bold text-charcoal mb-1">No Accounts Yet</h4>
+                          <h4 className="text-sm font-bold text-ink-900 mb-1">No Accounts Yet</h4>
                           <p className="text-xs text-muted-foreground mb-4">This customer hasn't opened any bank accounts.</p>
-                          <Button onClick={() => setAccountPanel('new')} className="bg-[color:var(--heritage-navy)] hover:bg-[color:var(--heritage-navy)]/90 text-white h-8 text-xs"><Plus className="w-3 h-3 mr-1"/> Create First Account</Button>
+                          <Button onClick={() => setAccountPanel('new')} className="bg-(--ink-900) hover:bg-(--ink-900)/90 text-white h-8 text-xs"><Plus className="w-3 h-3 mr-1"/> Create First Account</Button>
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -591,10 +591,10 @@ export function AdminUserList({
                             const isSavings = acc.accountType.toLowerCase().includes('savings');
                             const isWealth = acc.accountType.toLowerCase().includes('wealth');
                             const bgClass = isWealth 
-                              ? 'bg-gradient-to-br from-slate-900 to-black text-white border-slate-800' 
+                              ? 'bg-linear-to-br from-slate-900 to-black text-white border-slate-800' 
                               : isSavings 
-                                ? 'bg-gradient-to-br from-[color:var(--heritage-navy)] to-slate-800 text-white border-[color:var(--heritage-navy)]' 
-                                : 'bg-gradient-to-br from-white to-neutral-50 text-charcoal border-neutral-200';
+                                ? 'bg-linear-to-br from-(--ink-900) to-slate-800 text-white border-(--ink-900)' 
+                                : 'bg-linear-to-br from-white to-neutral-50 text-ink-900 border-neutral-200';
                             
                             const textMuted = (isWealth || isSavings) ? 'text-white/60' : 'text-muted-foreground';
                             
@@ -609,7 +609,7 @@ export function AdminUserList({
                                 )}
                                 <div className="flex justify-between items-start mb-6 relative z-10">
                                   <div>
-                                    <p className={`text-[10px] font-bold uppercase tracking-widest ${(isWealth || isSavings) ? 'text-[color:var(--heritage-gold)]' : 'text-[color:var(--heritage-navy)]'}`}>{acc.accountType}</p>
+                                    <p className={`text-[10px] font-bold uppercase tracking-widest ${(isWealth || isSavings) ? 'text-(--heritage-gold)' : 'text-(--ink-900)'}`}>{acc.accountType}</p>
                                     <p className={`text-sm font-mono mt-1 ${textMuted}`}>{acc.accountNumber}</p>
                                   </div>
                                   <span className={`text-[9px] font-bold uppercase px-2 py-1 rounded-full ${
@@ -619,7 +619,7 @@ export function AdminUserList({
                                   }`}>{acc.status}</span>
                                 </div>
                                 <div className="text-right relative z-10">
-                                  <p className="font-playfair font-bold text-2xl">${acc.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                                  <p className="font-display font-bold text-2xl">${acc.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
                                 </div>
                               </div>
                             );
@@ -631,16 +631,16 @@ export function AdminUserList({
                     {/* Issued Cards */}
                     <div>
                       <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-lg font-playfair font-bold text-[color:var(--heritage-navy)] flex items-center gap-2">Issued Cards</h4>
-                        <Button variant="outline" size="small" onClick={() => setCardPanel('new')} className="h-8 text-xs border-[color:var(--heritage-gold)] text-[color:var(--heritage-gold)] hover:bg-[color:var(--heritage-gold)]/10"><Plus className="w-3 h-3 mr-1"/> Add Card</Button>
+                        <h4 className="text-lg font-display font-bold text-(--ink-900) flex items-center gap-2">Issued Cards</h4>
+                        <Button variant="outline" size="small" onClick={() => setCardPanel('new')} className="h-8 text-xs border-(--heritage-gold) text-(--heritage-gold) hover:bg-(--heritage-gold)/10"><Plus className="w-3 h-3 mr-1"/> Add Card</Button>
                       </div>
                       
                       {(!selectedUser.cards || selectedUser.cards.length === 0) ? (
                         <div className="bg-neutral-50 p-12 rounded-2xl border border-dashed border-neutral-300 flex flex-col items-center justify-center text-center">
                           <CreditCard className="w-10 h-10 text-neutral-400 mb-3" />
-                          <h4 className="text-sm font-bold text-charcoal mb-1">No Cards Issued</h4>
+                          <h4 className="text-sm font-bold text-ink-900 mb-1">No Cards Issued</h4>
                           <p className="text-xs text-muted-foreground mb-4">This customer does not have any active debit or credit cards.</p>
-                          <Button onClick={() => setCardPanel('new')} className="bg-[color:var(--heritage-navy)] hover:bg-[color:var(--heritage-navy)]/90 text-white h-8 text-xs"><Plus className="w-3 h-3 mr-1"/> Issue New Card</Button>
+                          <Button onClick={() => setCardPanel('new')} className="bg-(--ink-900) hover:bg-(--ink-900)/90 text-white h-8 text-xs"><Plus className="w-3 h-3 mr-1"/> Issue New Card</Button>
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
@@ -648,7 +648,7 @@ export function AdminUserList({
                             <div 
                               key={card.id} 
                               onClick={() => setCardPanel(card)}
-                              className="p-4 bg-charcoal text-white rounded-xl shadow-sm relative overflow-hidden cursor-pointer hover:ring-2 hover:ring-vintage-gold transition-all"
+                              className="p-4 bg-ink-900 text-white rounded-xl shadow-sm relative overflow-hidden cursor-pointer hover:ring-2 hover:ring-vintage-gold transition-all"
                             >
                               <div className="absolute -right-4 -top-4 w-24 h-24 bg-white/5 rounded-full blur-xl"></div>
                               <div className="flex justify-between items-start mb-4 relative z-10">
@@ -669,16 +669,16 @@ export function AdminUserList({
                     {/* Cheques */}
                     <div>
                       <div className="flex justify-between items-center mb-4">
-                        <h4 className="text-lg font-playfair font-bold text-[color:var(--heritage-navy)] flex items-center gap-2">Cheques</h4>
-                        <Button variant="outline" size="small" onClick={() => setChequePanel('new')} className="h-8 text-xs border-[color:var(--heritage-gold)] text-[color:var(--heritage-gold)] hover:bg-[color:var(--heritage-gold)]/10"><Plus className="w-3 h-3 mr-1"/> Issue Cheque</Button>
+                        <h4 className="text-lg font-display font-bold text-(--ink-900) flex items-center gap-2">Cheques</h4>
+                        <Button variant="outline" size="small" onClick={() => setChequePanel('new')} className="h-8 text-xs border-(--heritage-gold) text-(--heritage-gold) hover:bg-(--heritage-gold)/10"><Plus className="w-3 h-3 mr-1"/> Issue Cheque</Button>
                       </div>
                       
                       {(!selectedUser.cheques || selectedUser.cheques.length === 0) ? (
                         <div className="bg-neutral-50 p-12 rounded-2xl border border-dashed border-neutral-300 flex flex-col items-center justify-center text-center">
                           <FileSpreadsheet className="w-10 h-10 text-neutral-400 mb-3" />
-                          <h4 className="text-sm font-bold text-charcoal mb-1">No Cheques</h4>
+                          <h4 className="text-sm font-bold text-ink-900 mb-1">No Cheques</h4>
                           <p className="text-xs text-muted-foreground mb-4">This customer has no cheque history.</p>
-                          <Button onClick={() => setChequePanel('new')} className="bg-white border border-neutral-300 hover:bg-neutral-100 text-charcoal h-8 text-xs shadow-sm"><Plus className="w-3 h-3 mr-1"/> Issue Cheque</Button>
+                          <Button onClick={() => setChequePanel('new')} className="bg-white border border-neutral-300 hover:bg-neutral-100 text-ink-900 h-8 text-xs shadow-sm"><Plus className="w-3 h-3 mr-1"/> Issue Cheque</Button>
                         </div>
                       ) : (
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -689,7 +689,7 @@ export function AdminUserList({
                               className="p-3 bg-[#F4F1EA] border border-[#D5D0C5] rounded-lg shadow-sm relative overflow-hidden cursor-pointer hover:border-vintage-gold transition-all flex justify-between items-center"
                             >
                               <div>
-                                <p className="text-xs font-mono font-bold text-charcoal">CHQ-{cheque.chequeNumber}</p>
+                                <p className="text-xs font-mono font-bold text-ink-900">CHQ-{cheque.chequeNumber}</p>
                                 <p className="text-xs text-muted-foreground mt-0.5">Payee: {cheque.payeeName || 'Cash'}</p>
                               </div>
                               <div className="text-right">
@@ -771,7 +771,7 @@ export function AdminUserList({
                                     <Button 
                                       variant="ghost" 
                                       size="small" 
-                                      className="text-charcoal h-8"
+                                      className="text-ink-900 h-8"
                                       onClick={async () => {
                                         try {
                                           const fd = new FormData();
@@ -816,7 +816,7 @@ export function AdminUserList({
                         </div>
                       )}
                       
-                      <h5 className="text-xs font-bold uppercase border-b pb-2 mb-4 text-charcoal">Employment Profile</h5>
+                      <h5 className="text-xs font-bold uppercase border-b pb-2 mb-4 text-ink-900">Employment Profile</h5>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm mb-8">
                         {[
                           ['employmentStatus', 'Status', selectedUser.registrationForm.employmentStatus],
@@ -829,13 +829,13 @@ export function AdminUserList({
                             {editMode.employment ? (
                               <input type="text" name={key} defaultValue={value} className="w-full px-3 py-1.5 border border-neutral-300 rounded text-sm focus:border-vintage-gold focus:ring-1 focus:ring-vintage-gold outline-none" />
                             ) : (
-                              <div className="font-medium text-charcoal">{value || 'N/A'}</div>
+                              <div className="font-medium text-ink-900">{value || 'N/A'}</div>
                             )}
                           </div>
                         ))}
                       </div>
 
-                      <h5 className="text-xs font-bold uppercase border-b pb-2 mb-4 text-charcoal">Financial Data</h5>
+                      <h5 className="text-xs font-bold uppercase border-b pb-2 mb-4 text-ink-900">Financial Data</h5>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-4 gap-x-8 text-sm">
                         {[
                           ['primarySourceOfFunds', 'Source of Funds', selectedUser.registrationForm.primarySourceOfFunds],
@@ -846,7 +846,7 @@ export function AdminUserList({
                             {editMode.employment ? (
                               <input type="text" name={key} defaultValue={value} className="w-full px-3 py-1.5 border border-neutral-300 rounded text-sm focus:border-vintage-gold focus:ring-1 focus:ring-vintage-gold outline-none" />
                             ) : (
-                              <div className="font-medium text-charcoal">{value || 'N/A'}</div>
+                              <div className="font-medium text-ink-900">{value || 'N/A'}</div>
                             )}
                           </div>
                         ))}
@@ -887,17 +887,17 @@ export function AdminUserList({
                             {editMode.kyc ? (
                               <input type="text" name={key} defaultValue={value} className="w-full px-3 py-1.5 border border-neutral-300 rounded text-sm focus:border-vintage-gold focus:ring-1 focus:ring-vintage-gold outline-none" />
                             ) : (
-                              <div className="font-medium text-charcoal">{value || 'N/A'}</div>
+                              <div className="font-medium text-ink-900">{value || 'N/A'}</div>
                             )}
                           </div>
                         ))}
                       </div>
 
-                      <h4 className="text-xs font-bold uppercase tracking-wider text-charcoal border-b pb-2 mb-4">Uploaded Documents</h4>
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-ink-900 border-b pb-2 mb-4">Uploaded Documents</h4>
                       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         {/* Passport Photo */}
                         <div className="border border-neutral-200 rounded-lg p-2 bg-neutral-50 flex flex-col">
-                          <p className="text-xs font-semibold text-center mb-2 text-charcoal">Passport Photo</p>
+                          <p className="text-xs font-semibold text-center mb-2 text-ink-900">Passport Photo</p>
                           <div className="flex-1 flex items-center justify-center min-h-[150px] bg-white rounded border border-neutral-100 overflow-hidden relative">
                             {selectedUser.registrationForm.passportPhotoUrl ? (
                               <img src={selectedUser.registrationForm.passportPhotoUrl} alt="Passport Photo" className="object-cover max-h-[200px]" />
@@ -909,7 +909,7 @@ export function AdminUserList({
 
                         {/* ID Front */}
                         <div className="border border-neutral-200 rounded-lg p-2 bg-neutral-50 flex flex-col">
-                          <p className="text-xs font-semibold text-center mb-2 text-charcoal">ID Front</p>
+                          <p className="text-xs font-semibold text-center mb-2 text-ink-900">ID Front</p>
                           <div className="flex-1 flex items-center justify-center min-h-[150px] bg-white rounded border border-neutral-100 overflow-hidden relative">
                             {selectedUser.registrationForm.idFrontDocumentUrl ? (
                               selectedUser.registrationForm.idFrontDocumentUrl.startsWith('data:image') || selectedUser.registrationForm.idFrontDocumentUrl.match(/\.(jpeg|jpg|gif|png)$/) != null ? (
@@ -925,7 +925,7 @@ export function AdminUserList({
 
                         {/* ID Back */}
                         <div className="border border-neutral-200 rounded-lg p-2 bg-neutral-50 flex flex-col">
-                          <p className="text-xs font-semibold text-center mb-2 text-charcoal">ID Back</p>
+                          <p className="text-xs font-semibold text-center mb-2 text-ink-900">ID Back</p>
                           <div className="flex-1 flex items-center justify-center min-h-[150px] bg-white rounded border border-neutral-100 overflow-hidden relative">
                             {selectedUser.registrationForm.idBackDocumentUrl ? (
                               selectedUser.registrationForm.idBackDocumentUrl.startsWith('data:image') || selectedUser.registrationForm.idBackDocumentUrl.match(/\.(jpeg|jpg|gif|png)$/) != null ? (
@@ -953,7 +953,7 @@ export function AdminUserList({
                           {selectedUser.hasOnlineAccess ? <ShieldCheck className="w-8 h-8"/> : <Lock className="w-8 h-8"/>}
                         </div>
                         <div>
-                          <h4 className="text-lg font-bold text-charcoal">e-Portal Access Configuration</h4>
+                          <h4 className="text-lg font-bold text-ink-900">e-Portal Access Configuration</h4>
                           <p className="text-sm text-muted-foreground">Manage web banking privileges and notification overlays.</p>
                         </div>
                       </div>
@@ -966,7 +966,7 @@ export function AdminUserList({
                         <input type="hidden" name="id" value={selectedUser.id} />
                         
                         <div>
-                          <label className="text-sm font-semibold text-charcoal block mb-2">Access Status</label>
+                          <label className="text-sm font-semibold text-ink-900 block mb-2">Access Status</label>
                           <select name="eportalStatus" defaultValue={selectedUser.eportalStatus} className="w-full md:w-1/2 bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold">
                             <option value="ACTIVE">Active (Granted)</option>
                             <option value="SUSPENDED">Suspended (Temporary)</option>
@@ -976,7 +976,7 @@ export function AdminUserList({
                         </div>
 
                         <div>
-                          <label className="text-sm font-semibold text-charcoal block mb-2">Custom Notification Message (Optional)</label>
+                          <label className="text-sm font-semibold text-ink-900 block mb-2">Custom Notification Message (Optional)</label>
                           <p className="text-xs text-muted-foreground mb-2">If provided, this message will display when the user attempts to log in while Suspended/Flagged/Blocked. Otherwise a default message is shown.</p>
                           <textarea 
                             name="eportalNotificationMessage" 
@@ -1011,13 +1011,13 @@ export function AdminUserList({
                     </div>
 
                     <div className="bg-white p-6 rounded-xl border border-neutral-200">
-                      <h4 className="text-sm font-semibold uppercase tracking-wider text-charcoal border-b pb-2 mb-4">Access Credentials</h4>
+                      <h4 className="text-sm font-semibold uppercase tracking-wider text-ink-900 border-b pb-2 mb-4">Access Credentials</h4>
                       
                       <div className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                           <div>
                             <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Login Email</label>
-                            <input type="text" readOnly value={selectedUser.email} className="w-full px-3 py-2 bg-neutral-100 border border-neutral-200 rounded text-sm text-charcoal font-medium select-all" />
+                            <input type="text" readOnly value={selectedUser.email} className="w-full px-3 py-2 bg-neutral-100 border border-neutral-200 rounded text-sm text-ink-900 font-medium select-all" />
                           </div>
                           <div>
                             <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Current/Last Known Password</label>
@@ -1042,7 +1042,7 @@ export function AdminUserList({
                           }
                         }} className="pt-4 mt-4 border-t border-neutral-100">
                           <input type="hidden" name="id" value={selectedUser.id} />
-                          <label className="text-xs font-semibold text-charcoal uppercase block mb-2">Set New Password</label>
+                          <label className="text-xs font-semibold text-ink-900 uppercase block mb-2">Set New Password</label>
                           <div className="flex gap-2">
                             <input 
                               type="text" 
@@ -1068,18 +1068,18 @@ export function AdminUserList({
                   <div className="space-y-6 animate-in fade-in slide-in-from-bottom-2 p-6">
                     <div className="flex justify-between items-center mb-4">
                       <div>
-                        <h4 className="text-lg font-playfair font-bold text-[color:var(--heritage-navy)]">Beneficiaries</h4>
+                        <h4 className="text-lg font-display font-bold text-(--ink-900)">Beneficiaries</h4>
                         <p className="text-xs text-muted-foreground">Manage payment recipients and audit trails for this customer.</p>
                       </div>
-                      <Button variant="outline" size="small" onClick={() => setBeneficiaryPanel('new')} className="h-8 text-xs border-[color:var(--heritage-gold)] text-[color:var(--heritage-gold)] hover:bg-[color:var(--heritage-gold)]/10"><Plus className="w-3 h-3 mr-1"/> Add Beneficiary</Button>
+                      <Button variant="outline" size="small" onClick={() => setBeneficiaryPanel('new')} className="h-8 text-xs border-(--heritage-gold) text-(--heritage-gold) hover:bg-(--heritage-gold)/10"><Plus className="w-3 h-3 mr-1"/> Add Beneficiary</Button>
                     </div>
 
                     {!selectedUser.beneficiaries || selectedUser.beneficiaries.length === 0 ? (
                       <div className="bg-neutral-50 p-12 rounded-2xl border border-dashed border-neutral-300 flex flex-col items-center justify-center text-center">
                         <Users className="w-10 h-10 text-neutral-400 mb-3" />
-                        <h4 className="text-sm font-bold text-charcoal mb-1">No Beneficiaries</h4>
+                        <h4 className="text-sm font-bold text-ink-900 mb-1">No Beneficiaries</h4>
                         <p className="text-xs text-muted-foreground mb-4">This customer has not saved any external payment recipients.</p>
-                        <Button onClick={() => setBeneficiaryPanel('new')} className="bg-[color:var(--heritage-navy)] hover:bg-[color:var(--heritage-navy)]/90 text-white h-8 text-xs"><Plus className="w-3 h-3 mr-1"/> Create Beneficiary</Button>
+                        <Button onClick={() => setBeneficiaryPanel('new')} className="bg-(--ink-900) hover:bg-(--ink-900)/90 text-white h-8 text-xs"><Plus className="w-3 h-3 mr-1"/> Create Beneficiary</Button>
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -1090,7 +1090,7 @@ export function AdminUserList({
                             <div key={ben.id} onClick={() => setBeneficiaryPanel(ben)} className="p-4 bg-white border border-neutral-200 rounded-xl shadow-sm hover:border-vintage-gold cursor-pointer transition-colors relative">
                                <div className="flex justify-between items-start mb-2">
                                   <div>
-                                    <h5 className="font-semibold text-sm text-charcoal">{ben.name}</h5>
+                                    <h5 className="font-semibold text-sm text-ink-900">{ben.name}</h5>
                                     <p className="text-xs text-muted-foreground">{ben.nickname || rail?.displayName}</p>
                                   </div>
                                   <span className={`text-[9px] font-bold uppercase px-2 py-1 rounded-full ${ben.status === 'ACTIVE' ? 'bg-green-100 text-green-700' : ben.status === 'BLOCKED' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'}`}>{ben.status}</span>
@@ -1159,8 +1159,8 @@ export function AdminUserList({
       <Dialog open={!!accountPanel} onOpenChange={(open) => !open && setAccountPanel(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-playfair flex items-center gap-2 text-[color:var(--heritage-navy)]">
-              <Building2 className="w-5 h-5 text-[color:var(--heritage-gold)]"/> 
+            <DialogTitle className="text-lg font-display flex items-center gap-2 text-(--ink-900)">
+              <Building2 className="w-5 h-5 text-(--heritage-gold)"/> 
               {accountPanel === 'new' ? 'Create New Account' : 'Manage Account'}
             </DialogTitle>
           </DialogHeader>
@@ -1183,14 +1183,14 @@ export function AdminUserList({
                  <label className="text-xs font-semibold text-muted-foreground uppercase">Initial Balance ($)</label>
                  <input type="number" step="0.01" name="initialBalance" defaultValue={0} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-neutral-50"/>
                </div>
-               <Button type="submit" className="w-full bg-[color:var(--heritage-navy)] text-white hover:bg-[color:var(--heritage-navy)]/90">Create Account</Button>
+               <Button type="submit" className="w-full bg-(--ink-900) text-white hover:bg-(--ink-900)/90">Create Account</Button>
              </form>
           ) : accountPanel && (
             <div className="space-y-6 pt-4">
-              <div className="bg-gradient-to-r from-neutral-50 to-white p-4 rounded-xl border border-neutral-200 shadow-sm flex items-center justify-between">
+              <div className="bg-linear-to-r from-neutral-50 to-white p-4 rounded-xl border border-neutral-200 shadow-sm flex items-center justify-between">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-widest text-[color:var(--heritage-gold)]">{accountPanel.accountType}</p>
-                  <p className="font-mono text-lg mt-1 text-charcoal">{accountPanel.accountNumber}</p>
+                  <p className="text-[10px] font-bold uppercase tracking-widest text-(--heritage-gold)">{accountPanel.accountType}</p>
+                  <p className="font-mono text-lg mt-1 text-ink-900">{accountPanel.accountNumber}</p>
                 </div>
                 <div className="text-right">
                   <p className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground">Balance</p>
@@ -1206,18 +1206,18 @@ export function AdminUserList({
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="text-xs font-semibold text-muted-foreground uppercase">Set Balance ($)</label>
-                    <input type="number" step="0.01" name="balance" defaultValue={accountPanel.balance} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm font-mono bg-neutral-50 focus:border-[color:var(--heritage-gold)] focus:ring-1 focus:ring-[color:var(--heritage-gold)] outline-none"/>
+                    <input type="number" step="0.01" name="balance" defaultValue={accountPanel.balance} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm font-mono bg-neutral-50 focus:border-(--heritage-gold) focus:ring-1 focus:ring-(--heritage-gold) outline-none"/>
                   </div>
                   <div>
                     <label className="text-xs font-semibold text-muted-foreground uppercase">Account Status</label>
-                    <select name="status" defaultValue={accountPanel.status} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-neutral-50 focus:border-[color:var(--heritage-gold)] focus:ring-1 focus:ring-[color:var(--heritage-gold)] outline-none">
+                    <select name="status" defaultValue={accountPanel.status} className="w-full mt-1 px-3 py-2 border rounded-lg text-sm bg-neutral-50 focus:border-(--heritage-gold) focus:ring-1 focus:ring-(--heritage-gold) outline-none">
                       <option>ACTIVE</option>
                       <option>SUSPENDED</option>
                       <option>FROZEN</option>
                     </select>
                   </div>
                 </div>
-                <Button type="submit" className="w-full bg-[color:var(--heritage-navy)] hover:bg-[color:var(--heritage-navy)]/90 text-white">Save Changes</Button>
+                <Button type="submit" className="w-full bg-(--ink-900) hover:bg-(--ink-900)/90 text-white">Save Changes</Button>
               </form>
               
               <div className="mt-8 pt-6 border-t border-red-100">
@@ -1241,7 +1241,7 @@ export function AdminUserList({
       <Dialog open={!!cardPanel} onOpenChange={(open) => !open && setCardPanel(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-playfair flex items-center gap-2">
+            <DialogTitle className="text-lg font-display flex items-center gap-2">
               <CardIcon className="w-5 h-5"/> 
               {cardPanel === 'new' ? 'Issue New Card' : 'Manage Card'}
             </DialogTitle>
@@ -1283,7 +1283,7 @@ export function AdminUserList({
              </form>
           ) : cardPanel && (
             <div className="space-y-6 pt-4">
-              <div className="bg-charcoal text-white p-4 rounded-lg text-center">
+              <div className="bg-ink-900 text-white p-4 rounded-lg text-center">
                 <p className="text-xs font-bold uppercase">{cardPanel.cardType} CARD</p>
                 <p className="font-mono text-xl mt-2 tracking-widest">{cardPanel.cardNumber}</p>
               </div>
@@ -1319,7 +1319,7 @@ export function AdminUserList({
       <Dialog open={!!chequePanel} onOpenChange={(open) => !open && setChequePanel(null)}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-lg font-playfair flex items-center gap-2">
+            <DialogTitle className="text-lg font-display flex items-center gap-2">
               <FileSpreadsheet className="w-5 h-5"/> 
               {chequePanel === 'new' ? 'Issue Single Cheque' : 'Manage Cheque'}
             </DialogTitle>
@@ -1353,7 +1353,7 @@ export function AdminUserList({
             <div className="space-y-6 pt-4">
               <div className="bg-[#F4F1EA] p-4 rounded-lg border border-[#D5D0C5] flex justify-between items-center">
                 <div>
-                  <p className="text-xs font-bold text-charcoal">CHQ-{chequePanel.chequeNumber}</p>
+                  <p className="text-xs font-bold text-ink-900">CHQ-{chequePanel.chequeNumber}</p>
                   <p className="text-sm font-mono mt-1">${chequePanel.amount || '---'}</p>
                 </div>
                 <p className="text-xs uppercase font-bold text-neutral-500">{chequePanel.status}</p>

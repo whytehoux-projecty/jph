@@ -46,7 +46,7 @@ export async function getBudgets() {
           category: "Shopping",
           limit: 400,
           spent: 150,
-          color: "bg-[color:var(--heritage-gold)]",
+          color: "bg-(--heritage-gold)",
           month: monthKey,
         }
       })

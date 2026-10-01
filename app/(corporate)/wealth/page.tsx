@@ -108,7 +108,7 @@ export default function WealthManagementPage() {
                                 <ul className="space-y-3">
                                     {features.map((f) => (
                                         <li key={f} className="flex items-start gap-3 text-body text-ink-700">
-                                            <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                            <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
                                             {f}
                                         </li>
                                     ))}
@@ -149,10 +149,10 @@ export default function WealthManagementPage() {
                                         </p>
                                         <p className="text-small text-ink-500 mt-1">Minimum investable assets</p>
                                     </div>
-                                    <ul className="space-y-3 flex-grow mb-8">
+                                    <ul className="space-y-3 grow mb-8">
                                         {tier.features.map((f) => (
                                             <li key={f} className="flex items-start gap-3 text-body text-ink-700">
-                                                <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                                <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
                                                 {f}
                                             </li>
                                         ))}

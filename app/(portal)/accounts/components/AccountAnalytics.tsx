@@ -26,7 +26,7 @@ export function AccountAnalytics({
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Total Liquid Assets
             </p>
-            <p className="text-3xl font-mono lining-nums tabular-nums text-charcoal mt-2">
+            <p className="text-3xl font-mono lining-nums tabular-nums text-ink-900 mt-2">
               <Money amount={totalLiquidAssets} currency={currency} />
             </p>
           </CardContent>
@@ -37,7 +37,7 @@ export function AccountAnalytics({
             <p className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
               Active Accounts
             </p>
-            <p className="text-3xl font-mono lining-nums tabular-nums text-charcoal mt-2">
+            <p className="text-3xl font-mono lining-nums tabular-nums text-ink-900 mt-2">
               {activeAccountsCount}
             </p>
           </CardContent>

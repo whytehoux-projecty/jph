@@ -21,13 +21,13 @@ export default async function TransfersQueuePage() {
         <div className="flex gap-2">
           <Link 
             href="/admin/ebank/transfers/settings" 
-            className="flex items-center gap-2 px-4 py-2 bg-white text-charcoal border border-neutral-200 rounded-md text-sm font-medium hover:bg-neutral-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-white text-ink-900 border border-neutral-200 rounded-md text-sm font-medium hover:bg-neutral-50 transition-colors"
           >
             Method Settings
           </Link>
           <Link 
             href="/admin/ebank/transfers/history" 
-            className="flex items-center gap-2 px-4 py-2 bg-charcoal text-white rounded-md text-sm font-medium hover:bg-charcoal/90 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-ink-900 text-white rounded-md text-sm font-medium hover:bg-ink-900/90 transition-colors"
           >
             View History
           </Link>

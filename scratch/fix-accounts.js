@@ -42,14 +42,14 @@ content = content.replace(
         />`
 );
 
-// 5. Update Header Plus & Refresh Icons to stroke-[2]
+// 5. Update Header Plus & Refresh Icons to stroke-2
 content = content.replace(
   /<RefreshCw\s*className={`w-4 h-4 mr-2 \${isLoading \? "animate-spin" : ""}`}\s*\/>/g,
-  '<RefreshCw className={`w-4 h-4 mr-2 stroke-[2] ${isLoading ? "animate-spin" : ""}`} />'
+  '<RefreshCw className={`w-4 h-4 mr-2 stroke-2 ${isLoading ? "animate-spin" : ""}`} />'
 );
 content = content.replace(
   '<Plus className="w-4 h-4 mr-2" />',
-  '<Plus className="w-4 h-4 mr-2 stroke-[2]" />'
+  '<Plus className="w-4 h-4 mr-2 stroke-2" />'
 );
 
 // 6. Gate AccountAnalytics and Filter Bar behind hasAccounts

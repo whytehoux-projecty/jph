@@ -93,14 +93,14 @@ export function RightSidebar({ isOpen, onToggle, profile }: RightSidebarProps) {
             <div className="flex flex-col items-center gap-5 mb-8 pt-4 animate-fade-in-up">
               <div className="relative group cursor-pointer">
                 {/* Premium Animated Gradient Ring */}
-                <div className="absolute -inset-2 rounded-full bg-gradient-to-tr from-amber-200 via-yellow-400 to-orange-300 opacity-60 blur-md group-hover:opacity-100 transition duration-700 animate-pulse-slow"></div>
+                <div className="absolute -inset-2 rounded-full bg-linear-to-tr from-amber-200 via-yellow-400 to-orange-300 opacity-60 blur-md group-hover:opacity-100 transition duration-700 animate-pulse-slow"></div>
                 
-                <Avatar className="relative h-32 w-32 border-[4px] border-white/90 shadow-2xl rounded-full transition-transform duration-500 group-hover:scale-[1.03]">
+                <Avatar className="relative h-32 w-32 border-4 border-white/90 shadow-2xl rounded-full transition-transform duration-500 group-hover:scale-[1.03]">
                   <AvatarImage
                     src={avatarSrc}
                     className="object-cover"
                   />
-                  <AvatarFallback className="rounded-full text-4xl bg-gradient-to-br from-slate-50 to-slate-200 text-slate-800 font-playfair font-semibold shadow-inner">
+                  <AvatarFallback className="rounded-full text-4xl bg-linear-to-br from-slate-50 to-slate-200 text-slate-800 font-display font-semibold shadow-inner">
                     {initials}
                   </AvatarFallback>
                 </Avatar>
@@ -113,13 +113,13 @@ export function RightSidebar({ isOpen, onToggle, profile }: RightSidebarProps) {
               </div>
               
               <div className="text-center space-y-1.5">
-                <h3 className="font-playfair font-extrabold text-2xl text-slate-900 tracking-tight">
+                <h3 className="font-display font-extrabold text-2xl text-slate-900 tracking-tight">
                   {fullName}
                 </h3>
                 <div className="flex items-center justify-center gap-2">
                   <Badge
                     variant="outline"
-                    className="text-amber-700 border-amber-200/60 bg-gradient-to-r from-amber-50 to-amber-100/50 shadow-sm font-semibold tracking-wider text-[10px] px-3 py-1 rounded-full uppercase">
+                    className="text-amber-700 border-amber-200/60 bg-linear-to-r from-amber-50 to-amber-100/50 shadow-sm font-semibold tracking-wider text-[10px] px-3 py-1 rounded-full uppercase">
                     <Sparkles className="w-3 h-3 mr-1 inline-block text-amber-500" />
                     {tierLabel}
                   </Badge>
@@ -170,7 +170,7 @@ export function RightSidebar({ isOpen, onToggle, profile }: RightSidebarProps) {
                       <VintageIcon
                         icon={service.icon}
                         size="sm"
-                        variant="charcoal"
+                        variant="ink-900"
                       />
                     </div>
 
@@ -191,15 +191,15 @@ export function RightSidebar({ isOpen, onToggle, profile }: RightSidebarProps) {
 
           {/* Premium Promo */}
           {showPromo && (
-            <div className="mt-8 p-6 rounded-2xl bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black text-white relative overflow-hidden group border border-slate-700/50 shadow-2xl animate-fade-in-up">
+            <div className="mt-8 p-6 rounded-2xl bg-[radial-gradient(ellipse_at_top_right,var(--tw-gradient-stops))] from-slate-800 via-slate-900 to-black text-white relative overflow-hidden group border border-slate-700/50 shadow-2xl animate-fade-in-up">
                <div className="absolute top-0 right-0 p-4 opacity-10 transform translate-x-4 -translate-y-4 group-hover:scale-110 group-hover:rotate-12 transition-all duration-700 ease-out">
                  <ShieldCheck className="w-24 h-24" />
                </div>
                
                {/* Glassmorphism shine effect */}
-               <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
+               <div className="absolute inset-0 bg-linear-to-br from-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" />
 
-              <h4 className="font-playfair font-bold text-lg mb-1.5 flex items-center gap-2 text-white/95 relative z-10 tracking-tight">
+              <h4 className="font-display font-bold text-lg mb-1.5 flex items-center gap-2 text-white/95 relative z-10 tracking-tight">
                 Upgrade to Metal
               </h4>
               <p className="text-xs text-slate-300/90 mb-5 font-medium leading-relaxed relative z-10">

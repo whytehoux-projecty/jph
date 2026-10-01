@@ -81,7 +81,7 @@ export function VirtualCardGenerator({ physicalCardId }: { physicalCardId: strin
                 <div className="flex justify-between items-center">
                     <div>
                         <CardTitle className="flex items-center gap-2">
-                            <CreditCard className="w-5 h-5 text-vintage-green" />
+                            <CreditCard className="w-5 h-5 text-pine-700" />
                             Virtual Cards
                             <Badge variant="outline" className="text-[10px] font-normal">Beta Preview</Badge>
                         </CardTitle>
@@ -106,7 +106,7 @@ export function VirtualCardGenerator({ physicalCardId }: { physicalCardId: strin
                                         key={type.type}
                                         onClick={() => !isCreating && createVirtualCard(type.type)}
                                         className={cn(
-                                            "cursor-pointer rounded-xl border p-4 transition-all hover:shadow-md hover:border-vintage-green/50 flex flex-col gap-3 group",
+                                            "cursor-pointer rounded-xl border p-4 transition-all hover:shadow-md hover:border-pine-700/50 flex flex-col gap-3 group",
                                             isCreating ? "opacity-50 pointer-events-none" : ""
                                         )}
                                     >
@@ -114,7 +114,7 @@ export function VirtualCardGenerator({ physicalCardId }: { physicalCardId: strin
                                             <type.icon size={20} />
                                         </div>
                                         <div>
-                                            <h4 className="font-semibold text-charcoal">{type.title}</h4>
+                                            <h4 className="font-semibold text-ink-900">{type.title}</h4>
                                             <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
                                                 {type.description}
                                             </p>
@@ -133,7 +133,7 @@ export function VirtualCardGenerator({ physicalCardId }: { physicalCardId: strin
                             <div className="mx-auto w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center mb-3">
                                 <CreditCard className="w-6 h-6 text-gray-400" />
                             </div>
-                            <h3 className="text-sm font-medium text-charcoal">No Virtual Cards</h3>
+                            <h3 className="text-sm font-medium text-ink-900">No Virtual Cards</h3>
                             <p className="text-xs text-muted-foreground mt-1 max-w-[200px] mx-auto">
                                 Generate a virtual card to protect your real card details online.
                             </p>
@@ -151,13 +151,13 @@ export function VirtualCardGenerator({ physicalCardId }: { physicalCardId: strin
                                         </div>
                                         <div>
                                             <div className="flex items-center gap-2">
-                                                <p className="font-medium text-charcoal text-sm">{card.typeName}</p>
+                                                <p className="font-medium text-ink-900 text-sm">{card.typeName}</p>
                                                 <Badge variant="outline" className="text-[10px] h-5 px-1.5 font-normal text-muted-foreground">
                                                     Active
                                                 </Badge>
                                             </div>
                                             <div className="flex items-center gap-2 mt-0.5">
-                                                <p className="font-mono text-xs text-charcoal font-semibold">•••• {card.last4}</p>
+                                                <p className="font-mono text-xs text-ink-900 font-semibold">•••• {card.last4}</p>
                                                 <span className="text-gray-300 text-[10px]">•</span>
                                                 <p className="text-xs text-muted-foreground">Expires {card.expiryDate}</p>
                                             </div>
@@ -166,7 +166,7 @@ export function VirtualCardGenerator({ physicalCardId }: { physicalCardId: strin
                                     <div className="flex items-center gap-3">
                                         <div className="text-right hidden sm:block">
                                             <p className="text-xs text-muted-foreground">Spent</p>
-                                            <p className="text-sm font-medium text-charcoal">${card.amountUsed.toFixed(2)}</p>
+                                            <p className="text-sm font-medium text-ink-900">${card.amountUsed.toFixed(2)}</p>
                                         </div>
                                         <Button 
                                             variant="ghost" 

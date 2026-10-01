@@ -22,7 +22,7 @@ export default async function RegistrationFormPage({ params }: { params: Promise
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
                         </svg>
                     </div>
-                    <h1 className="text-2xl font-playfair font-bold text-neutral-900">Application Already Executed</h1>
+                    <h1 className="text-2xl font-display font-bold text-neutral-900">Application Already Executed</h1>
                     <p className="text-neutral-600 text-sm leading-relaxed">
                         This official registration form has already been completed and submitted for verification. This single-use link is no longer active.
                     </p>

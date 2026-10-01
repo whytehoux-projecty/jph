@@ -82,8 +82,8 @@ export function NotificationCenter({ onClick }: { onClick?: () => void }) {
           <Bell className="h-5 w-5" />
           {unreadCount > 0 && (
             <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-[color:var(--heritage-gold)] opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-[color:var(--heritage-gold)] border border-white" />
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-(--heritage-gold) opacity-75" />
+              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-(--heritage-gold) border border-white" />
             </span>
           )}
         </Button>
@@ -91,11 +91,11 @@ export function NotificationCenter({ onClick }: { onClick?: () => void }) {
       <PopoverContent
         align="end"
         sideOffset={8}
-        className="w-80 sm:w-96 p-0 rounded-md shadow-xl border border-[color:var(--heritage-navy)]/20 bg-white text-charcoal z-50"
+        className="w-80 sm:w-96 p-0 rounded-md shadow-xl border border-(--ink-900)/20 bg-white text-ink-900 z-50"
       >
         <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/60">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-sm text-[color:var(--heritage-navy)] font-playfair">
+            <h3 className="font-semibold text-sm text-(--ink-900) font-display">
               Notifications
             </h3>
             {unreadCount > 0 && (
@@ -108,7 +108,7 @@ export function NotificationCenter({ onClick }: { onClick?: () => void }) {
             <button
               onClick={handleMarkAllAsRead}
               disabled={isLoading}
-              className="text-xs text-[color:var(--heritage-navy)] hover:text-[color:var(--heritage-gold)] font-medium flex items-center gap-1 transition-colors disabled:opacity-50"
+              className="text-xs text-(--ink-900) hover:text-(--heritage-gold) font-medium flex items-center gap-1 transition-colors disabled:opacity-50"
             >
               <CheckCheck className="h-3.5 w-3.5" />
               Mark all read
@@ -133,7 +133,7 @@ export function NotificationCenter({ onClick }: { onClick?: () => void }) {
                 className={cn(
                   "p-3.5 flex gap-3 transition-colors cursor-pointer",
                   !n.isRead
-                    ? "bg-amber-50/40 hover:bg-amber-50/70 border-l-2 border-[color:var(--heritage-gold)]"
+                    ? "bg-amber-50/40 hover:bg-amber-50/70 border-l-2 border-(--heritage-gold)"
                     : "hover:bg-gray-50/80 border-l-2 border-transparent opacity-80"
                 )}
               >

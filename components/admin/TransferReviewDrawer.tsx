@@ -105,19 +105,19 @@ export function TransferReviewDrawer({
   return (
     <>
       <div 
-        className="fixed inset-0 bg-charcoal/40 backdrop-blur-sm z-40" 
+        className="fixed inset-0 bg-ink-900/40 backdrop-blur-sm z-40" 
         onClick={onClose}
       />
       <div className="fixed inset-y-0 right-0 w-full max-w-xl bg-white shadow-2xl z-50 flex flex-col animate-in slide-in-from-right">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-neutral-200">
           <div>
-            <h2 className="text-xl font-playfair font-bold text-charcoal flex items-center gap-2">
+            <h2 className="text-xl font-display font-bold text-ink-900 flex items-center gap-2">
               <ArrowRightLeft className="w-5 h-5 text-vintage-gold" />
               Transfer Review
             </h2>
             <p className="text-sm text-muted-foreground mt-1">
-              Reference: <span className="font-mono text-charcoal">{tx.reference}</span>
+              Reference: <span className="font-mono text-ink-900">{tx.reference}</span>
             </p>
           </div>
           <button 
@@ -135,13 +135,13 @@ export function TransferReviewDrawer({
           <section>
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Customer Information</h3>
             <div className="bg-neutral-50 p-4 rounded-xl border border-neutral-200 flex items-start gap-4">
-              <div className="w-10 h-10 bg-charcoal text-white rounded-full flex items-center justify-center font-bold">
+              <div className="w-10 h-10 bg-ink-900 text-white rounded-full flex items-center justify-center font-bold">
                 {tx.account.user.firstName[0]}{tx.account.user.lastName[0]}
               </div>
               <div>
-                <p className="font-semibold text-charcoal">{tx.account.user.firstName} {tx.account.user.lastName}</p>
+                <p className="font-semibold text-ink-900">{tx.account.user.firstName} {tx.account.user.lastName}</p>
                 <p className="text-sm text-muted-foreground">{tx.account.user.email}</p>
-                <p className="text-sm font-mono mt-1 text-charcoal">From Account: {tx.account.accountNumber}</p>
+                <p className="text-sm font-mono mt-1 text-ink-900">From Account: {tx.account.accountNumber}</p>
               </div>
             </div>
           </section>
@@ -153,7 +153,7 @@ export function TransferReviewDrawer({
               <div className="flex justify-between items-end border-b border-neutral-100 pb-4">
                 <div>
                   <p className="text-sm text-muted-foreground mb-1">Requested Amount</p>
-                  <p className="text-3xl font-playfair font-bold text-charcoal tabular-nums">
+                  <p className="text-3xl font-display font-bold text-ink-900 tabular-nums">
                     ${tx.amount.toFixed(2)} <span className="text-sm text-muted-foreground font-sans font-normal uppercase">{tx.currency}</span>
                   </p>
                 </div>
@@ -178,7 +178,7 @@ export function TransferReviewDrawer({
             <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-3">Admin Controls</h3>
             <div className="space-y-4">
               <div>
-                <label className="block text-sm font-medium text-charcoal mb-1">
+                <label className="block text-sm font-medium text-ink-900 mb-1">
                   Modify Approved Amount (Optional)
                 </label>
                 <div className="relative">
@@ -186,7 +186,7 @@ export function TransferReviewDrawer({
                   <input 
                     type="number" 
                     step="0.01"
-                    className="w-full pl-8 pr-4 py-2 border border-neutral-300 rounded-md text-charcoal focus:ring-vintage-gold focus:border-vintage-gold"
+                    className="w-full pl-8 pr-4 py-2 border border-neutral-300 rounded-md text-ink-900 focus:ring-vintage-gold focus:border-vintage-gold"
                     value={modifiedAmount}
                     onChange={(e) => setModifiedAmount(e.target.value)}
                   />
@@ -195,11 +195,11 @@ export function TransferReviewDrawer({
               </div>
 
               <div>
-                <label className="block text-sm font-medium text-charcoal mb-1">
+                <label className="block text-sm font-medium text-ink-900 mb-1">
                   Internal Admin Note (Hidden from user)
                 </label>
                 <textarea 
-                  className="w-full p-3 border border-neutral-300 rounded-md text-charcoal focus:ring-vintage-gold focus:border-vintage-gold"
+                  className="w-full p-3 border border-neutral-300 rounded-md text-ink-900 focus:ring-vintage-gold focus:border-vintage-gold"
                   rows={2}
                   placeholder="E.g. Verified via phone call at 10:30 AM"
                   value={adminNote}
@@ -270,7 +270,7 @@ function DetailItem({ label, value, isCode }: { label: string, value: string | u
   return (
     <div>
       <p className="text-xs text-muted-foreground mb-1">{label}</p>
-      <p className={`text-sm text-charcoal ${isCode ? "font-mono bg-neutral-100 px-2 py-1 rounded" : "font-medium"}`}>
+      <p className={`text-sm text-ink-900 ${isCode ? "font-mono bg-neutral-100 px-2 py-1 rounded" : "font-medium"}`}>
         {value}
       </p>
     </div>

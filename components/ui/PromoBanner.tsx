@@ -14,12 +14,12 @@ interface PromoBannerProps {
 
 export function PromoBanner({ title, body, ctaLabel, onCtaClick, onDismiss, className }: PromoBannerProps) {
   return (
-    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-soft-gold/30 bg-soft-gold/10 px-5 py-4", className)}>
+    <div className={cn("flex flex-col sm:flex-row sm:items-center justify-between gap-4 rounded-xl border border-vermilion-600/30 bg-vermilion-600/10 px-5 py-4", className)}>
       <div>
-        <p className="text-[11px] font-semibold uppercase tracking-wider text-[color:var(--heritage-navy)]">
+        <p className="text-[11px] font-semibold uppercase tracking-wider text-ink-900">
           {title}
         </p>
-        <p className="text-sm text-charcoal/80 mt-1">
+        <p className="text-sm text-ink-900/80 mt-1">
           {body}
         </p>
       </div>
@@ -27,14 +27,14 @@ export function PromoBanner({ title, body, ctaLabel, onCtaClick, onDismiss, clas
         <Button
           variant="outline"
           size="small"
-          className="h-9 border-[color:var(--heritage-navy)]/40 text-[color:var(--heritage-navy)] text-sm font-medium hover:bg-[color:var(--heritage-navy)] hover:text-white transition-colors"
+          className="h-9 border-ink-900/40 text-ink-900 text-sm font-medium hover:bg-ink-900 hover:text-white transition-colors"
           onClick={onCtaClick}>
           {ctaLabel}
         </Button>
         <button
           type="button"
           onClick={onDismiss}
-          className="text-sm text-muted-foreground hover:text-charcoal font-medium underline-offset-4 hover:underline transition-all">
+          className="text-sm text-muted-foreground hover:text-ink-900 font-medium underline-offset-4 hover:underline transition-all">
           Dismiss
         </button>
       </div>

@@ -99,7 +99,7 @@ export default function OnboardingPage() {
                     <div className="w-16 h-16 bg-vintage-gold/10 rounded-full flex items-center justify-center mx-auto mb-4">
                         <ShieldCheck className="w-8 h-8 text-vintage-gold" />
                     </div>
-                    <CardTitle className="text-2xl font-playfair text-charcoal">
+                    <CardTitle className="text-2xl font-display text-ink-900">
                         Welcome to Heritage Vault
                     </CardTitle>
                     <CardDescription>
@@ -128,7 +128,7 @@ export default function OnboardingPage() {
                     <div className="min-h-[300px]">
                         {currentStep === 1 && (
                             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
-                                <h3 className="text-lg font-semibold text-charcoal mb-4">Step 1: Set Permanent Password</h3>
+                                <h3 className="text-lg font-semibold text-ink-900 mb-4">Step 1: Set Permanent Password</h3>
                                 <p className="text-sm text-muted-foreground mb-4">
                                     Your temporary password has expired. Please create a new, secure password.
                                 </p>
@@ -150,7 +150,7 @@ export default function OnboardingPage() {
                                 />
 
                                 <div className="p-4 bg-gray-50 rounded-lg text-sm space-y-2 border border-gray-100">
-                                    <p className="font-semibold text-charcoal">Password Requirements:</p>
+                                    <p className="font-semibold text-ink-900">Password Requirements:</p>
                                     <ul className="grid grid-cols-2 gap-2 text-xs">
                                         <li className={`flex items-center gap-2 ${passwordRules.length ? 'text-green-600' : 'text-gray-500'}`}>
                                             <CheckCircle className="w-3 h-3" /> 8+ characters
@@ -174,7 +174,7 @@ export default function OnboardingPage() {
 
                         {currentStep === 2 && (
                             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
-                                <h3 className="text-lg font-semibold text-charcoal mb-4">Step 2: Transaction PIN</h3>
+                                <h3 className="text-lg font-semibold text-ink-900 mb-4">Step 2: Transaction PIN</h3>
                                 <p className="text-sm text-muted-foreground mb-4">
                                     Set up a 4 to 6 digit PIN. This PIN will be required to authorize transfers and sensitive actions.
                                 </p>
@@ -199,7 +199,7 @@ export default function OnboardingPage() {
 
                         {currentStep === 3 && (
                             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-500">
-                                <h3 className="text-lg font-semibold text-charcoal mb-4">Step 3: Digital Features</h3>
+                                <h3 className="text-lg font-semibold text-ink-900 mb-4">Step 3: Digital Features</h3>
                                 <p className="text-sm text-muted-foreground mb-4">
                                     Enhance your banking experience with our modern digital features.
                                 </p>
@@ -209,7 +209,7 @@ export default function OnboardingPage() {
                                         <Wallet className="w-6 h-6" />
                                     </div>
                                     <div>
-                                        <h4 className="font-semibold text-charcoal">Enable Digital Coin Wallet</h4>
+                                        <h4 className="font-semibold text-ink-900">Enable Digital Coin Wallet</h4>
                                         <p className="text-sm text-muted-foreground mt-1">
                                             Activate secure wallets for USDC and USDT to seamlessly manage and transfer digital assets alongside your fiat accounts.
                                         </p>

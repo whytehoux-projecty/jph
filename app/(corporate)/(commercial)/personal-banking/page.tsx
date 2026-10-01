@@ -53,13 +53,13 @@ export default function PersonalBankingPage() {
                                 </Button>
                             </div>
                         </div>
-                        <div className="animate-fade-in-up animate-delay-200 relative aspect-[4/3] w-full rounded border border-paper-300 bg-paper-50 overflow-hidden shadow-sm">
+                        <div className="animate-fade-in-up animate-delay-200 relative aspect-4/3 w-full rounded border border-paper-300 bg-paper-50 overflow-hidden shadow-sm">
                             {/* Vault App Screenshot Mock */}
                             <div className="absolute inset-x-8 -bottom-12 top-8 rounded-t-xl bg-ink-900 border-[6px] border-ink-900 overflow-hidden shadow-2xl flex flex-col">
                                 <div className="h-6 bg-ink-900 w-full flex items-center justify-center shrink-0">
                                     <div className="w-16 h-1.5 rounded-full bg-ink-700" />
                                 </div>
-                                <div className="flex-grow bg-paper-100 p-4">
+                                <div className="grow bg-paper-100 p-4">
                                     <div className="flex justify-between items-center mb-6">
                                         <div className="w-8 h-8 rounded-full bg-vermilion-600" />
                                         <div className="w-24 h-4 rounded bg-paper-200" />
@@ -124,7 +124,7 @@ export default function PersonalBankingPage() {
                                 'FDIC insured up to $250,000',
                             ].map((feature) => (
                                 <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
                                     {feature}
                                 </li>
                             ))}
@@ -155,7 +155,7 @@ export default function PersonalBankingPage() {
                                 'FDIC insured up to $250,000',
                             ].map((feature) => (
                                 <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
                                     {feature}
                                 </li>
                             ))}
@@ -186,7 +186,7 @@ export default function PersonalBankingPage() {
                                 'EMV chip + virtual card for Heritage Vault',
                             ].map((feature) => (
                                 <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
                                     {feature}
                                 </li>
                             ))}
@@ -218,7 +218,7 @@ export default function PersonalBankingPage() {
                                 'Relationship rate discount for Heritage Vault clients',
                             ].map((feature) => (
                                 <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
                                     {feature}
                                 </li>
                             ))}
@@ -243,7 +243,7 @@ export default function PersonalBankingPage() {
                                 'Dedicated mortgage advisors to guide you from application to closing',
                             ].map((feature) => (
                                 <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
                                     {feature}
                                 </li>
                             ))}

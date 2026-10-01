@@ -75,7 +75,7 @@ export function CardLimitsControl({
     iconColor?: string;
   }
 
-  const LimitSlider = ({ label, sublabel, value, max, step = 100, field, icon: Icon, iconColor = "text-charcoal/60 bg-gray-50" }: SliderProps) => {
+  const LimitSlider = ({ label, sublabel, value, max, step = 100, field, icon: Icon, iconColor = "text-ink-900/60 bg-gray-50" }: SliderProps) => {
     const pct = Math.round((value / max) * 100);
     return (
       <div className="space-y-2.5 pt-1">
@@ -85,12 +85,12 @@ export function CardLimitsControl({
               <Icon size={15} />
             </div>
             <div>
-              <p className="text-sm font-medium text-charcoal leading-none">{label}</p>
+              <p className="text-sm font-medium text-ink-900 leading-none">{label}</p>
               {sublabel && <p className="text-[11px] text-muted-foreground mt-0.5">{sublabel}</p>}
             </div>
           </div>
           <div className="text-right">
-            <span className="text-base font-bold text-vintage-green font-mono">
+            <span className="text-base font-bold text-pine-700 font-mono">
               ${value.toLocaleString()}
             </span>
             <p className="text-[10px] text-muted-foreground text-right">{pct}% of max</p>
@@ -106,7 +106,7 @@ export function CardLimitsControl({
             step={step}
             value={value}
             onChange={(e) => handleLimitChange(field, parseInt(e.target.value))}
-            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-vintage-green focus:outline-none focus:ring-2 focus:ring-vintage-green/20"
+            className="w-full h-2 bg-gray-200 rounded-lg appearance-none cursor-pointer accent-pine-700 focus:outline-none focus:ring-2 focus:ring-pine-700/20"
           />
           <div className="flex justify-between text-[10px] text-muted-foreground font-mono">
             <span>$0</span>
@@ -124,7 +124,7 @@ export function CardLimitsControl({
         <div className="flex justify-between items-start">
           <div>
             <CardTitle className="flex items-center gap-2">
-              <Shield className="w-5 h-5 text-vintage-green" />
+              <Shield className="w-5 h-5 text-pine-700" />
               Spending Limits
             </CardTitle>
             <CardDescription>
@@ -172,7 +172,7 @@ export function CardLimitsControl({
         <div className="pt-3 flex items-start gap-3 bg-blue-50/50 rounded-lg p-3 border border-blue-100">
           <Building2 className="w-4 h-4 text-blue-500 mt-0.5 shrink-0" />
           <div>
-            <p className="text-xs font-medium text-charcoal">ATM Withdrawal Limit</p>
+            <p className="text-xs font-medium text-ink-900">ATM Withdrawal Limit</p>
             <p className="text-[11px] text-muted-foreground mt-0.5">
               ATM limits are set at the branch level. Visit any branch or call us to adjust your daily ATM allowance.
             </p>

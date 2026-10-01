@@ -39,14 +39,14 @@ export default async function AdminLayout({ children }: { children: React.ReactN
             </div>
           </div>
           <div className="flex items-center gap-4">
-            <button className="relative p-2 text-muted-foreground hover:text-charcoal transition-colors hover:bg-neutral-100 rounded-full">
+            <button className="relative p-2 text-muted-foreground hover:text-ink-900 transition-colors hover:bg-neutral-100 rounded-full">
               <Bell className="w-5 h-5" />
               {totalNotifications > 0 && (
                 <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full border border-white"></span>
               )}
             </button>
             <div className="h-6 w-px bg-neutral-200 hidden sm:block"></div>
-            <div className="flex items-center gap-2 text-sm font-medium text-charcoal">
+            <div className="flex items-center gap-2 text-sm font-medium text-ink-900">
               <UserCircle className="w-8 h-8 text-muted-foreground" />
               <span className="hidden sm:inline-block">{adminName}</span>
             </div>

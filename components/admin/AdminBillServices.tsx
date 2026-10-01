@@ -148,13 +148,13 @@ export function AdminBillServices({
           onClick={() => setActiveTab('payees')}
           className={`flex items-center gap-2 px-5 py-3 font-medium text-sm border-b-2 transition-colors ${
             activeTab === 'payees'
-              ? 'border-vintage-gold text-charcoal font-semibold'
-              : 'border-transparent text-muted-foreground hover:text-charcoal'
+              ? 'border-vintage-gold text-ink-900 font-semibold'
+              : 'border-transparent text-muted-foreground hover:text-ink-900'
           }`}
         >
           <Building2 className="w-4 h-4" />
           Service Providers (Payees)
-          <span className="ml-1.5 px-2 py-0.5 rounded-full text-xs bg-neutral-100 text-charcoal font-bold">
+          <span className="ml-1.5 px-2 py-0.5 rounded-full text-xs bg-neutral-100 text-ink-900 font-bold">
             {payees.length}
           </span>
         </button>
@@ -162,13 +162,13 @@ export function AdminBillServices({
           onClick={() => setActiveTab('transactions')}
           className={`flex items-center gap-2 px-5 py-3 font-medium text-sm border-b-2 transition-colors ${
             activeTab === 'transactions'
-              ? 'border-vintage-gold text-charcoal font-semibold'
-              : 'border-transparent text-muted-foreground hover:text-charcoal'
+              ? 'border-vintage-gold text-ink-900 font-semibold'
+              : 'border-transparent text-muted-foreground hover:text-ink-900'
           }`}
         >
           <ReceiptText className="w-4 h-4" />
           Payment Transactions & Approvals
-          <span className="ml-1.5 px-2 py-0.5 rounded-full text-xs bg-neutral-100 text-charcoal font-bold">
+          <span className="ml-1.5 px-2 py-0.5 rounded-full text-xs bg-neutral-100 text-ink-900 font-bold">
             {bills.length}
           </span>
         </button>
@@ -238,19 +238,19 @@ export function AdminBillServices({
                 ) : (
                   filteredPayees.map((p) => (
                     <TableRow key={p.id}>
-                      <TableCell className="font-semibold text-charcoal flex items-center gap-2">
+                      <TableCell className="font-semibold text-ink-900 flex items-center gap-2">
                         <Building2 className="w-4 h-4 text-muted-foreground" />
                         {p.name}
                       </TableCell>
                       <TableCell>
-                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-charcoal border border-neutral-200">
+                        <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-neutral-100 text-ink-900 border border-neutral-200">
                           {getCategoryIcon(p.category)}
                           {p.category}
                         </span>
                       </TableCell>
                       <TableCell className="font-mono text-sm">{p.accountNumber}</TableCell>
                       <TableCell className="text-sm">
-                        <span className="font-medium text-charcoal">{p.user.firstName} {p.user.lastName}</span>
+                        <span className="font-medium text-ink-900">{p.user.firstName} {p.user.lastName}</span>
                         <span className="block text-xs text-muted-foreground">{p.user.email}</span>
                       </TableCell>
                       <TableCell className="text-sm uppercase font-mono">{p.country}</TableCell>
@@ -333,17 +333,17 @@ export function AdminBillServices({
                 ) : (
                   filteredBills.map((b) => (
                     <TableRow key={b.id}>
-                      <TableCell className="font-semibold text-charcoal">
+                      <TableCell className="font-semibold text-ink-900">
                         {b.payee.name}
                         <span className="block text-xs text-muted-foreground">{b.payee.category}</span>
                       </TableCell>
                       <TableCell>
-                        <span className="font-medium text-charcoal">
+                        <span className="font-medium text-ink-900">
                           {b.account.user.firstName} {b.account.user.lastName}
                         </span>
                       </TableCell>
                       <TableCell className="font-mono text-sm">{b.account.accountNumber}</TableCell>
-                      <TableCell className="font-bold text-charcoal">
+                      <TableCell className="font-bold text-ink-900">
                         ${b.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </TableCell>
                       <TableCell>
@@ -415,7 +415,7 @@ export function AdminBillServices({
       <Dialog open={isAddPayeeOpen} onOpenChange={setIsAddPayeeOpen}>
         <DialogContent className="max-w-md">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-charcoal">
+            <DialogTitle className="flex items-center gap-2 text-ink-900">
               <Building2 className="w-5 h-5 text-vintage-gold" />
               Add Service Provider / Payee
             </DialogTitle>
@@ -432,7 +432,7 @@ export function AdminBillServices({
             className="space-y-4 mt-2"
           >
             <div>
-              <label className="text-xs font-semibold text-charcoal block mb-1">
+              <label className="text-xs font-semibold text-ink-900 block mb-1">
                 Provider / Payee Name *
               </label>
               <input
@@ -445,7 +445,7 @@ export function AdminBillServices({
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-charcoal block mb-1">
+              <label className="text-xs font-semibold text-ink-900 block mb-1">
                 Account / Biller Identifier *
               </label>
               <input
@@ -459,7 +459,7 @@ export function AdminBillServices({
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-charcoal block mb-1">
+                <label className="text-xs font-semibold text-ink-900 block mb-1">
                   Category
                 </label>
                 <select
@@ -477,7 +477,7 @@ export function AdminBillServices({
               </div>
 
               <div>
-                <label className="text-xs font-semibold text-charcoal block mb-1">
+                <label className="text-xs font-semibold text-ink-900 block mb-1">
                   Country
                 </label>
                 <input
@@ -490,7 +490,7 @@ export function AdminBillServices({
             </div>
 
             <div>
-              <label className="text-xs font-semibold text-charcoal block mb-1">
+              <label className="text-xs font-semibold text-ink-900 block mb-1">
                 Assign to Customer Profile
               </label>
               <select
@@ -526,7 +526,7 @@ export function AdminBillServices({
           {selectedBill && (
             <div>
               <DialogHeader>
-                <DialogTitle className="flex items-center gap-2 text-charcoal">
+                <DialogTitle className="flex items-center gap-2 text-ink-900">
                   <ReceiptText className="w-5 h-5 text-vintage-gold" />
                   Bill Payment Review
                 </DialogTitle>
@@ -539,29 +539,29 @@ export function AdminBillServices({
                 <div className="bg-neutral-50 p-4 rounded-lg space-y-2 border border-neutral-100">
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Payee Name:</span>
-                    <span className="font-semibold text-charcoal">{selectedBill.payee.name}</span>
+                    <span className="font-semibold text-ink-900">{selectedBill.payee.name}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Category:</span>
-                    <span className="font-medium text-charcoal">{selectedBill.payee.category}</span>
+                    <span className="font-medium text-ink-900">{selectedBill.payee.category}</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Payee Account:</span>
-                    <span className="font-mono text-charcoal">{selectedBill.payee.accountNumber}</span>
+                    <span className="font-mono text-ink-900">{selectedBill.payee.accountNumber}</span>
                   </div>
                   <div className="flex justify-between border-t border-neutral-200 pt-2">
                     <span className="text-muted-foreground">Customer:</span>
-                    <span className="font-semibold text-charcoal">
+                    <span className="font-semibold text-ink-900">
                       {selectedBill.account.user.firstName} {selectedBill.account.user.lastName}
                     </span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-muted-foreground">Debiting Account:</span>
-                    <span className="font-mono text-charcoal">{selectedBill.account.accountNumber}</span>
+                    <span className="font-mono text-ink-900">{selectedBill.account.accountNumber}</span>
                   </div>
                   <div className="flex justify-between border-t border-neutral-200 pt-2">
                     <span className="text-muted-foreground font-semibold">Payment Amount:</span>
-                    <span className="font-bold text-lg text-charcoal">
+                    <span className="font-bold text-lg text-ink-900">
                       ${selectedBill.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                     </span>
                   </div>

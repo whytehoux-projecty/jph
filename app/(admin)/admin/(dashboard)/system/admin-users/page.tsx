@@ -27,7 +27,7 @@ export default async function AdminUsersPage() {
             <tbody className="divide-y divide-neutral-100">
               {admins.map((admin) => (
                 <tr key={admin.id} className="hover:bg-neutral-50/50">
-                  <td className="px-4 py-3 font-medium text-charcoal">{admin.firstName} {admin.lastName}</td>
+                  <td className="px-4 py-3 font-medium text-ink-900">{admin.firstName} {admin.lastName}</td>
                   <td className="px-4 py-3 text-muted-foreground">{admin.email}</td>
                   <td className="px-4 py-3">
                     <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">

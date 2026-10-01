@@ -86,7 +86,7 @@ export function CardSpendingInsights({ cardId }: { cardId?: string }) {
     <Card className="shadow-sm">
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-medium flex items-center gap-2">
-          <PieChart className="w-4 h-4 text-vintage-green" />
+          <PieChart className="w-4 h-4 text-pine-700" />
           Spending Insights
         </CardTitle>
       </CardHeader>
@@ -98,7 +98,7 @@ export function CardSpendingInsights({ cardId }: { cardId?: string }) {
             {loading ? (
               <Skeleton className="h-6 w-20" />
             ) : (
-              <p className="text-xl font-bold font-mono text-charcoal">
+              <p className="text-xl font-bold font-mono text-ink-900">
                 ${thisMonth.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
               </p>
             )}
@@ -109,7 +109,7 @@ export function CardSpendingInsights({ cardId }: { cardId?: string }) {
               <Skeleton className="h-6 w-20" />
             ) : (
               <div className="flex items-center gap-1.5">
-                <p className="text-xl font-bold font-mono text-charcoal">
+                <p className="text-xl font-bold font-mono text-ink-900">
                   {changePct > 0 ? "+" : ""}{changePct}%
                 </p>
                 {changePct > 0 ? (
@@ -151,12 +151,12 @@ export function CardSpendingInsights({ cardId }: { cardId?: string }) {
                   <div key={cat.name} className="space-y-1.5">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
-                        <div className={cn("w-5 h-5 rounded-full flex items-center justify-center flex-shrink-0", cfg.bg)}>
+                        <div className={cn("w-5 h-5 rounded-full flex items-center justify-center shrink-0", cfg.bg)}>
                           <Icon className={cn("w-3 h-3", cfg.text)} />
                         </div>
-                        <span className="text-xs font-medium text-charcoal">{cat.name}</span>
+                        <span className="text-xs font-medium text-ink-900">{cat.name}</span>
                       </div>
-                      <span className="text-xs font-mono font-semibold text-charcoal">
+                      <span className="text-xs font-mono font-semibold text-ink-900">
                         ${cat.amount.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                       </span>
                     </div>

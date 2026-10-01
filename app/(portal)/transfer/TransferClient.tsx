@@ -591,7 +591,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
       <div className="w-full max-w-7xl mx-auto space-y-8 animate-fade-in-up">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-playfair font-bold text-charcoal">
+            <h1 className="text-3xl font-display font-bold text-ink-900">
               Money Transfer
             </h1>
             <p className="text-muted-foreground mt-1">
@@ -605,7 +605,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Main Transfer Form */}
-          <Card className="md:col-span-2 border-none shadow-vintage-md">
+          <Card className="md:col-span-2 border-none shadow-md">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <VintageIcon icon={ArrowLeftRight} variant="gold" size="sm" />
@@ -623,15 +623,15 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                 )}
 
                 {isReviewMode && (
-                  <div className="p-4 rounded-lg border border-vintage-green/30 bg-emerald-50/60 text-sm space-y-3 animate-fade-in-up">
+                  <div className="p-4 rounded-lg border border-pine-700/30 bg-emerald-50/60 text-sm space-y-3 animate-fade-in-up">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium text-charcoal">
+                      <span className="font-medium text-ink-900">
                         Review transfer
                       </span>
                       <button
                         type="button"
                         onClick={() => setIsReviewMode(false)}
-                        className="text-xs text-vintage-green hover:underline">
+                        className="text-xs text-pine-700 hover:underline">
                         Edit details
                       </button>
                     </div>
@@ -689,7 +689,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                       </div>
                       {isPinStep && (
                         <div className="mt-3 pt-3 border-t border-emerald-200 space-y-2">
-                          <div className="flex items-center justify-between"><span className="text-xs font-medium text-charcoal">Enter Transaction PIN</span></div>
+                          <div className="flex items-center justify-between"><span className="text-xs font-medium text-ink-900">Enter Transaction PIN</span></div>
                           <Input
                             type="text"
                             inputMode="numeric"
@@ -729,7 +729,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                     <button
                       type="button"
                       onClick={() => setShowMethodComparison(true)}
-                      className="text-[11px] font-medium text-vintage-green hover:underline">
+                      className="text-[11px] font-medium text-pine-700 hover:underline">
                       {translate(
                         userPreferences.language,
                         "transfer.compareTrigger",
@@ -802,7 +802,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                         />
                         <button
                           type="button"
-                          className="absolute right-2 top-2 text-[10px] font-semibold text-[color:var(--heritage-navy)] hover:underline"
+                          className="absolute right-2 top-2 text-[10px] font-semibold text-ink-900 hover:underline"
                           onClick={() => {
                             if (selectedAccount) {
                               handleFieldChange("amount", selectedAccount.balance.toString());
@@ -907,7 +907,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                 </div>
 
                 {(selectedTypeId === "wire_domestic" || selectedTypeId === "ach" || selectedTypeId === "fednow" || selectedTypeId === "wire_international") && (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-l-2 border-[color:var(--heritage-gold)]/30 pl-4 animate-in fade-in slide-in-from-left-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 border-l-2 border-vermilion-600/30 pl-4 animate-in fade-in slide-in-from-left-4">
                     <div className="space-y-2 md:col-span-2">
                       <Label htmlFor="recipientName">Recipient Name</Label>
                       <Input
@@ -1082,31 +1082,31 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                   <div className="flex items-center justify-center gap-2 text-xs font-medium text-muted-foreground">
                     <span className={cn(
                       "flex items-center gap-1",
-                      !isReviewMode && !isPinStep && "text-[color:var(--heritage-navy)] font-semibold"
+                      !isReviewMode && !isPinStep && "text-ink-900 font-semibold"
                     )}>
                       <span className={cn(
                         "flex h-4 w-4 items-center justify-center rounded-full border",
-                        !isReviewMode && !isPinStep ? "border-[color:var(--heritage-navy)] bg-[color:var(--heritage-navy)]/10" : "border-slate-300 bg-slate-100"
+                        !isReviewMode && !isPinStep ? "border-ink-900 bg-ink-900/10" : "border-slate-300 bg-slate-100"
                       )}>1</span> Details
                     </span>
-                    <span className="w-8 h-[1px] bg-slate-200"></span>
+                    <span className="w-8 h-px bg-slate-200"></span>
                     <span className={cn(
                       "flex items-center gap-1",
-                      isReviewMode && !isPinStep && "text-[color:var(--heritage-navy)] font-semibold"
+                      isReviewMode && !isPinStep && "text-ink-900 font-semibold"
                     )}>
                       <span className={cn(
                         "flex h-4 w-4 items-center justify-center rounded-full border",
-                        isReviewMode && !isPinStep ? "border-[color:var(--heritage-navy)] bg-[color:var(--heritage-navy)]/10" : "border-slate-300 bg-slate-100"
+                        isReviewMode && !isPinStep ? "border-ink-900 bg-ink-900/10" : "border-slate-300 bg-slate-100"
                       )}>2</span> Review
                     </span>
-                    <span className="w-8 h-[1px] bg-slate-200"></span>
+                    <span className="w-8 h-px bg-slate-200"></span>
                     <span className={cn(
                       "flex items-center gap-1",
-                      isPinStep && "text-[color:var(--heritage-navy)] font-semibold"
+                      isPinStep && "text-ink-900 font-semibold"
                     )}>
                       <span className={cn(
                         "flex h-4 w-4 items-center justify-center rounded-full border",
-                        isPinStep ? "border-[color:var(--heritage-navy)] bg-[color:var(--heritage-navy)]/10" : "border-slate-300 bg-slate-100"
+                        isPinStep ? "border-ink-900 bg-ink-900/10" : "border-slate-300 bg-slate-100"
                       )}>3</span> Verify
                     </span>
                   </div>
@@ -1149,9 +1149,9 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
 
           {/* Info Sidebar */}
           <div className="space-y-6 md:sticky md:top-24 h-fit">
-            <Card className="border-[color:var(--heritage-navy)]/10 shadow-sm bg-[#FDFBF7]">
+            <Card className="border-ink-900/10 shadow-sm bg-[#FDFBF7]">
               <CardHeader className="pb-3 border-b border-slate-200/50">
-                <CardTitle className="text-lg text-[color:var(--heritage-navy)]">
+                <CardTitle className="text-lg text-ink-900">
                   Transfer Summary
                 </CardTitle>
               </CardHeader>
@@ -1162,19 +1162,19 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                   </h4>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-muted-foreground">Daily Limit</span>
-                    <span className="font-medium text-[color:var(--heritage-navy)]">
+                    <span className="font-medium text-ink-900">
                       {formatCurrency(DAILY_LIMIT, userPreferences.currency, locale)}
                     </span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-muted-foreground">Used Today</span>
-                    <span className="font-medium text-[color:var(--heritage-gold)]">
+                    <span className="font-medium text-vermilion-600">
                       {formatCurrency(totalAfter, userPreferences.currency, locale)}
                     </span>
                   </div>
                   <div className="w-full bg-slate-200 h-1.5 rounded-full mt-2 overflow-hidden">
                     <div
-                      className="bg-[color:var(--heritage-gold)] h-full rounded-full transition-all duration-500"
+                      className="bg-vermilion-600 h-full rounded-full transition-all duration-500"
                       style={{ width: `${limitUsageRatio * 100}%` }}></div>
                   </div>
                   <p className="text-[11px] text-muted-foreground">
@@ -1208,7 +1208,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
 
                 <div className="space-y-3 pt-4 border-t border-slate-200/50">
                   <div className="flex items-start gap-2 text-muted-foreground">
-                    <ShieldCheck className="h-4 w-4 mt-0.5 text-[color:var(--heritage-navy)]" />
+                    <ShieldCheck className="h-4 w-4 mt-0.5 text-ink-900" />
                     <div className="text-[11px] space-y-2">
                       <p>
                         Your transfers are protected by bank-level encryption.
@@ -1281,11 +1281,11 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                     }}
                     className={`w-full grid grid-cols-4 gap-4 items-center rounded-md px-3 py-2 text-left transition-colors ${
                       isSelected
-                        ? "bg-soft-gold/10 border border-soft-gold/40"
+                        ? "bg-vermilion-600/10 border border-vermilion-600/40"
                         : "hover:bg-slate-50"
                     } ${isDisabled ? "opacity-60 cursor-not-allowed" : ""}`}>
                     <div className="flex flex-col">
-                      <span className="text-[13px] font-medium text-charcoal">
+                      <span className="text-[13px] font-medium text-ink-900">
                         {type.displayName}
                       </span>
                       <span className="text-[11px] text-muted-foreground">
@@ -1316,11 +1316,11 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                   }}
                   className={`w-full rounded-md border px-3 py-2 text-left transition-colors ${
                     isSelected
-                      ? "border-soft-gold/60 bg-soft-gold/10"
+                      ? "border-vermilion-600/60 bg-vermilion-600/10"
                       : "border-slate-200 hover:bg-slate-50"
                   } ${isDisabled ? "opacity-60 cursor-not-allowed" : ""}`}>
                   <div className="flex items-center justify-between">
-                    <span className="text-[13px] font-medium text-charcoal">
+                    <span className="text-[13px] font-medium text-ink-900">
                       {type.displayName}
                     </span>
                     <span className="text-[11px] text-muted-foreground">
@@ -1363,7 +1363,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
         <DialogContent className="max-w-md animate-fade-in-up">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-2">
-              <CheckCircle2 className="h-5 w-5 text-vintage-green" />
+              <CheckCircle2 className="h-5 w-5 text-pine-700" />
               {translate(userPreferences.language, "receipt.title") ||
                 "Transfer submitted"}
             </DialogTitle>
@@ -1380,7 +1380,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                     {translate(userPreferences.language, "receipt.from") ||
                       "From"}
                   </span>
-                  <span className="font-medium text-charcoal">
+                  <span className="font-medium text-ink-900">
                     {receipt.fromAccountMasked}
                   </span>
                 </div>
@@ -1388,7 +1388,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                   <span className="text-muted-foreground">
                     {translate(userPreferences.language, "receipt.to") || "To"}
                   </span>
-                  <span className="font-medium text-charcoal">
+                  <span className="font-medium text-ink-900">
                     {receipt.toLabel}
                   </span>
                 </div>
@@ -1397,7 +1397,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                     {translate(userPreferences.language, "receipt.amount") ||
                       "Amount"}
                   </span>
-                  <span className="font-semibold text-charcoal">
+                  <span className="font-semibold text-ink-900">
                     {formatCurrency(
                       receipt.amount,
                       receipt.currency || userPreferences.currency,

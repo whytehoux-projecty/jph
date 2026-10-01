@@ -3,7 +3,7 @@ import { cn } from '@/lib/utils';
 
 interface VintageIconProps {
     icon: LucideIcon;
-    variant?: 'gold' | 'green' | 'charcoal' | 'cream';
+    variant?: 'gold' | 'green' | 'ink-900' | 'cream';
     size?: 'sm' | 'md' | 'lg';
     className?: string;
 }
@@ -16,10 +16,10 @@ export function VintageIcon({
 }: VintageIconProps) {
 
     const variants = {
-        gold: "bg-soft-gold/20 text-soft-gold-dark border-soft-gold/30",
-        green: "bg-vintage-green/20 text-vintage-green-dark border-vintage-green/30",
-        charcoal: "bg-charcoal/10 text-charcoal border-charcoal/20",
-        cream: "bg-off-white/20 text-off-white border-off-white/30",
+        gold: "bg-vermilion-600/20 text-vermilion-700 border-vermilion-600/30",
+        green: "bg-pine-700/20 text-pine-800 border-pine-700/30",
+        "ink-900": "bg-ink-900/10 text-ink-900 border-ink-900/20",
+        cream: "bg-paper-50/20 text-paper-50 border-paper-50/30",
     };
 
     const sizes = {

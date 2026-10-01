@@ -49,7 +49,7 @@ export function InvoiceUploader({ onFileSelect, currentFile, isUploading, error,
                     onDrop={handleDrop}
                     className={cn(
                         "relative border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200",
-                        isDragging ? "border-vintage-green bg-vintage-green/5" : "border-border hover:border-vintage-green/50 hover:bg-muted/30",
+                        isDragging ? "border-pine-700 bg-pine-700/5" : "border-border hover:border-pine-700/50 hover:bg-muted/30",
                         error ? "border-red-300 bg-red-50" : ""
                     )}
                 >
@@ -66,7 +66,7 @@ export function InvoiceUploader({ onFileSelect, currentFile, isUploading, error,
                         <Upload className="w-8 h-8" />
                     </div>
 
-                    <h3 className="text-lg font-semibold text-charcoal mb-1">Upload Invoice PDF</h3>
+                    <h3 className="text-lg font-semibold text-ink-900 mb-1">Upload Invoice PDF</h3>
                     <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-4">
                         Drag & drop or Click to upload your bill. We'll extract the details for you.
                     </p>
@@ -81,11 +81,11 @@ export function InvoiceUploader({ onFileSelect, currentFile, isUploading, error,
             ) : (
                 <div className="border rounded-xl p-6 bg-white shadow-sm flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-lg bg-vintage-green/10 flex items-center justify-center text-vintage-green">
+                        <div className="h-12 w-12 rounded-lg bg-pine-700/10 flex items-center justify-center text-pine-700">
                             <FileText className="w-6 h-6" />
                         </div>
                         <div>
-                            <p className="font-semibold text-charcoal truncate max-w-[200px]">{currentFile.name}</p>
+                            <p className="font-semibold text-ink-900 truncate max-w-[200px]">{currentFile.name}</p>
                             <p className="text-xs text-muted-foreground">{(currentFile.size / 1024 / 1024).toFixed(2)} MB</p>
                         </div>
                     </div>

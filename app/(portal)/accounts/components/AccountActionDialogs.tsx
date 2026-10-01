@@ -73,7 +73,7 @@ export function OpenAccountDialog({ isOpen, onClose }: OpenAccountDialogProps) {
     <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
       <DialogContent className="max-w-2xl sm:rounded-none">
         <DialogHeader>
-          <DialogTitle className="text-2xl font-playfair">
+          <DialogTitle className="text-2xl font-display">
             Open New Account
           </DialogTitle>
           <DialogDescription>
@@ -86,17 +86,17 @@ export function OpenAccountDialog({ isOpen, onClose }: OpenAccountDialogProps) {
             <Card
               className={`cursor-pointer hover:border-vintage-gold transition-all rounded-none ${
                 selectedType === "checking"
-                  ? "border-vintage-gold bg-warm-cream/20"
+                  ? "border-vintage-gold bg-paper-50/20"
                   : ""
               }`}
               onClick={() => setSelectedType("checking")}>
               <CardContent className="p-6 text-center space-y-4">
                 <VintageIcon
                   icon={CreditCard}
-                  variant="charcoal"
+                  variant="ink-900"
                   className="mx-auto"
                 />
-                <h3 className="font-semibold text-charcoal">Checking</h3>
+                <h3 className="font-semibold text-ink-900">Checking</h3>
                 <p className="text-xs text-muted-foreground">
                   Everyday spending with no monthly fees.
                 </p>
@@ -105,7 +105,7 @@ export function OpenAccountDialog({ isOpen, onClose }: OpenAccountDialogProps) {
             <Card
               className={`cursor-pointer hover:border-vintage-gold transition-all rounded-none ${
                 selectedType === "savings"
-                  ? "border-vintage-gold bg-warm-cream/20"
+                  ? "border-vintage-gold bg-paper-50/20"
                   : ""
               }`}
               onClick={() => setSelectedType("savings")}>
@@ -115,7 +115,7 @@ export function OpenAccountDialog({ isOpen, onClose }: OpenAccountDialogProps) {
                   variant="gold"
                   className="mx-auto"
                 />
-                <h3 className="font-semibold text-charcoal">Savings</h3>
+                <h3 className="font-semibold text-ink-900">Savings</h3>
                 <p className="text-xs text-muted-foreground">
                   High-yield savings with 4.20% APY.
                 </p>
@@ -124,7 +124,7 @@ export function OpenAccountDialog({ isOpen, onClose }: OpenAccountDialogProps) {
             <Card
               className={`cursor-pointer hover:border-vintage-gold transition-all rounded-none ${
                 selectedType === "cd"
-                  ? "border-vintage-gold bg-warm-cream/20"
+                  ? "border-vintage-gold bg-paper-50/20"
                   : ""
               }`}
               onClick={() => setSelectedType("cd")}>
@@ -134,7 +134,7 @@ export function OpenAccountDialog({ isOpen, onClose }: OpenAccountDialogProps) {
                   variant="green"
                   className="mx-auto"
                 />
-                <h3 className="font-semibold text-charcoal">CD</h3>
+                <h3 className="font-semibold text-ink-900">CD</h3>
                 <p className="text-xs text-muted-foreground">
                   Fixed rates for guaranteed returns.
                 </p>
@@ -166,7 +166,7 @@ export function OpenAccountDialog({ isOpen, onClose }: OpenAccountDialogProps) {
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-full flex items-center justify-center">
               <CheckCircle2 className="w-8 h-8 text-green-600" />
             </div>
-            <h3 className="text-xl font-semibold text-charcoal">
+            <h3 className="text-xl font-semibold text-ink-900">
               Account Opened Successfully!
             </h3>
             <p className="text-muted-foreground">
@@ -226,7 +226,7 @@ export function LinkExternalAccountDialog({
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-md sm:rounded-none">
         <DialogHeader>
-          <DialogTitle className="text-xl font-playfair flex items-center gap-2">
+          <DialogTitle className="text-xl font-display flex items-center gap-2">
             <ExternalLink className="w-5 h-5" /> Link External Account
           </DialogTitle>
           <DialogDescription>

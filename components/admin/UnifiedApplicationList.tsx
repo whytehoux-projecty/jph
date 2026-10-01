@@ -165,7 +165,7 @@ export function UnifiedApplicationList({
                     </div>
                   </TableCell>
                   <TableCell>
-                    <div className="font-medium text-charcoal">{req.applicantName}</div>
+                    <div className="font-medium text-ink-900">{req.applicantName}</div>
                     <div className="text-sm text-muted-foreground">{req.applicantEmail}</div>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground">
@@ -210,7 +210,7 @@ export function UnifiedApplicationList({
       }}>
         <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
-            <DialogTitle className="text-xl font-playfair flex items-center gap-2">
+            <DialogTitle className="text-xl font-display flex items-center gap-2">
               {selectedReq && getIcon(selectedReq.type)}
               Review {selectedReq && getTypeName(selectedReq.type)} Request
             </DialogTitle>
@@ -221,7 +221,7 @@ export function UnifiedApplicationList({
               <div className="grid grid-cols-2 gap-4 bg-neutral-50 p-4 rounded-lg border border-neutral-200 text-sm">
                 <div>
                   <p className="text-muted-foreground text-xs uppercase font-semibold">Applicant</p>
-                  <p className="font-medium text-charcoal">{selectedReq.applicantName}</p>
+                  <p className="font-medium text-ink-900">{selectedReq.applicantName}</p>
                   <p className="text-muted-foreground">{selectedReq.applicantEmail}</p>
                 </div>
                 <div>
@@ -234,7 +234,7 @@ export function UnifiedApplicationList({
               {/* Dynamic Content based on Type */}
               {selectedReq.type === 'ACCOUNT' && (
                 <div className="space-y-4 text-sm">
-                  <h4 className="font-bold text-charcoal border-b pb-2">Application Details</h4>
+                  <h4 className="font-bold text-ink-900 border-b pb-2">Application Details</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div><span className="text-muted-foreground block text-xs">Desired Account</span> {selectedReq.raw.desiredAccountType}</div>
                     <div><span className="text-muted-foreground block text-xs">Currency</span> {selectedReq.raw.currencyPreference}</div>
@@ -245,7 +245,7 @@ export function UnifiedApplicationList({
                   
                   {selectedReq.status === 'PENDING' || selectedReq.status === 'VERIFICATION_REQUIRED' ? (
                     <div className="pt-6 mt-6 border-t border-neutral-200">
-                      <h4 className="font-bold text-charcoal mb-4">Decision Actions</h4>
+                      <h4 className="font-bold text-ink-900 mb-4">Decision Actions</h4>
                       
                       <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg mb-6">
                         <label className="block text-sm font-semibold text-blue-900 mb-2">Initial Deposit Amount ($)</label>
@@ -294,7 +294,7 @@ export function UnifiedApplicationList({
 
               {selectedReq.type === 'EPORTAL' && (
                 <div className="space-y-4 text-sm">
-                  <h4 className="font-bold text-charcoal border-b pb-2">Request Details</h4>
+                  <h4 className="font-bold text-ink-900 border-b pb-2">Request Details</h4>
                   <p>Customer is requesting activation of their internet banking profile for e-Portal access.</p>
                   <div className="grid grid-cols-2 gap-4">
                     <div><span className="text-muted-foreground block text-xs">Associated Account Number</span> {selectedReq.raw.accountNumber}</div>
@@ -321,7 +321,7 @@ export function UnifiedApplicationList({
 
               {selectedReq.type === 'CHEQUE' && (
                 <div className="space-y-4 text-sm">
-                  <h4 className="font-bold text-charcoal border-b pb-2">Request Details</h4>
+                  <h4 className="font-bold text-ink-900 border-b pb-2">Request Details</h4>
                   <div className="grid grid-cols-2 gap-4">
                     <div><span className="text-muted-foreground block text-xs">Target Account Number</span> {selectedReq.raw.account?.accountNumber || 'Unknown'}</div>
                     <div><span className="text-muted-foreground block text-xs">Number of Leaves</span> {selectedReq.raw.numberOfLeaves}</div>

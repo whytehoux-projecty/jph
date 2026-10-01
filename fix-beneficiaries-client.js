@@ -112,7 +112,7 @@ const cardMappingReplace = `{filteredBeneficiaries.map((beneficiary) => {
                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <Button
                                         variant="ghost"
-                                        className="h-8 w-8 p-0 text-muted-foreground hover:text-[color:var(--heritage-navy)] flex items-center justify-center"
+                                        className="h-8 w-8 p-0 text-muted-foreground hover:text-(--heritage-navy) flex items-center justify-center"
                                         onClick={() => { setEditingId(beneficiary.id); setIsDialogOpen(true); }}
                                     >
                                         <Edit2 className="w-4 h-4" />

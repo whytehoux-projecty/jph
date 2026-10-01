@@ -4,6 +4,7 @@ import './globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { SecurityNoticeBanner } from '@/components/commercial/SecurityNoticeBanner';
+import { CookieModal } from '@/components/commercial/CookieModal';
 
 /**
  * Ledger fonts — loaded via next/font/google (auto-self-hosted at build time,
@@ -81,7 +82,7 @@ export default function CorporateLayout({
       <a
         href="#main-content"
         className="
-          sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-[100]
+          sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-100
           focus:px-4 focus:py-2 focus:bg-paper-50 focus:text-ink-900
           focus:border focus:border-ink-900 focus:text-sm focus:font-medium
         "
@@ -92,11 +93,12 @@ export default function CorporateLayout({
       <SecurityNoticeBanner />
       <Header />
 
-      <main id="main-content" className="flex-grow">
+      <main id="main-content" className="grow">
         {children}
       </main>
 
       <Footer />
+      <CookieModal />
     </div>
   );
 }

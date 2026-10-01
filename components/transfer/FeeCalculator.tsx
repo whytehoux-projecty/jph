@@ -209,18 +209,18 @@ export function FeeCalculator({
     <div className="rounded-lg border border-slate-200 bg-slate-50/60 p-3 space-y-3">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-2">
-          <ArrowUpRight className="h-4 w-4 text-vintage-green" />
-          <span className="text-xs font-semibold text-charcoal">
+          <ArrowUpRight className="h-4 w-4 text-pine-700" />
+          <span className="text-xs font-semibold text-ink-900">
             Fee breakdown
           </span>
         </div>
         {showSavingsAlert ? (
-          <span className="text-[11px] font-medium text-vintage-green">
+          <span className="text-[11px] font-medium text-pine-700">
             No transfer fee. You could save up to{" "}
             {formatCurrency(referenceWireFee, currencyLabel)} vs a wire.
           </span>
         ) : isFree ? (
-          <span className="text-[11px] font-medium text-vintage-green">
+          <span className="text-[11px] font-medium text-pine-700">
             No transfer fee for this method
           </span>
         ) : (
@@ -247,8 +247,8 @@ export function FeeCalculator({
                 onClick={() => setUseExpress(false)}
                 className={`px-2.5 py-1 rounded-full transition ${
                   !useExpress
-                    ? "bg-white text-charcoal shadow-sm"
-                    : "text-muted-foreground hover:text-charcoal hover:bg-white/60"
+                    ? "bg-white text-ink-900 shadow-sm"
+                    : "text-muted-foreground hover:text-ink-900 hover:bg-white/60"
                 }`}
               >
                 Standard
@@ -258,8 +258,8 @@ export function FeeCalculator({
                 onClick={() => setUseExpress(true)}
                 className={`px-2.5 py-1 rounded-full transition ${
                   useExpress
-                    ? "bg-white text-charcoal shadow-sm"
-                    : "text-muted-foreground hover:text-charcoal hover:bg-white/60"
+                    ? "bg-white text-ink-900 shadow-sm"
+                    : "text-muted-foreground hover:text-ink-900 hover:bg-white/60"
                 }`}
               >
                 Express
@@ -358,7 +358,7 @@ export function FeeCalculator({
           <button
             type="button"
             onClick={onCompareMethods}
-            className="text-[11px] font-semibold text-[color:var(--heritage-navy)] hover:underline"
+            className="text-[11px] font-semibold text-(--ink-900) hover:underline"
           >
             Compare methods
           </button>

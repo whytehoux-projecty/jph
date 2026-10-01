@@ -17,22 +17,22 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
         return (
             <div className="w-full">
                 {label && (
-                    <label className="block text-sm font-medium text-charcoal mb-2">
+                    <label className="block text-sm font-medium text-ink-900 mb-2">
                         {label}
                     </label>
                 )}
                 <div className="relative">
                     {icon && iconPosition === 'left' && (
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-lighter">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-500er">
                             {icon}
                         </div>
                     )}
                     <input
                         type={type}
                         className={cn(
-                            'flex h-11 w-full rounded-lg border-2 border-faded-gray-light bg-white px-4 py-2 text-base text-charcoal transition-all duration-250',
-                            'placeholder:text-charcoal-lighter',
-                            'focus-visible:outline-none focus-visible:border-vintage-green focus-visible:ring-4 focus-visible:ring-vintage-green/10',
+                            'flex h-11 w-full rounded-lg border-2 border-paper-300 bg-white px-4 py-2 text-base text-ink-900 transition-all duration-250',
+                            'placeholder:text-ink-500er',
+                            'focus-visible:outline-none focus-visible:border-pine-700 focus-visible:ring-4 focus-visible:ring-pine-700/10',
                             'disabled:cursor-not-allowed disabled:opacity-50',
                             error && 'border-red-500 focus-visible:border-red-500 focus-visible:ring-red-500/10',
                             icon && iconPosition === 'left' && 'pl-10',
@@ -43,7 +43,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                         {...props}
                     />
                     {icon && iconPosition === 'right' && (
-                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal-lighter">
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-500er">
                             {icon}
                         </div>
                     )}
@@ -52,7 +52,7 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
                     <p className="mt-1.5 text-sm text-red-600">{error}</p>
                 )}
                 {helperText && !error && (
-                    <p className="mt-1.5 text-xs text-charcoal-lighter">{helperText}</p>
+                    <p className="mt-1.5 text-xs text-ink-500er">{helperText}</p>
                 )}
             </div>
         );

@@ -14,17 +14,7 @@
     --action-hover: #A62F0E; /* vermilion-700 */
     --focus:        #14181B; /* ink-900 focus ring */
 
-    /* Legacy tokens (kept for any components still referencing them) */
-    --heritage-navy:       #0D2545;
-    --heritage-navy-light: #1B355B;
-    --heritage-navy-dark:  #091C38;
-    --soft-gold:           #B8960C;
-    --soft-gold-light:     #D4AF7A;
-    --charcoal:            #3D3D3D;
-    --off-white:           #FAF9F6;
-    --warm-cream:          #F5F1E8;
-    --heritage-surface:    #F0F4FA;
-    --heritage-gold:       #B8960C;
+
 
     /* Ledger font stacks (used via CSS var for non-Tailwind contexts) */
     --font-display: 'Familjen Grotesk', ui-sans-serif, system-ui, sans-serif;

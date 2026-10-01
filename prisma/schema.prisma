@@ -139,6 +139,18 @@ model AccountApplication {
   zipCode               String   @map("zip_code")
   employmentStatus      String   @map("employment_status")
   annualIncome          Float    @map("annual_income")
+  referenceId           String?  @unique @map("reference_id")
+
+  // Business Fields
+  businessName          String?  @map("business_name")
+  dbaName               String?  @map("dba_name")
+  entityType            String?  @map("entity_type")
+  ein                   String?
+  stateOfFormation      String?  @map("state_of_formation")
+  yearOfFormation       String?  @map("year_of_formation")
+  industry              String?
+  website               String?
+  ownershipData         String?  @map("ownership_data") // JSON string
 
   // File Uploads
   idDocumentUrl    String? @map("id_document_url")
@@ -241,7 +253,13 @@ model OnlineAccessRequest {
   id              String    @id @default(cuid())
   accountNumber   String    @map("account_number")
   email           String
+  ssnLast4        String?   @map("ssn_last_4")
+  firstName       String?   @map("first_name")
+  lastName        String?   @map("last_name")
+  phone           String?
+  dateOfBirth     DateTime? @map("date_of_birth")
   status          String    @default("PENDING") // PENDING, APPROVED, REJECTED
+  referenceId     String?   @unique @map("reference_id")
   rejectionReason String?   @map("rejection_reason")
   reviewedBy      String?   @map("reviewed_by")
   reviewedAt      DateTime? @map("reviewed_at")

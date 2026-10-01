@@ -69,10 +69,10 @@ export function TransferMethodSelector({
             className={cn(
               "relative flex flex-col items-start rounded-lg border p-3 text-left cursor-pointer transition-all min-h-[64px]",
               isActive
-                ? "border-[color:var(--heritage-gold)] bg-[#FDFBF7] shadow-sm ring-1 ring-[color:var(--heritage-gold)]"
-                : "border-slate-200 bg-white hover:border-[color:var(--heritage-navy)]/30 hover:bg-slate-50",
+                ? "border-(--heritage-gold) bg-[#FDFBF7] shadow-sm ring-1 ring-(--heritage-gold)"
+                : "border-slate-200 bg-white hover:border-(--ink-900)/30 hover:bg-slate-50",
               isDisabled && "opacity-60 cursor-not-allowed",
-              "focus-within:ring-2 focus-within:ring-[color:var(--heritage-navy)] focus-within:ring-offset-2"
+              "focus-within:ring-2 focus-within:ring-(--ink-900) focus-within:ring-offset-2"
             )}
             aria-disabled={isDisabled}
           >
@@ -88,22 +88,22 @@ export function TransferMethodSelector({
               className="sr-only"
             />
             {isActive && (
-              <CheckCircle2 className="absolute top-3 right-3 h-4 w-4 text-[color:var(--heritage-gold)]" />
+              <CheckCircle2 className="absolute top-3 right-3 h-4 w-4 text-(--heritage-gold)" />
             )}
             <div className="flex items-center gap-3 w-full pr-6">
               <div
                 className={cn(
                   "flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors",
                   isActive
-                    ? "bg-[color:var(--heritage-gold)]/10 text-[color:var(--heritage-gold)]"
-                    : "bg-[color:var(--heritage-navy)]/5 text-[color:var(--heritage-navy)]"
+                    ? "bg-(--heritage-gold)/10 text-(--heritage-gold)"
+                    : "bg-(--ink-900)/5 text-(--ink-900)"
                 )}
               >
                 <Icon className="h-4 w-4" />
               </div>
               <div className="flex flex-col min-w-0">
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium text-[color:var(--heritage-navy)] truncate">
+                  <span className="text-sm font-medium text-(--ink-900) truncate">
                     {type.displayName}
                   </span>
                   {type.badge && (

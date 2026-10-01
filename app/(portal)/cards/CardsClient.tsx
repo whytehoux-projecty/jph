@@ -134,14 +134,14 @@ function CardMini({ card, active }: { card: CardData; active: boolean }) {
 
   const gradientClass = isCredit
     ? "from-[#2C2C2C] via-[#4A4A4A] to-[#1A1A1A]"
-    : "from-vintage-green via-vintage-green-light to-vintage-green-dark";
+    : "from-pine-700 via-pine-600 to-pine-800";
 
   return (
     <div
-      className={`w-14 h-9 rounded-md bg-gradient-to-br ${gradientClass} shadow flex items-end justify-end p-1 relative overflow-hidden flex-shrink-0`}
+      className={`w-14 h-9 rounded-md bg-linear-to-br ${gradientClass} shadow flex items-end justify-end p-1 relative overflow-hidden shrink-0`}
     >
       {/* gloss */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent pointer-events-none" />
+      <div className="absolute inset-0 bg-linear-to-br from-white/20 to-transparent pointer-events-none" />
       {/* scheme mark */}
       {isMastercard ? (
         <div className="flex items-center -space-x-1.5">
@@ -246,7 +246,7 @@ export default function CardsClient({ initialCards }: { initialCards: CardData[]
           <CreditCard className="h-7 w-7 text-muted-foreground" />
         </div>
         <div className="text-center space-y-1">
-          <p className="font-semibold text-charcoal">No cards yet</p>
+          <p className="font-semibold text-ink-900">No cards yet</p>
           <p className="text-sm text-muted-foreground">Apply for a card to get started.</p>
         </div>
         <Button variant="primary" icon={<Plus className="w-4 h-4" />}>
@@ -262,7 +262,7 @@ export default function CardsClient({ initialCards }: { initialCards: CardData[]
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-border pb-6">
         <div>
-          <h1 className="text-3xl font-playfair font-bold text-charcoal">Cards Center</h1>
+          <h1 className="text-3xl font-display font-bold text-ink-900">Cards Center</h1>
           <p className="text-muted-foreground mt-1">
             Manage your cards, limits, and security controls.
           </p>
@@ -284,7 +284,7 @@ export default function CardsClient({ initialCards }: { initialCards: CardData[]
             <>
               {/* Card status label */}
               <div className="flex justify-between items-center px-1">
-                <h3 className="text-base font-semibold text-charcoal flex items-center gap-2">
+                <h3 className="text-base font-semibold text-ink-900 flex items-center gap-2">
                   <CreditCard className="w-4 h-4" />
                   {activeCard.tier} Card
                 </h3>
@@ -354,14 +354,14 @@ export default function CardsClient({ initialCards }: { initialCards: CardData[]
                         }}
                         className={`cursor-pointer px-3 py-3 rounded-xl border transition-all flex items-center justify-between group ${
                           isActive
-                            ? "bg-vintage-green/5 border-vintage-green ring-1 ring-vintage-green shadow-sm"
-                            : "bg-white border-border hover:border-vintage-green/30 hover:shadow-sm"
+                            ? "bg-pine-700/5 border-pine-700 ring-1 ring-pine-700 shadow-sm"
+                            : "bg-white border-border hover:border-pine-700/30 hover:shadow-sm"
                         }`}
                       >
                         <div className="flex items-center gap-3">
                           <CardMini card={card} active={isActive} />
                           <div>
-                            <p className="font-semibold text-charcoal text-sm leading-none">
+                            <p className="font-semibold text-ink-900 text-sm leading-none">
                               {card.scheme === "mastercard" ? "Mastercard" : "Visa"} {card.tier}
                             </p>
                             <p className="text-[11px] text-muted-foreground font-mono mt-0.5">
@@ -374,7 +374,7 @@ export default function CardsClient({ initialCards }: { initialCards: CardData[]
                             <Snowflake className="w-3.5 h-3.5 text-blue-400" />
                           )}
                           {isActive && (
-                            <div className="h-2 w-2 rounded-full bg-vintage-green" />
+                            <div className="h-2 w-2 rounded-full bg-pine-700" />
                           )}
                         </div>
                       </div>
@@ -420,7 +420,7 @@ export default function CardsClient({ initialCards }: { initialCards: CardData[]
             <Card>
               <CardHeader>
                 <CardTitle className="text-lg flex items-center gap-2">
-                  <Lock className="w-5 h-5 text-vintage-green" />
+                  <Lock className="w-5 h-5 text-pine-700" />
                   Security & Permissions
                 </CardTitle>
                 <CardDescription>
@@ -437,7 +437,7 @@ export default function CardsClient({ initialCards }: { initialCards: CardData[]
                       <Snowflake size={17} />
                     </div>
                     <div>
-                      <p className="font-medium text-charcoal text-sm">Freeze Card</p>
+                      <p className="font-medium text-ink-900 text-sm">Freeze Card</p>
                       <p className="text-xs text-muted-foreground">Block all transactions instantly</p>
                     </div>
                   </div>
@@ -454,7 +454,7 @@ export default function CardsClient({ initialCards }: { initialCards: CardData[]
                       <Wifi size={17} />
                     </div>
                     <div>
-                      <p className="font-medium text-charcoal text-sm">Contactless Payments</p>
+                      <p className="font-medium text-ink-900 text-sm">Contactless Payments</p>
                       <p className="text-xs text-muted-foreground">Tap-to-pay up to $100</p>
                     </div>
                   </div>
@@ -471,7 +471,7 @@ export default function CardsClient({ initialCards }: { initialCards: CardData[]
                       <Zap size={17} />
                     </div>
                     <div>
-                      <p className="font-medium text-charcoal text-sm">Online Payments</p>
+                      <p className="font-medium text-ink-900 text-sm">Online Payments</p>
                       <p className="text-xs text-muted-foreground">Allow e-commerce transactions</p>
                     </div>
                   </div>
@@ -488,7 +488,7 @@ export default function CardsClient({ initialCards }: { initialCards: CardData[]
                       <Globe size={17} />
                     </div>
                     <div>
-                      <p className="font-medium text-charcoal text-sm">International Transactions</p>
+                      <p className="font-medium text-ink-900 text-sm">International Transactions</p>
                       <p className="text-xs text-muted-foreground">Allow cross-border spending</p>
                     </div>
                   </div>
@@ -506,13 +506,13 @@ export default function CardsClient({ initialCards }: { initialCards: CardData[]
                         <Plane size={17} />
                       </div>
                       <div>
-                        <p className="font-medium text-charcoal text-sm">Travel Mode</p>
+                        <p className="font-medium text-ink-900 text-sm">Travel Mode</p>
                         <p className="text-xs text-muted-foreground">Prevent false fraud blocks while abroad</p>
                       </div>
                     </div>
                     <button
                       onClick={() => setTravelExpanded(!travelExpanded)}
-                      className="flex items-center gap-1 text-xs text-vintage-green font-medium hover:underline"
+                      className="flex items-center gap-1 text-xs text-pine-700 font-medium hover:underline"
                     >
                       {travelExpanded ? "Close" : "Configure"}
                       {travelExpanded ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}

@@ -126,18 +126,18 @@ export function AdminTransferHistory({
             ) : (
               filtered.map((tx) => (
                 <TableRow key={tx.id}>
-                  <TableCell className="font-mono text-xs text-charcoal">{tx.reference}</TableCell>
+                  <TableCell className="font-mono text-xs text-ink-900">{tx.reference}</TableCell>
                   <TableCell className="text-sm">
                     {format(new Date(tx.createdAt), 'MMM d, yyyy')}
                   </TableCell>
                   <TableCell>
-                    <div className="font-medium text-sm text-charcoal">{tx.account.user.firstName} {tx.account.user.lastName}</div>
+                    <div className="font-medium text-sm text-ink-900">{tx.account.user.firstName} {tx.account.user.lastName}</div>
                     <div className="text-xs text-muted-foreground font-mono">{tx.account.accountNumber}</div>
                   </TableCell>
                   <TableCell>
                     <div className="text-sm font-medium">{tx.methodId || tx.transactionType}</div>
                   </TableCell>
-                  <TableCell className="text-right font-mono font-medium text-charcoal">
+                  <TableCell className="text-right font-mono font-medium text-ink-900">
                     ${tx.modifiedAmount ? tx.modifiedAmount.toFixed(2) : tx.amount.toFixed(2)}
                     {tx.modifiedAmount && (
                       <span className="text-[10px] text-amber-600 block">Modified from ${tx.amount.toFixed(2)}</span>

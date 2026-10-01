@@ -23,20 +23,20 @@ export default async function EbankManagementHub() {
               <Receipt className="w-8 h-8" />
             </div>
             <div>
-              <h3 className="text-xl font-playfair font-bold text-charcoal">Bill Services</h3>
+              <h3 className="text-xl font-display font-bold text-ink-900">Bill Services</h3>
               <p className="text-sm text-muted-foreground">Setup and manage payees.</p>
             </div>
           </div>
           
           <div className="bg-neutral-50 rounded-lg p-4 mb-6 flex justify-between items-center border border-neutral-100">
-            <span className="text-sm font-medium text-charcoal">Total Payees</span>
+            <span className="text-sm font-medium text-ink-900">Total Payees</span>
             <span className="bg-emerald-100 text-emerald-800 text-xs font-bold px-2.5 py-1 rounded-full">{totalPayees}</span>
           </div>
 
           <div className="mt-auto">
             <Link 
               href="/admin/ebank/bill-services"
-              className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-white border border-neutral-300 rounded-md text-sm font-medium text-charcoal hover:bg-neutral-50 transition-colors"
+              className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-white border border-neutral-300 rounded-md text-sm font-medium text-ink-900 hover:bg-neutral-50 transition-colors"
             >
               Manage Services <ArrowRight className="w-4 h-4" />
             </Link>
@@ -50,20 +50,20 @@ export default async function EbankManagementHub() {
               <Bell className="w-8 h-8" />
             </div>
             <div>
-              <h3 className="text-xl font-playfair font-bold text-charcoal">Push Notifications</h3>
+              <h3 className="text-xl font-display font-bold text-ink-900">Push Notifications</h3>
               <p className="text-sm text-muted-foreground">Send alerts to customers.</p>
             </div>
           </div>
           
           <div className="bg-neutral-50 rounded-lg p-4 mb-6 flex justify-between items-center border border-neutral-100">
-            <span className="text-sm font-medium text-charcoal">Unread by Users</span>
+            <span className="text-sm font-medium text-ink-900">Unread by Users</span>
             <span className="bg-amber-100 text-amber-800 text-xs font-bold px-2.5 py-1 rounded-full">{unreadNotifications}</span>
           </div>
 
           <div className="mt-auto">
             <Link 
               href="/admin/ebank/notifications"
-              className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-white border border-neutral-300 rounded-md text-sm font-medium text-charcoal hover:bg-neutral-50 transition-colors"
+              className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-white border border-neutral-300 rounded-md text-sm font-medium text-ink-900 hover:bg-neutral-50 transition-colors"
             >
               Manage Notifications <ArrowRight className="w-4 h-4" />
             </Link>
@@ -77,20 +77,20 @@ export default async function EbankManagementHub() {
               <Headset className="w-8 h-8" />
             </div>
             <div>
-              <h3 className="text-xl font-playfair font-bold text-charcoal">Support Inbox</h3>
+              <h3 className="text-xl font-display font-bold text-ink-900">Support Inbox</h3>
               <p className="text-sm text-muted-foreground">Resolve customer tickets.</p>
             </div>
           </div>
           
           <div className="bg-neutral-50 rounded-lg p-4 mb-6 flex justify-between items-center border border-neutral-100">
-            <span className="text-sm font-medium text-charcoal">Open Tickets</span>
+            <span className="text-sm font-medium text-ink-900">Open Tickets</span>
             <span className="bg-rose-100 text-rose-800 text-xs font-bold px-2.5 py-1 rounded-full">{openTickets}</span>
           </div>
 
           <div className="mt-auto">
             <Link 
               href="/admin/ebank/support"
-              className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-white border border-neutral-300 rounded-md text-sm font-medium text-charcoal hover:bg-neutral-50 transition-colors"
+              className="flex items-center justify-center gap-2 w-full py-2.5 px-4 bg-white border border-neutral-300 rounded-md text-sm font-medium text-ink-900 hover:bg-neutral-50 transition-colors"
             >
               Go to Inbox <ArrowRight className="w-4 h-4" />
             </Link>

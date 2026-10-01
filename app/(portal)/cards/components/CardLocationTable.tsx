@@ -33,7 +33,7 @@ export function CardLocationTable() {
         <Card className="shadow-sm">
             <CardHeader className="pb-2">
                 <CardTitle className="text-base font-medium flex items-center gap-2">
-                    <History className="w-4 h-4 text-vintage-green" />
+                    <History className="w-4 h-4 text-pine-700" />
                     Recent Transactions
                 </CardTitle>
             </CardHeader>
@@ -70,7 +70,7 @@ export function CardLocationTable() {
                                     <TableRow key={tx.id}>
                                         <TableCell className="font-medium">
                                             <div className="flex flex-col">
-                                                <span className="text-sm font-semibold text-charcoal">
+                                                <span className="text-sm font-semibold text-ink-900">
                                                     {tx.description || 'Transaction'}
                                                 </span>
                                                 <span className="text-xs text-muted-foreground">
@@ -78,7 +78,7 @@ export function CardLocationTable() {
                                                 </span>
                                             </div>
                                         </TableCell>
-                                        <TableCell className={`text-right font-mono text-sm font-semibold ${displayAmount > 0 ? 'text-emerald-600' : 'text-charcoal'}`}>
+                                        <TableCell className={`text-right font-mono text-sm font-semibold ${displayAmount > 0 ? 'text-emerald-600' : 'text-ink-900'}`}>
                                             {displayAmount > 0 ? '+' : ''}{displayAmount.toLocaleString('en-US', { style: 'currency', currency: tx.currency || 'USD' })}
                                         </TableCell>
                                         <TableCell className="text-right">

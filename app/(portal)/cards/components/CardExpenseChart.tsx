@@ -101,7 +101,7 @@ export function CardExpenseChart() {
                     <div>
                         <CardTitle className="text-base font-medium">{title}</CardTitle>
                         {!loading && (
-                            <p className="text-2xl font-bold font-mono text-charcoal mt-1">
+                            <p className="text-2xl font-bold font-mono text-ink-900 mt-1">
                                 ${total.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}
                                 <span className="text-sm font-normal text-muted-foreground ml-1.5">spent</span>
                             </p>
@@ -116,8 +116,8 @@ export function CardExpenseChart() {
                                 className={cn(
                                     "px-3 py-1 rounded-md text-xs font-medium transition-all",
                                     period === p
-                                        ? "bg-white shadow-sm text-charcoal"
-                                        : "text-muted-foreground hover:text-charcoal"
+                                        ? "bg-white shadow-sm text-ink-900"
+                                        : "text-muted-foreground hover:text-ink-900"
                                 )}
                             >
                                 {p === "week" ? "Weekly" : "Monthly"}
@@ -160,7 +160,7 @@ export function CardExpenseChart() {
                                         dataKey="total"
                                         fill="currentColor"
                                         radius={[5, 5, 0, 0]}
-                                        className="fill-vintage-green/80"
+                                        className="fill-pine-700/80"
                                         barSize={period === "week" ? 32 : 24}
                                     />
                                 </BarChart>

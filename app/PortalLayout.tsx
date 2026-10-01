@@ -57,7 +57,7 @@ function ToastContainer() {
     <div
       aria-live="polite"
       aria-atomic="false"
-      className="fixed bottom-6 right-6 z-[9999] flex flex-col gap-3 w-full max-w-sm pointer-events-none">
+      className="fixed bottom-6 right-6 z-9999 flex flex-col gap-3 w-full max-w-sm pointer-events-none">
       {toasts.map((t) => (
         <div
           key={t.id}
@@ -144,7 +144,7 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-[color:var(--heritage-surface)] relative isolate">
+    <div className="flex min-h-screen bg-(--heritage-surface) relative isolate">
 
       <MobileInstallPrompt />
 

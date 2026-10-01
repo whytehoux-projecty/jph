@@ -109,11 +109,11 @@ export function AdminSupportList({
                 <TableRow key={tkt.id} className={tkt.status === 'CLOSED' ? 'opacity-60' : ''}>
                   <TableCell className="font-mono text-xs text-muted-foreground">{tkt.id}</TableCell>
                   <TableCell>
-                    <div className="font-medium text-sm text-charcoal">{`${tkt.user.firstName} ${tkt.user.lastName}`}</div>
+                    <div className="font-medium text-sm text-ink-900">{`${tkt.user.firstName} ${tkt.user.lastName}`}</div>
                     <div className="text-xs text-muted-foreground">{tkt.user.email}</div>
                   </TableCell>
                   <TableCell>
-                    <div className="font-medium text-sm text-charcoal max-w-[200px] truncate">{tkt.subject}</div>
+                    <div className="font-medium text-sm text-ink-900 max-w-[200px] truncate">{tkt.subject}</div>
                     <div className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                       <Clock className="w-3 h-3" /> {format(tkt.createdAt, 'MMM d, HH:mm')}
                     </div>
@@ -148,7 +148,7 @@ export function AdminSupportList({
       <Dialog open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle className="text-xl font-playfair flex items-center gap-2">
+            <DialogTitle className="text-xl font-display flex items-center gap-2">
               <LifeBuoy className="w-5 h-5" /> Support Ticket: {selectedTicket?.id}
             </DialogTitle>
             <DialogDescription>
@@ -161,8 +161,8 @@ export function AdminSupportList({
               <div className="bg-neutral-50 p-5 rounded-lg border border-neutral-200">
                 <div className="flex justify-between items-start border-b border-neutral-200 pb-4 mb-4">
                   <div>
-                    <h3 className="font-medium text-lg text-charcoal">{selectedTicket.subject}</h3>
-                    <p className="text-sm text-muted-foreground mt-1">From: <span className="font-medium text-charcoal">{`${selectedTicket.user.firstName} ${selectedTicket.user.lastName}`}</span> ({selectedTicket.user.email})</p>
+                    <h3 className="font-medium text-lg text-ink-900">{selectedTicket.subject}</h3>
+                    <p className="text-sm text-muted-foreground mt-1">From: <span className="font-medium text-ink-900">{`${selectedTicket.user.firstName} ${selectedTicket.user.lastName}`}</span> ({selectedTicket.user.email})</p>
                   </div>
                   <div className="text-right space-y-2">
                     
@@ -174,7 +174,7 @@ export function AdminSupportList({
                   </div>
                 </div>
                 
-                <div className="prose prose-sm text-charcoal">
+                <div className="prose prose-sm text-ink-900">
                   <p className="whitespace-pre-wrap">{selectedTicket.message}</p>
                 </div>
               </div>
@@ -196,7 +196,7 @@ export function AdminSupportList({
                     <Button type="button" variant="outline" className="text-neutral-600" onClick={() => setSelectedTicket(null)}>
                       Cancel
                     </Button>
-                    <Button type="submit" className="bg-charcoal text-white hover:bg-neutral-800" onClick={() => setTimeout(() => setSelectedTicket(null), 100)}>
+                    <Button type="submit" className="bg-ink-900 text-white hover:bg-neutral-800" onClick={() => setTimeout(() => setSelectedTicket(null), 100)}>
                       <CheckCircle2 className="w-4 h-4 mr-2" /> Send Reply & Resolve Ticket
                     </Button>
                   </div>

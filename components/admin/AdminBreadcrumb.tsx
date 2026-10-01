@@ -34,7 +34,7 @@ export function AdminBreadcrumb() {
 
   return (
     <nav className="flex items-center text-sm text-muted-foreground">
-      <Link href="/admin" className="hover:text-charcoal transition-colors font-medium">Admin</Link>
+      <Link href="/admin" className="hover:text-ink-900 transition-colors font-medium">Admin</Link>
       {breadcrumbs.map((crumb, idx) => {
         const isLast = idx === breadcrumbs.length - 1;
         const href = `/admin/${breadcrumbs.slice(0, idx + 1).join('/')}`;
@@ -44,9 +44,9 @@ export function AdminBreadcrumb() {
           <Fragment key={href}>
             <ChevronRight className="w-4 h-4 mx-1 opacity-50" />
             {isLast ? (
-              <span className="font-semibold text-charcoal">{label}</span>
+              <span className="font-semibold text-ink-900">{label}</span>
             ) : (
-              <Link href={href} className="hover:text-charcoal transition-colors font-medium">{label}</Link>
+              <Link href={href} className="hover:text-ink-900 transition-colors font-medium">{label}</Link>
             )}
           </Fragment>
         );

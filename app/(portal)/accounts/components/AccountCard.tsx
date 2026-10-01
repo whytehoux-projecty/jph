@@ -124,9 +124,9 @@ export function AccountCard({
       case "savings":
         return "gold";
       case "credit":
-        return "charcoal";
+        return "ink-900";
       default:
-        return "charcoal";
+        return "ink-900";
     }
   };
 
@@ -137,7 +137,7 @@ export function AccountCard({
       : 0;
 
   return (
-    <Card className="rounded-none hover:shadow-vintage-lg transition-all duration-300 group hover:-translate-y-1">
+    <Card className="rounded-none hover:shadow-lg transition-all duration-300 group hover:-translate-y-1">
       {/* Header */}
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/40 bg-muted/10">
         <div className="flex items-center gap-3">
@@ -147,7 +147,7 @@ export function AccountCard({
             size="md"
           />
           <div>
-            <h3 className="font-semibold text-charcoal text-base">
+            <h3 className="font-semibold text-ink-900 text-base">
               {account.name}
             </h3>
             <p className="text-xs text-muted-foreground font-mono">
@@ -196,7 +196,7 @@ export function AccountCard({
               )}
             </span>
             {account.interestRate !== "0.00%" && (
-              <span className="text-xs text-vintage-green font-medium bg-vintage-green/10 px-2 py-0.5 rounded-full">
+              <span className="text-xs text-pine-700 font-medium bg-pine-700/10 px-2 py-0.5 rounded-full">
                 {account.interestRate} APY
               </span>
             )}
@@ -210,7 +210,7 @@ export function AccountCard({
               <div className="h-1.5 w-full bg-secondary rounded-none overflow-hidden">
                 <div
                   className={`h-full rounded-none transition-all duration-500 ${
-                    utilization > 80 ? "bg-red-500" : "bg-vintage-green"
+                    utilization > 80 ? "bg-red-500" : "bg-pine-700"
                   }`}
                   style={{ width: `${utilization}%` }}
                 />
@@ -255,19 +255,19 @@ export function AccountCard({
                   className="flex items-center justify-between text-sm group/tx">
                   <div className="flex items-center gap-2 overflow-hidden">
                     <div
-                      className={`p-1 rounded-full ${tx.type === "credit" ? "bg-vintage-green/10 text-vintage-green" : "bg-slate-100 text-slate-500"}`}>
+                      className={`p-1 rounded-full ${tx.type === "credit" ? "bg-pine-700/10 text-pine-700" : "bg-slate-100 text-slate-500"}`}>
                       {tx.type === "credit" ? (
                         <ArrowDownLeft className="w-3 h-3" />
                       ) : (
                         <ArrowUpRight className="w-3 h-3" />
                       )}
                     </div>
-                    <span className="truncate text-charcoal/80 group-hover/tx:text-charcoal transition-colors">
+                    <span className="truncate text-ink-900/80 group-hover/tx:text-ink-900 transition-colors">
                       {tx.description}
                     </span>
                   </div>
                   <span
-                    className={`font-mono font-medium whitespace-nowrap ${tx.type === "credit" ? "text-vintage-green" : "text-charcoal"}`}>
+                    className={`font-mono font-medium whitespace-nowrap ${tx.type === "credit" ? "text-pine-700" : "text-ink-900"}`}>
                     {tx.type === "credit" ? "+" : "-"}
                     {formatCurrency(
                       Math.abs(tx.amount),

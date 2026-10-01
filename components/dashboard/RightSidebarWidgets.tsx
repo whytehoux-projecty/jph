@@ -34,7 +34,7 @@ import { formatDistanceToNow } from "date-fns";
 
 export function FinancialTipWidget() {
   return (
-    <div className="p-4 bg-gradient-to-br from-amber-50 to-orange-50/30 rounded-2xl border border-amber-100 shadow-sm relative overflow-hidden group">
+    <div className="p-4 bg-linear-to-br from-amber-50 to-orange-50/30 rounded-2xl border border-amber-100 shadow-sm relative overflow-hidden group">
       <div className="absolute -right-4 -top-4 w-16 h-16 bg-amber-200/20 rounded-full blur-xl group-hover:bg-amber-300/30 transition-all duration-500" />
       <h4 className="text-xs font-bold mb-2 flex items-center gap-2 text-amber-900 tracking-tight">
         <div className="p-1.5 bg-amber-100 text-amber-600 rounded-lg">
@@ -159,8 +159,8 @@ export function CreditScoreWidget() {
   const change = scoreData?.change || 12;
 
   return (
-    <div className="p-5 rounded-2xl bg-[conic-gradient(at_top_right,_var(--tw-gradient-stops))] from-slate-900 via-slate-800 to-slate-900 text-white shadow-[0_8px_20px_rgba(15,23,42,0.15)] border border-slate-700/50 group overflow-hidden relative">
-      <div className="absolute -inset-24 bg-gradient-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 rotate-12 pointer-events-none" />
+    <div className="p-5 rounded-2xl bg-[conic-gradient(at_top_right,var(--tw-gradient-stops))] from-slate-900 via-slate-800 to-slate-900 text-white shadow-[0_8px_20px_rgba(15,23,42,0.15)] border border-slate-700/50 group overflow-hidden relative">
+      <div className="absolute -inset-24 bg-linear-to-b from-white/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-1000 rotate-12 pointer-events-none" />
       
       <div className="flex justify-between items-start mb-4 relative z-10">
         <div className="flex items-center gap-2">
@@ -178,7 +178,7 @@ export function CreditScoreWidget() {
         </Badge>
       </div>
       <div className="flex items-end gap-2 mb-1.5 relative z-10">
-        <span className="text-4xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-gradient-to-br from-white to-slate-400">{score}</span>
+        <span className="text-4xl font-extrabold tracking-tighter bg-clip-text text-transparent bg-linear-to-br from-white to-slate-400">{score}</span>
         <span className="text-xs text-emerald-400 mb-2 flex items-center font-medium bg-emerald-400/10 px-1.5 py-0.5 rounded text-[10px]">
           +{change} pts <TrendingUp className="h-2.5 w-2.5 ml-1" />
         </span>

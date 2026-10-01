@@ -9,22 +9,22 @@ export function SecurityNoticeBanner() {
     if (!isVisible) return null;
 
     return (
-        <div className="bg-heritage-navy/5 border-b border-heritage-navy/20">
+        <div className="bg-ink-900/5 border-b border-ink-900/20">
             <div className="container mx-auto px-4 max-w-7xl">
                 <div className="flex items-center justify-between gap-4 py-3">
                     <div className="flex items-center gap-3">
-                        <Shield className="w-5 h-5 text-heritage-navy flex-shrink-0" />
-                        <p className="text-sm text-charcoal">
+                        <Shield className="w-5 h-5 text-ink-900 shrink-0" />
+                        <p className="text-sm text-ink-900">
                             <span className="font-semibold">Important Security Notice:</span>{' '}
                             Heritage Trust will never ask for your password, PIN, or OTP via email or phone.{' '}
-                            <a href="/security" className="text-heritage-navy hover:text-heritage-navy-dark font-semibold underline">
+                            <a href="/security" className="text-ink-900 hover:text-ink-900 font-semibold underline">
                                 Learn more about staying safe
                             </a>
                         </p>
                     </div>
                     <button
                         onClick={() => setIsVisible(false)}
-                        className="text-charcoal-lighter hover:text-charcoal transition-colors flex-shrink-0"
+                        className="text-ink-500er hover:text-ink-900 transition-colors shrink-0"
                         aria-label="Dismiss notice"
                     >
                         <X className="w-5 h-5" />

@@ -42,7 +42,7 @@ export default function ServiceUnavailablePage() {
                     </div>
 
                     {/* Title */}
-                    <h1 className="text-3xl md:text-4xl font-playfair font-bold text-charcoal mb-4">
+                    <h1 className="text-3xl md:text-4xl font-display font-bold text-ink-900 mb-4">
                         Digital Banking Portal Unavailable
                     </h1>
 
@@ -70,14 +70,14 @@ export default function ServiceUnavailablePage() {
                         <button
                             onClick={checkServiceStatus}
                             disabled={isChecking}
-                            className="inline-flex items-center justify-center h-12 px-6 text-sm font-semibold rounded-none bg-[color:var(--heritage-navy)] text-white hover:bg-[color:var(--heritage-navy-mid)] transition-all shadow-md disabled:opacity-50"
+                            className="inline-flex items-center justify-center h-12 px-6 text-sm font-semibold rounded-none bg-(--heritage-navy) text-white hover:bg-(--heritage-navy-mid) transition-all shadow-md disabled:opacity-50"
                         >
                             <RefreshCw className={`w-4 h-4 mr-2 ${isChecking ? 'animate-spin' : ''}`} />
                             {isChecking ? 'Checking...' : 'Check Status Again'}
                         </button>
                         <Link
                             href={ROUTES.home}
-                            className="inline-flex items-center justify-center h-12 px-6 text-sm font-semibold rounded-none bg-transparent text-[color:var(--heritage-navy)] border-2 border-[color:var(--heritage-navy)] hover:bg-[color:var(--heritage-navy)] hover:text-white transition-all"
+                            className="inline-flex items-center justify-center h-12 px-6 text-sm font-semibold rounded-none bg-transparent text-(--heritage-navy) border-2 border-(--heritage-navy) hover:bg-(--heritage-navy) hover:text-white transition-all"
                         >
                             <Home className="w-4 h-4 mr-2" />
                             Return to Homepage
@@ -98,19 +98,19 @@ export default function ServiceUnavailablePage() {
                         </h3>
                         <div className="grid md:grid-cols-2 gap-4 text-left">
                             <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
-                                <Phone className="w-5 h-5 text-[color:var(--heritage-navy)] mt-0.5 shrink-0" />
+                                <Phone className="w-5 h-5 text-(--heritage-navy) mt-0.5 shrink-0" />
                                 <div>
                                     <h4 className="font-semibold text-charcoal text-sm mb-0.5">24/7 Telephone Banking</h4>
-                                    <a href={`tel:${BANK_INFO.phone}`} className="text-xs text-charcoal-light hover:text-[color:var(--heritage-navy)] transition-colors">
+                                    <a href={`tel:${BANK_INFO.phone}`} className="text-xs text-charcoal-light hover:text-(--heritage-navy) transition-colors">
                                         {BANK_INFO.phone}
                                     </a>
                                 </div>
                             </div>
                             <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg">
-                                <Mail className="w-5 h-5 text-[color:var(--heritage-navy)] mt-0.5 shrink-0" />
+                                <Mail className="w-5 h-5 text-(--heritage-navy) mt-0.5 shrink-0" />
                                 <div>
                                     <h4 className="font-semibold text-charcoal text-sm mb-0.5">Direct Client Support</h4>
-                                    <a href={`mailto:${BANK_INFO.email}`} className="text-xs text-charcoal-light hover:text-[color:var(--heritage-navy)] transition-colors">
+                                    <a href={`mailto:${BANK_INFO.email}`} className="text-xs text-charcoal-light hover:text-(--heritage-navy) transition-colors">
                                         {BANK_INFO.email}
                                     </a>
                                 </div>

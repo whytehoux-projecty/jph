@@ -33,10 +33,10 @@ export function EBankingWidget({ className = '' }: EBankingWidgetProps) {
         <div className={`bg-white/70 backdrop-blur-xl rounded-xl shadow-2xl border border-white/30 p-6 ${className}`}>
             {/* Header */}
             <div className="mb-6">
-                <h3 className="text-xl font-playfair font-bold text-charcoal mb-2">
+                <h3 className="text-xl font-display font-bold text-ink-900 mb-2">
                     Heritage Vault
                 </h3>
-                <p className="text-sm text-charcoal-light">
+                <p className="text-sm text-ink-500">
                     Secure digital banking by Heritage Trust
                 </p>
             </div>
@@ -46,8 +46,8 @@ export function EBankingWidget({ className = '' }: EBankingWidgetProps) {
                 <button
                     onClick={() => setAccountType('personal')}
                     className={`flex-1 px-3 py-2 text-sm font-semibold rounded-none transition-all ${accountType === 'personal'
-                        ? 'bg-heritage-navy text-white'
-                        : 'bg-off-white text-charcoal-light hover:bg-faded-gray-light'
+                        ? 'bg-ink-900 text-white'
+                        : 'bg-paper-50 text-ink-500 hover:bg-paper-300'
                         }`}
                 >
                     Personal
@@ -55,8 +55,8 @@ export function EBankingWidget({ className = '' }: EBankingWidgetProps) {
                 <button
                     onClick={() => setAccountType('business')}
                     className={`flex-1 px-3 py-2 text-sm font-semibold rounded-none transition-all ${accountType === 'business'
-                        ? 'bg-heritage-navy text-white'
-                        : 'bg-off-white text-charcoal-light hover:bg-faded-gray-light'
+                        ? 'bg-ink-900 text-white'
+                        : 'bg-paper-50 text-ink-500 hover:bg-paper-300'
                         }`}
                 >
                     Business
@@ -64,8 +64,8 @@ export function EBankingWidget({ className = '' }: EBankingWidgetProps) {
                 <button
                     onClick={() => setAccountType('corporate')}
                     className={`flex-1 px-3 py-2 text-sm font-semibold rounded-none transition-all ${accountType === 'corporate'
-                        ? 'bg-heritage-navy text-white'
-                        : 'bg-off-white text-charcoal-light hover:bg-faded-gray-light'
+                        ? 'bg-ink-900 text-white'
+                        : 'bg-paper-50 text-ink-500 hover:bg-paper-300'
                         }`}
                 >
                     Corporate
@@ -76,11 +76,11 @@ export function EBankingWidget({ className = '' }: EBankingWidgetProps) {
             <form onSubmit={handleSubmit} className="space-y-4">
                 {/* Account Number */}
                 <div>
-                    <label htmlFor="widget-account" className="block text-sm font-semibold text-charcoal mb-2">
+                    <label htmlFor="widget-account" className="block text-sm font-semibold text-ink-900 mb-2">
                         Account Number
                     </label>
                     <div className="relative">
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-lighter">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-500er">
                             <User className="w-5 h-5" />
                         </div>
                         <input
@@ -91,18 +91,18 @@ export function EBankingWidget({ className = '' }: EBankingWidgetProps) {
                             onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value.replace(/\D/g, '') })}
                             maxLength={12}
                             disabled={isChecking}
-                            className="w-full h-12 pl-11 pr-4 rounded-none border border-faded-gray bg-white text-charcoal placeholder:text-charcoal-lighter focus:outline-none focus:ring-2 focus:ring-heritage-navy focus:border-transparent transition-all disabled:opacity-50"
+                            className="w-full h-12 pl-11 pr-4 rounded-none border border-paper-300 bg-white text-ink-900 placeholder:text-ink-500er focus:outline-none focus:ring-2 focus:ring-ink-900 focus:border-transparent transition-all disabled:opacity-50"
                         />
                     </div>
                 </div>
 
                 {/* Password */}
                 <div>
-                    <label htmlFor="widget-password" className="block text-sm font-semibold text-charcoal mb-2">
+                    <label htmlFor="widget-password" className="block text-sm font-semibold text-ink-900 mb-2">
                         Password
                     </label>
                     <div className="relative">
-                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-charcoal-lighter">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-ink-500er">
                             <Lock className="w-5 h-5" />
                         </div>
                         <input
@@ -112,13 +112,13 @@ export function EBankingWidget({ className = '' }: EBankingWidgetProps) {
                             value={formData.password}
                             onChange={(e) => setFormData({ ...formData, password: e.target.value })}
                             disabled={isChecking}
-                            className="w-full h-12 pl-11 pr-12 rounded-none border border-faded-gray bg-white text-charcoal placeholder:text-charcoal-lighter focus:outline-none focus:ring-2 focus:ring-heritage-navy focus:border-transparent transition-all disabled:opacity-50"
+                            className="w-full h-12 pl-11 pr-12 rounded-none border border-paper-300 bg-white text-ink-900 placeholder:text-ink-500er focus:outline-none focus:ring-2 focus:ring-ink-900 focus:border-transparent transition-all disabled:opacity-50"
                         />
                         <button
                             type="button"
                             onClick={() => setShowPassword(!showPassword)}
                             disabled={isChecking}
-                            className="absolute right-3 top-1/2 -translate-y-1/2 text-charcoal-lighter hover:text-charcoal transition-colors disabled:opacity-50"
+                            className="absolute right-3 top-1/2 -translate-y-1/2 text-ink-500er hover:text-ink-900 transition-colors disabled:opacity-50"
                         >
                             {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
                         </button>
@@ -133,15 +133,15 @@ export function EBankingWidget({ className = '' }: EBankingWidgetProps) {
                             checked={formData.rememberMe}
                             onChange={(e) => setFormData({ ...formData, rememberMe: e.target.checked })}
                             disabled={isChecking}
-                            className="w-4 h-4 rounded border-faded-gray text-heritage-navy focus:ring-heritage-navy disabled:opacity-50"
+                            className="w-4 h-4 rounded border-paper-300 text-ink-900 focus:ring-ink-900 disabled:opacity-50"
                         />
-                        <span className="text-sm text-charcoal-light">Remember me</span>
+                        <span className="text-sm text-ink-500">Remember me</span>
                     </label>
                     <button
                         type="button"
                         onClick={() => { window.location.href = `${process.env.NEXT_PUBLIC_PORTAL_URL || 'http://localhost:4000'}/forgot-password`; }}
                         disabled={isChecking}
-                        className="text-sm text-heritage-navy hover:text-heritage-navy-dark transition-colors disabled:opacity-50"
+                        className="text-sm text-ink-900 hover:text-ink-900 transition-colors disabled:opacity-50"
                     >
                         Forgot password?
                     </button>
@@ -151,16 +151,16 @@ export function EBankingWidget({ className = '' }: EBankingWidgetProps) {
                 <button
                     type="submit"
                     disabled={isChecking}
-                    className="w-full h-12 bg-heritage-navy text-white font-semibold rounded-none hover:bg-heritage-navy-dark transition-all shadow-vintage hover:shadow-vintage-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                    className="w-full h-12 bg-ink-900 text-white font-semibold rounded-none hover:bg-ink-900 transition-all shadow-vintage hover:shadow-lg hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                     {isChecking ? 'Connecting...' : 'Sign In to Your Account'}
                 </button>
 
                 {/* Registration Link */}
-                <div className="text-center pt-4 border-t border-faded-gray-light">
-                    <p className="text-sm text-charcoal-light">
+                <div className="text-center pt-4 border-t border-paper-300">
+                    <p className="text-sm text-ink-500">
                         Not registered?{' '}
-                        <a href="/apply" className="text-heritage-navy hover:text-heritage-navy-dark font-semibold transition-colors">
+                        <a href="/apply" className="text-ink-900 hover:text-ink-900 font-semibold transition-colors">
                             Open an account →
                         </a>
                     </p>

@@ -133,7 +133,7 @@ export default function BeneficiariesClient({ initialBeneficiaries }: { initialB
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 border-b border-border pb-6">
                 <div>
-                    <h1 className="text-3xl font-playfair font-bold text-charcoal">Beneficiaries</h1>
+                    <h1 className="text-3xl font-display font-bold text-ink-900">Beneficiaries</h1>
                     <p className="text-muted-foreground mt-1">Manage trusted contacts for faster transfers.</p>
                 </div>
 
@@ -194,19 +194,19 @@ export default function BeneficiariesClient({ initialBeneficiaries }: { initialB
                             <CardHeader className="flex flex-row items-start justify-between pb-2 space-y-0">
                                 <div className="flex items-center gap-3">
                                     <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
-                                        <AvatarFallback className="bg-vintage-green/10 text-vintage-green font-bold text-lg">
+                                        <AvatarFallback className="bg-pine-700/10 text-pine-700 font-bold text-lg">
                                             {beneficiary.name.charAt(0)}
                                         </AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        <CardTitle className="text-base font-semibold text-charcoal">{beneficiary.name}</CardTitle>
+                                        <CardTitle className="text-base font-semibold text-ink-900">{beneficiary.name}</CardTitle>
                                         <p className="text-xs text-muted-foreground">{beneficiary.nickname || rail?.displayName}</p>
                                     </div>
                                 </div>
                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <Button
                                         variant="ghost"
-                                        className="h-8 w-8 p-0 text-muted-foreground hover:text-[color:var(--heritage-navy)] flex items-center justify-center"
+                                        className="h-8 w-8 p-0 text-muted-foreground hover:text-ink-900 flex items-center justify-center"
                                         onClick={() => { setEditingId(beneficiary.id); setIsDialogOpen(true); }}
                                     >
                                         <Edit2 className="w-4 h-4" />
@@ -226,14 +226,14 @@ export default function BeneficiariesClient({ initialBeneficiaries }: { initialB
                                         <span className="flex items-center gap-2 text-muted-foreground">
                                             <Globe className="w-4 h-4" /> Method
                                         </span>
-                                        <span className="font-medium text-charcoal">{rail?.displayName}</span>
+                                        <span className="font-medium text-ink-900">{rail?.displayName}</span>
                                     </div>
                                     <div className="flex items-center justify-between text-sm">
                                         <span className="flex items-center gap-2 text-muted-foreground">
                                             <CreditCard className="w-4 h-4" /> Identifier
                                         </span>
                                         <div className="flex items-center gap-2">
-                                            <span className="font-mono text-charcoal bg-gray-50 px-2 py-0.5 rounded border border-gray-100 text-xs">
+                                            <span className="font-mono text-ink-900 bg-gray-50 px-2 py-0.5 rounded border border-gray-100 text-xs">
                                                 {isRevealed ? displayAccount : maskedAccount}
                                             </span>
                                             <button onClick={() => toggleReveal(beneficiary.id)} className="text-muted-foreground hover:text-slate-900 transition-colors">
@@ -251,7 +251,7 @@ export default function BeneficiariesClient({ initialBeneficiaries }: { initialB
                                         <Button
                                             size="small"
                                             variant="outline"
-                                            className="text-xs h-8 ml-auto hover:bg-vintage-green hover:text-white hover:border-vintage-green transition-colors gap-1"
+                                            className="text-xs h-8 ml-auto hover:bg-pine-700 hover:text-white hover:border-pine-700 transition-colors gap-1"
                                         >
                                             Transfer <Send className="w-3 h-3 ml-1" />
                                         </Button>
@@ -266,7 +266,7 @@ export default function BeneficiariesClient({ initialBeneficiaries }: { initialB
                     <div className="w-16 h-16 bg-gray-50 rounded-full flex items-center justify-center mx-auto mb-4">
                         <User className="w-8 h-8 text-gray-300" />
                     </div>
-                    <h3 className="text-lg font-medium text-charcoal">No beneficiaries found</h3>
+                    <h3 className="text-lg font-medium text-ink-900">No beneficiaries found</h3>
                     <p className="text-muted-foreground max-w-sm mx-auto mt-2 mb-6">
                         Add people or businesses you frequently transfer money to.
                     </p>

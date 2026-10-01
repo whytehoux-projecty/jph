@@ -323,9 +323,9 @@ export default function AccountsClient({ initialAccounts, userPreferences, pendi
       case "savings":
         return "gold";
       case "credit":
-        return "charcoal";
+        return "ink-900";
       default:
-        return "charcoal";
+        return "ink-900";
     }
   };
 
@@ -387,9 +387,9 @@ export default function AccountsClient({ initialAccounts, userPreferences, pendi
   const renderEmptyState = () => (
     <div className="text-center py-16 bg-muted/20 rounded-xl border border-dashed border-muted-foreground/20">
       <div className="mx-auto w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mb-4">
-        <Landmark className="w-8 h-8 text-muted-foreground stroke-[2]" />
+        <Landmark className="w-8 h-8 text-muted-foreground stroke-2" />
       </div>
-      <h3 className="text-xl font-medium text-charcoal mb-2">
+      <h3 className="text-xl font-medium text-ink-900 mb-2">
         No Accounts Found
       </h3>
       <p className="text-muted-foreground max-w-md mx-auto mb-6">
@@ -455,7 +455,7 @@ export default function AccountsClient({ initialAccounts, userPreferences, pendi
       {/* Page Header — not sticky, scrolls away */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
         <div>
-          <h1 className="text-3xl font-playfair font-bold text-charcoal">
+          <h1 className="text-3xl font-display font-bold text-ink-900">
             My Accounts
           </h1>
           <p className="text-muted-foreground mt-1">
@@ -467,13 +467,13 @@ export default function AccountsClient({ initialAccounts, userPreferences, pendi
             variant="outline"
             onClick={() => window.location.reload()}
             disabled={isLoading}>
-            <RefreshCw className={`w-4 h-4 mr-2 stroke-[2] ${isLoading ? "animate-spin" : ""}`} />
+            <RefreshCw className={`w-4 h-4 mr-2 stroke-2 ${isLoading ? "animate-spin" : ""}`} />
             Refresh
           </Button>
           <Button
-            className="bg-[color:var(--heritage-navy)] hover:bg-[color:var(--heritage-navy)]/90 text-white"
+            className="bg-ink-900 hover:bg-ink-900/90 text-white"
             onClick={() => setIsOpenAccountOpen(true)}>
-            <Plus className="w-4 h-4 mr-2 stroke-[2]" />
+            <Plus className="w-4 h-4 mr-2 stroke-2" />
             Open Account
           </Button>
         </div>
