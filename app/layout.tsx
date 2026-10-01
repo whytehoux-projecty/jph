@@ -5,11 +5,11 @@ import { Toaster } from "sonner";
 
 export const metadata: Metadata = {
   title: {
-    default: "Heritage Vault | JP Heritage Bank",
+    default: "Heritage Vault | Heritage Trust Bank",
     template: "%s | Heritage Vault",
   },
   description:
-    "Heritage Vault — secure digital banking by JP Heritage Bank. Manage accounts, transfer funds, pay bills, and more.",
+    "Heritage Vault — secure digital banking by Heritage Trust Bank. Manage accounts, transfer funds, pay bills, and more.",
   manifest: "/manifest.json",
   icons: {
     icon: [

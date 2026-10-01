@@ -1,80 +1,42 @@
+import type { Metadata } from 'next';
+import Link from 'next/link';
 import {
     CheckCircle, Building2, Briefcase, TrendingUp,
-    Users, Globe, ArrowRight, Shield,
-    BarChart3, Landmark, PiggyBank, Truck
+    Globe, ArrowRight, Shield, Truck, HeartHandshake
 } from 'lucide-react';
-import Link from 'next/link';
-import { ROUTES, BANK_INFO } from '@/lib/constants';
+import { ROUTES } from '@/lib/constants';
+import { BRAND, RATES, PRODUCTS } from '@/src/content/facts';
+import { Button } from '@/components/commercial-ui/Button';
+import { Figure } from '@/components/commercial-ui/Figure';
+import { DisclosureBlock } from '@/components/commercial-ui/Footnote';
 
-export const metadata = {
+export const metadata: Metadata = {
     title: 'Business Banking',
-    description: 'JP Heritage Bank business banking — commercial checking, merchant services, business loans, and treasury management for businesses of every size.',
+    description: `${BRAND.legalName} business banking — commercial checking, merchant services, business loans, and treasury management for businesses of every size.`,
+    openGraph: {
+        images: [{ url: '/images/og-default.png', width: 1200, height: 630, alt: BRAND.shortName }],
+    },
+    twitter: { card: 'summary_large_image' },
 };
 
-const services = [
+const caseStudies = [
     {
-        icon: Building2,
-        name: 'Business Checking',
-        tagline: 'The foundation of your business finances.',
-        highlight: '$0 Monthly Fee*',
-        color: 'from-[#0D2545] to-[#1B355B]',
-        features: [
-            'No monthly fee for first 12 months (then $15, waivable)',
-            '500 free transactions per month',
-            'Same-day ACH origination',
-            'Dedicated business debit cards for each authorized user',
-            'Positive Pay fraud protection included',
-            'QuickBooks® and Xero® direct integration',
-        ],
-        cta: 'Open Business Account',
+        company: 'Vantage Tech Solutions',
+        sector: 'Software/SaaS',
+        result: 'Secured a $1.8M growth line of credit in 5 business days, enabling a critical infrastructure expansion that tripled ARR.',
+        size: '45 Employees',
     },
     {
-        icon: BarChart3,
-        name: 'Merchant Services',
-        tagline: 'Accept every payment. Never miss a sale.',
-        highlight: '0.15% + $0.08/txn',
-        color: 'from-[#B8960C] to-[#8A6F07]',
-        features: [
-            'In-person, online, and mobile payment acceptance',
-            'Next-day funding — guaranteed',
-            'Virtual terminal for phone and mail orders',
-            'Recurring billing and invoicing engine',
-            'Level 1 PCI-DSS compliance included',
-            'Dedicated merchant support line, 7 days a week',
-        ],
-        cta: 'Set Up Merchant Services',
+        company: 'Meridian Restaurant Group',
+        sector: 'Hospitality',
+        result: `Cut payment processing costs by 34% and eliminated week-long funding delays using ${BRAND.shortName} Merchant Services.`,
+        size: '12 Locations',
     },
     {
-        icon: Landmark,
-        name: 'Business Loans & Lines',
-        tagline: 'Capital when and where you need it most.',
-        highlight: 'Up to $5M',
-        color: 'from-[#152D50] to-[#0D2545]',
-        features: [
-            'Term loans from $25,000 to $5,000,000',
-            'Business lines of credit: revolving, up to $2M',
-            'SBA 7(a) and 504 loan programs available',
-            'Equipment financing with up to 100% LTV',
-            'Commercial real estate mortgages at competitive rates',
-            'Decisions in as little as 48 hours for qualified businesses',
-        ],
-        cta: 'Explore Business Lending',
-    },
-    {
-        icon: Users,
-        name: 'Payroll & HR Banking',
-        tagline: 'Pay your team on time, every time.',
-        highlight: 'Full-Service',
-        color: 'from-[#091C38] to-[#152D50]',
-        features: [
-            'Integrated payroll processing for W-2 and 1099 workers',
-            'Same-day or next-day direct deposit',
-            'Tax filing and remittance — automated',
-            'Multi-state payroll support',
-            'Benefits and HSA account management',
-            'Compliance reporting and audit-ready record keeping',
-        ],
-        cta: 'Set Up Payroll Services',
+        company: 'Crown Construction LLC',
+        sector: 'Commercial Construction',
+        result: `Streamlined draw management for a $22M commercial project through ${BRAND.shortName}'s integrated construction lending portal.`,
+        size: '$40M Revenue',
     },
 ];
 
@@ -83,153 +45,68 @@ const industries = [
     { icon: Globe, name: 'Import/Export & Trade', description: 'Letters of credit, trade finance, and multi-currency accounts for international commerce.' },
     { icon: Building2, name: 'Real Estate & Construction', description: 'Construction draw loans, bridge financing, and property management banking solutions.' },
     { icon: Briefcase, name: 'Professional Services', description: 'IOLTA accounts, trust management, and specialized banking for law, healthcare, and accounting firms.' },
-    { icon: TrendingUp, name: 'Technology & Startups', description: 'Venture debt, SVB-replacement banking, and equity-linked credit facilities for growth-stage companies.' },
-    { icon: PiggyBank, name: 'Non-Profit Organizations', description: 'Zero-fee accounts, grant management tools, and CDFI lending for mission-driven organizations.' },
-];
-
-const caseStudies = [
-    {
-        company: 'Meridian Restaurant Group',
-        sector: 'Hospitality',
-        result: 'Cut payment processing costs by 34% and eliminated week-long funding delays using JP Heritage Merchant Services.',
-        size: '12 Locations',
-    },
-    {
-        company: 'Vantage Tech Solutions',
-        sector: 'Software/SaaS',
-        result: 'Secured a $1.8M growth line of credit in 5 business days, enabling a critical infrastructure expansion that tripled ARR.',
-        size: '45 Employees',
-    },
-    {
-        company: 'Crown Construction LLC',
-        sector: 'Commercial Construction',
-        result: 'Streamlined draw management for a $22M commercial project through JP Heritage\'s integrated construction lending portal.',
-        size: '$40M Revenue',
-    },
+    { icon: TrendingUp, name: 'Technology & Growth', description: 'Venture debt and equity-linked credit facilities for growth-stage companies.' },
+    { icon: HeartHandshake, name: 'Non-Profit Organizations', description: 'Zero-fee accounts and grant management tools for mission-driven organizations.' },
 ];
 
 export default function BusinessBankingPage() {
     return (
         <main>
-            {/* Hero */}
-            <section className="relative py-24 bg-[#0D2545] overflow-hidden">
-                <div className="absolute inset-0 opacity-5" style={{ backgroundImage: 'radial-gradient(circle at 2px 2px, white 1px, transparent 0)', backgroundSize: '40px 40px' }} />
-                <div className="absolute left-0 bottom-0 w-[500px] h-[400px] bg-[#B8960C]/10 blur-3xl rounded-full" />
-                <div className="container mx-auto px-6 max-w-7xl relative z-10">
+            {/* ── HERO ──────────────────────────────────────────────────── */}
+            <section className="py-24 bg-paper-100 border-b border-paper-200">
+                <div className="container mx-auto px-6 max-w-7xl">
                     <div className="grid md:grid-cols-2 gap-12 items-center">
                         <div className="animate-fade-in-up">
-                            <p className="text-sm font-semibold text-[#D4AF7A] uppercase tracking-widest mb-4">Business Banking</p>
-                            <h1 className="text-4xl md:text-6xl font-bold text-white leading-tight mb-6">
-                                The Bank That Works as Hard as Your Business.
+                            <p className="label-mono text-vermilion-600 mb-4">Business Banking</p>
+                            <h1 className="font-display text-display-lg text-ink-900 leading-tight mb-6 text-balance">
+                                A banking partner, not just a bank.
                             </h1>
-                            <p className="text-lg text-white/70 mb-8 leading-relaxed">
-                                From sole proprietors to mid-market enterprises, JP Heritage Bank delivers commercial banking relationships built on decades of sector expertise — not spreadsheets and scorecards.
+                            <p className="text-body-lg text-ink-700 mb-8 max-w-lg">
+                                From sole proprietors to mid-market enterprises, {BRAND.shortName} delivers commercial banking relationships built on decades of sector expertise — not spreadsheets and scorecards.
                             </p>
                             <div className="flex flex-col sm:flex-row gap-4">
-                                <Link href={ROUTES.apply} className="inline-flex items-center justify-center gap-2 h-12 px-8 font-semibold rounded-none bg-[#B8960C] hover:bg-[#D4AF7A] text-white transition-all hover:-translate-y-0.5 shadow-gold-glow">
-                                    Open Business Account
-                                    <ArrowRight className="w-4 h-4" />
-                                </Link>
-                                <Link href={ROUTES.contact} className="inline-flex items-center justify-center gap-2 h-12 px-8 font-semibold rounded-none border-2 border-white/25 text-white hover:bg-white/10 transition-all">
-                                    Speak with a Relationship Manager
-                                </Link>
+                                <Button as="a" href={ROUTES.apply} variant="primary" size="lg">
+                                    Open a business account
+                                </Button>
+                                <Button as="a" href={ROUTES.contact} variant="secondary" size="lg">
+                                    Speak with an advisor
+                                </Button>
                             </div>
                         </div>
-                        <div className="animate-fade-in-up animate-delay-200">
-                            <div className="w-full aspect-[4/3] bg-[#1B355B] rounded-none flex items-center justify-center border border-white/10">
-                                <span className="text-sm text-white/40 text-center px-8">[ Image: Professional team reviewing financial reports in a modern office environment ]</span>
-                            </div>
+                        <div className="animate-fade-in-up animate-delay-200 relative aspect-[4/3] w-full rounded border border-paper-300 bg-paper-50 overflow-hidden shadow-sm">
+                            <picture className="absolute inset-0">
+                                <source srcSet="/images/new/business-hero.jpg" type="image/jpeg" />
+                                <img
+                                    src="/images/new/business-hero.jpg"
+                                    alt="Professional team in a modern office environment"
+                                    className="w-full h-full object-cover"
+                                    fetchPriority="high"
+                                />
+                            </picture>
+                            <div className="absolute inset-0 bg-ink-900/10 mix-blend-multiply" />
                         </div>
                     </div>
                 </div>
             </section>
 
-            {/* Services */}
-            <section className="py-24 bg-off-white">
+            {/* ── CLIENT SUCCESS (Moved up) ─────────────────────────────── */}
+            <section className="py-24 bg-paper-50 border-b border-paper-200">
                 <div className="container mx-auto px-6 max-w-7xl">
                     <div className="text-center mb-16">
-                        <p className="text-sm font-semibold text-[#B8960C] uppercase tracking-widest mb-3">Commercial Solutions</p>
-                        <h2 className="text-3xl md:text-4xl font-bold text-charcoal mb-4">Banking Built for Business</h2>
-                        <p className="text-charcoal-light max-w-2xl mx-auto">
-                            JP Heritage Bank goes beyond checking accounts. Our commercial bankers are sector specialists who understand your industry&apos;s unique cash flow dynamics.
-                        </p>
-                    </div>
-                    <div className="grid md:grid-cols-2 gap-6">
-                        {services.map((service) => {
-                            const Icon = service.icon;
-                            return (
-                                <div key={service.name} className="bg-white rounded-none overflow-hidden border border-gray-100 hover:shadow-vintage-lg transition-all group">
-                                    <div className={`bg-gradient-to-br ${service.color} p-6 text-white`}>
-                                        <div className="flex items-start justify-between mb-4">
-                                            <Icon className="w-8 h-8 text-[#D4AF7A]" />
-                                            <span className="text-xl font-bold text-[#D4AF7A] font-playfair">{service.highlight}</span>
-                                        </div>
-                                        <h3 className="text-xl font-bold font-playfair mb-1">{service.name}</h3>
-                                        <p className="text-white/70 text-sm">{service.tagline}</p>
-                                    </div>
-                                    <div className="p-6">
-                                        <ul className="space-y-3 mb-6">
-                                            {service.features.map((f) => (
-                                                <li key={f} className="flex items-start gap-3 text-sm text-charcoal-light">
-                                                    <CheckCircle className="w-4 h-4 text-[#0D2545] flex-shrink-0 mt-0.5" />
-                                                    {f}
-                                                </li>
-                                            ))}
-                                        </ul>
-                                        <Link href={ROUTES.apply} className="inline-flex items-center gap-2 text-sm font-semibold text-[#0D2545] hover:text-[#B8960C] transition-colors group/cta">
-                                            {service.cta}
-                                            <ArrowRight className="w-4 h-4 group-hover/cta:translate-x-1 transition-transform" />
-                                        </Link>
-                                    </div>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            </section>
-
-            {/* Industries */}
-            <section className="py-24 bg-white">
-                <div className="container mx-auto px-6 max-w-7xl">
-                    <div className="text-center mb-16">
-                        <p className="text-sm font-semibold text-[#B8960C] uppercase tracking-widest mb-3">Sector Expertise</p>
-                        <h2 className="text-3xl md:text-4xl font-bold text-charcoal mb-4">We Know Your Industry</h2>
-                        <p className="text-charcoal-light max-w-xl mx-auto">
-                            Specialized banking relationships mean we understand your business — not just your balance.
-                        </p>
-                    </div>
-                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-                        {industries.map(({ icon: Icon, name, description }) => (
-                            <div key={name} className="p-6 rounded-none border border-gray-100 hover:border-[#0D2545]/20 hover:shadow-vintage-md transition-all group">
-                                <div className="w-11 h-11 rounded-xl bg-[#0D2545]/8 group-hover:bg-[#0D2545] flex items-center justify-center mb-4 transition-colors">
-                                    <Icon className="w-5 h-5 text-[#0D2545] group-hover:text-white transition-colors" />
-                                </div>
-                                <h3 className="font-semibold text-charcoal mb-2">{name}</h3>
-                                <p className="text-sm text-charcoal-light leading-relaxed">{description}</p>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* Case studies */}
-            <section className="py-24 bg-[#F0F4FA]">
-                <div className="container mx-auto px-6 max-w-7xl">
-                    <div className="text-center mb-16">
-                        <p className="text-sm font-semibold text-[#B8960C] uppercase tracking-widest mb-3">Client Success</p>
-                        <h2 className="text-3xl md:text-4xl font-bold text-charcoal mb-4">Results That Speak for Themselves</h2>
+                        <p className="label-mono text-vermilion-600 mb-3">Client Success</p>
+                        <h2 className="font-display text-h2 text-ink-900 mb-4">Results that speak for themselves.</h2>
                     </div>
                     <div className="grid md:grid-cols-3 gap-6">
                         {caseStudies.map((cs) => (
-                            <div key={cs.company} className="bg-white p-8 rounded-none border border-gray-100 hover:shadow-vintage-lg transition-all">
-                                <div className="flex items-center gap-2 mb-4">
-                                    <span className="text-xs font-semibold bg-[#0D2545]/8 text-[#0D2545] px-3 py-1 rounded-full">{cs.sector}</span>
-                                    <span className="text-xs text-charcoal-lighter">{cs.size}</span>
+                            <div key={cs.company} className="bg-paper-100 p-8 rounded border border-paper-200 flex flex-col">
+                                <div className="flex items-center gap-3 mb-6">
+                                    <span className="label-mono text-ink-700 bg-paper-200 px-2 py-1 rounded">{cs.sector}</span>
+                                    <span className="text-small text-ink-500">{cs.size}</span>
                                 </div>
-                                <h3 className="font-bold text-charcoal mb-3 font-playfair">{cs.company}</h3>
-                                <p className="text-sm text-charcoal-light leading-relaxed">{cs.result}</p>
-                                <div className="mt-4 pt-4 border-t border-gray-100">
-                                    <Shield className="w-5 h-5 text-[#B8960C]" />
+                                <h3 className="font-display text-h4 text-ink-900 mb-3">{cs.company}</h3>
+                                <p className="text-body text-ink-700 flex-grow">{cs.result}</p>
+                                <div className="mt-6 pt-6 border-t border-paper-200">
+                                    <Shield className="w-5 h-5 text-pine-700" aria-hidden="true" />
                                 </div>
                             </div>
                         ))}
@@ -237,22 +114,195 @@ export default function BusinessBankingPage() {
                 </div>
             </section>
 
-            {/* CTA */}
-            <section className="py-20 bg-[#0D2545]">
-                <div className="container mx-auto px-6 max-w-4xl text-center">
-                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">Partner with JP Heritage Bank</h2>
-                    <p className="text-white/70 mb-8 max-w-xl mx-auto">
-                        Schedule a call with a dedicated relationship manager. No obligation. Just expert advice tailored to your business.
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link href={ROUTES.contact} className="inline-flex items-center justify-center gap-2 h-12 px-8 font-semibold rounded-none bg-[#B8960C] hover:bg-[#D4AF7A] text-white transition-all hover:-translate-y-0.5">
-                            Request a Consultation
-                            <ArrowRight className="w-4 h-4" />
-                        </Link>
-                        <Link href={ROUTES.apply} className="inline-flex items-center justify-center gap-2 h-12 px-8 font-semibold rounded-none border-2 border-white/25 text-white hover:bg-white/10 transition-all">
-                            Apply Online
-                        </Link>
+            {/* ── PRODUCTS ──────────────────────────────────────────────── */}
+            <section className="py-24 bg-paper-50 border-b border-paper-200">
+                <div className="container mx-auto px-6 max-w-3xl space-y-24">
+                    
+                    {/* Checking */}
+                    <div id="checking" className="scroll-mt-32">
+                        <h2 className="font-display text-h2 text-ink-900 mb-2">Business Checking</h2>
+                        <p className="text-body-lg text-ink-700 mb-6">The foundation of your business finances.</p>
+                        
+                        <div className="flex gap-12 mb-8 p-6 bg-paper-100 border border-paper-200 rounded">
+                            <Figure value="$0" label="Monthly fee for 12 months" footnoteRef={1} />
+                            <Figure value="500" label="Free transactions / mo" />
+                        </div>
+                        
+                        <ul className="space-y-3 mb-8">
+                            {[
+                                'Same-day ACH origination',
+                                'Dedicated business debit cards for each authorized user',
+                                'Positive Pay fraud protection included',
+                                'QuickBooks® and Xero® direct integration',
+                            ].map((feature) => (
+                                <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                    <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                    {feature}
+                                </li>
+                            ))}
+                        </ul>
+                        <Button as="a" href={ROUTES.apply} variant="primary">
+                            Open Business Checking
+                        </Button>
                     </div>
+
+                    <div className="hairline" />
+
+                    {/* Merchant Services */}
+                    <div id="merchant" className="scroll-mt-32">
+                        <h2 className="font-display text-h2 text-ink-900 mb-2">Merchant Services</h2>
+                        <p className="text-body-lg text-ink-700 mb-6">Accept every payment. Never miss a sale.</p>
+                        
+                        <div className="flex gap-12 mb-8 p-6 bg-paper-100 border border-paper-200 rounded">
+                            <Figure value="0.15%" label="Plus $0.08 per transaction" />
+                            <Figure value="24hr" label="Next-day funding" />
+                        </div>
+                        
+                        <ul className="space-y-3 mb-8">
+                            {[
+                                'In-person, online, and mobile payment acceptance',
+                                'Virtual terminal for phone and mail orders',
+                                'Recurring billing and invoicing engine',
+                                'Level 1 PCI-DSS compliance included',
+                                'Dedicated merchant support line, 7 days a week',
+                            ].map((feature) => (
+                                <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                    <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                    {feature}
+                                </li>
+                            ))}
+                        </ul>
+                        <Button as="a" href={ROUTES.contact} variant="secondary">
+                            Set Up Merchant Services
+                        </Button>
+                    </div>
+
+                    <div className="hairline" />
+
+                    {/* Business Lending */}
+                    <div id="lending" className="scroll-mt-32">
+                        <h2 className="font-display text-h2 text-ink-900 mb-2">Business Loans & Lines</h2>
+                        <p className="text-body-lg text-ink-700 mb-6">Capital when and where you need it most.</p>
+                        
+                        <div className="flex gap-12 mb-8 p-6 bg-paper-100 border border-paper-200 rounded">
+                            <Figure value="$5M" label="Maximum term loan" />
+                            <Figure value="48h" label="Decision timeline" />
+                        </div>
+                        
+                        <ul className="space-y-3 mb-8">
+                            {[
+                                'Term loans from $25,000 to $5,000,000',
+                                'Business lines of credit: revolving, up to $2M',
+                                'SBA 7(a) and 504 loan programs available',
+                                'Equipment financing with up to 100% LTV',
+                                'Commercial real estate mortgages at competitive rates',
+                            ].map((feature) => (
+                                <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                    <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                    {feature}
+                                </li>
+                            ))}
+                        </ul>
+                        <Button as="a" href={ROUTES.contact} variant="primary">
+                            Explore Business Lending
+                        </Button>
+                    </div>
+                    
+                    <div className="hairline" />
+
+                    {/* Payroll */}
+                    <div id="payroll" className="scroll-mt-32">
+                        <h2 className="font-display text-h2 text-ink-900 mb-2">Payroll & HR Banking</h2>
+                        <p className="text-body-lg text-ink-700 mb-6">Pay your team on time, every time.</p>
+                        
+                        <ul className="space-y-3 mb-8">
+                            {[
+                                'Integrated payroll processing for W-2 and 1099 workers',
+                                'Same-day or next-day direct deposit',
+                                'Tax filing and remittance — automated',
+                                'Multi-state payroll support',
+                                'Benefits and HSA account management',
+                                'Compliance reporting and audit-ready record keeping',
+                            ].map((feature) => (
+                                <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                    <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                    {feature}
+                                </li>
+                            ))}
+                        </ul>
+                        <Button as="a" href={ROUTES.contact} variant="secondary">
+                            Set Up Payroll Services
+                        </Button>
+                    </div>
+
+                    <div className="hairline" />
+
+                    {/* Treasury Management */}
+                    <div id="treasury" className="scroll-mt-32">
+                        <h2 className="font-display text-h2 text-ink-900 mb-2">Treasury Management</h2>
+                        <p className="text-body-lg text-ink-700 mb-6">Optimize cash flow and mitigate risk.</p>
+                        
+                        <ul className="space-y-3 mb-8">
+                            {[
+                                'Automated sweep accounts for idle cash',
+                                'Advanced liquidity management and forecasting',
+                                'Lockbox services for accelerated receivables',
+                                'Information reporting and EDI',
+                                'Custom API integration for ERP systems',
+                            ].map((feature) => (
+                                <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                    <CheckCircle className="w-5 h-5 text-pine-700 flex-shrink-0 mt-0.5" />
+                                    {feature}
+                                </li>
+                            ))}
+                        </ul>
+                        <Button as="a" href={ROUTES.contact} variant="secondary">
+                            Speak with a Treasury Advisor
+                        </Button>
+                    </div>
+
+                </div>
+            </section>
+
+            {/* ── INDUSTRIES ────────────────────────────────────────────── */}
+            <section className="py-24 bg-paper-100 border-b border-paper-200">
+                <div className="container mx-auto px-6 max-w-7xl">
+                    <div className="text-center mb-16 max-w-2xl mx-auto">
+                        <p className="label-mono text-vermilion-600 mb-3">Sector Expertise</p>
+                        <h2 className="font-display text-h2 text-ink-900 mb-4">We know your industry.</h2>
+                        <p className="text-body-lg text-ink-700">
+                            Specialized banking relationships mean we understand your business — not just your balance.
+                        </p>
+                    </div>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {industries.map(({ icon: Icon, name, description }) => (
+                            <Link
+                                key={name}
+                                href={ROUTES.contact}
+                                className="group p-6 rounded border border-paper-200 bg-paper-50 hover:border-ink-900 transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900 block"
+                            >
+                                <div className="w-10 h-10 rounded bg-paper-200 flex items-center justify-center mb-4 group-hover:bg-ink-900 transition-colors">
+                                    <Icon className="w-5 h-5 text-ink-900 group-hover:text-paper-50 transition-colors" aria-hidden="true" />
+                                </div>
+                                <h3 className="font-display text-h4 text-ink-900 mb-2 group-hover:text-vermilion-600 transition-colors">{name}</h3>
+                                <p className="text-small text-ink-700 leading-relaxed">{description}</p>
+                            </Link>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ── DISCLOSURES ───────────────────────────────────────────── */}
+            <section className="bg-paper-50 py-12">
+                <div className="container mx-auto px-6 max-w-7xl">
+                    <DisclosureBlock
+                        items={[
+                            {
+                                ref: 1,
+                                text: `Business Checking has $0 monthly maintenance fee for the first 12 statement cycles. After 12 months, a $15 monthly fee applies unless minimum balance requirements are met.`,
+                            },
+                        ]}
+                    />
                 </div>
             </section>
         </main>

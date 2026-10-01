@@ -88,7 +88,7 @@ export default function LoginPage() {
       <div className="absolute inset-0 z-0 bg-white">
         <Image
           src="/images/login-bg.webp"
-          alt="JP Heritage login background"
+          alt="Heritage Trust login background"
           fill
           className="object-cover"
           priority
@@ -103,7 +103,7 @@ export default function LoginPage() {
         <Link href="/" className="relative block shrink-0 w-[280px] h-[90px] sm:w-[360px] sm:h-[110px]">
           <Image
             src="/vault-login-logo.svg"
-            alt="JP Heritage"
+            alt="Heritage Trust"
             fill
             className="object-contain"
             priority

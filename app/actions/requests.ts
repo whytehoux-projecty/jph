@@ -57,7 +57,7 @@ export async function handleApproveRequest(formData: FormData) {
                 <br/>
                 <p>You will be required to set a permanent password and transaction PIN upon your first login. This temporary password will remain valid until you complete the setup.</p>
                 <a href="${baseUrl}/login" style="display: inline-block; padding: 10px 20px; background-color: #0b2545; color: #fff; text-decoration: none; border-radius: 5px; margin: 20px 0;">Log In to Heritage Vault</a>
-                <p>Best regards,<br/>JP Heritage Bank Team</p>
+                <p>Best regards,<br/>Heritage Trust Bank Team</p>
               </div>
           `
       });
@@ -93,7 +93,7 @@ export async function handleRejectRequest(formData: FormData) {
             <p>Your request for internet banking access could not be approved at this time.</p>
             ${reason ? `<p><strong>Reason:</strong> ${reason}</p>` : ''}
             <p>If you have any questions, please contact our support team.</p>
-            <p>Best regards,<br/>JP Heritage Bank Team</p>
+            <p>Best regards,<br/>Heritage Trust Bank Team</p>
           </div>
       `
   });

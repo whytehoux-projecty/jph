@@ -41,7 +41,7 @@ const FAQS = [
         id: '2',
         category: 'Transfers',
         question: 'How long do transfers take?',
-        answer: 'Internal transfers between JP Heritage accounts are instant. External transfers typically take 1-3 business days.',
+        answer: 'Internal transfers between Heritage Trust accounts are instant. External transfers typically take 1-3 business days.',
     },
     {
         id: '3',
@@ -151,8 +151,8 @@ export default function SupportClient() {
                             <h3 className="font-bold text-lg">Email Support</h3>
                             <p className="text-muted-foreground text-sm">Response within 24h</p>
                         </div>
-                        <p className="font-mono text-charcoal font-semibold">support@jpheritage.com</p>
-                        <Button variant="outline" size="small" className="w-full" onClick={() => { window.location.href = 'mailto:support@jpheritage.com'; }}>Send Email</Button>
+                        <p className="font-mono text-charcoal font-semibold">support@heritagetrust.com</p>
+                        <Button variant="outline" size="small" className="w-full" onClick={() => { window.location.href = 'mailto:support@heritagetrust.com'; }}>Send Email</Button>
                     </CardContent>
                 </Card>
             </div>

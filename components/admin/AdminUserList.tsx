@@ -746,7 +746,7 @@ export function AdminUserList({
                                       className="text-vintage-gold h-8"
                                       onClick={() => {
                                         const acc = selectedUser.accounts.find(a => a.id === stmt.accountId);
-                                        const content = `JP HERITAGE BANK - OFFICIAL ACCOUNT STATEMENT\n` +
+                                        const content = `HERITAGE TRUST BANK - OFFICIAL ACCOUNT STATEMENT\n` +
                                           `Statement Period: ${stmt.period}\n` +
                                           `Account Number: ${acc?.accountNumber || 'Primary Account'}\n` +
                                           `Customer Name: ${selectedUser.firstName} ${selectedUser.lastName}\n` +
@@ -754,7 +754,7 @@ export function AdminUserList({
                                           `Date Issued: ${format(new Date(stmt.generatedAt), 'PPpp')}\n` +
                                           `Current Balance: $${acc?.balance?.toLocaleString(undefined, { minimumFractionDigits: 2 }) || '0.00'}\n` +
                                           `Status: Verified / Official Copy\n\n` +
-                                          `For questions regarding this statement, please contact JP Heritage Bank Support.`;
+                                          `For questions regarding this statement, please contact Heritage Trust Bank Support.`;
                                         const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
                                         const url = URL.createObjectURL(blob);
                                         const a = document.createElement('a');

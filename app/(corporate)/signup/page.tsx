@@ -4,27 +4,21 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/commercial-ui/Button';
-import { Input } from '@/components/forms/Input';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/commercial-ui/Card';
-import { Lock, Mail, User, CreditCard, CheckCircle } from 'lucide-react';
+import { Lock, Mail, User, CreditCard, CheckCircle, ArrowRight, ShieldCheck } from 'lucide-react';
 import { requestOnlineAccess } from '@/app/(corporate)/actions';
+import { BRAND } from '@/src/content/facts';
 
 export default function SignupPage() {
     const router = useRouter();
     const [currentStep, setCurrentStep] = useState(1);
     const [formData, setFormData] = useState({
-        // Step 1: Account Verification
         accountNumber: '',
         ssn: '',
         dateOfBirth: '',
-
-        // Step 2: Personal Information
         firstName: '',
         lastName: '',
         email: '',
         phone: '',
-
-        // Step 3: Agreement
         agreeToTerms: false,
         agreeToPrivacy: false,
     });
@@ -32,65 +26,65 @@ export default function SignupPage() {
     const [isLoading, setIsLoading] = useState(false);
     const [success, setSuccess] = useState(false);
 
+    const updateField = (field: string, value: any) => {
+        setFormData(prev => ({ ...prev, [field]: value }));
+        if (errors[field]) {
+            setErrors(prev => {
+                const newErrors = { ...prev };
+                delete newErrors[field];
+                return newErrors;
+            });
+        }
+    };
+
     const validateStep1 = () => {
         const newErrors: Record<string, string> = {};
-
         if (!formData.accountNumber) {
             newErrors.accountNumber = 'Account number is required';
         } else if (!/^\d{10,12}$/.test(formData.accountNumber)) {
             newErrors.accountNumber = 'Account number must be 10-12 digits';
         }
-
         if (!formData.ssn) {
             newErrors.ssn = 'Last 4 digits of SSN are required';
         } else if (!/^\d{4}$/.test(formData.ssn)) {
             newErrors.ssn = 'Must be exactly 4 digits';
         }
-
         if (!formData.dateOfBirth) {
             newErrors.dateOfBirth = 'Date of birth is required';
         }
-
         return newErrors;
     };
 
     const validateStep2 = () => {
         const newErrors: Record<string, string> = {};
-
         if (!formData.firstName) newErrors.firstName = 'First name is required';
         if (!formData.lastName) newErrors.lastName = 'Last name is required';
-
         if (!formData.email) {
             newErrors.email = 'Email is required';
         } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
             newErrors.email = 'Invalid email format';
         }
-
         if (!formData.phone) {
             newErrors.phone = 'Phone number is required';
         } else if (!/^\d{10}$/.test(formData.phone.replace(/\D/g, ''))) {
             newErrors.phone = 'Phone number must be 10 digits';
         }
-
         return newErrors;
     };
 
     const validateStep3 = () => {
         const newErrors: Record<string, string> = {};
-
         if (!formData.agreeToTerms) {
             newErrors.agreeToTerms = 'You must agree to the terms and conditions';
         }
         if (!formData.agreeToPrivacy) {
             newErrors.agreeToPrivacy = 'You must agree to the privacy policy';
         }
-
         return newErrors;
     };
 
     const handleNext = () => {
         let newErrors: Record<string, string> = {};
-
         if (currentStep === 1) newErrors = validateStep1();
         else if (currentStep === 2) newErrors = validateStep2();
 
@@ -105,7 +99,6 @@ export default function SignupPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
         const newErrors = validateStep3();
         if (Object.keys(newErrors).length > 0) {
             setErrors(newErrors);
@@ -113,19 +106,15 @@ export default function SignupPage() {
         }
 
         setIsLoading(true);
-
         try {
             await requestOnlineAccess({
                 accountNumber: formData.accountNumber,
                 email: formData.email,
             });
-
             setSuccess(true);
         } catch (error: any) {
             console.error('Registration failed:', error);
-            setErrors({
-                submit: error.message || 'Registration failed. Please try again.'
-            });
+            setErrors({ submit: error.message || 'Registration failed. Please try again.' });
         } finally {
             setIsLoading(false);
         }
@@ -133,260 +122,208 @@ export default function SignupPage() {
 
     if (success) {
         return (
-            <main className="min-h-screen bg-gradient-to-br from-off-white to-warm-cream py-12 px-4 flex items-center justify-center">
-                <Card className="text-center p-12 shadow-vintage-lg border-none bg-white max-w-xl mx-auto">
-                    <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6 text-green-600">
-                        <CheckCircle className="w-10 h-10" />
+            <main className="min-h-screen bg-paper-100 flex items-center justify-center p-6 py-24">
+                <div className="max-w-xl w-full bg-paper-50 p-10 rounded border border-paper-200 text-center shadow-sm animate-fade-in-up">
+                    <div className="w-16 h-16 bg-paper-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                        <CheckCircle className="w-8 h-8 text-pine-700" aria-hidden="true" />
                     </div>
-                    <h1 className="text-3xl font-playfair font-bold text-charcoal mb-4">Application Received</h1>
-                    <p className="text-charcoal-light mb-8 text-lg">
-                        Your request for Internet Banking access has been submitted. Our team will review it shortly. Once approved, you will receive a secure email containing your temporary login credentials.
+                    <h1 className="font-display text-h2 text-ink-900 mb-4">Access Request Received</h1>
+                    <p className="text-body-lg text-ink-700 mb-8">
+                        Your request for {BRAND.vault} digital access has been submitted securely. Our team will verify your information shortly. Once approved, you will receive an email containing a secure link to create your password.
                     </p>
-                    <Button onClick={() => router.push('/')} variant="primary" size="lg">
-                        Return Home
+                    <Button onClick={() => router.push('/')} variant="primary" className="w-full sm:w-auto">
+                        Return to Homepage
                     </Button>
-                </Card>
+                </div>
             </main>
         );
     }
 
     return (
-        <main className="min-h-screen bg-gradient-to-br from-off-white to-warm-cream py-12 px-4">
-            <div className="container mx-auto max-w-4xl">
-                {/* Progress Steps */}
-                <div className="mb-8">
-                    <div className="flex items-center justify-between">
+        <main className="min-h-screen bg-paper-100 flex flex-col items-center justify-center p-6 py-24">
+            <div className="w-full max-w-xl">
+                <div className="text-center mb-10">
+                    <ShieldCheck className="w-10 h-10 text-vermilion-600 mx-auto mb-4" aria-hidden="true" />
+                    <h1 className="font-display text-display-sm text-ink-900 mb-3">Register for {BRAND.vault}</h1>
+                    <p className="text-body text-ink-700">Set up digital access for your existing {BRAND.shortName} accounts.</p>
+                </div>
+
+                <div className="bg-paper-50 rounded border border-paper-200 p-8 shadow-sm">
+                    {/* Progress Indicator */}
+                    <div className="flex items-center justify-between mb-8 relative">
+                        <div className="absolute left-0 top-1/2 -translate-y-1/2 w-full h-px bg-paper-200 -z-10" />
                         {[1, 2, 3].map((step) => (
-                            <div key={step} className="flex items-center flex-1">
-                                <div className={`flex items-center justify-center w-10 h-10 rounded-full ${currentStep >= step ? 'bg-heritage-navy text-white' : 'bg-faded-gray-light text-charcoal-light'
-                                    } font-semibold transition-all`}>
-                                    {currentStep > step ? <CheckCircle className="w-6 h-6" /> : step}
-                                </div>
-                                {step < 3 && (
-                                    <div className={`flex-1 h-1 mx-2 ${currentStep > step ? 'bg-heritage-navy' : 'bg-faded-gray-light'
-                                        } transition-all`} />
-                                )}
+                            <div
+                                key={step}
+                                className={`w-8 h-8 rounded-full flex items-center justify-center font-mono text-small transition-colors ${currentStep >= step ? 'bg-ink-900 text-paper-50' : 'bg-paper-100 text-ink-500 border border-paper-200'}`}
+                            >
+                                {step}
                             </div>
                         ))}
                     </div>
-                    <div className="flex justify-between mt-2">
-                        <span className="text-xs text-charcoal-light">Verify Account</span>
-                        <span className="text-xs text-charcoal-light">Personal Info</span>
-                        <span className="text-xs text-charcoal-light">Complete</span>
-                    </div>
-                </div>
 
-                <Card className="shadow-vintage-xl">
-                    <CardHeader>
-                        <CardTitle className="text-2xl">
-                            {currentStep === 1 && 'Verify Your Account'}
-                            {currentStep === 2 && 'Personal Information'}
-                            {currentStep === 3 && 'Review and Agree'}
-                        </CardTitle>
-                        <CardDescription>
-                            {currentStep === 1 && 'Enter your existing JP Heritage Bank account details to get started'}
-                            {currentStep === 2 && 'Confirm your personal information'}
-                            {currentStep === 3 && 'Review your information and accept our terms'}
-                        </CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                        <form onSubmit={currentStep === 3 ? handleSubmit : (e) => { e.preventDefault(); handleNext(); }}>
-                            {/* Step 1: Account Verification */}
-                            {currentStep === 1 && (
-                                <div className="space-y-6">
-                                    <div className="p-4 bg-soft-gold/10 rounded-none border border-soft-gold/20">
-                                        <p className="text-sm text-charcoal">
-                                            <strong>Important:</strong> You must have an existing JP Heritage Bank account to register for Heritage Vault e-banking. Your account number can be found on your account statements or debit card.
-                                        </p>
-                                    </div>
-
-                                    <Input
-                                        label="Account Number"
+                    <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+                        {currentStep === 1 && (
+                            <div className="space-y-4 animate-fade-in">
+                                <div>
+                                    <h2 className="font-display text-h4 text-ink-900 mb-1">Account Verification</h2>
+                                    <p className="text-small text-ink-500 mb-6">Enter your {BRAND.legalName} account details.</p>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label htmlFor="accountNumber" className="block text-small font-medium text-ink-900">Account number</label>
+                                    <input
+                                        id="accountNumber"
                                         type="text"
-                                        placeholder="Enter your 10-12 digit account number"
                                         value={formData.accountNumber}
-                                        onChange={(e) => setFormData({ ...formData, accountNumber: e.target.value.replace(/\D/g, '') })}
-                                        error={errors.accountNumber}
-                                        icon={<CreditCard className="w-5 h-5" />}
-                                        maxLength={12}
+                                        onChange={(e) => updateField('accountNumber', e.target.value)}
+                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.accountNumber ? 'border-vermilion-600' : 'border-paper-300'}`}
                                     />
-
-                                    <Input
-                                        label="Last 4 Digits of SSN"
-                                        type="text"
-                                        placeholder="XXXX"
-                                        value={formData.ssn}
-                                        onChange={(e) => setFormData({ ...formData, ssn: e.target.value.replace(/\D/g, '') })}
-                                        error={errors.ssn}
-                                        icon={<Lock className="w-5 h-5" />}
+                                    {errors.accountNumber && <p className="text-xs text-vermilion-600">{errors.accountNumber}</p>}
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label htmlFor="ssn" className="block text-small font-medium text-ink-900">Last 4 digits of SSN</label>
+                                    <input
+                                        id="ssn"
+                                        type="password"
                                         maxLength={4}
+                                        value={formData.ssn}
+                                        onChange={(e) => updateField('ssn', e.target.value)}
+                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.ssn ? 'border-vermilion-600' : 'border-paper-300'}`}
                                     />
-
-                                    <Input
-                                        label="Date of Birth"
+                                    {errors.ssn && <p className="text-xs text-vermilion-600">{errors.ssn}</p>}
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label htmlFor="dateOfBirth" className="block text-small font-medium text-ink-900">Date of Birth</label>
+                                    <input
+                                        id="dateOfBirth"
                                         type="date"
                                         value={formData.dateOfBirth}
-                                        onChange={(e) => setFormData({ ...formData, dateOfBirth: e.target.value })}
-                                        error={errors.dateOfBirth}
+                                        onChange={(e) => updateField('dateOfBirth', e.target.value)}
+                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.dateOfBirth ? 'border-vermilion-600' : 'border-paper-300'}`}
                                     />
+                                    {errors.dateOfBirth && <p className="text-xs text-vermilion-600">{errors.dateOfBirth}</p>}
                                 </div>
-                            )}
-
-                            {/* Step 2: Personal Information */}
-                            {currentStep === 2 && (
-                                <div className="space-y-6">
-                                    <div className="grid md:grid-cols-2 gap-4">
-                                        <Input
-                                            label="First Name"
-                                            type="text"
-                                            placeholder="John"
-                                            value={formData.firstName}
-                                            onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                                            error={errors.firstName}
-                                            icon={<User className="w-5 h-5" />}
-                                        />
-
-                                        <Input
-                                            label="Last Name"
-                                            type="text"
-                                            placeholder="Doe"
-                                            value={formData.lastName}
-                                            onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                                            error={errors.lastName}
-                                            icon={<User className="w-5 h-5" />}
-                                        />
-                                    </div>
-
-                                    <Input
-                                        label="Email Address"
-                                        type="email"
-                                        placeholder="john.doe@example.com"
-                                        value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                                        error={errors.email}
-                                        icon={<Mail className="w-5 h-5" />}
-                                    />
-
-                                    <Input
-                                        label="Phone Number"
-                                        type="tel"
-                                        placeholder="(555) 123-4567"
-                                        value={formData.phone}
-                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                                        error={errors.phone}
-                                    />
-                                </div>
-                            )}
-
-                            {/* Step 3: Agreement */}
-                            {currentStep === 3 && (
-                                <div className="space-y-6">
-                                    <div className="p-6 bg-parchment rounded-none space-y-4">
-                                        <h3 className="font-semibold text-charcoal">Review Your Information</h3>
-                                        <div className="grid md:grid-cols-2 gap-4 text-sm">
-                                            <div>
-                                                <p className="text-charcoal-light">Account Number</p>
-                                                <p className="font-mono font-semibold text-charcoal">{formData.accountNumber}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-charcoal-light">Name</p>
-                                                <p className="font-semibold text-charcoal">{formData.firstName} {formData.lastName}</p>
-                                            </div>
-                                            <div>
-                                                <p className="text-charcoal-light">Email</p>
-                                                <p className="font-semibold text-charcoal">{formData.email}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div className="space-y-4">
-                                        <label className="flex items-start gap-3 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.agreeToTerms}
-                                                onChange={(e) => setFormData({ ...formData, agreeToTerms: e.target.checked })}
-                                                className="mt-1 w-4 h-4 rounded border-faded-gray text-heritage-navy focus:ring-heritage-navy"
-                                            />
-                                            <span className="text-sm text-charcoal-light">
-                                                I agree to the{' '}
-                                                <Link href="/terms" className="text-heritage-navy hover:underline">
-                                                    Terms and Conditions
-                                                </Link>
-                                                {' '}and{' '}
-                                                <Link href="/privacy" className="text-heritage-navy hover:underline">
-                                                    E-Banking Agreement
-                                                </Link>
-                                            </span>
-                                        </label>
-                                        {errors.agreeToTerms && (
-                                            <p className="text-sm text-red-600">{errors.agreeToTerms}</p>
-                                        )}
-
-                                        <label className="flex items-start gap-3 cursor-pointer">
-                                            <input
-                                                type="checkbox"
-                                                checked={formData.agreeToPrivacy}
-                                                onChange={(e) => setFormData({ ...formData, agreeToPrivacy: e.target.checked })}
-                                                className="mt-1 w-4 h-4 rounded border-faded-gray text-heritage-navy focus:ring-heritage-navy"
-                                            />
-                                            <span className="text-sm text-charcoal-light">
-                                                I acknowledge that I have read and understood the{' '}
-                                                <Link href="/privacy" className="text-heritage-navy hover:underline">
-                                                    Privacy Policy
-                                                </Link>
-                                            </span>
-                                        </label>
-                                        {errors.agreeToPrivacy && (
-                                            <p className="text-sm text-red-600">{errors.agreeToPrivacy}</p>
-                                        )}
-                                    </div>
-                                    
-                                    {errors.submit && (
-                                        <div className="p-3 bg-red-50 text-red-700 text-sm border border-red-200 rounded">
-                                            {errors.submit}
-                                        </div>
-                                    )}
-                                </div>
-                            )}
-
-                            {/* Navigation Buttons */}
-                            <div className="flex gap-4 mt-8">
-                                {currentStep > 1 && (
-                                    <Button
-                                        type="button"
-                                        variant="secondary"
-                                        size="lg"
-                                        onClick={() => setCurrentStep(currentStep - 1)}
-                                        className="flex-1"
-                                        disabled={isLoading}
-                                    >
-                                        Back
+                                <div className="pt-4 flex justify-end">
+                                    <Button onClick={handleNext} variant="primary">
+                                        Continue <ArrowRight className="w-4 h-4 ml-2" />
                                     </Button>
-                                )}
-                                <Button
-                                    type="submit"
-                                    variant="primary"
-                                    size="lg"
-                                    className="flex-1"
-                                    loading={isLoading}
-                                >
-                                    {currentStep === 3 ? (isLoading ? 'Submitting...' : 'Complete Request') : 'Continue'}
-                                </Button>
-                            </div>
-                        </form>
-
-                        {currentStep === 1 && (
-                            <div className="mt-6 text-center">
-                                <p className="text-sm text-charcoal-light">
-                                    Already registered?{' '}
-                                    <Link href="/login" className="text-heritage-navy hover:text-heritage-navy-dark font-semibold transition-colors">
-                                        Sign In
-                                    </Link>
-                                </p>
+                                </div>
                             </div>
                         )}
-                    </CardContent>
-                </Card>
+
+                        {currentStep === 2 && (
+                            <div className="space-y-4 animate-fade-in">
+                                <div>
+                                    <h2 className="font-display text-h4 text-ink-900 mb-1">Personal Profile</h2>
+                                    <p className="text-small text-ink-500 mb-6">Enter your contact information.</p>
+                                </div>
+                                <div className="grid md:grid-cols-2 gap-4">
+                                    <div className="space-y-1.5">
+                                        <label htmlFor="firstName" className="block text-small font-medium text-ink-900">First name</label>
+                                        <input
+                                            id="firstName"
+                                            type="text"
+                                            value={formData.firstName}
+                                            onChange={(e) => updateField('firstName', e.target.value)}
+                                            className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.firstName ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                        />
+                                        {errors.firstName && <p className="text-xs text-vermilion-600">{errors.firstName}</p>}
+                                    </div>
+                                    <div className="space-y-1.5">
+                                        <label htmlFor="lastName" className="block text-small font-medium text-ink-900">Last name</label>
+                                        <input
+                                            id="lastName"
+                                            type="text"
+                                            value={formData.lastName}
+                                            onChange={(e) => updateField('lastName', e.target.value)}
+                                            className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.lastName ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                        />
+                                        {errors.lastName && <p className="text-xs text-vermilion-600">{errors.lastName}</p>}
+                                    </div>
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label htmlFor="email" className="block text-small font-medium text-ink-900">Email address</label>
+                                    <input
+                                        id="email"
+                                        type="email"
+                                        value={formData.email}
+                                        onChange={(e) => updateField('email', e.target.value)}
+                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.email ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                    />
+                                    {errors.email && <p className="text-xs text-vermilion-600">{errors.email}</p>}
+                                </div>
+                                <div className="space-y-1.5">
+                                    <label htmlFor="phone" className="block text-small font-medium text-ink-900">Phone number</label>
+                                    <input
+                                        id="phone"
+                                        type="tel"
+                                        value={formData.phone}
+                                        onChange={(e) => updateField('phone', e.target.value)}
+                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.phone ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                    />
+                                    {errors.phone && <p className="text-xs text-vermilion-600">{errors.phone}</p>}
+                                </div>
+                                <div className="pt-4 flex justify-between">
+                                    <Button onClick={() => setCurrentStep(1)} variant="secondary">Back</Button>
+                                    <Button onClick={handleNext} variant="primary">Continue <ArrowRight className="w-4 h-4 ml-2" /></Button>
+                                </div>
+                            </div>
+                        )}
+
+                        {currentStep === 3 && (
+                            <div className="space-y-4 animate-fade-in">
+                                <div>
+                                    <h2 className="font-display text-h4 text-ink-900 mb-1">Agreements</h2>
+                                    <p className="text-small text-ink-500 mb-6">Review terms and submit.</p>
+                                </div>
+                                
+                                {errors.submit && (
+                                    <div className="p-4 bg-vermilion-600/10 text-vermilion-700 text-small rounded border border-vermilion-600/20">
+                                        {errors.submit}
+                                    </div>
+                                )}
+
+                                <div className="space-y-4">
+                                    <label className="flex items-start gap-3 cursor-pointer group">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.agreeToTerms}
+                                            onChange={(e) => updateField('agreeToTerms', e.target.checked)}
+                                            className={`w-5 h-5 rounded mt-0.5 cursor-pointer ${errors.agreeToTerms ? 'border-vermilion-600 focus:ring-vermilion-600 text-vermilion-600' : 'border-paper-300 focus:ring-ink-900 text-ink-900'}`}
+                                        />
+                                        <div>
+                                            <span className="text-small text-ink-700 group-hover:text-ink-900 transition-colors block">
+                                                I have read and agree to the <Link href="/terms" target="_blank" className="text-ink-900 underline hover:text-vermilion-600">Terms of Service</Link> and Digital Banking Agreement.
+                                            </span>
+                                            {errors.agreeToTerms && <p className="text-xs text-vermilion-600 mt-1">{errors.agreeToTerms}</p>}
+                                        </div>
+                                    </label>
+                                    <label className="flex items-start gap-3 cursor-pointer group">
+                                        <input
+                                            type="checkbox"
+                                            checked={formData.agreeToPrivacy}
+                                            onChange={(e) => updateField('agreeToPrivacy', e.target.checked)}
+                                            className={`w-5 h-5 rounded mt-0.5 cursor-pointer ${errors.agreeToPrivacy ? 'border-vermilion-600 focus:ring-vermilion-600 text-vermilion-600' : 'border-paper-300 focus:ring-ink-900 text-ink-900'}`}
+                                        />
+                                        <div>
+                                            <span className="text-small text-ink-700 group-hover:text-ink-900 transition-colors block">
+                                                I have read and agree to the <Link href="/privacy" target="_blank" className="text-ink-900 underline hover:text-vermilion-600">Privacy Policy</Link> and authorize the processing of my data.
+                                            </span>
+                                            {errors.agreeToPrivacy && <p className="text-xs text-vermilion-600 mt-1">{errors.agreeToPrivacy}</p>}
+                                        </div>
+                                    </label>
+                                </div>
+
+                                <div className="pt-4 flex justify-between">
+                                    <Button onClick={() => setCurrentStep(2)} variant="secondary" disabled={isLoading}>Back</Button>
+                                    <Button onClick={handleSubmit} variant="primary" disabled={isLoading}>
+                                        {isLoading ? 'Submitting...' : 'Submit Request'}
+                                    </Button>
+                                </div>
+                            </div>
+                        )}
+                    </form>
+                </div>
             </div>
         </main>
     );

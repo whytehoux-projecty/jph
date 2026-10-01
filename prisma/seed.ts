@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 const prisma = new PrismaClient();
 
 async function main() {
-  console.log('Seeding JPHeritage database...');
+  console.log('Seeding heritagetrust database...');
 
   // Wipe existing records cleanly
   await prisma.statement.deleteMany();
@@ -25,7 +25,7 @@ async function main() {
   const adminHashed = await bcrypt.hash('Admin123!', 10);
   const admin = await prisma.adminUser.create({
     data: {
-      email: 'admin@jpheritage.com',
+      email: 'admin@heritagetrust.com',
       password: adminHashed,
       firstName: 'Admin',
       lastName: 'Heritage',
@@ -39,7 +39,7 @@ async function main() {
 
   const john = await prisma.user.create({
     data: {
-      email: 'john.doe@jpheritage.com',
+      email: 'john.doe@heritagetrust.com',
       password: demoHashed,
       firstName: 'John',
       lastName: 'Doe',
@@ -60,7 +60,7 @@ async function main() {
 
   const jane = await prisma.user.create({
     data: {
-      email: 'jane.smith@jpheritage.com',
+      email: 'jane.smith@heritagetrust.com',
       password: demoHashed,
       firstName: 'Jane',
       lastName: 'Smith',
@@ -194,14 +194,14 @@ async function main() {
         userId: john.id,
         name: 'Jane Smith',
         accountNumber: '2002938471',
-        bankName: 'JP Heritage Bank',
+        bankName: 'Heritage Trust Bank',
         isInternal: true,
       },
       {
         userId: john.id,
         name: 'Robert Vance',
         accountNumber: '1009988776',
-        bankName: 'JP Heritage Bank',
+        bankName: 'Heritage Trust Bank',
         isInternal: true,
       },
       {
@@ -238,7 +238,7 @@ async function main() {
         userId: jane.id,
         name: 'John Doe',
         accountNumber: '1002938471',
-        bankName: 'JP Heritage Bank',
+        bankName: 'Heritage Trust Bank',
         isInternal: true,
       },
       {

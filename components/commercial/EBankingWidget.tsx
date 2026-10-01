@@ -37,7 +37,7 @@ export function EBankingWidget({ className = '' }: EBankingWidgetProps) {
                     Heritage Vault
                 </h3>
                 <p className="text-sm text-charcoal-light">
-                    Secure digital banking by JP Heritage
+                    Secure digital banking by Heritage Trust
                 </p>
             </div>
 

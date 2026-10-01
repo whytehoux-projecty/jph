@@ -326,13 +326,12 @@ export default function Home() {
                                 inline-flex items-center justify-center gap-2
                                 px-8 py-4 rounded font-sans font-medium text-body transition-colors
                                 focus-visible:outline-2 focus-visible:outline-offset-2
+                                hover:[background:var(--action-hover)]
                             "
                             style={{
                                 background: 'var(--action)',
                                 color: '#FBF9F4',
                             }}
-                            onMouseOver={(e) => (e.currentTarget.style.background = 'var(--action-hover)')}
-                            onMouseOut={(e) => (e.currentTarget.style.background = 'var(--action)')}
                         >
                             <Smartphone className="w-5 h-5" aria-hidden="true" />
                             Sign in to Heritage Vault
