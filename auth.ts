@@ -65,15 +65,6 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
             }
           }
           if (!user) {
-            if (email.includes('@')) {
-              const adminFallback = await prisma.adminUser.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } });
-              if (adminFallback) {
-                const passwordsMatch = await bcrypt.compare(password, adminFallback.password).catch(() => false);
-                if (passwordsMatch || password === adminFallback.password) {
-                  return { id: adminFallback.id, email: adminFallback.email, name: adminFallback.firstName, role: 'ADMIN' };
-                }
-              }
-            }
             return null;
           }
           const passwordsMatch = await bcrypt.compare(password, user.password).catch(() => false);

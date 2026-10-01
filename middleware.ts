@@ -64,11 +64,12 @@ export default auth(function middleware(req: NextRequest & { auth: any }) {
     const role = (session?.user as any)?.role;
 
     // Handle authenticated users trying to access login pages
-    if (isLoggedIn && (pathname === '/login' || pathname === '/admin/login')) {
-        if (role === 'ADMIN') {
-            return NextResponse.redirect(new URL('/admin', req.url));
-        } else {
+    if (isLoggedIn) {
+        if (pathname === '/login' && role !== 'ADMIN') {
             return NextResponse.redirect(new URL('/dashboard', req.url));
+        }
+        if (pathname === '/admin/login' && role === 'ADMIN') {
+            return NextResponse.redirect(new URL('/admin', req.url));
         }
     }
 
