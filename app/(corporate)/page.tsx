@@ -1,3 +1,4 @@
+import HeroSlides from '@/components/commercial-ui/HeroSlides';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -39,6 +40,7 @@ const segments = [
         href: ROUTES.personalBanking,
         stat: RATES.savingsApy,
         statLabel: 'APY — Heritage Savings',
+        image: '/images/segments/personal.jpg',
     },
     {
         id: 'business',
@@ -49,6 +51,7 @@ const segments = [
         href: ROUTES.businessBanking,
         stat: RATES.businessCheckingApy,
         statLabel: 'APY — Business Checking',
+        image: '/images/segments/business.jpg',
     },
     {
         id: 'wealth',
@@ -59,6 +62,7 @@ const segments = [
         href: '/wealth',
         stat: `$${FACTS.assets}`,
         statLabel: 'Assets under management',
+        image: '/images/segments/wealth.jpg',
     },
 ];
 
@@ -90,11 +94,13 @@ const outcomes = [
         client: 'Regional Construction Firm',
         result: 'Consolidated 4 banking relationships into one. Streamlined draw management for a $22M commercial project and cut payment processing time by 60%.',
         href: ROUTES.businessBanking,
+        image: '/images/outcomes/outcome-1.jpg',
     },
     {
         client: 'Independent Retail Chain',
         result: 'Cut payment processing costs by 34% and eliminated week-long funding delays using Heritage Trust merchant services and integrated treasury tools.',
         href: ROUTES.businessBanking,
+        image: '/images/outcomes/outcome-2.jpg',
     },
 ];
 
@@ -104,22 +110,10 @@ export default function Home() {
             {/* ── HERO ──────────────────────────────────────────────────── */}
             <section
                 aria-labelledby="hero-heading"
-                className="relative min-h-[88vh] flex items-center overflow-hidden bg-paper-50"
+                className="relative isolate min-h-[88vh] flex items-center overflow-hidden bg-paper-50"
             >
                 {/* Hero image — converts to AVIF/WebP manually (next.config unoptimized:true) */}
-                <picture className="absolute inset-0 -z-10">
-                    <source srcSet="/images/new/banking-hero.jpg" type="image/jpeg" />
-                    <img
-                        src="/images/new/banking-hero.jpg"
-                        alt=""
-                        aria-hidden="true"
-                        className="w-full h-full object-cover"
-                        fetchPriority="high"
-                    />
-                </picture>
-                {/* Overlay: paper-50 tint that reveals the image subtly */}
-                <div className="absolute inset-0 bg-ink-900/70 -z-10" />
-
+                <HeroSlides />
                 <div className="container mx-auto px-6 max-w-7xl py-24">
                     <div className="max-w-2xl">
                         {/* Eyebrow */}
@@ -214,37 +208,47 @@ export default function Home() {
                             <article
                                 key={seg.id}
                                 className="
-                                    flex flex-col p-8 bg-paper-100
+                                    flex flex-col overflow-hidden bg-paper-100
                                     border border-paper-200 rounded
                                     hover:border-ink-900 transition-colors group
                                 "
                             >
-                                <p className="label-mono text-vermilion-600 mb-4">{seg.label}</p>
-                                <h3 className="font-display text-h3 text-ink-900 mb-3 text-balance">
-                                    {seg.heading}
-                                </h3>
-                                <p className="text-body text-ink-700 mb-6 grow">{seg.body}</p>
-
-                                {/* Key stat */}
-                                <div className="border-t border-paper-200 pt-4 mb-6">
-                                    <Figure value={seg.stat} label={seg.statLabel} />
-                                </div>
-
-                                <Link
-                                    href={seg.href}
-                                    className="
-                                        inline-flex items-center gap-2 text-small font-medium text-ink-900
-                                        underline underline-offset-2 hover:text-vermilion-600 transition-colors
-                                        focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900
-                                    "
-                                    aria-label={seg.cta}
-                                >
-                                    {seg.cta}
-                                    <ArrowRight
-                                        className="w-4 h-4 group-hover:translate-x-0.5 transition-transform"
-                                        aria-hidden="true"
+                                <div className="relative h-48 w-full shrink-0">
+                                    <Image
+                                        src={seg.image}
+                                        alt={seg.heading}
+                                        fill
+                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
                                     />
-                                </Link>
+                                </div>
+                                <div className="flex flex-col p-8 grow">
+                                    <p className="label-mono text-vermilion-600 mb-4">{seg.label}</p>
+                                    <h3 className="font-display text-h3 text-ink-900 mb-3 text-balance">
+                                        {seg.heading}
+                                    </h3>
+                                    <p className="text-body text-ink-700 mb-6 grow">{seg.body}</p>
+
+                                    {/* Key stat */}
+                                    <div className="border-t border-paper-200 pt-4 mb-6">
+                                        <Figure value={seg.stat} label={seg.statLabel} />
+                                    </div>
+
+                                    <Link
+                                        href={seg.href}
+                                        className="
+                                            inline-flex items-center gap-2 text-small font-medium text-ink-900
+                                            underline underline-offset-2 hover:text-vermilion-600 transition-colors
+                                            focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900
+                                        "
+                                        aria-label={seg.cta}
+                                    >
+                                        {seg.cta}
+                                        <ArrowRight
+                                            className="w-4 h-4 group-hover:translate-x-0.5 transition-transform"
+                                            aria-hidden="true"
+                                        />
+                                    </Link>
+                                </div>
                             </article>
                         ))}
                     </div>
@@ -268,21 +272,31 @@ export default function Home() {
                         {outcomes.map((o) => (
                             <article
                                 key={o.client}
-                                className="p-8 bg-paper-50 border border-paper-200 rounded"
+                                className="group overflow-hidden bg-paper-50 border border-paper-200 rounded flex flex-col sm:flex-row"
                             >
-                                <p className="label-mono text-ink-500 mb-4">{o.client}</p>
-                                <p className="text-body-lg text-ink-900">{o.result}</p>
-                                <Link
-                                    href={o.href}
-                                    className="
-                                        inline-flex items-center gap-2 mt-6 text-small font-medium text-ink-900
-                                        underline underline-offset-2 hover:text-vermilion-600 transition-colors
-                                        focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900
-                                    "
-                                >
-                                    See business solutions
-                                    <ArrowRight className="w-4 h-4" aria-hidden="true" />
-                                </Link>
+                                <div className="relative w-full sm:w-2/5 h-48 sm:h-auto shrink-0">
+                                    <Image
+                                        src={o.image}
+                                        alt={o.client}
+                                        fill
+                                        className="object-cover transition-transform duration-700 group-hover:scale-105"
+                                    />
+                                </div>
+                                <div className="p-8 flex flex-col justify-center sm:w-3/5">
+                                    <p className="label-mono text-ink-500 mb-4">{o.client}</p>
+                                    <p className="text-body-lg text-ink-900">{o.result}</p>
+                                    <Link
+                                        href={o.href}
+                                        className="
+                                            inline-flex items-center gap-2 mt-6 text-small font-medium text-ink-900
+                                            underline underline-offset-2 hover:text-vermilion-600 transition-colors
+                                            focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900
+                                        "
+                                    >
+                                        See business solutions
+                                        <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" aria-hidden="true" />
+                                    </Link>
+                                </div>
                             </article>
                         ))}
                     </div>
@@ -292,64 +306,76 @@ export default function Home() {
             {/* ── HERITAGE VAULT BAND ───────────────────────────────────── */}
             <section
                 aria-labelledby="vault-heading"
-                className="theme-ink py-24"
+                className="theme-ink py-24 overflow-hidden"
                 style={{ background: 'var(--bg)' }}
             >
-                <div className="container mx-auto px-6 max-w-5xl text-center">
-                    <div
-                        className="
-                            inline-flex items-center justify-center w-14 h-14
-                            rounded border mb-8
-                        "
-                        style={{ borderColor: 'var(--line)', background: 'var(--surface)' }}
-                    >
-                        <Lock className="w-7 h-7" style={{ color: 'var(--action)' }} aria-hidden="true" />
-                    </div>
+                <div className="container mx-auto px-6 max-w-7xl">
+                    <div className="grid lg:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <div
+                                className="
+                                    inline-flex items-center justify-center w-14 h-14
+                                    rounded border mb-8
+                                "
+                                style={{ borderColor: 'var(--line)', background: 'var(--surface)' }}
+                            >
+                                <Lock className="w-7 h-7" style={{ color: 'var(--action)' }} aria-hidden="true" />
+                            </div>
 
-                    <h2
-                        id="vault-heading"
-                        className="font-display text-h1 text-balance mb-6"
-                        style={{ color: 'var(--text)' }}
-                    >
-                        {BRAND.vault} — your bank, in your pocket.
-                    </h2>
+                            <h2
+                                id="vault-heading"
+                                className="font-display text-h1 text-balance mb-6"
+                                style={{ color: 'var(--text)' }}
+                            >
+                                {BRAND.vault} — your bank, in your pocket.
+                            </h2>
 
-                    <p className="text-body-lg mb-10 max-w-2xl mx-auto" style={{ color: 'var(--text-muted)' }}>
-                        Check balances, transfer funds, pay bills, and manage cards — from one
-                        secure, award-winning digital platform.
-                    </p>
+                            <p className="text-body-lg mb-10 max-w-xl" style={{ color: 'var(--text-muted)' }}>
+                                Check balances, transfer funds, pay bills, and manage cards — from one
+                                secure, award-winning digital platform.
+                            </p>
 
-                    <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                        <Link
-                            href={ROUTES.login}
-                            className="
-                                inline-flex items-center justify-center gap-2
-                                px-8 py-4 rounded font-sans font-medium text-body transition-colors
-                                focus-visible:outline-2 focus-visible:outline-offset-2
-                                hover:[background:var(--action-hover)]
-                            "
-                            style={{
-                                background: 'var(--action)',
-                                color: '#FBF9F4',
-                            }}
-                        >
-                            <Smartphone className="w-5 h-5" aria-hidden="true" />
-                            Sign in to Heritage Vault
-                        </Link>
-                        <Link
-                            href={ROUTES.enroll}
-                            className="
-                                inline-flex items-center justify-center gap-2
-                                px-8 py-4 rounded font-sans font-medium text-body transition-colors
-                                border focus-visible:outline-2 focus-visible:outline-offset-2
-                            "
-                            style={{
-                                borderColor: 'var(--line)',
-                                color: 'var(--text-muted)',
-                            }}
-                        >
-                            Get online access
-                        </Link>
+                            <div className="flex flex-col sm:flex-row gap-4">
+                                <Link
+                                    href={ROUTES.login}
+                                    className="
+                                        inline-flex items-center justify-center gap-2
+                                        px-8 py-4 rounded font-sans font-medium text-body transition-colors
+                                        focus-visible:outline-2 focus-visible:outline-offset-2
+                                        hover:[background:var(--action-hover)]
+                                    "
+                                    style={{
+                                        background: 'var(--action)',
+                                        color: '#FBF9F4',
+                                    }}
+                                >
+                                    <Smartphone className="w-5 h-5" aria-hidden="true" />
+                                    Sign in to Heritage Vault
+                                </Link>
+                                <Link
+                                    href={ROUTES.enroll}
+                                    className="
+                                        inline-flex items-center justify-center gap-2
+                                        px-8 py-4 rounded font-sans font-medium text-body transition-colors
+                                        border focus-visible:outline-2 focus-visible:outline-offset-2
+                                    "
+                                    style={{
+                                        borderColor: 'var(--line)',
+                                        color: 'var(--text-muted)',
+                                    }}
+                                >
+                                    Get online access
+                                </Link>
+                            </div>
+                        </div>
+                        <div className="relative h-[400px] lg:h-[600px] w-full rounded-xl overflow-hidden border" style={{ borderColor: 'var(--line)' }}>
+                            <Image
+                                src="/images/vault/vault-1.jpg"
+                                alt="Heritage Vault mobile app interface"
+                                fill
+                                className="object-cover"
+                            />
+                        </div>
                     </div>
                 </div>
             </section>

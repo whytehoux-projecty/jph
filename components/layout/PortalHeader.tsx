@@ -39,7 +39,7 @@ export function PortalHeader({
   };
 
   return (
-    <header className="sticky top-0 z-50 w-full border-b border-[#0B1B30] bg-ink-900/95 backdrop-blur-md shadow-sm text-white">
+    <header className="sticky top-0 z-50 w-full border-b border-paper-200 bg-white/95 backdrop-blur-md shadow-none text-ink-900">
       <div className="flex h-[70px] items-center px-4 md:px-6 justify-between">
         {/* Left Side: Logo */}
         <div className="flex items-center gap-2 h-full">
@@ -47,20 +47,14 @@ export function PortalHeader({
           <Button
             variant="ghost"
             size="small"
-            className="md:hidden text-white hover:bg-white/10 px-2 h-9"
+            className="md:hidden text-ink-900 hover:bg-paper-50 px-2 h-9 rounded"
             onClick={onToggleLeftSidebar}>
             <Menu className="h-5 w-5" />
           </Button>
 
           <Link href="/dashboard" className="flex items-center gap-2 h-full ml-1 md:ml-0 min-w-0">
-            <div className="flex items-center gap-2 ml-1 min-w-0">
-              <div className="w-8 h-8 md:w-9 md:h-9 rounded-xl bg-vermilion-600 flex items-center justify-center shadow-gold-glow shrink-0">
-                <Shield className="w-4 h-4 md:w-5 md:h-5 text-white" strokeWidth={2} />
-              </div>
-              <div className="flex flex-col leading-none whitespace-nowrap overflow-hidden min-w-0">
-                <span className="text-[9px] font-medium text-vermilion-600 tracking-wider md:tracking-[0.2em] uppercase truncate">Heritage Trust</span>
-                <span className="text-sm md:text-base font-bold text-white tracking-wide font-display truncate">BANK</span>
-              </div>
+            <div className="flex items-center ml-1 min-w-0">
+              <img src="/images/logos/heritage-trust-logo.svg" alt="Heritage Trust Logo" className="h-6 md:h-7 w-auto" />
             </div>
           </Link>
         </div>
@@ -69,7 +63,7 @@ export function PortalHeader({
         <div className="flex items-center gap-2">
           <div className="mr-1 shrink-0">
             <Select defaultValue="en" onValueChange={handleLanguageChange}>
-              <SelectTrigger className="w-auto gap-0 sm:gap-2 bg-transparent border border-white/20 text-white hover:bg-white/10 focus:ring-0 focus:ring-offset-0 px-1 sm:px-2 h-8 rounded-md transition-colors">
+              <SelectTrigger className="w-auto gap-0 sm:gap-2 bg-transparent border border-paper-200 text-ink-900 hover:bg-paper-50 focus:ring-0 focus:ring-offset-0 px-1 sm:px-2 h-8 rounded transition-colors">
                 <Globe className="h-4 w-4 shrink-0" />
                 <span className="hidden sm:inline">
                   <SelectValue placeholder="EN" />
@@ -77,7 +71,7 @@ export function PortalHeader({
               </SelectTrigger>
               <SelectContent
                 align="end"
-                className="bg-paper-100/95 backdrop-blur-md border-ink-900/20 rounded-sm text-ink-900">
+                className="bg-white/95 backdrop-blur-md border-paper-200 rounded text-ink-900">
                 <SelectItem value="en">English (EN)</SelectItem>
                 <SelectItem value="fr">Français (FR)</SelectItem>
                 <SelectItem value="de">Deutsch (DE)</SelectItem>
@@ -96,8 +90,8 @@ export function PortalHeader({
             onClick={onToggleRightSidebar}
             title="Your Profile"
             className={cn(
-              "text-white hover:bg-white/10 hover:text-white transition-colors",
-              isRightSidebarOpen && "bg-white/10 ring-1 ring-white/30",
+              "text-ink-900 hover:bg-paper-50 hover:text-ink-900 transition-colors rounded",
+              isRightSidebarOpen && "bg-paper-50 ring-1 ring-paper-200",
             )}>
             <User className="h-5 w-5" />
           </Button>

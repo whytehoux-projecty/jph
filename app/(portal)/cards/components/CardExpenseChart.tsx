@@ -95,7 +95,7 @@ export function CardExpenseChart() {
         : `Last 6 Months · ${year}`;
 
     return (
-        <Card className="shadow-sm">
+        <Card className="shadow-none">
             <CardHeader className="pb-2">
                 <div className="flex items-center justify-between">
                     <div>
@@ -116,7 +116,7 @@ export function CardExpenseChart() {
                                 className={cn(
                                     "px-3 py-1 rounded-md text-xs font-medium transition-all",
                                     period === p
-                                        ? "bg-white shadow-sm text-ink-900"
+                                        ? "bg-white shadow-none text-ink-900"
                                         : "text-muted-foreground hover:text-ink-900"
                                 )}
                             >

@@ -137,9 +137,9 @@ export function AccountCard({
       : 0;
 
   return (
-    <Card className="rounded-none hover:shadow-lg transition-all duration-300 group hover:-translate-y-1">
+    <Card className="rounded hover:shadow-none transition-all duration-300 group hover:-translate-y-1">
       {/* Header */}
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-border/40 bg-muted/10">
+      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-paper-200/40 bg-muted/10">
         <div className="flex items-center gap-3">
           <VintageIcon
             icon={getAccountIcon(account.type)}
@@ -207,9 +207,9 @@ export function AccountCard({
                 <span className="text-muted-foreground">Credit Used</span>
                 <span className="font-medium">{utilization.toFixed(0)}%</span>
               </div>
-              <div className="h-1.5 w-full bg-secondary rounded-none overflow-hidden">
+              <div className="h-1.5 w-full bg-secondary rounded overflow-hidden">
                 <div
-                  className={`h-full rounded-none transition-all duration-500 ${
+                  className={`h-full rounded transition-all duration-500 ${
                     utilization > 80 ? "bg-red-500" : "bg-pine-700"
                   }`}
                   style={{ width: `${utilization}%` }}
@@ -245,7 +245,7 @@ export function AccountCard({
               [1, 2].map((i) => (
                 <div
                   key={i}
-                  className="h-8 bg-muted/20 animate-pulse rounded-none"
+                  className="h-8 bg-muted/20 animate-pulse rounded"
                 />
               ))
             ) : recentTransactions.length > 0 ? (
@@ -287,28 +287,28 @@ export function AccountCard({
       </CardContent>
 
       {/* Footer Actions */}
-      <div className="flex items-center border-t border-border/40 p-4 bg-muted/5 gap-2">
+      <div className="flex items-center border-t border-paper-200/40 p-4 bg-muted/5 gap-2">
         <Button
           variant="outline"
-          className="flex-1 h-9 text-xs border-border/60 hover:border-vintage-gold/50 hover:bg-vintage-gold/5 rounded-none px-2"
+          className="flex-1 h-9 text-xs border-paper-200 hover:border-vintage-gold/50 hover:bg-vintage-gold/5 rounded px-2"
           onClick={() => onViewDetails(account)}>
           <Eye className="w-3.5 h-3.5 mr-2" />
           View
         </Button>
         <Button
           variant="outline"
-          className="flex-1 h-9 text-xs border-border/60 hover:border-vintage-gold/50 hover:bg-vintage-gold/5 rounded-none px-2"
+          className="flex-1 h-9 text-xs border-paper-200 hover:border-vintage-gold/50 hover:bg-vintage-gold/5 rounded px-2"
           onClick={() => onViewDetails(account, "statements")}>
           <FileText className="w-3.5 h-3.5 mr-2" />
           Statements
         </Button>
         {isCredit ? (
-          <Button className="flex-1 h-9 text-xs bg-vintage-navy hover:bg-vintage-navy/90 text-white rounded-none shadow-sm px-2">
+          <Button className="flex-1 h-9 text-xs bg-vintage-navy hover:bg-vintage-navy/90 text-white rounded shadow-none px-2">
             <CreditCard className="w-3.5 h-3.5 mr-2" />
             Pay Bill
           </Button>
         ) : (
-          <Button className="flex-1 h-9 text-xs bg-vintage-navy hover:bg-vintage-navy/90 text-white rounded-none shadow-sm px-2">
+          <Button className="flex-1 h-9 text-xs bg-vintage-navy hover:bg-vintage-navy/90 text-white rounded shadow-none px-2">
             <ArrowUpRight className="w-3.5 h-3.5 mr-2" />
             Transfer
           </Button>

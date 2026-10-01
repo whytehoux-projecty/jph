@@ -169,8 +169,8 @@ export function CardTransactionHistory({ cardId }: { cardId: string }) {
                                 className={cn(
                                     "px-3 py-1 rounded-full text-xs font-medium border transition-all",
                                     period === value
-                                        ? "bg-pine-700 text-white border-pine-700 shadow-sm"
-                                        : "bg-white text-muted-foreground border-border hover:border-pine-700/40 hover:text-ink-900"
+                                        ? "bg-pine-700 text-white border-pine-700 shadow-none"
+                                        : "bg-white text-muted-foreground border-paper-200 hover:border-pine-700/40 hover:text-ink-900"
                                 )}
                             >
                                 {label}
@@ -278,7 +278,7 @@ export function CardTransactionHistory({ cardId }: { cardId: string }) {
                                                                 variant="outline"
                                                                 size="small"
                                                                 icon={<AlertTriangle className="w-3.5 h-3.5 text-amber-600" />}
-                                                                className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:border-amber-300 shrink-0"
+                                                                className="text-amber-600 border-amber-200 hover:bg-amber-50 hover:border-warning shrink-0"
                                                                 disabled={disputingId === tx.id}
                                                                 onClick={(e) => { e.stopPropagation(); handleDispute(tx.id); }}
                                                             >

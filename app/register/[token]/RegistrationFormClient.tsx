@@ -494,7 +494,7 @@ export default function RegistrationFormClient({ application }: { application: a
                         <div className="space-y-1.5">
                             <div className="inline-flex items-center justify-center bg-[#0D2545] px-5 py-3 rounded shadow-md mb-2 print:border-2 print:border-black print:bg-[#0D2545] print:shadow-none">
                                 <img
-                                    src="/bank-logo.svg"
+                                    src="/images/logos/heritage-trust-logo-reversed.svg"
                                     alt="Heritage Trust Bank Logo"
                                     className="h-10 md:h-12 w-auto object-contain"
                                 />

@@ -45,7 +45,7 @@ export function PinSetupModal() {
 
   return (
     <div className="fixed inset-0 bg-neutral-900/80 z-50 flex items-center justify-center p-4 backdrop-blur-sm">
-      <Card className="w-full max-w-md shadow-2xl border-none">
+      <Card className="w-full max-w-md shadow-none border-none">
         <CardHeader className="text-center space-y-3">
           <div className="mx-auto w-12 h-12 bg-vintage-gold/10 rounded-full flex items-center justify-center text-vintage-gold">
             <ShieldAlert className="w-6 h-6" />

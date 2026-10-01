@@ -150,11 +150,8 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
         "flex items-center h-16 border-b border-white/10 shrink-0",
         isCollapsed ? "justify-center px-0" : "justify-between px-4"
       )}>
-        <div className={cn("flex items-center gap-3 overflow-hidden", isCollapsed && "hidden")}>
-          <Landmark className="w-6 h-6 text-vintage-gold shrink-0" />
-          <div className="truncate">
-            <h2 className="font-display font-bold text-lg tracking-wide truncate">heritagetrust</h2>
-          </div>
+        <div className={cn("flex items-center overflow-hidden", isCollapsed && "hidden")}>
+          <img src="/images/logos/heritage-trust-logo-reversed.svg" alt="Heritage Trust Logo" className="h-7 w-auto" />
         </div>
         
         <button 

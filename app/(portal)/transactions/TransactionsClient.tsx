@@ -462,7 +462,7 @@ function TransactionRow({
                 break;
             }
             return (
-              <span className={`inline-block px-1.5 py-0.5 border text-[9px] uppercase tracking-wider font-semibold rounded-none ${sealClasses}`}>
+              <span className={`inline-block px-1.5 py-0.5 border text-[9px] uppercase tracking-wider font-semibold rounded ${sealClasses}`}>
                 {label}
               </span>
             );
@@ -554,7 +554,7 @@ function TransactionRow({
                 const visibleNotes = isAllVisible ? notes : notes.slice(0, 3);
 
                 return (
-                  <div className="pt-3 border-t border-slate-200 space-y-1">
+                  <div className="pt-3 border-t border-paper-200 space-y-1">
                     <div className="font-semibold text-[11px] uppercase tracking-wide text-slate-500">
                       Notes
                     </div>
@@ -598,7 +598,7 @@ function TransactionRow({
                 );
               })()}
 
-              <div className="flex flex-wrap gap-2 pt-3 border-t border-slate-200">
+              <div className="flex flex-wrap gap-2 pt-3 border-t border-paper-200">
                 <Button
                   variant="outline"
                   size="small"
@@ -1646,7 +1646,7 @@ export default function TransactionsClient({
                       }
                       className={`rounded px-3 py-1 transition-colors ${
                         datePreset === preset.id
-                          ? "bg-white text-ink-900 shadow-sm"
+                          ? "bg-white text-ink-900 shadow-none"
                           : "text-muted-foreground hover:text-ink-900"
                       }`}>
                       {preset.label}
@@ -1914,7 +1914,7 @@ export default function TransactionsClient({
                       <div className={cn("font-mono text-sm font-medium tabular-nums lining-nums mb-1.5", out ? "text-slate-900" : "text-green-700")}>
                         {out ? "" : "+"}{new Intl.NumberFormat("en-US", { style: "currency", currency: "USD" }).format(Math.abs(Number(tx.amount)))}
                       </div>
-                      <span className={`inline-block px-1.5 py-0.5 border text-[9px] uppercase tracking-wider font-semibold rounded-none ${sealClasses}`}>
+                      <span className={`inline-block px-1.5 py-0.5 border text-[9px] uppercase tracking-wider font-semibold rounded ${sealClasses}`}>
                         {normalizedStatus}
                       </span>
                     </div>

@@ -83,7 +83,7 @@ export function CardSpendingInsights({ cardId }: { cardId?: string }) {
   const maxCatAmount = categories[0]?.amount || 1;
 
   return (
-    <Card className="shadow-sm">
+    <Card className="shadow-none">
       <CardHeader className="pb-3">
         <CardTitle className="text-base font-medium flex items-center gap-2">
           <PieChart className="w-4 h-4 text-pine-700" />

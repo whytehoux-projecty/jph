@@ -30,7 +30,7 @@ export function CardLocationTable() {
     }, []);
 
     return (
-        <Card className="shadow-sm">
+        <Card className="shadow-none">
             <CardHeader className="pb-2">
                 <CardTitle className="text-base font-medium flex items-center gap-2">
                     <History className="w-4 h-4 text-pine-700" />

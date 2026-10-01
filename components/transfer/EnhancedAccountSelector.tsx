@@ -139,7 +139,7 @@ export function EnhancedAccountSelector({
     return (
       <div className="space-y-2">
         <p className="text-xs font-medium text-ink-900">{label}</p>
-        <div className="rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-xs text-muted-foreground space-y-1">
+        <div className="rounded-lg border border-paper-200 bg-slate-50 px-3 py-2 text-xs text-muted-foreground space-y-1">
           <p>No accounts are available for transfers from this profile.</p>
           <p>
             Open or fund an account to start sending transfers from this
@@ -206,7 +206,7 @@ export function EnhancedAccountSelector({
               } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}
               tabIndex={isSelected ? 0 : -1}
               onKeyDown={(event) => handleKeyDown(event, index)}>
-              <Card className="flex items-center justify-between gap-3 border border-slate-200 px-3 py-3 shadow-none hover:border-vermilion-600/70 hover:shadow-md">
+              <Card className="flex items-center justify-between gap-3 border border-paper-200 px-3 py-3 shadow-none hover:border-vermilion-600/70 hover:shadow-none">
                 <div className="flex items-center gap-3">
                   <VintageIcon
                     icon={getAccountIcon(account.accountType)}

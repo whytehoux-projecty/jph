@@ -171,8 +171,8 @@ export function AccountDetailsDialog({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto sm:rounded-none flex flex-col p-0">
-        <DialogHeader className="px-6 py-4 border-b border-border/40 bg-muted/10">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto sm:rounded flex flex-col p-0">
+        <DialogHeader className="px-6 py-4 border-b border-paper-200/40 bg-muted/10">
           <div className="flex items-center gap-4">
             <VintageIcon
               icon={getAccountIcon(account.type)}
@@ -230,26 +230,26 @@ export function AccountDetailsDialog({
           value={activeTab}
           onValueChange={setActiveTab}
           className="flex-1 flex flex-col">
-          <div className="px-6 border-b border-border/40 bg-white sticky top-0 z-10">
+          <div className="px-6 border-b border-paper-200/40 bg-white sticky top-0 z-10">
             <TabsList className="h-auto p-0 bg-transparent gap-6">
               <TabsTrigger
                 value="overview"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-vintage-gold data-[state=active]:text-vintage-navy px-2 py-3 bg-transparent shadow-none transition-all">
+                className="rounded border-b-2 border-transparent data-[state=active]:border-vintage-gold data-[state=active]:text-vintage-navy px-2 py-3 bg-transparent shadow-none transition-all">
                 Overview
               </TabsTrigger>
               <TabsTrigger
                 value="activity"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-vintage-gold data-[state=active]:text-vintage-navy px-2 py-3 bg-transparent shadow-none transition-all">
+                className="rounded border-b-2 border-transparent data-[state=active]:border-vintage-gold data-[state=active]:text-vintage-navy px-2 py-3 bg-transparent shadow-none transition-all">
                 Activity
               </TabsTrigger>
               <TabsTrigger
                 value="statements"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-vintage-gold data-[state=active]:text-vintage-navy px-2 py-3 bg-transparent shadow-none transition-all">
+                className="rounded border-b-2 border-transparent data-[state=active]:border-vintage-gold data-[state=active]:text-vintage-navy px-2 py-3 bg-transparent shadow-none transition-all">
                 Statements
               </TabsTrigger>
               <TabsTrigger
                 value="settings"
-                className="rounded-none border-b-2 border-transparent data-[state=active]:border-vintage-gold data-[state=active]:text-vintage-navy px-2 py-3 bg-transparent shadow-none transition-all">
+                className="rounded border-b-2 border-transparent data-[state=active]:border-vintage-gold data-[state=active]:text-vintage-navy px-2 py-3 bg-transparent shadow-none transition-all">
                 Settings
               </TabsTrigger>
             </TabsList>
@@ -261,7 +261,7 @@ export function AccountDetailsDialog({
                 {/* Left Column: Stats */}
                 <div className="lg:col-span-2 space-y-6">
                   <div className="grid grid-cols-2 gap-4">
-                    <Card className="rounded-none">
+                    <Card className="rounded">
                       <CardContent className="p-4 space-y-1">
                         <p className="text-xs text-muted-foreground uppercase">
                           Available Balance
@@ -275,7 +275,7 @@ export function AccountDetailsDialog({
                         </p>
                       </CardContent>
                     </Card>
-                    <Card className="rounded-none">
+                    <Card className="rounded">
                       <CardContent className="p-4 space-y-1">
                         <p className="text-xs text-muted-foreground uppercase">
                           Interest Rate
@@ -288,7 +288,7 @@ export function AccountDetailsDialog({
                   </div>
 
                   {account.type === "credit" && account.creditLimit && (
-                    <Card className="rounded-none">
+                    <Card className="rounded">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-base">
                           Credit Utilization
@@ -326,7 +326,7 @@ export function AccountDetailsDialog({
                   )}
 
                   {/* Recent Activity Preview */}
-                  <Card className="rounded-none">
+                  <Card className="rounded">
                     <CardHeader className="flex flex-row items-center justify-between pb-2">
                       <CardTitle className="text-base">
                         Recent Activity
@@ -345,14 +345,14 @@ export function AccountDetailsDialog({
                           [1, 2, 3].map((i) => (
                             <div
                               key={i}
-                              className="h-10 bg-muted/20 animate-pulse rounded-none"
+                              className="h-10 bg-muted/20 animate-pulse rounded"
                             />
                           ))
                         ) : transactions.slice(0, 3).length > 0 ? (
                           transactions.slice(0, 3).map((tx) => (
                             <div
                               key={tx.id}
-                              className="flex items-center justify-between py-2 border-b border-border/40 last:border-0">
+                              className="flex items-center justify-between py-2 border-b border-paper-200/40 last:border-0">
                               <div className="flex items-center gap-3">
                                 <div
                                   className={`w-8 h-8 rounded-full flex items-center justify-center ${
@@ -408,7 +408,7 @@ export function AccountDetailsDialog({
 
                 {/* Right Column: Quick Actions & Insights */}
                 <div className="space-y-6">
-                  <Card className="rounded-none">
+                  <Card className="rounded">
                     <CardHeader>
                       <CardTitle className="text-base">Quick Actions</CardTitle>
                     </CardHeader>
@@ -434,7 +434,7 @@ export function AccountDetailsDialog({
                     </CardContent>
                   </Card>
 
-                  <Card className="bg-linear-to-br from-vermilion-600/10 to-transparent border-vermilion-600/20 rounded-none">
+                  <Card className="bg-paper-100 border-paper-200 rounded">
                     <CardHeader>
                       <CardTitle className="text-base flex items-center gap-2">
                         <TrendingUp className="w-4 h-4 text-vintage-gold" />{" "}
@@ -472,7 +472,7 @@ export function AccountDetailsDialog({
                 </Button>
               </div>
 
-              <Card className="rounded-none">
+              <Card className="rounded">
                 <CardContent className="p-0">
                   {isLoadingTransactions ? (
                     <div className="p-8 text-center text-muted-foreground">
@@ -531,7 +531,7 @@ export function AccountDetailsDialog({
             </TabsContent>
 
             <TabsContent value="statements" className="mt-0 space-y-4">
-              <Card className="rounded-none">
+              <Card className="rounded">
                 <CardHeader>
                   <CardTitle className="text-lg">Monthly Statements</CardTitle>
                   <DialogDescription>
@@ -568,7 +568,7 @@ export function AccountDetailsDialog({
                         return (
                           <div
                             key={statement.id}
-                            className="flex items-center justify-between p-3 border border-border/40 hover:bg-muted/30 transition-colors">
+                            className="flex items-center justify-between p-3 border border-paper-200/40 hover:bg-muted/30 transition-colors">
                             <div className="flex items-center gap-3">
                               <div className="w-10 h-10 bg-red-50 text-red-600 flex items-center justify-center">
                                 <FileText size={20} />
@@ -600,12 +600,12 @@ export function AccountDetailsDialog({
                 </CardContent>
               </Card>
 
-              <Card className="rounded-none">
+              <Card className="rounded">
                 <CardHeader>
                   <CardTitle className="text-lg">Tax Documents</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <div className="flex items-center justify-between p-3 border border-border/40 hover:bg-muted/30 transition-colors">
+                  <div className="flex items-center justify-between p-3 border border-paper-200/40 hover:bg-muted/30 transition-colors">
                     <div className="flex items-center gap-3">
                       <div className="w-10 h-10 bg-ink-900/5 text-ink-900 flex items-center justify-center">
                         <FileText size={20} />
@@ -628,7 +628,7 @@ export function AccountDetailsDialog({
             </TabsContent>
 
             <TabsContent value="settings" className="mt-0 space-y-6">
-              <Card className="rounded-none">
+              <Card className="rounded">
                 <CardHeader>
                   <CardTitle className="text-lg">Account Preferences</CardTitle>
                   <DialogDescription>
@@ -642,9 +642,9 @@ export function AccountDetailsDialog({
                       <Input
                         id="nickname"
                         defaultValue={account.name}
-                        className="max-w-md rounded-none"
+                        className="max-w-md rounded"
                       />
-                      <Button variant="outline" className="rounded-none">
+                      <Button variant="outline" className="rounded">
                         Save
                       </Button>
                     </div>
@@ -653,7 +653,7 @@ export function AccountDetailsDialog({
                     </p>
                   </div>
 
-                  <div className="flex items-center justify-between py-4 border-t border-border/40">
+                  <div className="flex items-center justify-between py-4 border-t border-paper-200/40">
                     <div className="space-y-0.5">
                       <Label className="text-base">Paperless Statements</Label>
                       <p className="text-xs text-muted-foreground">
@@ -663,7 +663,7 @@ export function AccountDetailsDialog({
                     <Switch defaultChecked />
                   </div>
 
-                  <div className="flex items-center justify-between py-4 border-t border-border/40">
+                  <div className="flex items-center justify-between py-4 border-t border-paper-200/40">
                     <div className="space-y-0.5">
                       <Label className="text-base">Transaction Alerts</Label>
                       <p className="text-xs text-muted-foreground">
@@ -673,7 +673,7 @@ export function AccountDetailsDialog({
                     <Switch defaultChecked />
                   </div>
 
-                  <div className="flex items-center justify-between py-4 border-t border-border/40">
+                  <div className="flex items-center justify-between py-4 border-t border-paper-200/40">
                     <div className="space-y-0.5">
                       <Label className="text-base text-red-600">
                         Freeze Account

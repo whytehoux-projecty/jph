@@ -73,13 +73,13 @@ export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 lg:sticky lg:top-0 h-screen border-r border-ink-900/15 bg-paper-100/95 backdrop-blur-md transition-all duration-300 ease-in-out z-60 flex flex-col shrink-0",
-          isOpen ? "translate-x-0 w-64 shadow-2xl lg:shadow-none" : "-translate-x-full lg:translate-x-0 w-64 lg:w-16"
+          "fixed inset-y-0 left-0 lg:sticky lg:top-0 h-screen border-r border-paper-200 bg-white/95 backdrop-blur-md transition-all duration-300 ease-in-out z-60 flex flex-col shrink-0",
+          isOpen ? "translate-x-0 w-64 shadow-none" : "-translate-x-full lg:translate-x-0 w-64 lg:w-16"
         )}>
       {/* Sidebar Header with Trigger */}
       <div
         className={cn(
-          "flex h-[70px] items-center border-b border-ink-900/15 shrink-0",
+          "flex h-[70px] items-center border-b border-paper-200 shrink-0",
           isOpen ? "px-3 justify-start" : "justify-center px-0",
         )}>
         <SidebarTrigger onClick={onToggle} />
@@ -99,16 +99,16 @@ export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
                   <Link
                     href={item.href}
                       className={cn(
-                      "flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vermilion-600",
+                      "flex items-center gap-3 rounded px-3 py-2.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vermilion-600",
                       isActive
-                        ? "bg-ink-900 text-white shadow-sm"
-                        : "text-ink-900/70 hover:bg-ink-900/10 hover:text-ink-900",
+                        ? "bg-ink-900 text-paper-50 shadow-none"
+                        : "text-ink-500 hover:bg-paper-50 hover:text-ink-900",
                       !isOpen && "justify-center px-0",
                     )}>
                     <VintageIcon
                       icon={item.icon}
                       size="sm"
-                      variant={isActive ? "green" : "ink-900"}
+                      variant={isActive ? "gold" : "ink-900"}
                       className={cn(!isOpen && "mx-auto")}
                     />
                     {isOpen && <span>{item.name}</span>}
@@ -130,13 +130,13 @@ export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
         </ScrollArea>
 
         {/* Fix #9: Logout outside ScrollArea, properly at bottom with border separator */}
-        <div className={cn("shrink-0 border-t border-ink-900/10 p-2", !isOpen && "flex justify-center")}>
+        <div className={cn("shrink-0 border-t border-paper-200 p-2", !isOpen && "flex justify-center")}>
           {/* Fix #11: Logout tooltip in collapsed mode */}
           <div className="relative group/logout">
             <button
               onClick={() => signOut({ callbackUrl: "/login" })} // Fix #33: fallback to /login not localhost:3002
               className={cn(
-                "w-full flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors text-red-600/80 hover:bg-red-50 hover:text-red-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500",
+                "w-full flex items-center gap-3 rounded px-3 py-2.5 text-sm font-medium transition-colors text-error hover:bg-error-bg hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error",
                 !isOpen && "justify-center px-0 w-auto",
               )}>
               <VintageIcon
@@ -149,10 +149,10 @@ export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
             </button>
             {!isOpen && (
               <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 z-50 hidden group-hover/logout:flex items-center pointer-events-none">
-                <div className="bg-red-600 text-white text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg whitespace-nowrap">
+                <div className="bg-error text-paper-50 text-xs font-medium px-2.5 py-1.5 rounded-md shadow-lg whitespace-nowrap">
                   Logout
                 </div>
-                <div className="absolute right-full border-[6px] border-transparent border-r-red-600" />
+                <div className="absolute right-full border-[6px] border-transparent border-r-error" />
               </div>
             )}
           </div>

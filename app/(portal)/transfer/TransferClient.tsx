@@ -605,7 +605,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* Main Transfer Form */}
-          <Card className="md:col-span-2 border-none shadow-md">
+          <Card className="md:col-span-2 border-none shadow-none">
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <VintageIcon icon={ArrowLeftRight} variant="gold" size="sm" />
@@ -1027,7 +1027,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                 </div>
 
                 {isPinStep && (
-                  <Card className="border-amber-300 bg-amber-50/70 my-4 shadow-sm">
+                  <Card className="border-warning bg-warning-bg my-4 shadow-none">
                     <CardHeader className="pb-2">
                       <CardTitle className="text-base flex items-center gap-2 text-amber-950">
                         <ShieldCheck className="h-5 w-5 text-amber-600" />
@@ -1149,8 +1149,8 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
 
           {/* Info Sidebar */}
           <div className="space-y-6 md:sticky md:top-24 h-fit">
-            <Card className="border-ink-900/10 shadow-sm bg-[#FDFBF7]">
-              <CardHeader className="pb-3 border-b border-slate-200/50">
+            <Card className="border-paper-200 shadow-none bg-[#FDFBF7]">
+              <CardHeader className="pb-3 border-b border-paper-200/50">
                 <CardTitle className="text-lg text-ink-900">
                   Transfer Summary
                 </CardTitle>
@@ -1183,7 +1183,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                   </p>
                 </div>
 
-                <div className="space-y-3 pt-4 border-t border-slate-200/50">
+                <div className="space-y-3 pt-4 border-t border-paper-200/50">
                   <h4 className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
                     Fees & Total
                   </h4>
@@ -1206,7 +1206,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                   )}
                 </div>
 
-                <div className="space-y-3 pt-4 border-t border-slate-200/50">
+                <div className="space-y-3 pt-4 border-t border-paper-200/50">
                   <div className="flex items-start gap-2 text-muted-foreground">
                     <ShieldCheck className="h-4 w-4 mt-0.5 text-ink-900" />
                     <div className="text-[11px] space-y-2">
@@ -1243,7 +1243,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
             </DialogDescription>
           </DialogHeader>
           <div className="hidden md:block">
-            <div className="grid grid-cols-4 gap-4 text-[11px] font-medium text-muted-foreground border-b border-slate-200 pb-2">
+            <div className="grid grid-cols-4 gap-4 text-[11px] font-medium text-muted-foreground border-b border-paper-200 pb-2">
               <span>
                 {translate(
                   userPreferences.language,
@@ -1317,7 +1317,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                   className={`w-full rounded-md border px-3 py-2 text-left transition-colors ${
                     isSelected
                       ? "border-vermilion-600/60 bg-vermilion-600/10"
-                      : "border-slate-200 hover:bg-slate-50"
+                      : "border-paper-200 hover:bg-slate-50"
                   } ${isDisabled ? "opacity-60 cursor-not-allowed" : ""}`}>
                   <div className="flex items-center justify-between">
                     <span className="text-[13px] font-medium text-ink-900">
@@ -1374,7 +1374,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
           </DialogHeader>
           {receipt && (
             <div className="space-y-4 text-sm">
-              <div className="rounded-md border border-slate-200 bg-slate-50/60 p-3 space-y-2">
+              <div className="rounded-md border border-paper-200 bg-slate-50/60 p-3 space-y-2">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">
                     {translate(userPreferences.language, "receipt.from") ||
@@ -1441,7 +1441,7 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
                   </span>
                 </div>
               </div>
-              <div className="border-t border-dashed border-slate-200 pt-2 text-[11px] text-muted-foreground space-y-1">
+              <div className="border-t border-dashed border-paper-200 pt-2 text-[11px] text-muted-foreground space-y-1">
                 {receipt.id && (
                   <div className="flex justify-between">
                     <span>

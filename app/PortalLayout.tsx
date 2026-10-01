@@ -144,7 +144,7 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-(--heritage-surface) relative isolate">
+    <div className="flex min-h-screen bg-paper-100 relative isolate">
 
       <MobileInstallPrompt />
 
