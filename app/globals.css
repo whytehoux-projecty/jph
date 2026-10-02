@@ -23,21 +23,30 @@
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
 
+  --color-paper: #F6F1E7;
   --color-paper-50: #FBF9F4;
-  --color-paper-100: #F3EFE4;
+  --color-paper-100: #F6F1E7; /* Updated to brand paper */
   --color-paper-200: #E6E0D0;
   --color-paper-300: #D3CBB8;
   
-  --color-ink-900: #14181B;
+  --color-ink: #14181F;
+  --color-ink-900: #14181F; /* Updated to brand ink */
   --color-ink-700: #2E353B;
   --color-ink-500: #5B646C;
   
+  --color-vermilion: #D8432B;
   --color-vermilion-100: #FBE3DA;
   --color-vermilion-400: #F2714B;
-  --color-vermilion-600: #C93A14;
+  --color-vermilion-600: #D8432B; /* Updated to brand vermilion */
   --color-vermilion-700: #A62F0E;
   
-  --color-pine-700: #1D5243;
+  --color-pine: #1F4D3F;
+  --color-pine-700: #1F4D3F; /* Updated to brand pine */
+
+  --color-stone: #8A8577;
+  --color-stone-400: #A8A498;
+  --color-stone-500: #8A8577;
+  --color-stone-600: #6B675C;
   
   --color-success: #1B7A4B;
   --color-success-bg: #E6F3EC;
