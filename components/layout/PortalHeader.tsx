@@ -83,18 +83,14 @@ export function PortalHeader({
           {/* Fix #22: Notifications use onToggleNotifications (separate handler) */}
           <NotificationCenter onClick={onToggleNotifications ?? onToggleRightSidebar} />
 
-          {/* User Profile — opens profile / right sidebar */}
-          <Button
-            variant="ghost"
-            size="small"
-            onClick={onToggleRightSidebar}
-            title="Your Profile"
-            className={cn(
-              "text-ink-900 hover:bg-paper-50 hover:text-ink-900 transition-colors rounded",
-              isRightSidebarOpen && "bg-paper-50 ring-1 ring-paper-200",
-            )}>
-            <User className="h-5 w-5" />
-          </Button>
+          {/* User Profile & Security Settings */}
+          <Link
+            href="/settings"
+            title="Account & Security Settings"
+            className="flex h-8 w-8 items-center justify-center rounded text-ink-900 transition-colors hover:bg-paper-50 hover:text-ink-900"
+          >
+            <User className="h-4 w-4" />
+          </Link>
         </div>
       </div>
     </header>

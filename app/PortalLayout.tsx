@@ -6,8 +6,9 @@ import Image from "next/image";
 import { X, CheckCircle2, AlertCircle, AlertTriangle, Info } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { PortalHeader } from "@/components/layout/PortalHeader";
+import { PortalSubHeader } from "@/components/layout/PortalSubHeader";
 import { LeftSidebar } from "@/components/layout/LeftSidebar";
-import { RightSidebar, type UserProfile } from "@/components/layout/RightSidebar";
+import type { UserProfile } from "@/components/layout/RightSidebar";
 import { Footer } from "@/components/layout/Footer";
 import { MobileInstallPrompt } from "@/components/layout/MobileInstallPrompt";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
@@ -94,7 +95,6 @@ function ToastContainer() {
 export default function PortalLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
-  const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   // Skip portal layout for auth, corporate marketing, and admin pages
@@ -145,7 +145,6 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
 
   return (
     <div className="flex min-h-screen bg-paper-100 relative isolate">
-
       <MobileInstallPrompt />
 
       <LeftSidebar
@@ -153,33 +152,20 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
         onToggle={() => setLeftSidebarOpen(!leftSidebarOpen)}
       />
 
-      {/* Fix #10: Add right margin when RightSidebar is open to prevent occlusion */}
-      <div className={cn(
-        "flex-1 flex flex-col min-w-0 relative z-10 transition-all duration-300 ease-in-out",
-        isRightSidebarOpen ? "xl:mr-[300px]" : "mr-0"
-      )}>
+      <div className="flex-1 flex flex-col min-w-0 relative z-10 transition-all duration-300 ease-in-out">
         <PortalHeader
-          onToggleRightSidebar={() =>
-            setIsRightSidebarOpen(!isRightSidebarOpen)
-          }
-          isRightSidebarOpen={isRightSidebarOpen}
-          onToggleLeftSidebar={() => setLeftSidebarOpen(!leftSidebarOpen)} // Fix #34: pass left sidebar toggle
+          onToggleLeftSidebar={() => setLeftSidebarOpen(!leftSidebarOpen)}
         />
+        <PortalSubHeader profile={profile} />
         <main
           className={cn(
-            "flex-1 px-4 md:px-6 lg:px-8 pt-6 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-6",
+            "flex-1 px-4 md:px-6 lg:px-8 pt-5 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-6",
             "transition-all duration-300 ease-in-out",
           )}>
           {children}
         </main>
         <Footer isSlim={true} />
       </div>
-
-      <RightSidebar
-        isOpen={isRightSidebarOpen}
-        onToggle={() => setIsRightSidebarOpen(!isRightSidebarOpen)}
-        profile={profile}
-      />
 
       {/* Global Toast Notification Container */}
       <ToastContainer />

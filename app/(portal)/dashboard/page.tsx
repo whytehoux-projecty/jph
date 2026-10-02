@@ -18,6 +18,7 @@ import { QuickActions } from "@/components/dashboard/QuickActions";
 import { SpendingByCategory } from "@/components/dashboard/SpendingByCategory";
 import { AccountsList } from "@/components/dashboard/AccountsList";
 import { PendingApprovals } from "@/components/dashboard/PendingApprovals";
+import { DashboardIntelligenceSidebar } from "@/components/dashboard/DashboardIntelligenceSidebar";
 import { getProfile } from "@/app/actions/profile";
 import { getAccounts } from "@/app/actions/accounts";
 import { getTransactions, getTransactionStats } from "@/app/actions/transactions";
@@ -100,150 +101,176 @@ export default async function DashboardPage() {
       date: t.createdAt.toISOString(),
     }));
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) {
-        if (language === 'es') return 'Buenos días';
-        if (language === 'fr') return 'Bonjour';
-        if (language === 'de') return 'Guten Morgen';
-        return 'Good morning';
-    }
-    if (hour < 18) {
-        if (language === 'es') return 'Buenas tardes';
-        if (language === 'fr') return 'Bon après-midi';
-        if (language === 'de') return 'Guten Tag';
-        return 'Good afternoon';
-    }
-    if (language === 'es') return 'Buenas noches';
-    if (language === 'fr') return 'Bonsoir';
-    if (language === 'de') return 'Guten Abend';
-    return 'Good evening';
-  };
-
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 pt-2">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 theme-ink bg-ink-900 text-paper-50 p-6 md:p-8 rounded shadow-none mb-6 -mx-2 md:mx-0">
-        <div className="space-y-4">
-          <h2 className="text-3xl md:text-h2 font-bold tracking-tight font-display text-paper-50">
-            {getGreeting()}, {user?.firstName || "there"}
-          </h2>
-          <div>
-            <p className="text-xs font-medium text-ink-500 mb-1 uppercase tracking-widest">Total Deposit Balance</p>
-            <p className="text-4xl md:text-display-lg font-mono font-bold tabular-nums text-paper-50">
-              {formatCurrency(totalBalance, currency, languageToLocale(language))}
-            </p>
+    <div className="w-full max-w-7xl mx-auto space-y-5">
+      {/* ── Consolidated Treasury & Liquidity Banner (Greeting removed, moved to Sub-Header) ── */}
+      <div className="relative overflow-hidden rounded-sm border border-ink-900 bg-ink-900 p-5 md:p-6 text-paper-50 shadow-none">
+        <div className="absolute right-0 top-0 -mr-16 -mt-16 h-48 w-48 rounded-full bg-vermilion-600/10 blur-3xl pointer-events-none" />
+        
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-5 relative z-10">
+          <div className="space-y-2">
+            {/* Identity & Vault Eyebrow */}
+            <div className="flex flex-wrap items-center gap-2.5 text-xs font-mono">
+              <span className="inline-flex items-center gap-1.5 rounded-sm bg-white/10 px-2 py-0.5 text-[#F4724A] border border-white/10 text-[11px]">
+                <span className="h-1.5 w-1.5 rounded-full bg-[#E8532B] animate-pulse" />
+                Heritage Vault · Private Banking
+              </span>
+              <span className="text-white/50 text-[11px]">
+                Vault ID: HTB-{user?.id ? user.id.slice(-6).toUpperCase() : "880194"} · FDIC Insured to $250,000
+              </span>
+            </div>
+
+            {/* Total Balance Amount */}
+            <div>
+              <p className="text-[11px] font-mono font-medium text-white/60 uppercase tracking-widest">
+                Consolidated Liquid Deposits
+              </p>
+              <div className="mt-1 flex items-baseline gap-3 flex-wrap">
+                <span className="text-3xl md:text-4xl lg:text-5xl font-mono font-bold tabular-nums text-white tracking-tight">
+                  {formatCurrency(totalBalance, currency, languageToLocale(language))}
+                </span>
+                <span className="inline-flex items-center text-[11px] font-mono text-emerald-400 bg-emerald-950/60 border border-emerald-500/20 px-2 py-0.5 rounded-sm">
+                  Settled & Verified
+                </span>
+              </div>
+            </div>
           </div>
-        </div>
-        <div className="flex items-center">
-          <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 rounded font-semibold transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vermilion-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900 disabled:pointer-events-none disabled:opacity-50 border border-paper-200/20 bg-transparent text-paper-50 hover:bg-paper-50/10 shadow-none h-10 px-6 text-sm">
-            Refresh Data
-          </Link>
+
+          {/* Action Links */}
+          <div className="flex flex-wrap items-center gap-2.5 shrink-0">
+            <Link
+              href="/transfer"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-sm bg-vermilion-600 px-4 text-xs font-semibold text-white shadow-xs transition hover:bg-vermilion-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            >
+              Transfer Funds
+            </Link>
+            <Link
+              href="/dashboard"
+              className="inline-flex h-9 items-center justify-center gap-1.5 rounded-sm border border-white/20 bg-white/5 px-3.5 text-xs font-medium text-paper-50 transition hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
+            >
+              Refresh
+            </Link>
+          </div>
         </div>
       </div>
 
       <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">
+        <TabsList className="bg-paper-200/60 p-0.5 rounded-sm">
+          <TabsTrigger value="overview" className="text-xs px-3 py-1">
             {translate(language, "nav.overview") || "Overview"}
           </TabsTrigger>
-          <TabsTrigger value="analytics">
+          <TabsTrigger value="analytics" className="text-xs px-3 py-1">
             {translate(language, "nav.analytics") || "Analytics"}
           </TabsTrigger>
         </TabsList>
 
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div className="lg:col-span-4">
+        <TabsContent value="overview">
+          {/* Main 12-Column Responsive Ledger Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            {/* Primary Ledger Column (8 of 12 columns) */}
+            <div className="lg:col-span-8 space-y-5">
+              {/* Executive Actions */}
               <ErrorBoundary>
                 <QuickActions />
               </ErrorBoundary>
-            </div>
-          </div>
 
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            <DashboardStatCard
-              title={translate(language, "overview.totalBalance") || "Total Balance"}
-              value={formatCurrency(totalBalance, currency, languageToLocale(language))}
-              icon={Wallet}
-              subtitle={translate(language, "overview.acrossAllAccounts") || "Across all accounts"}
-              animate="animate-fade-in-up animate-delay-100"
-            />
-            <DashboardStatCard
-              title={translate(language, "overview.incomeMonth") || "Income (Month)"}
-              value={`+${formatCurrency(income, currency, languageToLocale(language))}`}
-              icon={ArrowDownLeft}
-              changeType="positive"
-              subtitle={translate(language, "overview.totalDeposits") || "Total deposits"}
-              animate="animate-fade-in-up animate-delay-200"
-            />
-            <DashboardStatCard
-              title={translate(language, "overview.expensesMonth") || "Expenses (Month)"}
-              value={`−${formatCurrency(expenses, currency, languageToLocale(language))}`}
-              icon={ArrowUpRight}
-              changeType="negative"
-              subtitle={translate(language, "overview.withdrawalsTransfers") || "Withdrawals & transfers"}
-              animate="animate-fade-in-up animate-delay-300"
-            />
-            <DashboardStatCard
-              title={translate(language, "overview.savingsGoals") || "Savings Goals"}
-              value={formatCurrency(savingsGoal, currency, languageToLocale(language))}
-              icon={PiggyBank}
-              subtitle={`of ${formatCurrency(savingsTarget)} target`}
-              animate="animate-fade-in-up animate-delay-400"
-            />
-          </div>
+              {/* 4 Core Financial Stat Cards */}
+              <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <DashboardStatCard
+                  title="Primary Checking"
+                  value={formatCurrency(accounts[0]?.balance || totalBalance, currency, languageToLocale(language))}
+                  icon={Wallet}
+                  subtitle="Operating Liquidity"
+                />
+                <DashboardStatCard
+                  title={translate(language, "overview.incomeMonth") || "Inflow (Month)"}
+                  value={`+${formatCurrency(income, currency, languageToLocale(language))}`}
+                  icon={ArrowDownLeft}
+                  changeType="positive"
+                  subtitle={translate(language, "overview.totalDeposits") || "Settled deposits"}
+                />
+                <DashboardStatCard
+                  title={translate(language, "overview.expensesMonth") || "Outflow (Month)"}
+                  value={`−${formatCurrency(expenses, currency, languageToLocale(language))}`}
+                  icon={ArrowUpRight}
+                  changeType="negative"
+                  subtitle={translate(language, "overview.withdrawalsTransfers") || "Wires & transfers"}
+                />
+                <DashboardStatCard
+                  title={translate(language, "overview.savingsGoals") || "Savings Reserve"}
+                  value={formatCurrency(savingsGoal, currency, languageToLocale(language))}
+                  icon={PiggyBank}
+                  subtitle={`of ${formatCurrency(savingsTarget)} target`}
+                />
+              </div>
 
-          <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
-            <Card className="col-span-1 lg:col-span-4 bg-white border-paper-200 shadow-none animate-scale-in hover-lift">
-              <CardHeader>
-                <CardTitle>Overview</CardTitle>
-              </CardHeader>
-              <CardContent className="pl-2">
-                <ErrorBoundary>
-                  <Overview data={analyticsData.slice(-6)} />
-                </ErrorBoundary>
-              </CardContent>
-            </Card>
-            <Card className="col-span-1 lg:col-span-3 bg-white border-paper-200 shadow-none animate-slide-in-right hover-lift">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <div className="space-y-1">
-                  <CardTitle>Recent Transactions</CardTitle>
-                  <CardDescription>
-                    Latest activity across all accounts.
-                  </CardDescription>
+              {/* Cash Flow Chart & Recent Transactions */}
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-12">
+                <Card className="md:col-span-7 bg-white border-paper-200 shadow-none">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-semibold text-ink-900">Liquidity & Cash Flow</CardTitle>
+                    <CardDescription className="text-xs text-ink-500">6-month settled trend</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pl-1 pb-3">
+                    <ErrorBoundary>
+                      <Overview data={analyticsData.slice(-6)} />
+                    </ErrorBoundary>
+                  </CardContent>
+                </Card>
+
+                <Card className="md:col-span-5 bg-white border-paper-200 shadow-none">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <div className="space-y-0.5">
+                      <CardTitle className="text-sm font-semibold text-ink-900">Recent Activity</CardTitle>
+                      <CardDescription className="text-xs text-ink-500">
+                        Latest settled items
+                      </CardDescription>
+                    </div>
+                    <Link
+                      href="/transactions"
+                      className="text-xs font-medium text-vermilion-600 hover:underline"
+                    >
+                      View all
+                    </Link>
+                  </CardHeader>
+                  <CardContent className="p-3 pt-0">
+                    <ErrorBoundary>
+                      <RecentTransactions transactions={serializedTransactions} />
+                    </ErrorBoundary>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* Accounts Vault & Pending Approvals */}
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-12">
+                <div className="md:col-span-7">
+                  <ErrorBoundary>
+                    <AccountsList accounts={accounts} language={language} />
+                  </ErrorBoundary>
                 </div>
-                <Link href="/transactions" className="text-sm font-medium text-ink-900 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-900 rounded-md px-1">
-                  View all
-                </Link>
-              </CardHeader>
-              <CardContent>
-                <ErrorBoundary>
-                  <RecentTransactions transactions={serializedTransactions} />
-                </ErrorBoundary>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
-            <div className="col-span-1 lg:col-span-4">
-              <ErrorBoundary>
-                <AccountsList accounts={accounts} language={language} />
-              </ErrorBoundary>
+                <div className="md:col-span-5">
+                  <ErrorBoundary>
+                    <PendingApprovals items={pendingItems} language={language} />
+                  </ErrorBoundary>
+                </div>
+              </div>
             </div>
-            <div className="col-span-1 lg:col-span-3">
+
+            {/* Right Intelligence Column: Integrated Client Concierge, Credit Score, Upcoming Bills */}
+            <div className="lg:col-span-4">
               <ErrorBoundary>
-                <PendingApprovals items={pendingItems} language={language} />
+                <DashboardIntelligenceSidebar user={user} />
               </ErrorBoundary>
             </div>
           </div>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
-          <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
-            <Card className="col-span-1 lg:col-span-4 bg-white border-paper-200 shadow-none">
+          <div className="grid gap-4 grid-cols-1 lg:grid-cols-12">
+            <Card className="lg:col-span-8 bg-white border-paper-200 shadow-none">
               <CardHeader>
-                <CardTitle>Financial Analysis</CardTitle>
-                <CardDescription>Income vs Expenses over time</CardDescription>
+                <CardTitle className="text-sm font-semibold text-ink-900">Financial Analysis</CardTitle>
+                <CardDescription className="text-xs text-ink-500">Income vs Expenses over time</CardDescription>
               </CardHeader>
               <CardContent className="pl-2">
                 <ErrorBoundary>
@@ -251,29 +278,30 @@ export default async function DashboardPage() {
                 </ErrorBoundary>
               </CardContent>
             </Card>
-            <div className="col-span-1 lg:col-span-3 space-y-4">
-              <Card>
+
+            <div className="lg:col-span-4 space-y-4">
+              <Card className="bg-white border-paper-200 shadow-none">
                 <CardHeader>
-                  <CardTitle>Savings Progress</CardTitle>
-                  <CardDescription>
-                    Progress towards your goal of {formatCurrency(savingsGoal)}
+                  <CardTitle className="text-sm font-semibold text-ink-900">Savings Progress</CardTitle>
+                  <CardDescription className="text-xs text-ink-500">
+                    Target: {formatCurrency(savingsGoal, currency, languageToLocale(language))}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">Total Saved</span>
-                    <span className="font-bold font-inter tabular-nums lining-nums">
-                      {formatCurrency(totalBalance)}
+                    <span className="font-medium text-xs text-ink-600">Total Saved</span>
+                    <span className="font-bold font-mono tabular-nums text-ink-900">
+                      {formatCurrency(totalBalance, currency, languageToLocale(language))}
                     </span>
                   </div>
                   <div className="w-full">
                     <Progress
-                      value={(totalBalance / savingsGoal) * 100}
+                      value={(totalBalance / (savingsGoal || 1)) * 100}
                       className="h-2"
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground text-right">
-                    {((totalBalance / savingsGoal) * 100).toFixed(1)}% of goal
+                  <p className="text-[11px] text-ink-500 font-mono text-right">
+                    {((totalBalance / (savingsGoal || 1)) * 100).toFixed(1)}% of reserve goal
                   </p>
                 </CardContent>
               </Card>
