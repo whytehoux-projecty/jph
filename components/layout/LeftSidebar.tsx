@@ -73,7 +73,7 @@ export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
       )}
       <aside
         className={cn(
-          "fixed inset-y-0 left-0 lg:sticky lg:top-0 h-screen border-r border-paper-200 bg-white/95 backdrop-blur-md transition-all duration-300 ease-in-out z-60 flex flex-col shrink-0",
+          "fixed inset-y-0 left-0 lg:sticky lg:top-0 h-screen border-r border-paper-200 bg-paper-50/95 backdrop-blur-md transition-all duration-300 ease-in-out z-60 flex flex-col shrink-0",
           isOpen ? "translate-x-0 w-64 shadow-none" : "-translate-x-full lg:translate-x-0 w-64 lg:w-16"
         )}>
       {/* Sidebar Header with Trigger */}

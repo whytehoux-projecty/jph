@@ -30,21 +30,25 @@ export function PortalSubHeader({ profile }: PortalSubHeaderProps) {
   return (
     <div className="w-full border-b border-paper-200 bg-paper-50/90 backdrop-blur-xs transition-colors">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 px-4 md:px-6 lg:px-8 py-2">
-        {/* Left: Personalized greeting & security status */}
+        {/* Left: Personalized greeting or Page Title */}
         <div className="flex flex-wrap items-center gap-2.5">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold tracking-tight text-ink-900">
-              Welcome back, {firstName}
-            </span>
-            <span className="inline-flex items-center gap-1 rounded-sm border border-paper-200 bg-paper-100 px-2 py-0.5 text-[10px] font-mono font-medium uppercase tracking-wider text-ink-700">
-              <Sparkles className="h-2.5 w-2.5 text-vermilion-600" />
-              {tier}
-            </span>
-          </div>
-          <span className="hidden md:inline text-paper-300">·</span>
-          <div className="hidden sm:flex items-center gap-1.5 text-[11px] text-ink-500 font-mono">
-            <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
-            <span>256-Bit Encrypted · Member FDIC</span>
+            {pathname === "/dashboard" || pathname === "/" ? (
+              <span className="text-sm tracking-tight text-ink-900 leading-snug">
+                <span className="font-semibold">Welcome back, {firstName}.</span> <span className="hidden lg:inline text-ink-600">Know that Heritage Trust will never ask for your password, PIN, or OTP via email or phone. <Link href="/security" className="underline hover:text-vermilion-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vermilion-600 rounded-sm">Learn more about staying safe</Link></span>
+              </span>
+            ) : (
+              <span className="text-sm tracking-tight text-ink-900 leading-snug font-semibold">
+                {pathname?.startsWith("/transfer") && "Transfers & Payments"}
+                {pathname?.startsWith("/accounts") && "Account Management"}
+                {pathname?.startsWith("/cards") && "Card Management"}
+                {pathname?.startsWith("/statements") && "Statements & Documents"}
+                {pathname?.startsWith("/settings") && "Settings & Preferences"}
+                {pathname?.startsWith("/support") && "Support Center"}
+                {pathname?.startsWith("/transactions") && "Transaction History"}
+                {pathname?.startsWith("/bills") && "Bill Pay"}
+              </span>
+            )}
           </div>
         </div>
 
@@ -63,7 +67,7 @@ export function PortalSubHeader({ profile }: PortalSubHeaderProps) {
                 className={cn(
                   "shrink-0 px-2.5 py-1 rounded-sm text-xs transition-all duration-150 font-medium",
                   isActive
-                    ? "bg-white text-ink-900 border border-paper-200 shadow-xs font-semibold"
+                    ? "bg-paper-50 text-ink-900 border border-paper-200 shadow-xs font-semibold"
                     : "text-ink-500 hover:text-ink-900 hover:bg-paper-100 border border-transparent"
                 )}
               >

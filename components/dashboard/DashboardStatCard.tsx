@@ -26,7 +26,7 @@ export function DashboardStatCard({
   return (
     <Card
       className={cn(
-        'group relative overflow-hidden bg-white border border-paper-200 text-ink-900 rounded-sm shadow-none transition-all duration-200 hover:border-ink-900/30',
+        'group relative overflow-hidden bg-paper-50 border border-paper-200 text-ink-900 rounded-sm shadow-none transition-all duration-200 hover:border-ink-900/30',
         animate,
         className
       )}

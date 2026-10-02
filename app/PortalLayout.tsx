@@ -7,7 +7,6 @@ import { X, CheckCircle2, AlertCircle, AlertTriangle, Info } from "lucide-react"
 import { cn } from "@/lib/utils";
 import { PortalHeader } from "@/components/layout/PortalHeader";
 import { PortalSubHeader } from "@/components/layout/PortalSubHeader";
-import { LeftSidebar } from "@/components/layout/LeftSidebar";
 import type { UserProfile } from "@/components/layout/RightSidebar";
 import { Footer } from "@/components/layout/Footer";
 import { MobileInstallPrompt } from "@/components/layout/MobileInstallPrompt";
@@ -94,7 +93,6 @@ function ToastContainer() {
 
 export default function PortalLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const [leftSidebarOpen, setLeftSidebarOpen] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   // Skip portal layout for auth, corporate marketing, and admin pages
@@ -128,7 +126,7 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
               tier: user.tier,
               pinSetupComplete: user.pinSetupComplete,
               profilePhotoUrl: user.profilePhotoUrl,
-              sidebarPreferences: user.sidebarPreferences,
+              hideBalance: user.hideBalance,
             });
           }
         })
@@ -144,17 +142,12 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-paper-100 relative isolate">
+    <div className="flex min-h-screen bg-paper-200 relative isolate">
       <MobileInstallPrompt />
-
-      <LeftSidebar
-        isOpen={leftSidebarOpen}
-        onToggle={() => setLeftSidebarOpen(!leftSidebarOpen)}
-      />
 
       <div className="flex-1 flex flex-col min-w-0 relative z-10 transition-all duration-300 ease-in-out">
         <PortalHeader
-          onToggleLeftSidebar={() => setLeftSidebarOpen(!leftSidebarOpen)}
+          profile={profile}
         />
         <PortalSubHeader profile={profile} />
         <main
