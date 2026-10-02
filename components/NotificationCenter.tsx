@@ -73,29 +73,27 @@ export function NotificationCenter({ onClick }: { onClick?: () => void }) {
   return (
     <Popover open={isOpen} onOpenChange={setIsOpen}>
       <PopoverTrigger asChild>
-        <Button
-          variant="ghost"
-          size="small"
+        <button
           aria-label="Notifications"
-          className="text-white hover:bg-white/10 hover:text-white relative transition-colors"
+          className="flex h-8 w-8 items-center justify-center rounded text-ink-900 transition-colors hover:bg-paper-100/50 relative"
         >
-          <Bell className="h-5 w-5" />
+          <Bell className="h-4 w-4" />
           {unreadCount > 0 && (
-            <span className="absolute top-1 right-1 flex h-2.5 w-2.5">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-(--heritage-gold) opacity-75" />
-              <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-(--heritage-gold) border border-white" />
+            <span className="absolute top-1.5 right-1.5 flex h-2 w-2">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-vermilion-500 opacity-75" />
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-vermilion-600 border border-paper-50" />
             </span>
           )}
-        </Button>
+        </button>
       </PopoverTrigger>
       <PopoverContent
         align="end"
         sideOffset={8}
-        className="w-80 sm:w-96 p-0 rounded-md shadow-xl border border-(--ink-900)/20 bg-white text-ink-900 z-50"
+        className="w-80 sm:w-96 p-0 rounded-md shadow-xl border border-paper-300 bg-paper-50 text-ink-900 z-50"
       >
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 bg-gray-50/60">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-paper-200/50 bg-paper-100/50">
           <div className="flex items-center gap-2">
-            <h3 className="font-semibold text-sm text-(--ink-900) font-display">
+            <h3 className="font-semibold text-sm text-ink-900 font-display">
               Notifications
             </h3>
             {unreadCount > 0 && (

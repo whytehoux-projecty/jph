@@ -3,7 +3,6 @@ import { Familjen_Grotesk, Public_Sans, IBM_Plex_Mono } from 'next/font/google';
 import './globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { SecurityNoticeBanner } from '@/components/commercial/SecurityNoticeBanner';
 import { CookieModal } from '@/components/commercial/CookieModal';
 
 /**
@@ -89,8 +88,6 @@ export default function CorporateLayout({
       >
         Skip to main content
       </a>
-
-      <SecurityNoticeBanner />
       <Header />
 
       <main id="main-content" className="grow">

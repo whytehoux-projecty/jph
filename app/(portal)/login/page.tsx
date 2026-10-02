@@ -1,261 +1,344 @@
 "use client";
 
-import { useState } from "react";
-import Link from "next/link";
-import { AlertTriangle } from "lucide-react";
-import { signIn } from "next-auth/react";
-import Image from "next/image";
+import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
-import { Footer } from "@/components/layout/Footer";
+import Link from "next/link";
+import { signIn } from "next-auth/react";
+
+/* ------------------------------------------------------------------
+   EASY SETTINGS - Heritage Trust Vault Configuration
+------------------------------------------------------------------- */
+// Authentic 1888 Heritage Trust bank stone facade at twilight with illuminated arched windows
+const SIDE_IMAGE = "/images/hero/hero-3-desktop.webp";
+const AFTER_LOGIN_ROUTE = "/dashboard";
+const SUPPORT_PHONE = "1-800-437-4824";
 
 export default function LoginPage() {
   const router = useRouter();
+  const [userId, setUserId] = useState("");
+  const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const [formData, setFormData] = useState({
-    accountNumber: "",
-    password: "",
-    rememberMe: false,
-  });
-  const [errors, setErrors] = useState<Record<string, string>>({});
-  const [isLoading, setIsLoading] = useState(false);
+  const [remember, setRemember] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  async function handleSubmit(e: FormEvent) {
     e.preventDefault();
-    setErrors({});
-    setIsLoading(true);
+    setError("");
 
-    const newErrors: Record<string, string> = {};
-
-    const isAccountNumber = /^\d{10,12}$/.test(formData.accountNumber);
-    const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.accountNumber);
-
-    if (!formData.accountNumber) {
-      newErrors.accountNumber = "Username or account number is required";
-    } else if (!isAccountNumber && !isEmail) {
-      newErrors.accountNumber =
-        "Please enter a valid account number or email address";
-    }
-
-    if (!formData.password) {
-      newErrors.password = "Password is required";
-    } else if (formData.password.length < 6) {
-      // Fix #20: admin can set 6-char passwords, so minimum must be 6 not 8
-      newErrors.password = "Password must be at least 6 characters";
-    }
-
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      setIsLoading(false);
+    if (!userId.trim() || !password) {
+      setError("Enter your username or account number and your password.");
       return;
     }
 
+    setLoading(true);
     try {
+      const isAccountNumber = /^\d{10,12}$/.test(userId);
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(userId);
+      
+      if (!isAccountNumber && !isEmail) {
+        setError("Please enter a valid account number or email address");
+        setLoading(false);
+        return;
+      }
+
+      if (password.length < 6) {
+        setError("Password must be at least 6 characters");
+        setLoading(false);
+        return;
+      }
+
       const result = await signIn("credentials", {
-        email: formData.accountNumber,
-        password: formData.password,
+        email: userId,
+        password: password,
         redirect: false,
       });
 
       if (result?.error) {
-        // Fix #21: pass through the EXACT error message from auth.ts,
-        // which now contains the admin-set custom notification message
-        const knownGenericErrors = [
-          "CredentialsSignin",
-          "Configuration",
-        ];
+        const knownGenericErrors = ["CredentialsSignin", "Configuration"];
         const isGenericError = knownGenericErrors.includes(result.error);
-        setErrors({
-          general: isGenericError
+        setError(
+          isGenericError
             ? "Invalid credentials. Please check your account number/email and password."
-            : result.error, // ← show the custom admin message verbatim
-        });
-        setIsLoading(false);
+            : result.error
+        );
+        setLoading(false);
         return;
       }
 
-      router.push("/dashboard");
+      router.push(AFTER_LOGIN_ROUTE);
       router.refresh();
-    } catch (error) {
-      console.error("Login error:", error);
-      setErrors({ general: "An unexpected error occurred. Please try again." });
-      setIsLoading(false);
+    } catch (err) {
+      console.error("Login error:", err);
+      setError("An unexpected error occurred. Please try again.");
+      setLoading(false);
     }
-  };
+  }
 
   return (
-    <main className="min-h-screen w-full relative flex flex-col overflow-hidden">
-      {/* Full Screen Background */}
-      <div className="absolute inset-0 z-0 bg-white">
-        <Image
-          src="/images/login-bg.webp"
-          alt="Heritage Trust login background"
-          fill
-          className="object-cover"
-          priority
-        />
-      </div>
+    <main className="grid min-h-screen bg-[#FAF8F3] text-[#14181F] lg:grid-cols-[minmax(0,1.05fr)_minmax(0,1fr)]">
+      {/* ---------------- LEFT: brand panel (hidden on mobile) ---------------- */}
+      <aside
+        className="relative hidden flex-col justify-between overflow-hidden bg-[#14181C] p-12 text-[#FAF8F3] lg:flex"
+        style={{
+          backgroundImage: `linear-gradient(180deg, rgba(20,24,28,.82) 0%, rgba(20,24,28,.62) 42%, rgba(20,24,28,.94) 100%), url(${SIDE_IMAGE})`,
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        <div>
+          <Link href="/" className="inline-flex items-center" aria-label="Heritage Trust home">
+            {/* Official Horizontal Reversed Logo for Ink / dark scrim */}
+            <img
+              src="/images/logos/heritage-trust-logo-reversed.svg"
+              alt="Heritage Trust"
+              className="h-9 w-auto object-contain"
+            />
+          </Link>
+        </div>
 
-      {/* Fix #6 & #7: Use flex column layout so logo and form stack properly
-          on all viewports, no absolute logo that crashes into form */}
-      <div className="relative z-10 flex flex-col items-center justify-center min-h-screen px-4 py-12 gap-6">
+        <div className="max-w-md py-12">
+          <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-3 py-1 text-xs font-mono text-[#F4724A] backdrop-blur-sm">
+            <span className="h-1.5 w-1.5 rounded-full bg-[#E8532B] animate-pulse" />
+            Heritage Vault
+          </div>
+          <h1 className="mt-4 text-4xl xl:text-5xl font-semibold leading-[1.08] tracking-tight font-display text-white">
+            Your accounts, kept the way we have kept them since 1888.
+          </h1>
+          <p className="mt-4 text-sm text-white/70 leading-relaxed">
+            Institutional custody, bespoke treasury management, and private banking built on enduring trust and cryptographic security.
+          </p>
+        </div>
 
-        {/* Logo — flex item, not absolute */}
-        <Link href="/" className="relative block shrink-0 w-[280px] h-[90px] sm:w-[360px] sm:h-[110px]">
-          <Image
-            src="/vault-login-logo.svg"
-            alt="Heritage Trust"
-            fill
-            className="object-contain"
-            priority
-          />
-        </Link>
+        <ul className="grid max-w-md gap-3.5 border-t border-white/15 pt-6 text-sm text-white/80">
+          <li className="flex items-center gap-3">
+            <Tick />
+            <span>Deposits insured up to $250,000 by the FDIC</span>
+          </li>
+          <li className="flex items-center gap-3">
+            <Tick />
+            <span>256-bit AES encryption on all data in transit and at rest</span>
+          </li>
+          <li className="flex items-center gap-3">
+            <Tick />
+            <span>Fraud monitoring around the clock, with zero-liability protection</span>
+          </li>
+        </ul>
+      </aside>
 
-        {/* Login Form */}
-        {/* Fix #7: responsive width — full on mobile, fixed on larger screens */}
-        <div className="w-full max-w-[360px] bg-white/90 backdrop-blur-md shadow-2xl rounded-sm p-6 border border-ink-900/20">
-          {/* General Error Message */}
-          {errors.general && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-sm mb-4">
-              <p className="text-xs text-red-700 font-medium flex items-start gap-2">
-                {/* Fix #5: use AlertTriangle instead of Shield for error state */}
-                <AlertTriangle className="w-3.5 h-3.5 mt-0.5 shrink-0" />
-                <span>{errors.general}</span>
-              </p>
-            </div>
-          )}
+      {/* ---------------- RIGHT: sign-in section ---------------- */}
+      <section className="flex min-h-screen flex-col justify-between px-6 py-8 sm:px-12">
+        <div className="flex items-center justify-between">
+          {/* Mobile view brand logo */}
+          <Link href="/" className="inline-flex items-center lg:hidden" aria-label="Heritage Trust home">
+            <img
+              src="/images/logos/heritage-trust-logo.svg"
+              alt="Heritage Trust"
+              className="h-7 w-auto object-contain"
+            />
+          </Link>
 
-          {/* Login Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Account Number */}
-            <div className="space-y-1">
-              <label
-                htmlFor="accountNumberInput"
-                className="block text-sm font-medium text-gray-700">
+          <Link
+            href="/"
+            className="ml-auto text-sm text-[#5B646C] underline-offset-4 hover:text-[#14181F] hover:underline"
+          >
+            Back to heritagetrust.com
+          </Link>
+        </div>
+
+        <div className="mx-auto flex w-full max-w-[410px] flex-1 flex-col justify-center py-10">
+          {/* Subtle Vault emblem badge */}
+          <div className="mb-3 inline-flex items-center gap-2">
+            <img
+              src="/images/logos/heritage-trust-mark.svg"
+              alt=""
+              className="h-6 w-6 object-contain"
+              aria-hidden="true"
+            />
+            <span className="font-mono text-xs font-semibold uppercase tracking-wider text-[#C8401A]">
+              Heritage Vault
+            </span>
+          </div>
+
+          <h2 className="text-3xl sm:text-4xl font-semibold tracking-tight text-[#14181F]">
+            Sign in
+          </h2>
+          <p className="mt-2 text-sm text-[#5B646C]">
+            Access your secure personal and commercial banking portal
+          </p>
+
+          <form onSubmit={handleSubmit} noValidate className="mt-8 grid gap-5">
+            {error && (
+              <div
+                role="alert"
+                className="flex items-start gap-2.5 rounded-md border-l-4 border-[#C8401A] bg-[#FBEAE4] px-4 py-3 text-sm text-[#7A2410]"
+              >
+                <svg className="h-5 w-5 shrink-0 text-[#C8401A]" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
+                  <path fillRule="evenodd" d="M8.485 2.495c.673-1.167 2.357-1.167 3.03 0l6.28 10.875c.673 1.167-.17 2.625-1.516 2.625H3.72c-1.347 0-2.189-1.458-1.515-2.625L8.485 2.495zM10 5a.75.75 0 01.75.75v3.5a.75.75 0 01-1.5 0v-3.5A.75.75 0 0110 5zm0 9a1 1 0 100-2 1 1 0 000 2z" clipRule="evenodd" />
+                </svg>
+                <span>{error}</span>
+              </div>
+            )}
+
+            <div>
+              <label htmlFor="userId" className="mb-2 block text-sm font-medium text-[#14181F]">
                 Username or account number
               </label>
-              <div className="relative">
-                <input
-                  id="accountNumberInput"
-                  type="text"
-                  value={formData.accountNumber}
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      accountNumber: e.target.value,
-                    })
-                  }
-                  className="w-full h-10 px-3 rounded-none border-b border-gray-400 bg-transparent text-gray-900 placeholder:text-gray-400 text-base focus:outline-none focus:border-[#1E4B35] focus:border-b-2 transition-colors"
-                />
-              </div>
-              {errors.accountNumber && (
-                <p className="text-xs text-red-600 font-medium mt-1">
-                  {errors.accountNumber}
-                </p>
-              )}
+              <input
+                id="userId"
+                name="userId"
+                type="text"
+                autoComplete="username"
+                value={userId}
+                onChange={(e) => setUserId(e.target.value)}
+                placeholder="e.g. 10-digit account or email"
+                className={`vault-input h-[52px] w-full rounded-md border bg-white px-4 text-base outline-none transition focus:border-[#14181F] focus:ring-2 focus:ring-[#C8401A]/30 ${
+                  error ? "border-[#C8401A]" : "border-[#CFC8B8]"
+                }`}
+              />
             </div>
 
-            {/* Password */}
-            <div className="space-y-1">
-              <label
-                htmlFor="passwordInput"
-                className="block text-sm font-medium text-gray-700">
-                Password
-              </label>
+            <div>
+              <div className="mb-2 flex items-baseline justify-between">
+                <label htmlFor="password" className="text-sm font-medium text-[#14181F]">
+                  Password
+                </label>
+                <Link
+                  href="/contact"
+                  className="text-xs sm:text-sm font-medium text-[#C8401A] underline-offset-4 hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              </div>
               <div className="relative">
                 <input
-                  id="passwordInput"
+                  id="password"
+                  name="password"
                   type={showPassword ? "text" : "password"}
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  className="w-full h-10 px-3 pr-12 rounded-none border-b border-gray-400 bg-transparent text-gray-900 placeholder:text-gray-400 text-base focus:outline-none focus:border-[#1E4B35] focus:border-b-2 transition-colors"
+                  autoComplete="current-password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter your vault password"
+                  className={`vault-input h-[52px] w-full rounded-md border bg-white pl-4 pr-20 text-base outline-none transition focus:border-[#14181F] focus:ring-2 focus:ring-[#C8401A]/30 ${
+                    error ? "border-[#C8401A]" : "border-[#CFC8B8]"
+                  }`}
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[#1E4B35] hover:text-[#143d2a] text-sm font-semibold transition-colors">
+                  onClick={() => setShowPassword((s) => !s)}
+                  aria-pressed={showPassword}
+                  className="absolute right-1 top-1 h-[44px] rounded px-3 text-xs font-semibold uppercase tracking-wider text-[#5B646C] hover:bg-[#F3EEE3] hover:text-[#14181F] focus:outline-none focus:ring-2 focus:ring-[#C8401A]/30"
+                >
                   {showPassword ? "Hide" : "Show"}
                 </button>
               </div>
-              {errors.password && (
-                <p className="text-xs text-red-600 font-medium mt-1">
-                  {errors.password}
-                </p>
+            </div>
+
+            <label className="flex cursor-pointer items-center gap-3 text-sm text-[#14181F]">
+              <input
+                type="checkbox"
+                checked={remember}
+                onChange={(e) => setRemember(e.target.checked)}
+                className="h-4 w-4 rounded border-[#CFC8B8] accent-[#14181F]"
+              />
+              <span>Remember my username on this device</span>
+            </label>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="flex h-[52px] w-full items-center justify-center gap-2 rounded-md bg-[#C8401A] text-base font-semibold text-white shadow-sm transition hover:bg-[#A62F0E] focus:outline-none focus:ring-2 focus:ring-[#14181F] focus:ring-offset-2 focus:ring-offset-[#FAF8F3] disabled:cursor-wait disabled:opacity-75"
+            >
+              {loading ? (
+                <>
+                  <svg className="h-5 w-5 animate-spin text-white" viewBox="0 0 24 24" fill="none">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  <span>Signing in securely...</span>
+                </>
+              ) : (
+                <>
+                  <Lock />
+                  <span>Sign in securely</span>
+                </>
               )}
-            </div>
-
-            {/* Remember Me & Forgot Password */}
-            <div className="flex items-center justify-between pt-1">
-              <label className="flex items-center gap-2 cursor-pointer group">
-                <div className="relative flex items-center">
-                  <input
-                    type="checkbox"
-                    checked={formData.rememberMe}
-                    onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        rememberMe: e.target.checked,
-                      })
-                    }
-                    className="peer h-5 w-5 cursor-pointer appearance-none rounded-sm border border-gray-400 checked:border-[#1E4B35] checked:bg-[#1E4B35] transition-all"
-                  />
-                  <div className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-white opacity-0 peer-checked:opacity-100">
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-3.5 w-3.5"
-                      viewBox="0 0 20 20"
-                      fill="currentColor">
-                      <path
-                        fillRule="evenodd"
-                        d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                        clipRule="evenodd"
-                      />
-                    </svg>
-                  </div>
-                </div>
-                <span className="text-sm text-gray-600 group-hover:text-gray-900">
-                  Remember me
-                </span>
-              </label>
-            </div>
-
-            <div className="space-y-3 pt-2">
-              <button
-                type="submit"
-                disabled={isLoading}
-                className="w-full h-10 bg-ink-900 text-white text-base font-bold rounded-[3px] hover:bg-(--ink-700) transition-colors shadow-sm disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2">
-                {isLoading ? (
-                  <span className="flex items-center gap-2">
-                    <svg className="animate-spin h-4 w-4" fill="none" viewBox="0 0 24 24">
-                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
-                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
-                    </svg>
-                    Signing in...
-                  </span>
-                ) : "Sign in"}
-              </button>
-
-              <div className="flex flex-col gap-2 items-center">
-                <Link
-                  href="/contact"
-                  className="text-sm text-ink-900 hover:underline font-medium flex items-center justify-center gap-1">
-                  Forgot username/password? <span className="text-xs">›</span>
-                </Link>
-                <Link
-                  href="/apply"
-                  className="text-sm text-ink-900 hover:underline font-medium flex items-center justify-center gap-1">
-                  Not enrolled? Sign up now.{" "}
-                  <span className="text-xs">›</span>
-                </Link>
-              </div>
-            </div>
+            </button>
           </form>
-        </div>
-      </div>
 
-      {/* Footer */}
-      <Footer isAbsolute />
+          <div className="mt-8 grid gap-2.5 border-t border-[#E3DCCB] pt-6 text-sm text-[#5B646C]">
+            <p>
+              Have an account but no online access?{" "}
+              <Link href="/apply" className="font-medium text-[#14181F] underline underline-offset-4 hover:text-[#C8401A]">
+                Enroll in online banking
+              </Link>
+            </p>
+            <p>
+              New to Heritage Trust?{" "}
+              <Link href="/apply" className="font-medium text-[#14181F] underline underline-offset-4 hover:text-[#C8401A]">
+                Open an account
+              </Link>
+            </p>
+          </div>
+
+          <div className="mt-8 flex items-start gap-3 rounded-md border border-[#E3DCCB] bg-[#F3EEE3]/70 p-3.5 text-[13px] leading-relaxed text-[#5B646C]">
+            <ShieldCheck />
+            <p>
+              <strong className="font-medium text-[#14181F]">Security notice:</strong> Heritage Trust will never ask for your password, PIN, or one-time passcode by email or unsolicited call.
+            </p>
+          </div>
+        </div>
+
+        <footer className="flex flex-wrap items-center justify-between gap-x-6 gap-y-2 text-xs text-[#5B646C] pt-6">
+          <span>&copy; {new Date().getFullYear()} Heritage Trust Bank, N.A. Member FDIC. Equal Housing Lender.</span>
+          <nav className="flex flex-wrap gap-x-5 gap-y-1" aria-label="Legal">
+            <Link href="/privacy" className="hover:underline">Privacy</Link>
+            <Link href="/terms" className="hover:underline">Terms</Link>
+            <Link href="/accessibility" className="hover:underline">Accessibility</Link>
+            <Link href="/security" className="hover:underline">Security</Link>
+            <a href={`tel:${SUPPORT_PHONE.replace(/-/g, "")}`} className="hover:underline">{SUPPORT_PHONE}</a>
+          </nav>
+        </footer>
+      </section>
+
+      {/* Prevent autofill styling clash */}
+      <style>{`
+        .vault-input:-webkit-autofill,
+        .vault-input:-webkit-autofill:focus {
+          -webkit-box-shadow: 0 0 0 1000px #fff inset;
+          -webkit-text-fill-color: #14181F;
+        }
+      `}</style>
     </main>
   );
 }
+
+/* ---------- Brand Icons ---------- */
+
+function Tick() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true" className="shrink-0">
+      <circle cx="9" cy="9" r="8" fill="#E8532B" fillOpacity="0.2" />
+      <path d="M5.5 9.5l2.5 2.5 5-5" stroke="#F4724A" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function Lock() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 18 18" fill="none" aria-hidden="true">
+      <rect x="3.5" y="8" width="11" height="7.5" rx="1.5" stroke="currentColor" strokeWidth="1.8" />
+      <path d="M6 8V6a3 3 0 016 0v2" stroke="currentColor" strokeWidth="1.8" />
+    </svg>
+  );
+}
+
+function ShieldCheck() {
+  return (
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#1F4D3F" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mt-0.5 shrink-0" aria-hidden="true">
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+      <path d="m9 12 2 2 4-4" />
+    </svg>
+  );
+}
+

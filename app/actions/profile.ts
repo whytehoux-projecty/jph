@@ -70,9 +70,21 @@ export async function setupTransactionPin(pin: string) {
   return { success: true };
 }
 
-export async function updatePreferences(data: any) {
-  // Demo mock to update language/currency preferences
-  // Could be stored in metadata column of User in a real app
+export async function updatePreferences(data: { preferredLanguage?: string, preferredCurrency?: string, hideBalance?: boolean }) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error('Unauthorized');
+
+  const updateData: any = {};
+  if (data.preferredLanguage !== undefined) updateData.preferredLanguage = data.preferredLanguage;
+  if (data.preferredCurrency !== undefined) updateData.preferredCurrency = data.preferredCurrency;
+  if (data.hideBalance !== undefined) updateData.hideBalance = data.hideBalance;
+
+  if (Object.keys(updateData).length > 0) {
+    await prisma.user.update({
+      where: { id: session.user.id },
+      data: updateData
+    });
+  }
   return { success: true };
 }
 

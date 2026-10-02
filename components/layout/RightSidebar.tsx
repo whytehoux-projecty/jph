@@ -24,7 +24,7 @@ export interface UserProfile {
   tier: string;
   pinSetupComplete: boolean;
   profilePhotoUrl?: string | null;
-  sidebarPreferences?: string | null;
+  hideBalance?: boolean;
 }
 
 interface RightSidebarProps {
@@ -70,15 +70,9 @@ export function RightSidebar({ isOpen, onToggle, profile }: RightSidebarProps) {
   const tierLabel = profile?.tier ? `${profile.tier} MEMBER` : 'PREMIUM MEMBER';
   const memberId = profile?.id ? (profile.id.length > 10 ? profile.id.slice(-10).toUpperCase() : profile.id) : '8839-2991-00';
 
-  let prefs: Record<string, boolean> = {};
-  if (profile?.sidebarPreferences) {
-    try {
-      prefs = JSON.parse(profile.sidebarPreferences);
-    } catch(e) {}
-  }
-  const showProfile = prefs['profile-photo'] !== false;
-  const showQuickAccess = prefs['quick-access'] !== false;
-  const showPromo = prefs['promo'] !== false;
+  const showProfile = true;
+  const showQuickAccess = true;
+  const showPromo = true;
 
   return (
     <aside
@@ -131,14 +125,7 @@ export function RightSidebar({ isOpen, onToggle, profile }: RightSidebarProps) {
 
           {/* Dynamic Widgets Section */}
           <div className="space-y-4">
-            {SIDEBAR_REGISTRY.filter(widget => {
-              if (!profile?.sidebarPreferences) return widget.defaultVisibility;
-              try {
-                const prefs = JSON.parse(profile.sidebarPreferences);
-                if (prefs[widget.id] !== undefined) return prefs[widget.id];
-              } catch (e) {}
-              return widget.defaultVisibility;
-            }).map((widget, index) => {
+            {SIDEBAR_REGISTRY.filter(widget => widget.defaultVisibility).map((widget, index) => {
               const WidgetComponent = widget.component;
               return (
                 <div 

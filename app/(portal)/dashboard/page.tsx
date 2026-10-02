@@ -1,5 +1,5 @@
 import "./dashboard-animations.css";
-import { Wallet, ArrowDownLeft, ArrowUpRight, PiggyBank } from "lucide-react";
+import { Wallet, ArrowDownLeft, ArrowUpRight, PiggyBank, LayoutGrid, BarChart3 } from "lucide-react";
 import {
   Card,
   CardContent,
@@ -16,8 +16,8 @@ import { ErrorBoundary } from "@/components/ui/ErrorBoundary";
 import { DashboardStatCard } from "@/components/dashboard/DashboardStatCard";
 import { QuickActions } from "@/components/dashboard/QuickActions";
 import { SpendingByCategory } from "@/components/dashboard/SpendingByCategory";
-import { AccountsList } from "@/components/dashboard/AccountsList";
-import { PendingApprovals } from "@/components/dashboard/PendingApprovals";
+import { DashboardIntelligenceSidebar } from "@/components/dashboard/DashboardIntelligenceSidebar";
+import { BalanceBanner } from "@/components/dashboard/BalanceBanner";
 import { getProfile } from "@/app/actions/profile";
 import { getAccounts } from "@/app/actions/accounts";
 import { getTransactions, getTransactionStats } from "@/app/actions/transactions";
@@ -100,150 +100,110 @@ export default async function DashboardPage() {
       date: t.createdAt.toISOString(),
     }));
 
-  const getGreeting = () => {
-    const hour = new Date().getHours();
-    if (hour < 12) {
-        if (language === 'es') return 'Buenos días';
-        if (language === 'fr') return 'Bonjour';
-        if (language === 'de') return 'Guten Morgen';
-        return 'Good morning';
-    }
-    if (hour < 18) {
-        if (language === 'es') return 'Buenas tardes';
-        if (language === 'fr') return 'Bon après-midi';
-        if (language === 'de') return 'Guten Tag';
-        return 'Good afternoon';
-    }
-    if (language === 'es') return 'Buenas noches';
-    if (language === 'fr') return 'Bonsoir';
-    if (language === 'de') return 'Guten Abend';
-    return 'Good evening';
-  };
-
   return (
-    <div className="w-full max-w-7xl mx-auto space-y-6 pt-2">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-4 theme-ink bg-ink-900 text-paper-50 p-6 md:p-8 rounded shadow-none mb-6 -mx-2 md:mx-0">
-        <div className="space-y-4">
-          <h2 className="text-3xl md:text-h2 font-bold tracking-tight font-display text-paper-50">
-            {getGreeting()}, {user?.firstName || "there"}
-          </h2>
-          <div>
-            <p className="text-xs font-medium text-ink-500 mb-1 uppercase tracking-widest">Total Deposit Balance</p>
-            <p className="text-4xl md:text-display-lg font-mono font-bold tabular-nums text-paper-50">
-              {formatCurrency(totalBalance, currency, languageToLocale(language))}
-            </p>
-          </div>
-        </div>
-        <div className="flex items-center">
-          <Link href="/dashboard" className="inline-flex items-center justify-center gap-2 rounded font-semibold transition-all duration-250 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vermilion-400 focus-visible:ring-offset-2 focus-visible:ring-offset-ink-900 disabled:pointer-events-none disabled:opacity-50 border border-paper-200/20 bg-transparent text-paper-50 hover:bg-paper-50/10 shadow-none h-10 px-6 text-sm">
-            Refresh Data
-          </Link>
-        </div>
-      </div>
+    <Tabs defaultValue="overview" className="w-full max-w-7xl mx-auto space-y-5">
+      {/* ── Total Balance Banner Widget ── */}
+      <BalanceBanner
+        totalBalance={totalBalance}
+        currency={currency}
+        language={language}
+        accounts={accounts}
+        initialHideBalance={user?.hideBalance}
+      />
 
-      <Tabs defaultValue="overview" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="overview">
-            {translate(language, "nav.overview") || "Overview"}
-          </TabsTrigger>
-          <TabsTrigger value="analytics">
-            {translate(language, "nav.analytics") || "Analytics"}
-          </TabsTrigger>
-        </TabsList>
+        <TabsContent value="overview" className="m-0">
+          {/* Main 12-Column Responsive Ledger Grid */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            {/* Primary Ledger Column (8 of 12 columns) */}
+            <div className="lg:col-span-8 space-y-5">
+              {/* 4 Core Financial Stat Cards */}
+              <div className="grid gap-3 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <DashboardStatCard
+                  title="Primary Checking"
+                  value={formatCurrency(accounts[0]?.balance || totalBalance, currency, languageToLocale(language))}
+                  icon={Wallet}
+                  subtitle="Operating Liquidity"
+                />
+                <DashboardStatCard
+                  title={translate(language, "overview.incomeMonth") || "Inflow (Month)"}
+                  value={`+${formatCurrency(income, currency, languageToLocale(language))}`}
+                  icon={ArrowDownLeft}
+                  changeType="positive"
+                  subtitle={translate(language, "overview.totalDeposits") || "Settled deposits"}
+                />
+                <DashboardStatCard
+                  title={translate(language, "overview.expensesMonth") || "Outflow (Month)"}
+                  value={`−${formatCurrency(expenses, currency, languageToLocale(language))}`}
+                  icon={ArrowUpRight}
+                  changeType="negative"
+                  subtitle={translate(language, "overview.withdrawalsTransfers") || "Wires & transfers"}
+                />
+                <DashboardStatCard
+                  title={translate(language, "overview.savingsGoals") || "Savings Reserve"}
+                  value={formatCurrency(savingsGoal, currency, languageToLocale(language))}
+                  icon={PiggyBank}
+                  subtitle={`of ${formatCurrency(savingsTarget)} target`}
+                />
+              </div>
 
-        <TabsContent value="overview" className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-            <div className="lg:col-span-4">
+              {/* Executive Actions */}
               <ErrorBoundary>
                 <QuickActions />
               </ErrorBoundary>
+
+              {/* Cash Flow Chart & Recent Transactions */}
+              <div className="grid gap-4 grid-cols-1 md:grid-cols-12">
+                <Card className="md:col-span-7 bg-paper-50 border-paper-200 shadow-none">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="text-sm font-semibold text-ink-900">Liquidity & Cash Flow</CardTitle>
+                    <CardDescription className="text-xs text-ink-500">6-month settled trend</CardDescription>
+                  </CardHeader>
+                  <CardContent className="pl-1 pb-3">
+                    <ErrorBoundary>
+                      <Overview data={analyticsData.slice(-6)} />
+                    </ErrorBoundary>
+                  </CardContent>
+                </Card>
+
+                <Card className="md:col-span-5 bg-paper-50 border-paper-200 shadow-none">
+                  <CardHeader className="flex flex-row items-center justify-between pb-2">
+                    <div className="space-y-0.5">
+                      <CardTitle className="text-sm font-semibold text-ink-900">Recent Activity</CardTitle>
+                      <CardDescription className="text-xs text-ink-500">
+                        Latest settled items
+                      </CardDescription>
+                    </div>
+                    <Link
+                      href="/transactions"
+                      className="text-xs font-medium text-vermilion-600 hover:underline"
+                    >
+                      View all
+                    </Link>
+                  </CardHeader>
+                  <CardContent className="p-3 pt-0">
+                    <ErrorBoundary>
+                      <RecentTransactions transactions={serializedTransactions} />
+                    </ErrorBoundary>
+                  </CardContent>
+                </Card>
+              </div>
             </div>
-          </div>
 
-          <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
-            <DashboardStatCard
-              title={translate(language, "overview.totalBalance") || "Total Balance"}
-              value={formatCurrency(totalBalance, currency, languageToLocale(language))}
-              icon={Wallet}
-              subtitle={translate(language, "overview.acrossAllAccounts") || "Across all accounts"}
-              animate="animate-fade-in-up animate-delay-100"
-            />
-            <DashboardStatCard
-              title={translate(language, "overview.incomeMonth") || "Income (Month)"}
-              value={`+${formatCurrency(income, currency, languageToLocale(language))}`}
-              icon={ArrowDownLeft}
-              changeType="positive"
-              subtitle={translate(language, "overview.totalDeposits") || "Total deposits"}
-              animate="animate-fade-in-up animate-delay-200"
-            />
-            <DashboardStatCard
-              title={translate(language, "overview.expensesMonth") || "Expenses (Month)"}
-              value={`−${formatCurrency(expenses, currency, languageToLocale(language))}`}
-              icon={ArrowUpRight}
-              changeType="negative"
-              subtitle={translate(language, "overview.withdrawalsTransfers") || "Withdrawals & transfers"}
-              animate="animate-fade-in-up animate-delay-300"
-            />
-            <DashboardStatCard
-              title={translate(language, "overview.savingsGoals") || "Savings Goals"}
-              value={formatCurrency(savingsGoal, currency, languageToLocale(language))}
-              icon={PiggyBank}
-              subtitle={`of ${formatCurrency(savingsTarget)} target`}
-              animate="animate-fade-in-up animate-delay-400"
-            />
-          </div>
-
-          <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
-            <Card className="col-span-1 lg:col-span-4 bg-white border-paper-200 shadow-none animate-scale-in hover-lift">
-              <CardHeader>
-                <CardTitle>Overview</CardTitle>
-              </CardHeader>
-              <CardContent className="pl-2">
-                <ErrorBoundary>
-                  <Overview data={analyticsData.slice(-6)} />
-                </ErrorBoundary>
-              </CardContent>
-            </Card>
-            <Card className="col-span-1 lg:col-span-3 bg-white border-paper-200 shadow-none animate-slide-in-right hover-lift">
-              <CardHeader className="flex flex-row items-center justify-between pb-2">
-                <div className="space-y-1">
-                  <CardTitle>Recent Transactions</CardTitle>
-                  <CardDescription>
-                    Latest activity across all accounts.
-                  </CardDescription>
-                </div>
-                <Link href="/transactions" className="text-sm font-medium text-ink-900 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-900 rounded-md px-1">
-                  View all
-                </Link>
-              </CardHeader>
-              <CardContent>
-                <ErrorBoundary>
-                  <RecentTransactions transactions={serializedTransactions} />
-                </ErrorBoundary>
-              </CardContent>
-            </Card>
-          </div>
-
-          <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
-            <div className="col-span-1 lg:col-span-4">
+            {/* Right Intelligence Column: Integrated Client Concierge, Credit Score, Upcoming Bills */}
+            <div className="lg:col-span-4">
               <ErrorBoundary>
-                <AccountsList accounts={accounts} language={language} />
-              </ErrorBoundary>
-            </div>
-            <div className="col-span-1 lg:col-span-3">
-              <ErrorBoundary>
-                <PendingApprovals items={pendingItems} language={language} />
+                <DashboardIntelligenceSidebar user={user} />
               </ErrorBoundary>
             </div>
           </div>
         </TabsContent>
 
         <TabsContent value="analytics" className="space-y-4 animate-in fade-in slide-in-from-bottom-4">
-          <div className="grid gap-4 grid-cols-1 lg:grid-cols-7">
-            <Card className="col-span-1 lg:col-span-4 bg-white border-paper-200 shadow-none">
+          <div className="grid gap-4 grid-cols-1 lg:grid-cols-12">
+            <Card className="lg:col-span-8 bg-paper-50 border-paper-200 shadow-none">
               <CardHeader>
-                <CardTitle>Financial Analysis</CardTitle>
-                <CardDescription>Income vs Expenses over time</CardDescription>
+                <CardTitle className="text-sm font-semibold text-ink-900">Financial Analysis</CardTitle>
+                <CardDescription className="text-xs text-ink-500">Income vs Expenses over time</CardDescription>
               </CardHeader>
               <CardContent className="pl-2">
                 <ErrorBoundary>
@@ -251,29 +211,30 @@ export default async function DashboardPage() {
                 </ErrorBoundary>
               </CardContent>
             </Card>
-            <div className="col-span-1 lg:col-span-3 space-y-4">
-              <Card>
+
+            <div className="lg:col-span-4 space-y-4">
+              <Card className="bg-paper-50 border-paper-200 shadow-none">
                 <CardHeader>
-                  <CardTitle>Savings Progress</CardTitle>
-                  <CardDescription>
-                    Progress towards your goal of {formatCurrency(savingsGoal)}
+                  <CardTitle className="text-sm font-semibold text-ink-900">Savings Progress</CardTitle>
+                  <CardDescription className="text-xs text-ink-500">
+                    Target: {formatCurrency(savingsGoal, currency, languageToLocale(language))}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-2">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-medium">Total Saved</span>
-                    <span className="font-bold font-inter tabular-nums lining-nums">
-                      {formatCurrency(totalBalance)}
+                    <span className="font-medium text-xs text-ink-600">Total Saved</span>
+                    <span className="font-bold font-mono tabular-nums text-ink-900">
+                      {formatCurrency(totalBalance, currency, languageToLocale(language))}
                     </span>
                   </div>
                   <div className="w-full">
                     <Progress
-                      value={(totalBalance / savingsGoal) * 100}
+                      value={(totalBalance / (savingsGoal || 1)) * 100}
                       className="h-2"
                     />
                   </div>
-                  <p className="text-xs text-muted-foreground text-right">
-                    {((totalBalance / savingsGoal) * 100).toFixed(1)}% of goal
+                  <p className="text-[11px] text-ink-500 font-mono text-right">
+                    {((totalBalance / (savingsGoal || 1)) * 100).toFixed(1)}% of reserve goal
                   </p>
                 </CardContent>
               </Card>
@@ -287,7 +248,6 @@ export default async function DashboardPage() {
             </div>
           </div>
         </TabsContent>
-      </Tabs>
-    </div>
+    </Tabs>
   );
 }
