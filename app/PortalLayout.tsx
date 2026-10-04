@@ -108,6 +108,7 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
     pathname?.startsWith("/personal-banking") ||
     pathname?.startsWith("/business-banking") ||
     pathname?.startsWith("/wealth") ||
+    pathname?.startsWith("/corporate") ||
     pathname?.startsWith("/about") ||
     pathname?.startsWith("/contact") ||
     pathname?.startsWith("/apply") ||

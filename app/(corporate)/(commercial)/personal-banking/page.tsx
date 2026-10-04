@@ -103,154 +103,148 @@ export default function PersonalBankingPage() {
 
             {/* ── PRODUCTS ──────────────────────────────────────────────── */}
             <section className="py-24 bg-paper-50">
-                <div className="container mx-auto px-6 max-w-3xl space-y-24">
+                <div className="container mx-auto px-6 max-w-7xl space-y-32">
                     
                     {/* Checking */}
-                    <div id="checking" className="scroll-mt-32">
-                        <h2 className="font-display text-h2 text-ink-900 mb-2">Heritage Checking</h2>
-                        <p className="text-body-lg text-ink-700 mb-6">For everyday spending and life on the move.</p>
-                        
-                        <div className="flex gap-12 mb-8 p-6 bg-paper-100 border border-paper-200 rounded">
-                            <Figure value={RATES.checkingApy} label="Annual Percentage Yield" />
-                            <Figure value="$0" label="Monthly maintenance fee" />
+                    <div id="checking" className="scroll-mt-32 grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h2 className="font-display text-h2 text-ink-900 mb-4">Heritage Advantage Checking</h2>
+                            <p className="text-body-lg text-ink-700 mb-6">Experience the convenience of Heritage Trust Advantage Banking. With simple ways to waive the monthly maintenance fee, a robust mobile banking app, and security features that put you in control, you can choose the checking setting that works best for you and your family.</p>
+                            
+                            <ul className="space-y-3 mb-8">
+                                {[
+                                    'No monthly maintenance fees — ever',
+                                    'Unlimited domestic ATM fee refunds',
+                                    'Real-time transaction alerts with Fraud Shield™',
+                                    'Early direct deposit (up to 2 days early)',
+                                    'FDIC insured up to $250,000',
+                                ].map((feature) => (
+                                    <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                        <CheckCircle className="w-5 h-5 text-vermilion-600 shrink-0 mt-0.5" />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Button as="a" href={ROUTES.apply} variant="primary">
+                                Open a checking account
+                            </Button>
                         </div>
-                        
-                        <ul className="space-y-3 mb-8">
-                            {[
-                                'No monthly maintenance fees — ever',
-                                'Unlimited domestic ATM fee refunds',
-                                'Real-time transaction alerts',
-                                'Early direct deposit (up to 2 days early)',
-                                'FDIC insured up to $250,000',
-                            ].map((feature) => (
-                                <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
-                                    {feature}
-                                </li>
-                            ))}
-                        </ul>
-                        <Button as="a" href={ROUTES.apply} variant="primary">
-                            Open Checking Account
-                        </Button>
+                        <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border border-paper-200">
+                            <Image src="/images/products/checking.jpg" alt="Heritage Advantage Checking" fill className="object-cover" />
+                        </div>
                     </div>
-
-                    <div className="hairline" />
 
                     {/* Savings */}
-                    <div id="savings" className="scroll-mt-32">
-                        <h2 className="font-display text-h2 text-ink-900 mb-2">Heritage Savings</h2>
-                        <p className="text-body-lg text-ink-700 mb-6">Grow your money faster with elite rates.</p>
-                        
-                        <div className="flex gap-12 mb-8 p-6 bg-paper-100 border border-paper-200 rounded">
-                            <Figure value={RATES.savingsApy} label="Annual Percentage Yield" footnoteRef={1} />
-                            <Figure value="$0" label="Minimum balance" />
+                    <div id="savings" className="scroll-mt-32 grid md:grid-cols-2 gap-12 items-center">
+                        <div className="order-last md:order-first relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border border-paper-200">
+                            <Image src="/images/products/savings.jpg" alt="Heritage Advantage Savings" fill className="object-cover" />
                         </div>
-                        
-                        <ul className="space-y-3 mb-8">
-                            {[
-                                `${RATES.savingsApy} APY — among the highest nationally`,
-                                'No minimum balance requirement',
-                                'Unlimited deposits, up to 6 withdrawals/month',
-                                'Compound interest calculated daily',
-                                'FDIC insured up to $250,000',
-                            ].map((feature) => (
-                                <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
-                                    {feature}
-                                </li>
-                            ))}
-                        </ul>
-                        <Button as="a" href={ROUTES.apply} variant="primary">
-                            Open Savings Account
-                        </Button>
+                        <div>
+                            <h2 className="font-display text-h2 text-ink-900 mb-4">Heritage Advantage Savings</h2>
+                            <p className="text-body-lg text-ink-700 mb-6">Get more from your savings. Start saving for the future with a Heritage Trust Advantage Savings account. Enjoy competitive interest rates, easy transfers from your checking account, and tools to help you track your goals in Heritage Vault.</p>
+                            
+                            <ul className="space-y-3 mb-8">
+                                {[
+                                    `${RATES.savingsApy} APY — highly competitive rates to grow your balance faster`,
+                                    'No minimum balance requirement to open',
+                                    'Automatic transfers with Keep the Change® savings program',
+                                    'Track your savings goals easily in the mobile app',
+                                ].map((feature) => (
+                                    <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                        <CheckCircle className="w-5 h-5 text-vermilion-600 shrink-0 mt-0.5" />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Button as="a" href={ROUTES.apply} variant="primary">
+                                Open a savings account
+                            </Button>
+                        </div>
                     </div>
-
-                    <div className="hairline" />
 
                     {/* Credit Card */}
-                    <div id="card" className="scroll-mt-32">
-                        <h2 className="font-display text-h2 text-ink-900 mb-2">Heritage Rewards Visa®</h2>
-                        <p className="text-body-lg text-ink-700 mb-6">Earn on every purchase you already make.</p>
-                        
-                        <div className="flex flex-wrap gap-12 mb-8 p-6 bg-paper-100 border border-paper-200 rounded">
-                            <Figure value={RATES.cardCashback} label="Unlimited cash back" />
-                            <Figure value="$0" label="Annual fee" />
+                    <div id="card" className="scroll-mt-32 grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h2 className="font-display text-h2 text-ink-900 mb-4">Heritage Rewards Visa® Credit Card</h2>
+                            <p className="text-body-lg text-ink-700 mb-6">Credit cards to fit your lifestyle. Earn unlimited cash back on every purchase, every day. There are no rotating categories to track, and your cash rewards don't expire as long as your account remains open.</p>
+                            
+                            <ul className="space-y-3 mb-8">
+                                {[
+                                    `${RATES.cardCashback} unlimited cash back on all purchases`,
+                                    `${RATES.cardIntroApr} Intro APR for 15 billing cycles`,
+                                    '$0 annual fee',
+                                    'Contactless payment technology and mobile wallet ready',
+                                ].map((feature) => (
+                                    <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                        <CheckCircle className="w-5 h-5 text-vermilion-600 shrink-0 mt-0.5" />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                            <p className="text-small text-ink-500 mb-6">{RATES.cardRegularApr} applies after introductory period.</p>
+                            <Button as="a" href={ROUTES.apply} variant="primary">
+                                Explore credit cards
+                            </Button>
                         </div>
-                        
-                        <ul className="space-y-3 mb-8">
-                            {[
-                                `${RATES.cardCashback} unlimited cash back on all purchases`,
-                                `${RATES.cardIntroApr} on purchases & transfers`,
-                                'No foreign transaction fees',
-                                'Travel accident insurance & purchase protection',
-                                'EMV chip + virtual card for Heritage Vault',
-                            ].map((feature) => (
-                                <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
-                                    {feature}
-                                </li>
-                            ))}
-                        </ul>
-                        <p className="text-small text-ink-500 mb-6">{RATES.cardRegularApr} applies after introductory period.</p>
-                        <Button as="a" href={ROUTES.apply} variant="primary">
-                            Apply for Credit Card
-                        </Button>
+                        <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border border-paper-200">
+                            <Image src="/images/products/card.jpg" alt="Heritage Rewards Credit Card" fill className="object-cover" />
+                        </div>
                     </div>
 
-                    <div className="hairline" />
-
-                    {/* Personal Loan */}
-                    <div id="loan" className="scroll-mt-32">
-                        <h2 className="font-display text-h2 text-ink-900 mb-2">Personal Loan</h2>
-                        <p className="text-body-lg text-ink-700 mb-6">Flexible financing for life&apos;s important moments.</p>
-                        
-                        <div className="flex gap-12 mb-8 p-6 bg-paper-100 border border-paper-200 rounded">
-                            <Figure value={RATES.personalLoanFrom} label="Starting rate" footnoteRef={2} />
-                            <Figure value="$100k" label="Maximum loan amount" />
+                    {/* Auto Loans (New) */}
+                    <div id="auto-loans" className="scroll-mt-32 grid md:grid-cols-2 gap-12 items-center">
+                        <div className="order-last md:order-first relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border border-paper-200">
+                            <Image src="/images/products/loans.jpg" alt="Heritage Auto Loans" fill className="object-cover" />
                         </div>
-                        
-                        <ul className="space-y-3 mb-8">
-                            {[
-                                'Borrow $2,500 – $100,000',
-                                'Terms from 12 to 84 months',
-                                'No prepayment penalty',
-                                'Same-business-day funding for approved applications',
-                                'Relationship rate discount for Heritage Vault clients',
-                            ].map((feature) => (
-                                <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
-                                    {feature}
-                                </li>
-                            ))}
-                        </ul>
-                        <Button as="a" href={ROUTES.apply} variant="primary">
-                            Apply for Personal Loan
-                        </Button>
+                        <div>
+                            <h2 className="font-display text-h2 text-ink-900 mb-4">Heritage Auto Loans</h2>
+                            <p className="text-body-lg text-ink-700 mb-6">Auto loans that get you on the road. Shop with confidence using an approved auto loan from Heritage Trust. We offer competitive rates and flexible terms for new and used cars, plus refinancing options.</p>
+                            
+                            <ul className="space-y-3 mb-8">
+                                {[
+                                    'Low competitive APRs on new and used vehicles',
+                                    'Get a decision in minutes',
+                                    'Lock in your rate for 30 days',
+                                    'No application fee or prepayment penalties',
+                                ].map((feature) => (
+                                    <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                        <CheckCircle className="w-5 h-5 text-vermilion-600 shrink-0 mt-0.5" />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Button as="a" href={ROUTES.apply} variant="primary">
+                                Apply for an auto loan
+                            </Button>
+                        </div>
                     </div>
-                    
-                    <div className="hairline" />
 
-                    {/* Mortgages */}
-                    <div id="mortgages" className="scroll-mt-32">
-                        <h2 className="font-display text-h2 text-ink-900 mb-2">Mortgages</h2>
-                        <p className="text-body-lg text-ink-700 mb-6">Expert guidance to bring you home.</p>
-                        
-                        <ul className="space-y-3 mb-8">
-                            {[
-                                'Fixed-rate and adjustable-rate mortgages (ARMs)',
-                                'Jumbo loans for higher-value properties',
-                                'First-time homebuyer programs with low down payments',
-                                'Dedicated mortgage advisors to guide you from application to closing',
-                            ].map((feature) => (
-                                <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
-                                    {feature}
-                                </li>
-                            ))}
-                        </ul>
-                        <Button as="a" href={ROUTES.contact} variant="secondary">
-                            Speak with a Mortgage Advisor
-                        </Button>
+                    {/* Mortgages & Personal Loans */}
+                    <div id="loans" className="scroll-mt-32 grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h2 className="font-display text-h2 text-ink-900 mb-4">Home & Personal Loans</h2>
+                            <p className="text-body-lg text-ink-700 mb-6">Loans designed to fit your life. Whether you're buying your first home, upgrading, or needing flexible financing for life's important moments, our lending specialists provide expert guidance and tailored solutions to bring your goals within reach.</p>
+                            
+                            <ul className="space-y-3 mb-8">
+                                {[
+                                    'Fixed-rate and adjustable-rate mortgages (ARMs)',
+                                    'Jumbo loans for higher-value properties',
+                                    'Personal loans with terms from 12 to 84 months',
+                                    'Digital application experience for easy tracking',
+                                ].map((feature) => (
+                                    <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                        <CheckCircle className="w-5 h-5 text-vermilion-600 shrink-0 mt-0.5" />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Button as="a" href={ROUTES.contact} variant="secondary">
+                                Speak with a lending specialist
+                            </Button>
+                        </div>
+                        <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border border-paper-200">
+                            <Image src="/images/products/mortgages.jpg" alt="Heritage Home Loans" fill className="object-cover" />
+                        </div>
                     </div>
 
                 </div>

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
     CheckCircle, Building2, Briefcase, TrendingUp,
@@ -115,150 +116,148 @@ export default function BusinessBankingPage() {
             </section>
 
             {/* ── PRODUCTS ──────────────────────────────────────────────── */}
+            {/* ── PRODUCTS ──────────────────────────────────────────────── */}
             <section className="py-24 bg-paper-50 border-b border-paper-200">
-                <div className="container mx-auto px-6 max-w-3xl space-y-24">
+                <div className="container mx-auto px-6 max-w-7xl space-y-32">
                     
                     {/* Checking */}
-                    <div id="checking" className="scroll-mt-32">
-                        <h2 className="font-display text-h2 text-ink-900 mb-2">Business Checking</h2>
-                        <p className="text-body-lg text-ink-700 mb-6">The foundation of your business finances.</p>
-                        
-                        <div className="flex gap-12 mb-8 p-6 bg-paper-100 border border-paper-200 rounded">
-                            <Figure value="$0" label="Monthly fee for 12 months" footnoteRef={1} />
-                            <Figure value="500" label="Free transactions / mo" />
+                    <div id="checking" className="scroll-mt-32 grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h2 className="font-display text-h2 text-ink-900 mb-4">Small Business Checking</h2>
+                            <p className="text-body-lg text-ink-700 mb-6">The foundation of your business finances. Experience the convenience of Heritage Trust Business Advantage Checking. From robust cash flow tools to easy QuickBooks® integration, we provide the resources you need to manage your day-to-day operations seamlessly.</p>
+                            
+                            <ul className="space-y-3 mb-8">
+                                {[
+                                    'Same-day ACH origination and wire transfers',
+                                    'Dedicated business debit cards with customizable employee limits',
+                                    'Advanced fraud protection with Positive Pay',
+                                    'Access to Cash Flow Monitor in Heritage Vault for Business',
+                                ].map((feature) => (
+                                    <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                        <CheckCircle className="w-5 h-5 text-vermilion-600 shrink-0 mt-0.5" />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Button as="a" href={ROUTES.apply} variant="primary">
+                                Open business checking
+                            </Button>
                         </div>
-                        
-                        <ul className="space-y-3 mb-8">
-                            {[
-                                'Same-day ACH origination',
-                                'Dedicated business debit cards for each authorized user',
-                                'Positive Pay fraud protection included',
-                                'QuickBooks® and Xero® direct integration',
-                            ].map((feature) => (
-                                <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
-                                    {feature}
-                                </li>
-                            ))}
-                        </ul>
-                        <Button as="a" href={ROUTES.apply} variant="primary">
-                            Open Business Checking
-                        </Button>
+                        <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border border-paper-200">
+                            <Image src="/images/products/business-checking.jpg" alt="Business Checking" fill className="object-cover" />
+                        </div>
                     </div>
 
-                    <div className="hairline" />
-
-                    {/* Merchant Services */}
-                    <div id="merchant" className="scroll-mt-32">
-                        <h2 className="font-display text-h2 text-ink-900 mb-2">Merchant Services</h2>
-                        <p className="text-body-lg text-ink-700 mb-6">Accept every payment. Never miss a sale.</p>
-                        
-                        <div className="flex gap-12 mb-8 p-6 bg-paper-100 border border-paper-200 rounded">
-                            <Figure value="0.15%" label="Plus $0.08 per transaction" />
-                            <Figure value="24hr" label="Next-day funding" />
+                    {/* Savings & CDs */}
+                    <div id="savings" className="scroll-mt-32 grid md:grid-cols-2 gap-12 items-center">
+                        <div className="order-last md:order-first relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border border-paper-200">
+                            <Image src="/images/products/business-savings.jpg" alt="Business Savings" fill className="object-cover" />
                         </div>
-                        
-                        <ul className="space-y-3 mb-8">
-                            {[
-                                'In-person, online, and mobile payment acceptance',
-                                'Virtual terminal for phone and mail orders',
-                                'Recurring billing and invoicing engine',
-                                'Level 1 PCI-DSS compliance included',
-                                'Dedicated merchant support line, 7 days a week',
-                            ].map((feature) => (
-                                <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
-                                    {feature}
-                                </li>
-                            ))}
-                        </ul>
-                        <Button as="a" href={ROUTES.contact} variant="secondary">
-                            Set Up Merchant Services
-                        </Button>
+                        <div>
+                            <h2 className="font-display text-h2 text-ink-900 mb-4">Business Savings & CDs</h2>
+                            <p className="text-body-lg text-ink-700 mb-6">Put your excess cash to work. Whether you're building a reserve for seasonal expenses or saving for a major expansion, our high-yield Business Savings and Certificate of Deposit (CD) accounts provide the growth and security you need.</p>
+                            
+                            <ul className="space-y-3 mb-8">
+                                {[
+                                    'Competitive interest rates to maximize your returns',
+                                    'Flexible terms for Business CDs from 3 months to 5 years',
+                                    'Automatic transfers to simplify saving',
+                                    'FDIC insured up to the maximum allowable limits',
+                                ].map((feature) => (
+                                    <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                        <CheckCircle className="w-5 h-5 text-vermilion-600 shrink-0 mt-0.5" />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Button as="a" href={ROUTES.apply} variant="primary">
+                                Open a savings account
+                            </Button>
+                        </div>
                     </div>
 
-                    <div className="hairline" />
+                    {/* Business Credit Cards */}
+                    <div id="cards" className="scroll-mt-32 grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h2 className="font-display text-h2 text-ink-900 mb-4">Business Credit Cards</h2>
+                            <p className="text-body-lg text-ink-700 mb-6">Fuel your growth with purchasing power. Heritage Trust Business Rewards cards offer unlimited cash back on the categories where your business spends most, plus valuable travel and expense management tools.</p>
+                            
+                            <ul className="space-y-3 mb-8">
+                                {[
+                                    'Unlimited cash back on all business purchases',
+                                    'No annual fee options available',
+                                    'Free employee cards with customized spending limits',
+                                    'Integration with major expense management software',
+                                ].map((feature) => (
+                                    <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                        <CheckCircle className="w-5 h-5 text-vermilion-600 shrink-0 mt-0.5" />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Button as="a" href={ROUTES.apply} variant="primary">
+                                Explore business credit cards
+                            </Button>
+                        </div>
+                        <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border border-paper-200">
+                            <Image src="/images/products/business-card.jpg" alt="Business Credit Cards" fill className="object-cover" />
+                        </div>
+                    </div>
 
                     {/* Business Lending */}
-                    <div id="lending" className="scroll-mt-32">
-                        <h2 className="font-display text-h2 text-ink-900 mb-2">Business Loans & Lines</h2>
-                        <p className="text-body-lg text-ink-700 mb-6">Capital when and where you need it most.</p>
-                        
-                        <div className="flex gap-12 mb-8 p-6 bg-paper-100 border border-paper-200 rounded">
-                            <Figure value="$5M" label="Maximum term loan" />
-                            <Figure value="48h" label="Decision timeline" />
+                    <div id="lending" className="scroll-mt-32 grid md:grid-cols-2 gap-12 items-center">
+                        <div className="order-last md:order-first relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border border-paper-200">
+                            <Image src="/images/products/business-loans.jpg" alt="Business Loans" fill className="object-cover" />
                         </div>
-                        
-                        <ul className="space-y-3 mb-8">
-                            {[
-                                'Term loans from $25,000 to $5,000,000',
-                                'Business lines of credit: revolving, up to $2M',
-                                'SBA 7(a) and 504 loan programs available',
-                                'Equipment financing with up to 100% LTV',
-                                'Commercial real estate mortgages at competitive rates',
-                            ].map((feature) => (
-                                <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
-                                    {feature}
-                                </li>
-                            ))}
-                        </ul>
-                        <Button as="a" href={ROUTES.contact} variant="primary">
-                            Explore Business Lending
-                        </Button>
+                        <div>
+                            <h2 className="font-display text-h2 text-ink-900 mb-4">Loans & Financing</h2>
+                            <p className="text-body-lg text-ink-700 mb-6">Capital when and where you need it most. From SBA loans to commercial real estate mortgages and equipment financing, our dedicated business lenders will help structure the right credit facility to scale your operations.</p>
+                            
+                            <ul className="space-y-3 mb-8">
+                                {[
+                                    'Revolving business lines of credit up to $2M',
+                                    'SBA 7(a) and 504 loan programs available',
+                                    'Equipment financing with up to 100% LTV',
+                                    'Streamlined application and fast decision timelines',
+                                ].map((feature) => (
+                                    <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                        <CheckCircle className="w-5 h-5 text-vermilion-600 shrink-0 mt-0.5" />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Button as="a" href={ROUTES.contact} variant="secondary">
+                                Speak with a lending specialist
+                            </Button>
+                        </div>
                     </div>
                     
-                    <div className="hairline" />
-
-                    {/* Payroll */}
-                    <div id="payroll" className="scroll-mt-32">
-                        <h2 className="font-display text-h2 text-ink-900 mb-2">Payroll & HR Banking</h2>
-                        <p className="text-body-lg text-ink-700 mb-6">Pay your team on time, every time.</p>
-                        
-                        <ul className="space-y-3 mb-8">
-                            {[
-                                'Integrated payroll processing for W-2 and 1099 workers',
-                                'Same-day or next-day direct deposit',
-                                'Tax filing and remittance — automated',
-                                'Multi-state payroll support',
-                                'Benefits and HSA account management',
-                                'Compliance reporting and audit-ready record keeping',
-                            ].map((feature) => (
-                                <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
-                                    {feature}
-                                </li>
-                            ))}
-                        </ul>
-                        <Button as="a" href={ROUTES.contact} variant="secondary">
-                            Set Up Payroll Services
-                        </Button>
-                    </div>
-
-                    <div className="hairline" />
-
-                    {/* Treasury Management */}
-                    <div id="treasury" className="scroll-mt-32">
-                        <h2 className="font-display text-h2 text-ink-900 mb-2">Treasury Management</h2>
-                        <p className="text-body-lg text-ink-700 mb-6">Optimize cash flow and mitigate risk.</p>
-                        
-                        <ul className="space-y-3 mb-8">
-                            {[
-                                'Automated sweep accounts for idle cash',
-                                'Advanced liquidity management and forecasting',
-                                'Lockbox services for accelerated receivables',
-                                'Information reporting and EDI',
-                                'Custom API integration for ERP systems',
-                            ].map((feature) => (
-                                <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
-                                    <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
-                                    {feature}
-                                </li>
-                            ))}
-                        </ul>
-                        <Button as="a" href={ROUTES.contact} variant="secondary">
-                            Speak with a Treasury Advisor
-                        </Button>
+                    {/* Merchant Services */}
+                    <div id="merchant" className="scroll-mt-32 grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h2 className="font-display text-h2 text-ink-900 mb-4">Merchant Services</h2>
+                            <p className="text-body-lg text-ink-700 mb-6">Accept every payment. Never miss a sale. Heritage Trust Merchant Services provides comprehensive point-of-sale and online gateway solutions with next-day funding to keep your cash flowing smoothly.</p>
+                            
+                            <ul className="space-y-3 mb-8">
+                                {[
+                                    'In-person, online, and mobile payment acceptance',
+                                    'Next-day funding for approved transactions',
+                                    'Transparent pricing with no hidden fees',
+                                    'Level 1 PCI-DSS compliance and robust fraud protection',
+                                ].map((feature) => (
+                                    <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                        <CheckCircle className="w-5 h-5 text-vermilion-600 shrink-0 mt-0.5" />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Button as="a" href={ROUTES.contact} variant="secondary">
+                                Set up merchant services
+                            </Button>
+                        </div>
+                        <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border border-paper-200">
+                            <Image src="/images/products/merchant.jpg" alt="Merchant Services" fill className="object-cover" />
+                        </div>
                     </div>
 
                 </div>

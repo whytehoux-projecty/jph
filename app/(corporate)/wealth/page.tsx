@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Image from 'next/image';
 import Link from 'next/link';
 import {
     TrendingUp, Shield, Users, Briefcase,
@@ -88,34 +89,122 @@ export default function WealthManagementPage() {
             </section>
 
             {/* ── SERVICES ──────────────────────────────────────────────── */}
+            {/* ── WEALTH SOLUTIONS ──────────────────────────────────────────────── */}
             <section className="py-24 bg-paper-50 border-b border-paper-200">
-                <div className="container mx-auto px-6 max-w-7xl">
-                    <div className="text-center mb-16 max-w-2xl mx-auto">
-                        <p className="label-mono text-vermilion-600 mb-3">Our Services</p>
-                        <h2 className="font-display text-h2 text-ink-900 mb-4">Comprehensive wealth solutions.</h2>
-                        <p className="text-body-lg text-ink-700">
-                            From investment management to multi-generational estate planning, {BRAND.shortName} provides the full spectrum of private banking and wealth services — under one relationship.
-                        </p>
+                <div className="container mx-auto px-6 max-w-7xl space-y-32">
+                    
+                    {/* Private Wealth */}
+                    <div id="private" className="scroll-mt-32 grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h2 className="font-display text-h2 text-ink-900 mb-4">Heritage Private Wealth</h2>
+                            <p className="text-body-lg text-ink-700 mb-6">A customized approach to managing your wealth. Our private wealth advisors work closely with you to understand your financial picture, helping you navigate complex wealth planning, lending, and banking needs with the high-touch service of a premium private bank.</p>
+                            
+                            <ul className="space-y-3 mb-8">
+                                {[
+                                    'Dedicated Private Wealth Advisor',
+                                    'Customized lending and credit solutions',
+                                    'Specialized banking services for high-net-worth individuals',
+                                    'Philanthropic and family governance advisory',
+                                ].map((feature) => (
+                                    <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                        <CheckCircle className="w-5 h-5 text-vermilion-600 shrink-0 mt-0.5" />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Button as="a" href={ROUTES.contact} variant="primary">
+                                Connect with an advisor
+                            </Button>
+                        </div>
+                        <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border border-paper-200">
+                            <Image src="/images/products/wealth-hero.jpg" alt="Heritage Private Wealth" fill className="object-cover" />
+                        </div>
                     </div>
-                    <div className="grid md:grid-cols-2 gap-6">
-                        {services.map(({ icon: Icon, name, description, features }) => (
-                            <div key={name} className="bg-paper-100 rounded p-8 border border-paper-200">
-                                <div className="w-10 h-10 rounded bg-paper-200 flex items-center justify-center mb-5">
-                                    <Icon className="w-5 h-5 text-ink-900" aria-hidden="true" />
-                                </div>
-                                <h3 className="font-display text-h4 text-ink-900 mb-3">{name}</h3>
-                                <p className="text-body text-ink-700 leading-relaxed mb-6">{description}</p>
-                                <ul className="space-y-3">
-                                    {features.map((f) => (
-                                        <li key={f} className="flex items-start gap-3 text-body text-ink-700">
-                                            <CheckCircle className="w-5 h-5 text-pine-700 shrink-0 mt-0.5" />
-                                            {f}
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        ))}
+
+                    {/* Trust Services */}
+                    <div id="trust" className="scroll-mt-32 grid md:grid-cols-2 gap-12 items-center">
+                        <div className="order-last md:order-first relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border border-paper-200">
+                            <Image src="/images/products/personal-hero.webp" alt="Trust Services" fill className="object-cover" />
+                        </div>
+                        <div>
+                            <h2 className="font-display text-h2 text-ink-900 mb-4">Trust Services</h2>
+                            <p className="text-body-lg text-ink-700 mb-6">Protect what you've built. Heritage Trust serves as a steadfast corporate trustee, working impartially to manage your trust assets, carry out your wishes, and provide continuity for future generations.</p>
+                            
+                            <ul className="space-y-3 mb-8">
+                                {[
+                                    'Revocable and irrevocable trust administration',
+                                    'Special needs and charitable trust management',
+                                    'Impartial execution of fiduciary duties',
+                                    'Continuity of service spanning generations',
+                                ].map((feature) => (
+                                    <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                        <CheckCircle className="w-5 h-5 text-vermilion-600 shrink-0 mt-0.5" />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Button as="a" href={ROUTES.contact} variant="primary">
+                                Learn about trust services
+                            </Button>
+                        </div>
                     </div>
+
+                    {/* Estate Planning */}
+                    <div id="estate" className="scroll-mt-32 grid md:grid-cols-2 gap-12 items-center">
+                        <div>
+                            <h2 className="font-display text-h2 text-ink-900 mb-4">Estate Planning Services</h2>
+                            <p className="text-body-lg text-ink-700 mb-6">Shape your legacy. We collaborate with your legal and tax professionals to structure an estate plan that minimizes tax implications and ensures a smooth transition of wealth to your heirs and chosen charities.</p>
+                            
+                            <ul className="space-y-3 mb-8">
+                                {[
+                                    'Estate settlement and executor services',
+                                    'Wealth transfer strategy and consultation',
+                                    'Coordination with outside legal and tax advisors',
+                                    'Tax-efficient charitable giving strategies',
+                                ].map((feature) => (
+                                    <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                        <CheckCircle className="w-5 h-5 text-vermilion-600 shrink-0 mt-0.5" />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Button as="a" href={ROUTES.contact} variant="primary">
+                                Plan your legacy
+                            </Button>
+                        </div>
+                        <div className="relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border border-paper-200">
+                            <Image src="/images/products/corporate-hero.jpg" alt="Estate Planning" fill className="object-cover" />
+                        </div>
+                    </div>
+
+                    {/* Portfolio Management */}
+                    <div id="portfolio" className="scroll-mt-32 grid md:grid-cols-2 gap-12 items-center">
+                        <div className="order-last md:order-first relative aspect-[4/3] rounded-xl overflow-hidden shadow-lg border border-paper-200">
+                            <Image src="/images/products/commercial.jpg" alt="Portfolio Management" fill className="object-cover" />
+                        </div>
+                        <div>
+                            <h2 className="font-display text-h2 text-ink-900 mb-4">Portfolio Management</h2>
+                            <p className="text-body-lg text-ink-700 mb-6">Institutional-caliber investment strategies. Our portfolio managers build customized, risk-adjusted portfolios tailored to your specific liquidity needs, time horizon, and long-term financial goals.</p>
+                            
+                            <ul className="space-y-3 mb-8">
+                                {[
+                                    'Discretionary portfolio management',
+                                    'Access to alternative investments and private markets',
+                                    'Tax-loss harvesting and direct indexing',
+                                    'Sustainable and ESG-aligned investing options',
+                                ].map((feature) => (
+                                    <li key={feature} className="flex items-start gap-3 text-body text-ink-700">
+                                        <CheckCircle className="w-5 h-5 text-vermilion-600 shrink-0 mt-0.5" />
+                                        {feature}
+                                    </li>
+                                ))}
+                            </ul>
+                            <Button as="a" href={ROUTES.contact} variant="secondary">
+                                Discuss your portfolio
+                            </Button>
+                        </div>
+                    </div>
+
                 </div>
             </section>
 

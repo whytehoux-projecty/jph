@@ -374,10 +374,10 @@ export default async function Home() {
                         </div>
                         <div className="relative h-[400px] lg:h-[600px] w-full rounded-xl overflow-hidden border" style={{ borderColor: 'var(--line)' }}>
                             <Image
-                                src="/images/vault/vault-1.jpg"
+                                src="/images/vault/phone_mock.png"
                                 alt="Heritage Vault mobile app interface"
                                 fill
-                                className="object-cover"
+                                className="object-contain p-4"
                             />
                         </div>
                     </div>

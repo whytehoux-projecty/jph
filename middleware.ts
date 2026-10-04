@@ -15,6 +15,7 @@ const PUBLIC_PATHS = [
     '/personal-banking',
     '/business-banking',
     '/wealth',
+    '/corporate',
     '/about',
     '/contact',
     '/apply',
