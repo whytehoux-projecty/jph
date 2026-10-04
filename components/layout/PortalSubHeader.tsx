@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Sparkles } from "lucide-react";
@@ -24,8 +25,38 @@ const subpageLinks = [
 
 export function PortalSubHeader({ profile }: PortalSubHeaderProps) {
   const pathname = usePathname();
+  const [showWelcome, setShowWelcome] = useState(false);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const loginTimeStr = sessionStorage.getItem("portal_login_time");
+      const now = Date.now();
+      let loginTime: number;
+
+      if (!loginTimeStr) {
+        loginTime = now;
+        sessionStorage.setItem("portal_login_time", loginTime.toString());
+      } else {
+        loginTime = parseInt(loginTimeStr, 10);
+      }
+
+      const elapsed = now - loginTime;
+      const displayDuration = 30 * 1000;
+
+      if (elapsed < displayDuration) {
+        setShowWelcome(true);
+        const timeout = setTimeout(() => {
+          setShowWelcome(false);
+        }, displayDuration - elapsed);
+        return () => clearTimeout(timeout);
+      } else {
+        setShowWelcome(false);
+      }
+    }
+  }, []);
 
   const firstName = profile?.firstName || "Client";
+  const fullName = `${profile?.firstName || ""} ${profile?.lastName || ""}`.trim().toUpperCase() || "CLIENT";
   const tier = profile?.tier ? `${profile.tier} Member` : "Private Client";
 
   return (
@@ -36,7 +67,13 @@ export function PortalSubHeader({ profile }: PortalSubHeaderProps) {
           <div className="flex items-center gap-2">
             {pathname === "/dashboard" || pathname === "/" ? (
               <span className="text-sm tracking-tight text-ink-900 leading-snug">
-                <span className="font-semibold">Welcome back, {firstName}.</span> <span className="hidden lg:inline text-ink-600">Know that Heritage Trust will never ask for your password, PIN, or OTP via email or phone. <Link href="/security" className="underline hover:text-vermilion-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vermilion-600 rounded-sm">Learn more about staying safe</Link></span>
+                {showWelcome ? (
+                  <>
+                    <span className="font-semibold">Welcome back, {firstName}.</span> <span className="hidden lg:inline text-ink-600">Know that Heritage Trust will never ask for your password, PIN, or OTP via email or phone. <Link href="/security" className="underline hover:text-vermilion-600 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vermilion-600 rounded-sm">Learn more about staying safe</Link></span>
+                  </>
+                ) : (
+                  <span className="font-semibold uppercase tracking-wider">{fullName}</span>
+                )}
               </span>
             ) : (
               <span className="text-sm tracking-tight text-ink-900 leading-snug font-semibold">
