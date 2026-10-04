@@ -7,8 +7,8 @@ export const authConfig = {
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "fallback_secret_do_not_use_in_prod_1234567890",
   session: {
     strategy: "jwt",
-    maxAge: 60, // 60 seconds max absolute life (client must ping to keep alive)
-    updateAge: 15, // Issue new cookie if 15 seconds have passed
+    maxAge: 15 * 60, // 15 minutes for banking security (avoids clock skew issues)
+    updateAge: 5 * 60, // Slide expiration every 5 minutes
   },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
