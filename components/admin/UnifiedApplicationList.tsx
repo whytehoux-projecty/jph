@@ -38,7 +38,8 @@ export function UnifiedApplicationList({
   onEportalApprove,
   onEportalReject,
   onChequeApprove,
-  onChequeReject
+  onChequeReject,
+  onRegenerateToken
 }: { 
   requests: UnifiedRequest[];
   onAccountApprove: (formData: FormData) => void;
