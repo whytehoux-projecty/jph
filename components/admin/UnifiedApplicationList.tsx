@@ -304,9 +304,14 @@ export function UnifiedApplicationList({
                       </p>
                       
                       <div className="flex items-center gap-2 p-3 bg-neutral-100 border border-neutral-200 rounded-md mb-4">
-                        <div className="flex-1 font-mono text-xs text-neutral-600 truncate">
+                        <a 
+                          href={`/register/${selectedReq.raw.registrationToken}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="flex-1 font-mono text-xs text-blue-600 hover:text-blue-800 underline truncate block"
+                        >
                           {typeof window !== 'undefined' ? window.location.origin : ''}/register/{selectedReq.raw.registrationToken}
-                        </div>
+                        </a>
                         <Button 
                           variant="outline" 
                           size="small" 

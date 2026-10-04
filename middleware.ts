@@ -20,6 +20,8 @@ const PUBLIC_PATHS = [
     '/apply',
     '/signup',
     '/enroll',      // enrollment request (replaces /signup)
+    '/register',    // KYC registration form via token
+    '/verification',// Verification scheduling
     '/privacy',
     '/terms',
     // New marketing routes (Phase 6)
