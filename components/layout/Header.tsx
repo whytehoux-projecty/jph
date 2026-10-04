@@ -14,7 +14,7 @@ const NAV_ITEMS = [
     { name: 'About', href: ROUTES.about },
 ];
 
-export function Header() {
+export function Header({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
     const [mobileOpen, setMobileOpen] = useState(false);
     const [scrolled, setScrolled] = useState(false);
     const pathname = usePathname();
@@ -149,14 +149,14 @@ export function Header() {
                         Contact
                     </Link>
                     <Link
-                        href={ROUTES.login}
+                        href={isLoggedIn ? ROUTES.dashboard : ROUTES.login}
                         className="
                             text-small font-medium text-ink-900 underline underline-offset-2
                             hover:text-vermilion-600 transition-colors
                             focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900
                         "
                     >
-                        Sign in
+                        {isLoggedIn ? 'Go to Heritage Vault' : 'Sign in'}
                     </Link>
                     <Link
                         href={ROUTES.apply}
@@ -296,7 +296,7 @@ export function Header() {
                                 Open an account
                             </Link>
                             <Link
-                                href={ROUTES.login}
+                                href={isLoggedIn ? ROUTES.dashboard : ROUTES.login}
                                 className="
                                     flex items-center justify-center w-full px-6 py-3
                                     border border-ink-900 text-ink-900 text-small font-medium rounded
@@ -304,7 +304,7 @@ export function Header() {
                                     focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900
                                 "
                             >
-                                Sign in to Heritage Vault
+                                {isLoggedIn ? 'Go to Heritage Vault' : 'Sign in to Heritage Vault'}
                             </Link>
                         </div>
 

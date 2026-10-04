@@ -5,6 +5,11 @@ export const authConfig = {
     signIn: '/login',
   },
   secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "fallback_secret_do_not_use_in_prod_1234567890",
+  session: {
+    strategy: "jwt",
+    maxAge: 60, // 60 seconds max absolute life (client must ping to keep alive)
+    updateAge: 15, // Issue new cookie if 15 seconds have passed
+  },
   callbacks: {
     authorized({ auth, request: { nextUrl } }) {
       return true; // Let middleware.ts handle the routing and authorization logic completely

@@ -12,6 +12,7 @@ import { Footer } from "@/components/layout/Footer";
 import { MobileInstallPrompt } from "@/components/layout/MobileInstallPrompt";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { PinSetupModal } from "@/components/portal/PinSetupModal";
+import { AutoLogoutProvider } from "@/components/layout/AutoLogoutProvider";
 import { getProfile } from "@/app/actions/profile";
 import type { ToastItem } from "@/lib/toast";
 
@@ -142,8 +143,9 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen bg-paper-200 relative isolate">
-      <MobileInstallPrompt />
+    <AutoLogoutProvider>
+      <div className="flex min-h-screen bg-paper-200 relative isolate">
+        <MobileInstallPrompt />
 
       <div className="flex-1 flex flex-col min-w-0 relative z-10 transition-all duration-300 ease-in-out">
         <PortalHeader
@@ -166,5 +168,6 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
       
       <MobileBottomNav />
     </div>
+    </AutoLogoutProvider>
   );
 }

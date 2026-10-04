@@ -9,6 +9,7 @@ import {
 import { ROUTES } from '@/lib/constants';
 import { BRAND, FACTS, RATES, yearsOfService, ACQUISITIONS } from '@/src/content/facts';
 import { Figure } from '@/components/commercial-ui/Figure';
+import { auth } from '@/auth';
 
 export const metadata: Metadata = {
     title: 'Heritage Trust Bank — Trusted Since 1888',
@@ -104,7 +105,10 @@ const outcomes = [
     },
 ];
 
-export default function Home() {
+export default async function Home() {
+    const session = await auth();
+    const isLoggedIn = !!session?.user;
+
     return (
         <main>
             {/* ── HERO ──────────────────────────────────────────────────── */}
@@ -156,20 +160,20 @@ export default function Home() {
                                 Open an account
                                 <ArrowRight className="w-4 h-4" aria-hidden="true" />
                             </Link>
-                            <Link
-                                href={ROUTES.login}
-                                className="
-                                    inline-flex items-center py-4 px-2
-                                    text-paper-200 font-medium underline underline-offset-2
-                                    hover:text-paper-50 transition-colors
-                                    focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-paper-50
-                                "
-                            >
-                                Sign in to Heritage Vault
-                            </Link>
+                                <Link
+                                    href={isLoggedIn ? ROUTES.dashboard : ROUTES.login}
+                                    className="
+                                        inline-flex items-center py-4 px-2
+                                        text-paper-200 font-medium underline underline-offset-2
+                                        hover:text-paper-50 transition-colors
+                                        focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-paper-50
+                                    "
+                                >
+                                    {isLoggedIn ? 'Go to Heritage Vault' : 'Sign in to Heritage Vault'}
+                                </Link>
+                            </div>
                         </div>
                     </div>
-                </div>
             </section>
 
             {/* ── PROOF STRIP ───────────────────────────────────────────── */}
@@ -337,7 +341,7 @@ export default function Home() {
 
                             <div className="flex flex-col sm:flex-row gap-4">
                                 <Link
-                                    href={ROUTES.login}
+                                    href={isLoggedIn ? ROUTES.dashboard : ROUTES.login}
                                     className="
                                         inline-flex items-center justify-center gap-2
                                         px-8 py-4 rounded font-sans font-medium text-body transition-colors
@@ -350,7 +354,7 @@ export default function Home() {
                                     }}
                                 >
                                     <Smartphone className="w-5 h-5" aria-hidden="true" />
-                                    Sign in to Heritage Vault
+                                    {isLoggedIn ? 'Go to Heritage Vault' : 'Sign in to Heritage Vault'}
                                 </Link>
                                 <Link
                                     href={ROUTES.enroll}

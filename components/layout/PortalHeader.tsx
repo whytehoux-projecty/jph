@@ -172,7 +172,9 @@ export function PortalHeader({
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-paper-200 my-1 h-px" />
               <DropdownMenuItem 
-                onClick={() => signOut({ callbackUrl: '/login' })}
+                onClick={() => {
+                  import('@/app/actions/auth').then(m => m.logoutAction());
+                }}
                 className="cursor-pointer text-error hover:bg-error-bg hover:text-error focus:bg-error-bg focus:text-error p-2 rounded-sm text-sm"
               >
                 <div className="flex items-center w-full">

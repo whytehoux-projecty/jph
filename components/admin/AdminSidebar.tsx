@@ -266,7 +266,9 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
         isCollapsed ? "px-2 flex justify-center" : ""
       )}>
         <button 
-          onClick={() => signOut({ callbackUrl: '/admin/login' })}
+          onClick={() => {
+            import('@/app/actions/auth').then(m => m.adminLogoutAction());
+          }}
           className={cn(
             "flex items-center rounded-md text-sm font-medium text-red-400 hover:bg-red-400/10 transition-colors w-full",
             isCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"

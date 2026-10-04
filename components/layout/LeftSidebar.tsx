@@ -134,7 +134,9 @@ export function LeftSidebar({ isOpen, onToggle }: LeftSidebarProps) {
           {/* Fix #11: Logout tooltip in collapsed mode */}
           <div className="relative group/logout">
             <button
-              onClick={() => signOut({ callbackUrl: "/login" })} // Fix #33: fallback to /login not localhost:3002
+              onClick={() => {
+                import('@/app/actions/auth').then(m => m.logoutAction());
+              }} // Fix #33: fallback to /login not localhost:3002
               className={cn(
                 "w-full flex items-center gap-3 rounded px-3 py-2.5 text-sm font-medium transition-colors text-error hover:bg-error-bg hover:text-error focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error",
                 !isOpen && "justify-center px-0 w-auto",

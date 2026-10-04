@@ -4,6 +4,7 @@ import './globals.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
 import { CookieModal } from '@/components/commercial/CookieModal';
+import { auth } from '@/auth';
 
 /**
  * Ledger fonts — loaded via next/font/google (auto-self-hosted at build time,
@@ -62,11 +63,13 @@ export const viewport: Viewport = {
   initialScale: 1,
 };
 
-export default function CorporateLayout({
+export default async function CorporateLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const session = await auth();
+  const isLoggedIn = !!session?.user;
   return (
     <div
       className={`
@@ -88,7 +91,7 @@ export default function CorporateLayout({
       >
         Skip to main content
       </a>
-      <Header />
+      <Header isLoggedIn={isLoggedIn} />
 
       <main id="main-content" className="grow">
         {children}
