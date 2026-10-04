@@ -45,6 +45,21 @@ export async function submitTransfer(formData: FormData) {
     throw new Error('Invalid amount');
   }
 
+  // Check if method is globally enabled and not disabled for this user
+  const methodConfig = await prisma.transferMethodConfig.findUnique({ where: { methodId } });
+  if (methodConfig && !methodConfig.isEnabled) {
+    throw new Error('This transfer method is currently disabled system-wide.');
+  }
+  
+  if (user.transferMethodOverrides) {
+    try {
+      const overrides = JSON.parse(user.transferMethodOverrides);
+      if (overrides[methodId] && overrides[methodId].enabled === false) {
+        throw new Error('This transfer method is restricted for your account. Please contact support.');
+      }
+    } catch (e) {}
+  }
+
   const pinCode = formData.get('pinCode') as string;
   if (!user.transactionPin) {
     throw new Error('Transaction PIN not set up. Please go to settings to set it up.');

@@ -6,6 +6,7 @@ import {
   Globe2,
   Wallet,
   CheckCircle2,
+  Lock,
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -28,6 +29,7 @@ interface TransferMethodConfig {
   perTransferLimit: number;
   formConfig: string;
   sortOrder: number;
+  isBlockedByAdmin?: boolean;
 }
 
 export const getIconForMethod = (methodId: string): LucideIcon => {
@@ -59,9 +61,9 @@ export function TransferMethodSelector({
   return (
     <fieldset className="grid grid-cols-1 md:grid-cols-2 gap-3" aria-label="Transfer Method">
       {transferMethods.map((type) => {
-        const Icon = getIconForMethod(type.methodId);
+        const Icon = type.isBlockedByAdmin ? Lock : getIconForMethod(type.methodId);
         const isActive = selectedTypeId === type.methodId;
-        const isDisabled = !type.isEnabled;
+        const isDisabled = !type.isEnabled || type.isBlockedByAdmin;
 
         return (
           <label
@@ -113,7 +115,13 @@ export function TransferMethodSelector({
                   )}
                 </div>
                 <span className="text-[11px] text-muted-foreground truncate">
-                  {type.feeLabel === "$0.00" ? "Free" : type.feeLabel} • {type.processingTime}
+                  {type.isBlockedByAdmin ? (
+                    <span className="text-red-500 font-medium flex items-center gap-1">
+                      Restricted. Contact Support.
+                    </span>
+                  ) : (
+                    <>{type.feeLabel === "$0.00" ? "Free" : type.feeLabel} • {type.processingTime}</>
+                  )}
                 </span>
               </div>
             </div>

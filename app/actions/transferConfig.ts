@@ -11,12 +11,36 @@ export async function getTransferMethodConfigs() {
 }
 
 export async function getEnabledUserTransferMethods() {
-  return await prisma.transferMethodConfig.findMany({
+  const session = await auth();
+  if (!session?.user?.email) return [];
+
+  const user = await prisma.user.findUnique({
+    where: { email: session.user.email },
+    select: { transferMethodOverrides: true }
+  });
+
+  const methods = await prisma.transferMethodConfig.findMany({
     where: {
       isEnabled: true,
       isVisibleToUser: true,
     },
     orderBy: { sortOrder: 'asc' },
+  });
+
+  let overrides: Record<string, { enabled: boolean }> = {};
+  if (user?.transferMethodOverrides) {
+    try {
+      overrides = JSON.parse(user.transferMethodOverrides);
+    } catch {}
+  }
+
+  return methods.map(m => {
+    const override = overrides[m.methodId];
+    const isBlockedByAdmin = override && override.enabled === false;
+    return {
+      ...m,
+      isBlockedByAdmin
+    };
   });
 }
 

@@ -24,6 +24,8 @@ export default async function FlaggedAccountHoldersPage() {
     }
   });
 
+  const globalTransferMethods = await prisma.transferMethodConfig.findMany({ orderBy: { sortOrder: 'asc' } });
+
   const formattedUsers = users.map(user => ({
     ...user,
     cards: user.accounts.flatMap(acc => acc.cards),
@@ -38,6 +40,7 @@ export default async function FlaggedAccountHoldersPage() {
     >
       <AdminUserList 
         initialUsers={formattedUsers}
+        globalTransferMethods={globalTransferMethods}
         onLoginAs={loginAsUser}
       />
     </AdminPageShell>

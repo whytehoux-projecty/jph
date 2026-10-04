@@ -30,8 +30,8 @@ import { DynamicBeneficiaryForm } from "@/components/beneficiaries/DynamicBenefi
 import { adminCreateBeneficiary, adminUpdateBeneficiary, adminDeleteBeneficiary } from "@/app/actions/admin-customers";
 import { sendStatementEmail } from "@/app/actions/admin";
 import { AdminTxHistoryManager } from "./AdminTxHistoryManager";
-
-
+import { AdminUserTransferOverrides } from "./AdminUserTransferOverrides";
+import { TransferMethodConfig } from "@prisma/client";
 import { toast } from "sonner";
 import { 
   updateRegistrationForm, 
@@ -64,6 +64,7 @@ export type AdminUser = {
   createdAt: Date;
   isFirstLogin?: boolean;
   temporaryPassword?: string | null;
+  transferMethodOverrides?: string | null;
   accounts: {
     id: string;
     accountNumber: string;
@@ -109,15 +110,17 @@ export type AdminUser = {
 
 export function AdminUserList({ 
   initialUsers,
+  globalTransferMethods,
   onLoginAs,
 }: { 
   initialUsers: AdminUser[];
+  globalTransferMethods: TransferMethodConfig[];
   onLoginAs: (formData: FormData) => void;
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [activeTab, setActiveTab] = useState<'bio' | 'accounts' | 'employment' | 'kyc' | 'eportal' | 'beneficiaries' | 'transactions' | 'sidebar'>('bio');
+  const [activeTab, setActiveTab] = useState<'bio' | 'accounts' | 'employment' | 'kyc' | 'eportal' | 'beneficiaries' | 'transactions' | 'sidebar' | 'transfers'>('bio');
   const [editMode, setEditMode] = useState<Record<string, boolean>>({});
   
   // Modals state for Account Info tab
@@ -342,6 +345,12 @@ export function AdminUserList({
                 >
                   <Settings className="w-4 h-4 inline-block mr-1" /> Sidebar Config
                 </button>
+                <button
+                  className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'transfers' ? 'text-vintage-gold border-b-2 border-vintage-gold' : 'text-neutral-500 hover:text-neutral-700'}`}
+                  onClick={() => setActiveTab('transfers')}
+                >
+                  <Link2 className="w-4 h-4 inline-block mr-1" /> Transfers
+                </button>
               </div>
 
               {/* Tab Content */}
@@ -466,6 +475,15 @@ export function AdminUserList({
                       </div>
                     </div>
                   </div>
+                )}
+
+                {/* TRANSFERS TAB */}
+                {activeTab === 'transfers' && (
+                  <AdminUserTransferOverrides 
+                    userId={selectedUser.id}
+                    globalTransferMethods={globalTransferMethods}
+                    initialOverridesJson={selectedUser.transferMethodOverrides ?? null}
+                  />
                 )}
 
                 {/* BIO TAB */}

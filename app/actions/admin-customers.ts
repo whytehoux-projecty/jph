@@ -445,3 +445,15 @@ export async function updateCreditScore(formData: FormData) {
   revalidatePath('/admin/customers/account-holders');
   revalidatePath('/admin/customers/portal-users');
 }
+
+export async function updateUserTransferOverrides(userId: string, overridesJson: string) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { transferMethodOverrides: overridesJson }
+  });
+
+  revalidatePath('/admin/customers/account-holders');
+}

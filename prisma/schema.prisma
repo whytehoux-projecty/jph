@@ -55,6 +55,7 @@ model User {
   eportalStatus       String   @default("ACTIVE") @map("eportal_status")
   eportalNotificationMessage String? @map("eportal_notification_message")
   hideBalance         Boolean  @default(false) @map("hide_balance")
+  transferMethodOverrides String? @map("transfer_method_overrides")
   createdAt           DateTime @default(now()) @map("created_at")
   updatedAt           DateTime @updatedAt @map("updated_at")
 
