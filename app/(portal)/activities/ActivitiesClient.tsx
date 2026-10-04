@@ -24,6 +24,7 @@ import {
   AlertTriangle,
   Tag,
 } from "lucide-react";
+import { SegmentedControl } from "@/components/ui/SegmentedControl";
 
 import {
   Card,
@@ -1543,13 +1544,15 @@ export default function TransactionsClient({
     );
   }
 
+  const [activeTab, setActiveTab] = useState("history");
+
   return (
     <div className="space-y-8 max-w-7xl mx-auto animate-fade-in-up">
       {/* Header */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
         <div>
           <h1 className="text-3xl font-display font-bold text-ink-900">
-            Transactions
+            Activities
           </h1>
           <p className="text-muted-foreground mt-1">
             Search, filter, and export a complete record of your account
@@ -1571,8 +1574,18 @@ export default function TransactionsClient({
         />
       </div>
 
-      {/* Summary Strip */}
-      <Card className="overflow-hidden border-t-[3px] border-t-[#D4AF37]">
+      <div className="w-full mb-6">
+        <SegmentedControl
+          options={["history", "statements"]}
+          value={activeTab}
+          onChange={setActiveTab}
+        />
+      </div>
+
+      {activeTab === "history" && (
+        <>
+          {/* Summary Strip */}
+          <Card className="overflow-hidden border-t-[3px] border-t-[#D4AF37]">
         <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
           <div className="p-4 md:p-5 flex flex-col justify-center bg-white cursor-pointer hover:bg-slate-50 transition-colors" onClick={() => handleKpiCardClick("income")}>
             <span className="text-[11px] uppercase tracking-widest text-slate-500 font-semibold mb-1 font-inter">Money in</span>
@@ -2020,6 +2033,22 @@ export default function TransactionsClient({
           </div>)}
         </CardContent>
       </Card>
+      </>
+      )}
+
+      {activeTab === "statements" && (
+        <Card className="animate-in fade-in">
+          <CardHeader>
+            <CardTitle>Generated Statements</CardTitle>
+            <CardDescription>
+              View and download your previously requested or generated official statements.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="h-[300px] flex items-center justify-center border-t border-slate-100 bg-slate-50">
+            <p className="text-slate-500 font-medium">No statements generated yet.</p>
+          </CardContent>
+        </Card>
+      )}
 
       {/* Prompt-replacement dialog for bulk operations and add-note */}
       <Dialog open={!!promptDialog} onOpenChange={(open) => { if (!open) setPromptDialog(null); }}>

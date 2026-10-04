@@ -1,7 +1,7 @@
 import { getTransactions, getTransactionStats } from "@/app/actions/transactions";
 import { getAccounts } from "@/app/actions/accounts";
 import { getProfile } from "@/app/actions/profile";
-import TransactionsClient from "./TransactionsClient";
+import ActivitiesClient from "./ActivitiesClient";
 import { redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
@@ -51,7 +51,7 @@ export default async function TransactionsPage() {
   };
 
   return (
-    <TransactionsClient 
+    <ActivitiesClient 
       initialTransactions={initialTransactions}
       initialAccounts={initialAccounts}
       initialStats={initialStats}

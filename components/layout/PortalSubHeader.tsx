@@ -15,10 +15,11 @@ export interface PortalSubHeaderProps {
 
 const subpageLinks = [
   { name: "Overview", href: "/dashboard" },
-  { name: "Accounts", href: "/accounts" },
-  { name: "Transfers", href: "/transfer" },
-  { name: "Cards", href: "/cards" },
-  { name: "Statements", href: "/statements" },
+  { name: "Vaults", href: "/vaults" },
+  { name: "Transfers & Payments", href: "/transfer" },
+  { name: "Savings, Loans & Benefits", href: "/savings" },
+  { name: "Activities", href: "/activities" },
+  { name: "Deposit Cash & Cheques", href: "#", disabled: true, tooltip: "Upcoming Feature" },
 ];
 
 export function PortalSubHeader({ profile }: PortalSubHeaderProps) {
@@ -40,13 +41,11 @@ export function PortalSubHeader({ profile }: PortalSubHeaderProps) {
             ) : (
               <span className="text-sm tracking-tight text-ink-900 leading-snug font-semibold">
                 {pathname?.startsWith("/transfer") && "Transfers & Payments"}
-                {pathname?.startsWith("/accounts") && "Account Management"}
-                {pathname?.startsWith("/cards") && "Card Management"}
-                {pathname?.startsWith("/statements") && "Statements & Documents"}
+                {pathname?.startsWith("/vaults") && "Vaults"}
+                {pathname?.startsWith("/savings") && "Savings, Loans & Benefits"}
                 {pathname?.startsWith("/settings") && "Settings & Preferences"}
                 {pathname?.startsWith("/support") && "Support Center"}
-                {pathname?.startsWith("/transactions") && "Transaction History"}
-                {pathname?.startsWith("/bills") && "Bill Pay"}
+                {pathname?.startsWith("/activities") && "Activities"}
               </span>
             )}
           </div>
@@ -59,6 +58,23 @@ export function PortalSubHeader({ profile }: PortalSubHeaderProps) {
               link.href === "/dashboard"
                 ? pathname === "/dashboard"
                 : pathname?.startsWith(link.href);
+
+            if (link.disabled) {
+              return (
+                <div key={link.name} className="relative group cursor-not-allowed">
+                  <span
+                    className="shrink-0 px-2.5 py-1 rounded-sm text-xs transition-all duration-150 font-medium text-ink-400 opacity-60"
+                  >
+                    {link.name}
+                  </span>
+                  {link.tooltip && (
+                    <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1 hidden group-hover:block bg-ink-900 text-white text-[10px] px-2 py-1 rounded whitespace-nowrap z-50 pointer-events-none">
+                      {link.tooltip}
+                    </div>
+                  )}
+                </div>
+              );
+            }
 
             return (
               <Link

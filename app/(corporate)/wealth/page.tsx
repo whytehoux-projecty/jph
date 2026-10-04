@@ -92,13 +92,13 @@ export default function WealthManagementPage() {
             {/* ── WEALTH SOLUTIONS ──────────────────────────────────────────────── */}
             <section className="py-24 bg-paper-50 border-b border-paper-200">
                 <div className="container mx-auto px-6 max-w-7xl space-y-32">
-                    
+
                     {/* Private Wealth */}
                     <div id="private" className="scroll-mt-32 grid md:grid-cols-2 gap-12 items-center">
                         <div>
                             <h2 className="font-display text-h2 text-ink-900 mb-4">Heritage Private Wealth</h2>
                             <p className="text-body-lg text-ink-700 mb-6">A customized approach to managing your wealth. Our private wealth advisors work closely with you to understand your financial picture, helping you navigate complex wealth planning, lending, and banking needs with the high-touch service of a premium private bank.</p>
-                            
+
                             <ul className="space-y-3 mb-8">
                                 {[
                                     'Dedicated Private Wealth Advisor',
@@ -129,7 +129,7 @@ export default function WealthManagementPage() {
                         <div>
                             <h2 className="font-display text-h2 text-ink-900 mb-4">Trust Services</h2>
                             <p className="text-body-lg text-ink-700 mb-6">Protect what you've built. Heritage Trust serves as a steadfast corporate trustee, working impartially to manage your trust assets, carry out your wishes, and provide continuity for future generations.</p>
-                            
+
                             <ul className="space-y-3 mb-8">
                                 {[
                                     'Revocable and irrevocable trust administration',
@@ -154,7 +154,7 @@ export default function WealthManagementPage() {
                         <div>
                             <h2 className="font-display text-h2 text-ink-900 mb-4">Estate Planning Services</h2>
                             <p className="text-body-lg text-ink-700 mb-6">Shape your legacy. We collaborate with your legal and tax professionals to structure an estate plan that minimizes tax implications and ensures a smooth transition of wealth to your heirs and chosen charities.</p>
-                            
+
                             <ul className="space-y-3 mb-8">
                                 {[
                                     'Estate settlement and executor services',
@@ -185,7 +185,7 @@ export default function WealthManagementPage() {
                         <div>
                             <h2 className="font-display text-h2 text-ink-900 mb-4">Portfolio Management</h2>
                             <p className="text-body-lg text-ink-700 mb-6">Institutional-caliber investment strategies. Our portfolio managers build customized, risk-adjusted portfolios tailored to your specific liquidity needs, time horizon, and long-term financial goals.</p>
-                            
+
                             <ul className="space-y-3 mb-8">
                                 {[
                                     'Discretionary portfolio management',

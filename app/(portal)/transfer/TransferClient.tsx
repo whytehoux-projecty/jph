@@ -1551,7 +1551,12 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
   );
 }
 
-export default function TransferClient({ initialAccounts = [], userPreferences = { language: "en", currency: "USD" }, transferMethods = [] }: { initialAccounts?: any[]; userPreferences?: any; transferMethods?: any[] }) {
+import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import BillsClient from "../bills/BillsClient";
+
+export default function TransferClient({ initialAccounts = [], userPreferences = { language: "en", currency: "USD" }, transferMethods = [], initialProviders = {} }: { initialAccounts?: any[]; userPreferences?: any; transferMethods?: any[]; initialProviders?: any }) {
+  const [activeTab, setActiveTab] = useState("transfers");
+
   return (
     <Suspense
       fallback={
@@ -1559,7 +1564,19 @@ export default function TransferClient({ initialAccounts = [], userPreferences =
           <Skeleton className="h-12 w-12 rounded-full" />
         </div>
       }>
-      <TransferContent initialAccounts={initialAccounts} userPreferences={userPreferences} transferMethods={transferMethods} />
+      <div className="w-full max-w-7xl mx-auto mb-6">
+        <SegmentedControl
+          options={["transfers", "payments"]}
+          value={activeTab}
+          onChange={setActiveTab}
+        />
+      </div>
+      
+      {activeTab === "transfers" ? (
+        <TransferContent initialAccounts={initialAccounts} userPreferences={userPreferences} transferMethods={transferMethods} />
+      ) : (
+        <BillsClient initialAccounts={initialAccounts} initialProviders={initialProviders} />
+      )}
     </Suspense>
   );
 }
