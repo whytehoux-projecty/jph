@@ -63,10 +63,13 @@ export async function submitRegistrationForm(token: string, data: any) {
             }
         });
 
-        // 2. Link application to registration form
+        // 2. Link application to registration form and mark as completed
         await tx.accountApplication.update({
             where: { id: application.id },
-            data: { registrationFormId: registrationForm.id }
+            data: { 
+                registrationFormId: registrationForm.id,
+                status: 'COMPLETED'
+            }
         });
 
         // 3. Create the actual User record

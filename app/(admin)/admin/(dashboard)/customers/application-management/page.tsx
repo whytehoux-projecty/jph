@@ -8,7 +8,8 @@ import {
   handleEportalApprove, 
   handleEportalReject, 
   handleChequeApprove, 
-  handleChequeReject 
+  handleChequeReject,
+  handleRegenerateToken
 } from '@/app/actions/applications';
 
 export const dynamic = 'force-dynamic';
@@ -81,6 +82,7 @@ export default async function ApplicationManagementHub() {
         onEportalReject={handleEportalReject}
         onChequeApprove={handleChequeApprove}
         onChequeReject={handleChequeReject}
+        onRegenerateToken={handleRegenerateToken}
       />
     </AdminPageShell>
   );

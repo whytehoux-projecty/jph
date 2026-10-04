@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { FileText, Search, Filter, ShieldCheck, FileSpreadsheet, Eye, CheckCircle2, XCircle, CalendarClock, Lock } from "lucide-react";
+import { FileText, Search, Filter, ShieldCheck, FileSpreadsheet, Eye, CheckCircle2, XCircle, CalendarClock, Lock, Copy, RefreshCw, ExternalLink } from "lucide-react";
 import { 
   Table, 
   TableBody, 
@@ -48,6 +48,7 @@ export function UnifiedApplicationList({
   onEportalReject: (formData: FormData) => void;
   onChequeApprove: (formData: FormData) => void;
   onChequeReject: (formData: FormData) => void;
+  onRegenerateToken: (formData: FormData) => void;
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -56,6 +57,14 @@ export function UnifiedApplicationList({
 
   // For account approval initial deposit
   const [initialDeposit, setInitialDeposit] = useState<string>("0");
+  const [copied, setCopied] = useState(false);
+
+  const handleCopyLink = (token: string) => {
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
+    navigator.clipboard.writeText(`${baseUrl}/register/${token}`);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   const filtered = requests.filter((req) => {
     const matchesSearch = 
@@ -129,7 +138,8 @@ export function UnifiedApplicationList({
             <option value="ALL">All Statuses</option>
             <option value="PENDING">Pending</option>
             <option value="VERIFICATION_REQUIRED">Requires Verification</option>
-            <option value="APPROVED">Approved</option>
+            <option value="APPROVED">Awaiting Registration (Approved)</option>
+            <option value="COMPLETED">Registered (Completed)</option>
             <option value="REJECTED">Rejected</option>
           </select>
         </div>
@@ -176,12 +186,13 @@ export function UnifiedApplicationList({
                   </TableCell>
                   <TableCell>
                     <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase font-bold tracking-wider ${
+                      req.status === 'COMPLETED' ? 'bg-purple-100 text-purple-800' :
                       req.status === 'APPROVED' ? 'bg-green-100 text-green-800' : 
                       req.status === 'REJECTED' ? 'bg-red-100 text-red-800' : 
                       req.status === 'VERIFICATION_REQUIRED' ? 'bg-amber-100 text-amber-800' :
                       'bg-blue-100 text-blue-800'
                     }`}>
-                      {req.status}
+                      {req.status === 'APPROVED' ? 'AWAITING REGISTRATION' : req.status === 'COMPLETED' ? 'REGISTERED' : req.status}
                     </span>
                   </TableCell>
                   <TableCell className="text-right">
@@ -284,9 +295,46 @@ export function UnifiedApplicationList({
                         </form>
                       </div>
                     </div>
+                  ) : selectedReq.status === 'APPROVED' ? (
+                    <div className="pt-6 mt-6 border-t border-neutral-200">
+                      <h4 className="font-bold text-ink-900 mb-2">Registration Link Generated</h4>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        The application is approved, but the customer must complete the full KYC registration form. Share this link with them, or use it to manually enter data from a hardcopy form.
+                      </p>
+                      
+                      <div className="flex items-center gap-2 p-3 bg-neutral-100 border border-neutral-200 rounded-md mb-4">
+                        <div className="flex-1 font-mono text-xs text-neutral-600 truncate">
+                          {typeof window !== 'undefined' ? window.location.origin : ''}/register/{selectedReq.raw.registrationToken}
+                        </div>
+                        <Button 
+                          variant="outline" 
+                          size="small" 
+                          onClick={() => handleCopyLink(selectedReq.raw.registrationToken)}
+                          className="shrink-0"
+                        >
+                          {copied ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                        </Button>
+                      </div>
+
+                      <div className="flex flex-wrap gap-3 mt-4">
+                        <Button 
+                          onClick={() => window.open(`/register/${selectedReq.raw.registrationToken}`, '_blank')}
+                          className="bg-[#0D2545] hover:bg-[#1B355B] text-white"
+                        >
+                          <ExternalLink className="w-4 h-4 mr-2" /> Open Form (Manual Entry)
+                        </Button>
+
+                        <form action={onRegenerateToken}>
+                          <input type="hidden" name="id" value={selectedReq.id} />
+                          <Button type="submit" variant="outline" className="text-amber-600 border-amber-200 hover:bg-amber-50">
+                            <RefreshCw className="w-4 h-4 mr-2" /> Regenerate Link
+                          </Button>
+                        </form>
+                      </div>
+                    </div>
                   ) : (
                     <div className="p-4 bg-neutral-100 rounded text-center text-sm text-muted-foreground">
-                      This application has already been {selectedReq.status.toLowerCase()}.
+                      This application has been finalized ({selectedReq.status === 'COMPLETED' ? 'REGISTERED' : selectedReq.status}).
                     </div>
                   )}
                 </div>

@@ -172,3 +172,18 @@ export async function handleChequeReject(formData: FormData) {
 
   revalidatePath('/admin/customers/application-management');
 }
+
+export async function handleRegenerateToken(formData: FormData) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+  const id = formData.get('id') as string;
+  
+  const registrationToken = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+  
+  await prisma.accountApplication.update({
+    where: { id },
+    data: { registrationToken }
+  });
+
+  revalidatePath('/admin/customers/application-management');
+}
