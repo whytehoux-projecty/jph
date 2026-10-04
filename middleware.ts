@@ -65,6 +65,10 @@ export default auth(function middleware(req: NextRequest & { auth: any }) {
     const isLoggedIn = !!session?.user;
     const role = (session?.user as any)?.role;
 
+    if (pathname.startsWith('/admin')) {
+      console.log(`[Middleware] ${req.method} ${pathname} | isLoggedIn: ${isLoggedIn} | role: ${role}`);
+    }
+
     // Handle authenticated users trying to access login pages
     if (isLoggedIn) {
         if (pathname === '/login' && role !== 'ADMIN') {

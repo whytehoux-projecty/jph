@@ -4,6 +4,7 @@ import { signIn } from 'next-auth/react';
 import { useState } from 'react';
 import { Lock, Mail, ShieldAlert, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
 export default function AdminLogin() {
@@ -11,6 +12,7 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -28,7 +30,8 @@ export default function AdminLogin() {
       if (result?.error) {
         setError('Invalid admin credentials. Access denied.');
       } else {
-        window.location.href = '/admin';
+        router.refresh();
+        router.push('/admin');
       }
     } finally {
       setIsLoading(false);
@@ -86,7 +89,7 @@ export default function AdminLogin() {
                   value={email} 
                   onChange={e => setEmail(e.target.value)} 
                   className="w-full pl-11 pr-4 py-3.5 bg-black/20 border border-white/10 rounded-xl text-white placeholder:text-white/30 focus:bg-black/40 focus:outline-none focus:ring-2 focus:ring-vermilion-600 focus:border-transparent transition-all sm:text-sm" 
-                  placeholder="admin@heritagetrust.com"
+                  placeholder="admin@jpheritage.com"
                   required 
                   disabled={isLoading}
                 />
