@@ -24,7 +24,7 @@ import {
   AlertTriangle,
   Tag,
 } from "lucide-react";
-import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 
 import {
   Card,
@@ -1574,16 +1574,15 @@ export default function TransactionsClient({
         />
       </div>
 
-      <div className="w-full mb-6">
-        <SegmentedControl
-          options={["history", "statements"]}
-          value={activeTab}
-          onChange={setActiveTab}
-        />
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className="w-full mb-6">
+          <TabsList className="w-full md:w-auto inline-flex p-1 bg-slate-100 rounded-lg">
+            <TabsTrigger value="history" className="px-6 py-2.5 capitalize text-sm font-medium">History</TabsTrigger>
+            <TabsTrigger value="statements" className="px-6 py-2.5 capitalize text-sm font-medium">Statements</TabsTrigger>
+          </TabsList>
+        </div>
 
-      {activeTab === "history" && (
-        <>
+        <TabsContent value="history" className="m-0 space-y-8">
           {/* Summary Strip */}
           <Card className="overflow-hidden border-t-[3px] border-t-[#D4AF37]">
         <div className="grid grid-cols-1 sm:grid-cols-3 md:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
@@ -2033,10 +2032,9 @@ export default function TransactionsClient({
           </div>)}
         </CardContent>
       </Card>
-      </>
-      )}
+        </TabsContent>
 
-      {activeTab === "statements" && (
+        <TabsContent value="statements" className="m-0">
         <Card className="animate-in fade-in">
           <CardHeader>
             <CardTitle>Generated Statements</CardTitle>
@@ -2045,10 +2043,10 @@ export default function TransactionsClient({
             </CardDescription>
           </CardHeader>
           <CardContent className="h-[300px] flex items-center justify-center border-t border-slate-100 bg-slate-50">
-            <p className="text-slate-500 font-medium">No statements generated yet.</p>
           </CardContent>
         </Card>
-      )}
+        </TabsContent>
+      </Tabs>
 
       {/* Prompt-replacement dialog for bulk operations and add-note */}
       <Dialog open={!!promptDialog} onOpenChange={(open) => { if (!open) setPromptDialog(null); }}>

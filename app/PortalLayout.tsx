@@ -129,6 +129,10 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
               pinSetupComplete: user.pinSetupComplete,
               profilePhotoUrl: user.profilePhotoUrl,
               hideBalance: user.hideBalance,
+              email: user.email,
+              phone: user.phone,
+              profileType: (user as any).profileType || "PERSONAL",
+              accountNumber: (user as any).accounts?.[0]?.accountNumber,
             });
           }
         })
@@ -152,7 +156,7 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
         <PortalHeader
           profile={profile}
         />
-        <PortalSubHeader profile={profile} />
+        <PortalSubHeader profile={profile} accountNumber={profile?.accountNumber} />
         <main
           className={cn(
             "flex-1 px-4 md:px-6 lg:px-8 pt-5 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-6",

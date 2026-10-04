@@ -44,7 +44,7 @@ import {
   LinkExternalAccountDialog,
 } from "./components/AccountActionDialogs";
 import { AccountCard, Account } from "./components/AccountCard";
-import { SegmentedControl } from "@/components/ui/SegmentedControl";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { SortSelect } from "@/components/ui/SortSelect";
 import { PromoBanner } from "@/components/ui/PromoBanner";
@@ -490,11 +490,18 @@ export default function VaultsClient({ initialAccounts, userPreferences, pending
       {/* Filter Bar — sticky, stays visible while scrolling the account grid */}
       <div className="sticky top-[70px] z-30 bg-white/95 backdrop-blur-md border border-border shadow-sm rounded-xl px-4 py-3">
         <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <SegmentedControl
-              options={["bank accounts", "credit cards", "wallets"]}
-              value={filterType}
-              onChange={setFilterType}
-            />
+          <Tabs value={filterType} onValueChange={setFilterType} className="w-full md:w-auto">
+            <TabsList className="w-full md:w-auto inline-flex p-1 bg-slate-100 rounded-lg">
+              <TabsTrigger value="bank accounts" className="px-4 py-2 capitalize text-sm font-medium">Bank Accounts</TabsTrigger>
+              <TabsTrigger value="credit cards" className="px-4 py-2 capitalize text-sm font-medium">Credit Cards</TabsTrigger>
+              <TabsTrigger value="wallets" className="px-4 py-2 capitalize text-sm font-medium">Wallets</TabsTrigger>
+            </TabsList>
+            <div className="hidden">
+              <TabsContent value="bank accounts" />
+              <TabsContent value="credit cards" />
+              <TabsContent value="wallets" />
+            </div>
+          </Tabs>
 
           <div className="flex items-center gap-2 w-full md:w-auto flex-1 md:flex-none justify-end">
               <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder="Search by nickname or last 4 digits..." />

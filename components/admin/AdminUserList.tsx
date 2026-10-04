@@ -47,7 +47,9 @@ import {
   generateStatement, 
   updateEportalStatus, 
   requestOnlineAccess,
-  updateEportalCredentials
+  updateEportalCredentials,
+  updateAccountManagerInfo,
+  updateCreditScoreSettings
 } from "@/app/actions/admin-customers";
 
 export type AdminUser = {
@@ -65,6 +67,12 @@ export type AdminUser = {
   isFirstLogin?: boolean;
   temporaryPassword?: string | null;
   transferMethodOverrides?: string | null;
+  accountManagerName?: string | null;
+  accountManagerTitle?: string | null;
+  accountManagerEmail?: string | null;
+  accountManagerPhone?: string | null;
+  creditScoreAutoMode?: string;
+  creditScoreFixedChange?: number;
   accounts: {
     id: string;
     accountNumber: string;
@@ -120,7 +128,7 @@ export function AdminUserList({
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [activeTab, setActiveTab] = useState<'bio' | 'accounts' | 'employment' | 'kyc' | 'eportal' | 'beneficiaries' | 'transactions' | 'sidebar' | 'transfers'>('bio');
+  const [activeTab, setActiveTab] = useState<'bio' | 'accounts' | 'employment' | 'kyc' | 'eportal' | 'beneficiaries' | 'transactions' | 'sidebar' | 'transfers' | 'account_manager'>('bio');
   const [editMode, setEditMode] = useState<Record<string, boolean>>({});
   
   // Modals state for Account Info tab
@@ -350,6 +358,12 @@ export function AdminUserList({
                   onClick={() => setActiveTab('transfers')}
                 >
                   <Link2 className="w-4 h-4 inline-block mr-1" /> Transfers
+                </button>
+                <button
+                  className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'account_manager' ? 'text-vintage-gold border-b-2 border-vintage-gold' : 'text-neutral-500 hover:text-neutral-700'}`}
+                  onClick={() => setActiveTab('account_manager')}
+                >
+                  <UserIcon className="w-4 h-4 inline-block mr-1" /> Mgr / Credit
                 </button>
               </div>
 
@@ -1122,6 +1136,88 @@ export function AdminUserList({
                         })}
                       </div>
                     )}
+                  </div>
+                )}
+
+                {/* ACCOUNT MANAGER TAB */}
+                {activeTab === 'account_manager' && (
+                  <div className="space-y-8 animate-in fade-in slide-in-from-bottom-2 p-6">
+                    <form action={async (fd) => {
+                      fd.append('userId', selectedUser.id);
+                      await updateAccountManagerInfo(fd);
+                      toast.success('Account Manager info updated');
+                      setSelectedUser(prev => prev ? ({
+                        ...prev,
+                        accountManagerName: fd.get('accountManagerName') as string,
+                        accountManagerTitle: fd.get('accountManagerTitle') as string,
+                        accountManagerEmail: fd.get('accountManagerEmail') as string,
+                        accountManagerPhone: fd.get('accountManagerPhone') as string,
+                      }) : null);
+                    }} className="space-y-6 p-6 border border-neutral-200 rounded-md bg-white">
+                      <div className="flex items-center gap-2 mb-2">
+                        <UserIcon className="w-5 h-5 text-vintage-gold" />
+                        <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-widest">Account Manager Details</h3>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-neutral-500">Name</label>
+                          <input type="text" name="accountManagerName" defaultValue={selectedUser.accountManagerName || ''} placeholder="e.g. Eleanor Vance, CFA" className="w-full bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-neutral-500">Title</label>
+                          <input type="text" name="accountManagerTitle" defaultValue={selectedUser.accountManagerTitle || ''} placeholder="e.g. VP, Private Client Advisory" className="w-full bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-neutral-500">Email</label>
+                          <input type="email" name="accountManagerEmail" defaultValue={selectedUser.accountManagerEmail || ''} placeholder="e.g. advisory@heritagetrust.com" className="w-full bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-neutral-500">Phone</label>
+                          <input type="text" name="accountManagerPhone" defaultValue={selectedUser.accountManagerPhone || ''} placeholder="e.g. 18004374824" className="w-full bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold" />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button type="submit" className="bg-vintage-gold hover:bg-vintage-gold/90 text-white shadow-vintage-sm">
+                          <Check className="w-4 h-4 mr-1" /> Save Manager Info
+                        </Button>
+                      </div>
+                    </form>
+
+                    <form action={async (fd) => {
+                      fd.append('userId', selectedUser.id);
+                      await updateCreditScoreSettings(fd);
+                      toast.success('Credit score settings updated');
+                      setSelectedUser(prev => prev ? ({
+                        ...prev,
+                        creditScoreAutoMode: fd.get('creditScoreAutoMode') as string,
+                        creditScoreFixedChange: parseInt(fd.get('creditScoreFixedChange') as string) || 0,
+                      }) : null);
+                    }} className="space-y-6 p-6 border border-neutral-200 rounded-md bg-white mt-8">
+                      <div className="flex items-center gap-2 mb-2">
+                        <FileSpreadsheet className="w-5 h-5 text-vintage-gold" />
+                        <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-widest">Credit Score Automation</h3>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-neutral-500">Update Mode</label>
+                          <select name="creditScoreAutoMode" defaultValue={selectedUser.creditScoreAutoMode || 'MANUAL'} className="w-full bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold">
+                            <option value="MANUAL">Manual (No Auto-Update)</option>
+                            <option value="RANDOM">Random Fluctuation</option>
+                            <option value="FIXED_INCREASE">Fixed Increase (Monthly)</option>
+                            <option value="FIXED_DECREASE">Fixed Decrease (Monthly)</option>
+                          </select>
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-xs font-semibold text-neutral-500">Fixed Change Amount (if applicable)</label>
+                          <input type="number" name="creditScoreFixedChange" defaultValue={selectedUser.creditScoreFixedChange || 0} placeholder="e.g. 5" className="w-full bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold" />
+                        </div>
+                      </div>
+                      <div className="flex justify-end">
+                        <Button type="submit" className="bg-vintage-gold hover:bg-vintage-gold/90 text-white shadow-vintage-sm">
+                          <Check className="w-4 h-4 mr-1" /> Save Credit Settings
+                        </Button>
+                      </div>
+                    </form>
                   </div>
                 )}
 

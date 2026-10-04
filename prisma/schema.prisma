@@ -51,6 +51,17 @@ model User {
   temporaryPassword   String?  @map("temporary_password")
   cryptoWalletEnabled Boolean  @default(false) @map("crypto_wallet_enabled")
   profilePhotoUrl     String?  @map("profile_photo_url")
+  profileType         String   @default("PERSONAL") @map("profile_type")
+  accountManagerName  String?  @map("account_manager_name")
+  accountManagerEmail String?  @map("account_manager_email")
+  accountManagerPhone String?  @map("account_manager_phone")
+  accountManagerTitle String?  @map("account_manager_title")
+  
+  // Credit Score Automation Settings
+  creditScoreAutoMode     String   @default("MANUAL") @map("credit_score_auto_mode") // MANUAL, RANDOM, FIXED_INCREASE, FIXED_DECREASE
+  creditScoreFixedChange  Int      @default(0) @map("credit_score_fixed_change")
+  creditScoreNextUpdate   DateTime? @map("credit_score_next_update")
+
   isFlagged           Boolean  @default(false) @map("is_flagged")
   eportalStatus       String   @default("ACTIVE") @map("eportal_status")
   eportalNotificationMessage String? @map("eportal_notification_message")
