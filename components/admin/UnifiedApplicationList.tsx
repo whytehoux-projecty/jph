@@ -18,6 +18,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/Button";
+import { AutoRegistrationPanel } from "@/components/admin/AutoRegistrationPanel";
 
 export type UnifiedRequest = {
   id: string;
@@ -340,6 +341,8 @@ export function UnifiedApplicationList({
                           </Button>
                         </form>
                       </div>
+
+                      <AutoRegistrationPanel application={selectedReq.raw} />
                     </div>
                   ) : (
                     <div className="p-4 bg-neutral-100 rounded text-center text-sm text-muted-foreground">
