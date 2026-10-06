@@ -198,21 +198,68 @@ export function Header({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
             {/* BOTTOM BAR (Logo, Sub-items, CTA) */}
             <nav
                 aria-label="Main navigation"
-                className="mx-auto flex max-w-7xl items-center justify-between px-6 py-4 lg:px-8 border-b border-paper-200"
+                className="mx-auto flex flex-col max-w-7xl px-6 py-4 lg:px-8 border-b border-paper-200 gap-4"
             >
-                {/* Wordmark */}
-                <div className="flex flex-shrink-0 mr-8">
-                    <Link
-                        href={ROUTES.home}
-                        aria-label={`${BRAND.shortName} — Home`}
-                        className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900"
-                    >
-                        <img src="/images/logos/heritage-trust-logo.svg" alt="Heritage Trust Logo" className="h-7 w-auto" />
-                    </Link>
+                {/* Top Row: Logo & CTAs */}
+                <div className="flex items-center justify-between w-full">
+                    {/* Wordmark */}
+                    <div className="flex flex-shrink-0 mr-8">
+                        <Link
+                            href={ROUTES.home}
+                            aria-label={`${BRAND.shortName} — Home`}
+                            className="focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900"
+                        >
+                            <img src="/images/logos/heritage-trust-logo.svg" alt="Heritage Trust Logo" className="h-7 w-auto" />
+                        </Link>
+                    </div>
+
+                    {/* Desktop CTA row */}
+                    <div className="hidden lg:flex flex-shrink-0 lg:gap-4 lg:items-center ml-auto">
+                        <Link
+                            href={isLoggedIn ? ROUTES.dashboard : ROUTES.login}
+                            className="
+                                text-sm font-medium text-ink-900 underline underline-offset-2
+                                hover:text-vermilion-600 transition-colors whitespace-nowrap
+                                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900
+                            "
+                        >
+                            {isLoggedIn ? 'Go to Heritage Vault' : 'Sign in'}
+                        </Link>
+                        <Link
+                            href={ROUTES.apply}
+                            className="
+                                inline-flex items-center justify-center whitespace-nowrap
+                                px-5 py-2 bg-vermilion-600 text-paper-50
+                                text-sm font-medium rounded
+                                hover:bg-vermilion-700 transition-colors
+                                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900
+                            "
+                        >
+                            Open an account
+                        </Link>
+                    </div>
+
+                    {/* Mobile menu toggle */}
+                    <div className="flex lg:hidden ml-auto">
+                        <button
+                            ref={menuButtonRef}
+                            type="button"
+                            onClick={() => setMobileOpen(true)}
+                            aria-label="Open main menu"
+                            aria-expanded={mobileOpen}
+                            aria-controls="mobile-menu"
+                            className="
+                                p-2.5 text-ink-700 hover:text-ink-900 transition-colors
+                                focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900
+                            "
+                        >
+                            <Menu className="h-6 w-6" aria-hidden="true" />
+                        </button>
+                    </div>
                 </div>
 
-                {/* Desktop Sub-items (Products of active domain) */}
-                <div className="hidden lg:flex lg:flex-1 lg:gap-x-6 lg:items-center" role="list">
+                {/* Bottom Row: Desktop Sub-items (Products of active domain) */}
+                <div className="hidden lg:flex lg:flex-1 lg:gap-x-6 lg:items-center w-full" role="list">
                     {activeDomain.subItems && activeDomain.subItems.length > 0 && (
                         activeDomain.subItems.map((sub) => (
                             <Link
@@ -229,50 +276,6 @@ export function Header({ isLoggedIn = false }: { isLoggedIn?: boolean }) {
                             </Link>
                         ))
                     )}
-                </div>
-
-                {/* Desktop CTA row */}
-                <div className="hidden lg:flex flex-shrink-0 lg:gap-4 lg:items-center ml-4">
-                    <Link
-                        href={isLoggedIn ? ROUTES.dashboard : ROUTES.login}
-                        className="
-                            text-sm font-medium text-ink-900 underline underline-offset-2
-                            hover:text-vermilion-600 transition-colors whitespace-nowrap
-                            focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900
-                        "
-                    >
-                        {isLoggedIn ? 'Go to Heritage Vault' : 'Sign in'}
-                    </Link>
-                    <Link
-                        href={ROUTES.apply}
-                        className="
-                            inline-flex items-center justify-center whitespace-nowrap
-                            px-5 py-2 bg-vermilion-600 text-paper-50
-                            text-sm font-medium rounded
-                            hover:bg-vermilion-700 transition-colors
-                            focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900
-                        "
-                    >
-                        Open an account
-                    </Link>
-                </div>
-
-                {/* Mobile menu toggle */}
-                <div className="flex lg:hidden ml-auto">
-                    <button
-                        ref={menuButtonRef}
-                        type="button"
-                        onClick={() => setMobileOpen(true)}
-                        aria-label="Open main menu"
-                        aria-expanded={mobileOpen}
-                        aria-controls="mobile-menu"
-                        className="
-                            p-2.5 text-ink-700 hover:text-ink-900 transition-colors
-                            focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900
-                        "
-                    >
-                        <Menu className="h-6 w-6" aria-hidden="true" />
-                    </button>
                 </div>
             </nav>
         </header>
