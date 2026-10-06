@@ -60,9 +60,12 @@ export function UnifiedApplicationList({
   const [initialDeposit, setInitialDeposit] = useState<string>("0");
   const [copied, setCopied] = useState(false);
 
-  const handleCopyLink = (token: string) => {
+  const handleCopyLink = (token: string, appType?: string) => {
     const baseUrl = process.env.NEXT_PUBLIC_APP_URL || window.location.origin;
-    navigator.clipboard.writeText(`${baseUrl}/register/${token}`);
+    const link = appType === 'BUSINESS' 
+      ? `${baseUrl}/register/business/${token}` 
+      : `${baseUrl}/register/${token}`;
+    navigator.clipboard.writeText(link);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -305,17 +308,17 @@ export function UnifiedApplicationList({
                       
                       <div className="flex items-center gap-2 p-3 bg-neutral-100 border border-neutral-200 rounded-md mb-4">
                         <a 
-                          href={`/register/${selectedReq.raw.registrationToken}`}
+                          href={selectedReq.raw?.applicationType === 'BUSINESS' ? `/register/business/${selectedReq.raw.registrationToken}` : `/register/${selectedReq.raw.registrationToken}`}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="flex-1 font-mono text-xs text-blue-600 hover:text-blue-800 underline truncate block"
                         >
-                          {typeof window !== 'undefined' ? window.location.origin : ''}/register/{selectedReq.raw.registrationToken}
+                          {typeof window !== 'undefined' ? window.location.origin : ''}{selectedReq.raw?.applicationType === 'BUSINESS' ? `/register/business/${selectedReq.raw.registrationToken}` : `/register/${selectedReq.raw.registrationToken}`}
                         </a>
                         <Button 
                           variant="outline" 
                           size="small" 
-                          onClick={() => handleCopyLink(selectedReq.raw.registrationToken)}
+                          onClick={() => handleCopyLink(selectedReq.raw.registrationToken, selectedReq.raw?.applicationType)}
                           className="shrink-0"
                         >
                           {copied ? <CheckCircle2 className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
@@ -324,7 +327,7 @@ export function UnifiedApplicationList({
 
                       <div className="flex flex-wrap gap-3 mt-4">
                         <Button 
-                          onClick={() => window.open(`/register/${selectedReq.raw.registrationToken}`, '_blank')}
+                          onClick={() => window.open(selectedReq.raw?.applicationType === 'BUSINESS' ? `/register/business/${selectedReq.raw.registrationToken}` : `/register/${selectedReq.raw.registrationToken}`, '_blank')}
                           className="bg-[#0D2545] hover:bg-[#1B355B] text-white"
                         >
                           <ExternalLink className="w-4 h-4 mr-2" /> Open Form (Manual Entry)

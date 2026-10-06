@@ -2,6 +2,8 @@
 
 import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
+
 import { Button } from '@/components/commercial-ui/Button';
 import { LedgerInput } from '@/components/commercial-ui/LedgerInput';
 import { LedgerSelect } from '@/components/commercial-ui/LedgerSelect';
@@ -33,6 +35,9 @@ function ApplicationFormContent() {
         consentComms: false,
         consentPrivacy: false,
         businessName: '',
+        dbaName: '',
+        entityType: '',
+        stateOfFormation: '',
         ein: '',
         industry: '',
         website: '',
@@ -59,7 +64,9 @@ function ApplicationFormContent() {
 
             if (formData.applicationType === 'BUSINESS') {
                 if (!formData.businessName) stepErrors.businessName = 'Business name is required';
+                if (!formData.entityType) stepErrors.entityType = 'Entity type is required';
                 if (!formData.ein) stepErrors.ein = 'EIN is required';
+                if (!formData.stateOfFormation) stepErrors.stateOfFormation = 'State of formation is required';
                 if (!formData.industry) stepErrors.industry = 'Industry is required';
             }
         }
@@ -167,9 +174,17 @@ function ApplicationFormContent() {
                     </div>
                 </div>
 
-                <div className="bg-paper-50 p-8 rounded border border-paper-200 shadow-sm">
+                <div className="bg-paper-50 p-8 rounded border border-paper-200 shadow-sm overflow-hidden">
+                    <AnimatePresence mode="wait">
                     {step === 1 && (
-                        <div className="space-y-6 animate-fade-in">
+                        <motion.div 
+                            key="step1"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.3 }}
+                            className="space-y-6"
+                        >
                             <div>
                                 <h2 className="font-display text-h3 text-ink-900 mb-1">Let's get started</h2>
                                 <p className="text-body text-ink-700">Tell us a bit about yourself.</p>
@@ -237,6 +252,35 @@ function ApplicationFormContent() {
                                         </div>
                                         <div className="grid md:grid-cols-2 gap-4">
                                             <div className="space-y-1.5">
+
+                                                <label htmlFor="entityType" className="block text-small font-medium text-ink-900">Entity Type</label>
+                                                <select
+                                                    id="entityType"
+                                                    value={formData.entityType}
+                                                    onChange={(e) => updateField('entityType', e.target.value)}
+                                                    className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.entityType ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                                >
+                                                    <option value="">Select Entity Type</option>
+                                                    <option value="LLC">LLC</option>
+                                                    <option value="CORPORATION">Corporation</option>
+                                                    <option value="PARTNERSHIP">Partnership</option>
+                                                    <option value="SOLE_PROPRIETORSHIP">Sole Proprietorship</option>
+                                                    <option value="OTHER">Other</option>
+                                                </select>
+                                                {errors.entityType && <p className="text-xs text-vermilion-600">{errors.entityType}</p>}
+                                            </div>
+                                            <div className="space-y-1.5">
+                                                <label htmlFor="stateOfFormation" className="block text-small font-medium text-ink-900">State of Formation</label>
+                                                <input
+                                                    id="stateOfFormation"
+                                                    type="text"
+                                                    value={formData.stateOfFormation}
+                                                    onChange={(e) => updateField('stateOfFormation', e.target.value)}
+                                                    className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.stateOfFormation ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                                />
+                                                {errors.stateOfFormation && <p className="text-xs text-vermilion-600">{errors.stateOfFormation}</p>}
+                                            </div>
+                                            <div className="space-y-1.5">
                                                 <label htmlFor="ein" className="block text-small font-medium text-ink-900">Employer Identification Number (EIN)</label>
                                                 <input
                                                     id="ein"
@@ -290,11 +334,18 @@ function ApplicationFormContent() {
                                     Continue <ArrowRight className="w-4 h-4 ml-2" />
                                 </Button>
                             </div>
-                        </div>
+                        </motion.div>
                     )}
 
                     {step === 2 && (
-                        <div className="space-y-6 animate-fade-in">
+                        <motion.div 
+                            key="step2"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.3 }}
+                            className="space-y-6"
+                        >
                             <div>
                                 <h2 className="font-display text-h3 text-ink-900 mb-1">Contact Details</h2>
                                 <p className="text-body text-ink-700">We need this to verify your identity.</p>
@@ -364,11 +415,18 @@ function ApplicationFormContent() {
                                     Continue <ArrowRight className="w-4 h-4 ml-2" />
                                 </Button>
                             </div>
-                        </div>
+                        </motion.div>
                     )}
 
                     {step === 3 && (
-                        <div className="space-y-6 animate-fade-in">
+                        <motion.div 
+                            key="step3"
+                            initial={{ opacity: 0, x: 20 }}
+                            animate={{ opacity: 1, x: 0 }}
+                            exit={{ opacity: 0, x: -20 }}
+                            transition={{ duration: 0.3 }}
+                            className="space-y-6"
+                        >
                             <div>
                                 <h2 className="font-display text-h3 text-ink-900 mb-1">Review & Submit</h2>
                                 <p className="text-body text-ink-700">Please review your information before submitting.</p>
@@ -443,8 +501,9 @@ function ApplicationFormContent() {
                                     {isSubmitting ? 'Submitting...' : 'Submit Application'}
                                 </Button>
                             </div>
-                        </div>
+                        </motion.div>
                     )}
+                    </AnimatePresence>
                 </div>
             </div>
         </div>

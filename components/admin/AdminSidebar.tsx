@@ -102,7 +102,7 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
       icon: Settings,
       subItems: [
         { name: "Roles & Access", href: "/admin/system/roles" },
-        { name: "Settings", href: "/admin/system/settings" },
+        { name: "Global Settings", href: "/admin/system/global-settings" },
       ]
     }
   ];
@@ -156,8 +156,9 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
         
         <button 
           onClick={toggleSidebar}
-          className="text-gray-400 hover:text-white p-2 rounded-md hover:bg-white/5 transition-colors"
+          className="text-gray-400 hover:text-white p-2 rounded-md hover:bg-white/5 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold"
           title={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+          aria-label={isCollapsed ? "Expand sidebar" : "Collapse sidebar"}
         >
           {isCollapsed ? <PanelLeftOpen className="w-5 h-5" /> : <PanelLeftClose className="w-5 h-5" />}
         </button>
@@ -165,7 +166,7 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
       
       {/* Navigation */}
       <div className="flex-1 py-4 overflow-y-auto overflow-x-hidden custom-scrollbar">
-        <nav className="space-y-1 px-3">
+        <nav className="space-y-1 px-3" aria-label="Primary Administrative">
           {NAV_TREE.map((category) => {
             const isCatActive = category.href === pathname || category.subItems?.some(sub => pathname.startsWith(sub.href));
             const isOpen = openCategories[category.name];
@@ -180,7 +181,7 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
                   key={category.name}
                   href={category.href}
                   className={cn(
-                    "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors group",
+                    "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold",
                     isCatActive 
                       ? "bg-vintage-gold/10 text-vintage-gold border-l-2 border-vintage-gold font-bold" 
                       : "text-gray-300 hover:bg-white/5 hover:text-white border-l-2 border-transparent"
@@ -198,12 +199,14 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
                 <button
                   onClick={() => toggleCategory(category.name)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors group relative",
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-colors group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold",
                     isCatActive && !isOpen
                       ? "text-vintage-gold"
                       : "text-gray-300 hover:bg-white/5 hover:text-white"
                   )}
                   title={isCollapsed ? category.name : undefined}
+                  aria-expanded={isOpen}
+                  aria-controls={`submenu-${category.name}`}
                 >
                   <category.icon className="w-5 h-5 shrink-0" />
                   
@@ -226,10 +229,13 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
                 </button>
 
                 {!isCollapsed && (
-                  <div className={cn(
-                    "grid transition-all duration-200 ease-in-out",
-                    isOpen ? "grid-rows-[1fr] opacity-100 mb-2" : "grid-rows-[0fr] opacity-0"
-                  )}>
+                  <div 
+                    id={`submenu-${category.name}`}
+                    className={cn(
+                      "grid transition-all duration-200 ease-in-out",
+                      isOpen ? "grid-rows-[1fr] opacity-100 mb-2" : "grid-rows-[0fr] opacity-0"
+                    )}
+                  >
                     <div className="overflow-hidden flex flex-col space-y-1 pl-11 pr-2">
                       {category.subItems?.map((sub) => {
                         const isSubActive = pathname.startsWith(sub.href);
@@ -238,7 +244,7 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
                             key={sub.name}
                             href={sub.href}
                             className={cn(
-                              "flex items-center justify-between py-1.5 px-2 rounded text-[13px] transition-colors relative before:absolute before:left-[-15px] before:top-1/2 before:-translate-y-1/2 before:w-1.5 before:h-1.5 before:rounded-full before:transition-colors",
+                              "flex items-center justify-between py-1.5 px-2 rounded text-[13px] transition-colors relative before:absolute before:left-[-15px] before:top-1/2 before:-translate-y-1/2 before:w-1.5 before:h-1.5 before:rounded-full before:transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vintage-gold",
                               isSubActive 
                                 ? "text-vintage-gold font-semibold before:bg-vintage-gold" 
                                 : "text-gray-400 hover:text-white hover:bg-white/5 before:bg-transparent"
@@ -270,10 +276,11 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
             import('@/app/actions/auth').then(m => m.adminLogoutAction());
           }}
           className={cn(
-            "flex items-center rounded-md text-sm font-medium text-red-400 hover:bg-red-400/10 transition-colors w-full",
+            "flex items-center rounded-md text-sm font-medium text-red-400 hover:bg-red-400/10 transition-colors w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400",
             isCollapsed ? "justify-center p-2" : "gap-3 px-3 py-2"
           )}
           title={isCollapsed ? "Sign Out" : undefined}
+          aria-label={isCollapsed ? "Sign Out" : undefined}
         >
           <LogOut className="w-5 h-5 shrink-0" />
           {!isCollapsed && <span>Sign Out</span>}

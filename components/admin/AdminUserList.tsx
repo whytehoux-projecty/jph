@@ -170,6 +170,7 @@ export function AdminUserList({
           <input 
             type="text" 
             placeholder="Search by name or email..." 
+            aria-label="Search users by name or email"
             className="w-full pl-9 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold/50"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -178,6 +179,7 @@ export function AdminUserList({
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-muted-foreground" />
           <select 
+            aria-label="Filter users by status"
             className="text-sm bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-vintage-gold/50"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -872,6 +874,8 @@ export function AdminUserList({
                         {[
                           ['primarySourceOfFunds', 'Source of Funds', selectedUser.registrationForm.primarySourceOfFunds],
                           ['estimatedAnnualIncome', 'Est. Annual Income', selectedUser.registrationForm.estimatedAnnualIncome],
+                          ['purposeOfAccount', 'Purpose of Account', selectedUser.registrationForm.purposeOfAccount],
+                          ['expectedMonthlyVolume', 'Expected Monthly Volume', selectedUser.registrationForm.expectedMonthlyVolume],
                         ].map(([key, label, value]) => (
                           <div key={key}>
                             <label className="text-muted-foreground block text-xs mb-1 uppercase font-semibold">{label}</label>
@@ -925,8 +929,24 @@ export function AdminUserList({
                         ))}
                       </div>
 
+                      <h4 className="text-xs font-bold uppercase tracking-wider text-ink-900 border-b pb-2 mb-4 mt-8">Compliance Declarations</h4>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-y-4 gap-x-8 text-sm mb-8">
+                        {[
+                          ['isUsTaxPerson', 'US Tax Person', selectedUser.registrationForm.isUsTaxPerson ? 'Yes' : 'No'],
+                          ['w8benCertification', 'W-8BEN Certified', selectedUser.registrationForm.w8benCertification ? 'Yes' : 'No'],
+                          ['isPep', 'Politically Exposed (PEP)', selectedUser.registrationForm.isPep ? 'Yes' : 'No'],
+                          ['pepDetails', 'PEP Details', selectedUser.registrationForm.pepDetails],
+                          ['sanctionsDeclaration', 'Sanctions Cleared', selectedUser.registrationForm.sanctionsDeclaration ? 'Yes' : 'No'],
+                        ].map(([key, label, value]) => (
+                          <div key={key}>
+                            <label className="text-muted-foreground block text-xs mb-1 uppercase font-semibold">{label}</label>
+                            <div className="font-medium text-ink-900">{value || 'N/A'}</div>
+                          </div>
+                        ))}
+                      </div>
+
                       <h4 className="text-xs font-bold uppercase tracking-wider text-ink-900 border-b pb-2 mb-4">Uploaded Documents</h4>
-                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
                         {/* Passport Photo */}
                         <div className="border border-neutral-200 rounded-lg p-2 bg-neutral-50 flex flex-col">
                           <p className="text-xs font-semibold text-center mb-2 text-ink-900">Passport Photo</p>
@@ -964,6 +984,27 @@ export function AdminUserList({
                                 <img src={selectedUser.registrationForm.idBackDocumentUrl} alt="ID Back" className="object-contain w-full h-full" />
                               ) : (
                                 <a href={selectedUser.registrationForm.idBackDocumentUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline flex flex-col items-center gap-2"><FileText className="w-8 h-8"/>View PDF</a>
+                              )
+                            ) : (
+                              <span className="text-xs text-muted-foreground italic">Not provided</span>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Proof of Address */}
+                        <div className="border border-neutral-200 rounded-lg p-2 bg-neutral-50 flex flex-col">
+                          <p className="text-xs font-semibold text-center mb-2 text-ink-900">Proof of Address</p>
+                          <div className="flex-1 flex items-center justify-center min-h-[150px] bg-white rounded border border-neutral-100 overflow-hidden relative">
+                            {selectedUser.registrationForm.poaWaiverRequested ? (
+                              <div className="text-center p-2">
+                                <span className="text-xs font-bold text-amber-600 block mb-1">WAIVER REQUESTED</span>
+                                <span className="text-[10px] text-muted-foreground">User requested PoA waiver</span>
+                              </div>
+                            ) : selectedUser.registrationForm.proofOfAddressUrl ? (
+                              selectedUser.registrationForm.proofOfAddressUrl.startsWith('data:image') || selectedUser.registrationForm.proofOfAddressUrl.match(/\.(jpeg|jpg|gif|png)$/) != null ? (
+                                <img src={selectedUser.registrationForm.proofOfAddressUrl} alt="Proof of Address" className="object-contain w-full h-full" />
+                              ) : (
+                                <a href={selectedUser.registrationForm.proofOfAddressUrl} target="_blank" rel="noreferrer" className="text-sm text-blue-600 hover:underline flex flex-col items-center gap-2"><FileText className="w-8 h-8"/>View PDF</a>
                               )
                             ) : (
                               <span className="text-xs text-muted-foreground italic">Not provided</span>

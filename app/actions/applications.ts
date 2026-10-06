@@ -26,7 +26,9 @@ export async function handleApprove(formData: FormData) {
   });
 
   const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-  const registerLink = `${baseUrl}/register/${registrationToken}`;
+  const registerLink = app.applicationType === 'BUSINESS' 
+    ? `${baseUrl}/register/business/${registrationToken}` 
+    : `${baseUrl}/register/${registrationToken}`;
 
   await sendEmail({
     to: app.email,

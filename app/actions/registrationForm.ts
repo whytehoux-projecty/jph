@@ -14,28 +14,59 @@ export async function submitRegistrationForm(token: string, data: any) {
         throw new Error('Invalid or expired registration token');
     }
 
-    // Hash a temporary password. In a real app, you'd send a reset password link or have them set it here.
     const tempPassword = await bcrypt.hash('Welcome123!', 10);
 
     const result = await prisma.$transaction(async (tx) => {
+        const settings = await tx.systemSettings.findFirst();
+        const minDeposit = settings?.minimumInitialDeposit || 0;
+        if (data.initialDepositAmount < minDeposit) {
+            throw new Error(`Initial deposit must be at least $${minDeposit}`);
+        }
+
         // 1. Create the Registration Form record
         const registrationForm = await tx.registrationForm.create({
             data: {
+                title: data.title,
+                gender: data.gender,
+                maritalStatus: data.maritalStatus,
+                nationality: data.nationality,
+                countryOfResidence: data.countryOfResidence,
                 fullLegalName: data.fullLegalName,
                 dateOfBirth: new Date(data.dateOfBirth),
                 ssnItin: encryptDeterministic(data.ssnItin), // encrypted
-                mothersMaidenName: data.mothersMaidenName,
+                mothersMaidenName: data.mothersMaidenName || 'N/A',
+
+                nextOfKinName: data.nextOfKinName,
+                nextOfKinRelationship: data.nextOfKinRelationship,
+                nextOfKinPhone: data.nextOfKinPhone,
+                nextOfKinAddress: data.nextOfKinAddress,
                 
                 residentialAddress: data.residentialAddress,
                 mailingAddress: data.mailingAddress,
                 primaryPhoneType: data.primaryPhoneType,
+                secondaryPhone: data.secondaryPhone,
                 
                 employmentStatus: data.employmentStatus,
                 occupation: data.occupation,
                 employerName: data.employerName,
+                employerAddress: data.employerAddress,
                 primarySourceOfFunds: data.primarySourceOfFunds,
                 estimatedAnnualIncome: data.estimatedAnnualIncome,
                 
+                purposeOfAccount: data.purposeOfAccount,
+                expectedMonthlyVolume: data.expectedMonthlyVolume,
+
+                entityType: data.entityType,
+                businessRegistrationNo: data.businessRegistrationNo,
+                businessName: data.businessName,
+                dbaName: data.dbaName,
+                ein: data.ein ? encryptDeterministic(data.ein) : null,
+                stateOfFormation: data.stateOfFormation,
+                yearOfFormation: data.yearOfFormation,
+                industry: data.industry,
+                website: data.website,
+                uboDeclaration: data.uboDeclaration,
+
                 primaryIdType: data.primaryIdType,
                 idNumber: encryptDeterministic(data.idNumber),
                 stateCountryOfIssuance: data.stateCountryOfIssuance,
@@ -44,20 +75,32 @@ export async function submitRegistrationForm(token: string, data: any) {
                 idFrontDocumentUrl: data.idFrontDocumentUrl,
                 idBackDocumentUrl: data.idBackDocumentUrl,
                 passportPhotoUrl: data.passportPhotoUrl,
+
+                proofOfAddressType: data.proofOfAddressType,
+                proofOfAddressUrl: data.poaWaiverRequested ? null : data.proofOfAddressUrl,
+                poaWaiverRequested: data.poaWaiverRequested,
                 
+                isUsTaxPerson: data.isUsTaxPerson,
+                foreignTaxResidencies: data.foreignTaxResidencies,
+                w8benCertification: data.w8benCertification,
+                isPep: data.isPep,
+                pepDetails: data.pepDetails,
+                sanctionsDeclaration: data.sanctionsDeclaration,
+
                 overdraftProtection: data.overdraftProtection,
                 debitCardRequest: data.debitCardRequest,
                 nameToAppearOnCard: data.nameToAppearOnCard,
                 statementPreference: data.statementPreference,
                 
                 fundingMethod: data.fundingMethod,
-                externalAccountRoutingNumber: encryptDeterministic(data.externalAccountRoutingNumber),
-                externalAccountNumber: encryptDeterministic(data.externalAccountNumber),
+                externalAccountRoutingNumber: data.externalAccountRoutingNumber ? encryptDeterministic(data.externalAccountRoutingNumber) : null,
+                externalAccountNumber: data.externalAccountNumber ? encryptDeterministic(data.externalAccountNumber) : null,
                 initialDepositAmount: data.initialDepositAmount,
                 
                 w9Certification: data.w9Certification,
                 electronicCommunicationsDisclosure: data.electronicCommunicationsDisclosure,
                 depositAccountAgreement: data.depositAccountAgreement,
+                marketingConsent: data.marketingConsent ?? true,
                 digitalSignature: data.digitalSignature,
                 signatureDate: new Date(data.signatureDate)
             }
@@ -75,33 +118,37 @@ export async function submitRegistrationForm(token: string, data: any) {
         // 3. Create the actual User record
         const user = await tx.user.create({
             data: {
-                firstName: data.fullLegalName.split(' ')[0],
-                lastName: data.fullLegalName.split(' ').slice(1).join(' '),
+                firstName: data.fullLegalName.split(' ')[0] || application.firstName,
+                lastName: data.fullLegalName.split(' ').slice(1).join(' ') || application.lastName,
                 email: application.email,
                 password: tempPassword,
-                phone: data.primaryPhoneType ? application.phone : application.phone, // In a real app we'd split phone inputs, for now inherit from application
+                phone: application.phone,
                 dateOfBirth: new Date(data.dateOfBirth),
                 address: data.residentialAddress,
                 city: application.city,
                 state: application.state,
-                zipCode: application.zipCode
+                zipCode: application.zipCode,
+                profileType: application.applicationType === 'BUSINESS' ? 'BUSINESS' : 'PERSONAL'
             }
         });
 
-        // Update RegistrationForm with userId
         await tx.registrationForm.update({
             where: { id: registrationForm.id },
             data: { userId: user.id }
         });
 
         // 4. Create the initial Bank Account based on desired account type
-        const accountTypeMap: Record<string, 'CHECKING' | 'SAVINGS' | 'BUSINESS'> = {
+        const accountTypeMap: Record<string, string> = {
             'Everyday Checking': 'CHECKING',
             'High-Yield Savings': 'SAVINGS',
-            'Certificate of Deposit': 'SAVINGS'
+            'Certificate of Deposit': 'SAVINGS',
+            'Private Wealth Reserve': 'BUSINESS'
         };
         
-        const mappedType = application.desiredAccountType ? accountTypeMap[application.desiredAccountType] || 'CHECKING' : 'CHECKING';
+        let mappedType = application.desiredAccountType ? accountTypeMap[application.desiredAccountType] || 'CHECKING' : 'CHECKING';
+        if (application.applicationType === 'BUSINESS') {
+            mappedType = 'BUSINESS';
+        }
 
         const account = await tx.account.create({
             data: {

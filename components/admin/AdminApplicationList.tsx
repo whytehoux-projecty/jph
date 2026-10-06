@@ -58,6 +58,7 @@ export function AdminApplicationList({
           <input 
             type="text" 
             placeholder="Search email or applicant name..." 
+            aria-label="Search applications by email or name"
             className="w-full pl-9 pr-4 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold/50"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
@@ -66,6 +67,7 @@ export function AdminApplicationList({
         <div className="flex items-center gap-2">
           <Filter className="w-4 h-4 text-muted-foreground" />
           <select 
+            aria-label="Filter applications by status"
             className="text-sm bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 focus:outline-none focus:ring-1 focus:ring-vintage-gold/50"
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
@@ -136,7 +138,7 @@ export function AdminApplicationList({
                     {app.status === 'APPROVED' && app.registrationToken && (
                         <div className="mt-1">
                             <span className="text-[10px] bg-gray-100 text-gray-500 px-1 py-0.5 rounded border border-gray-200">
-                                /register/{app.registrationToken.substring(0, 8)}...
+                                {app.applicationType === 'BUSINESS' ? '/register/business/' : '/register/'}{app.registrationToken.substring(0, 8)}...
                             </span>
                         </div>
                     )}
@@ -230,7 +232,7 @@ export function AdminApplicationList({
                       </p>
                       <div className="flex items-center gap-2 mt-2">
                           <code className="text-xs bg-white px-3 py-2 rounded border border-green-200 flex-1 break-all select-all font-mono">
-                              {typeof window !== 'undefined' ? window.location.origin : ''}/register/{selectedApp.registrationToken}
+                              {typeof window !== 'undefined' ? window.location.origin : ''}{selectedApp.applicationType === 'BUSINESS' ? '/register/business/' : '/register/'}{selectedApp.registrationToken}
                           </code>
                       </div>
                   </div>

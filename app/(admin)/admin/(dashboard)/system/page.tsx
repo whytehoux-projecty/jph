@@ -15,6 +15,7 @@ export default async function SystemAdminHubPage() {
   const links: QuickLink[] = [
     { title: "Admin Users", description: "Manage staff accounts and administrative access.", href: "/admin/system/admin-users", icon: <UserCog className="w-6 h-6" /> },
     { title: "Roles & Permissions", description: "Configure access control lists and role capabilities.", href: "/admin/system/roles", icon: <ShieldCheck className="w-6 h-6" /> },
+    { title: "Global Settings", description: "Manage system-wide configuration such as deposit limits.", href: "/admin/system/global-settings", icon: <ShieldCheck className="w-6 h-6" /> },
   ];
 
   return (

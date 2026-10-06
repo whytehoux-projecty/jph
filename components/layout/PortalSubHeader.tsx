@@ -3,8 +3,12 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Sparkles, ChevronDown, User } from "lucide-react";
+import { Sparkles, ChevronDown, User, ShieldCheck, PiggyBank, Banknote, Briefcase, ChevronRight, LogOut, Settings } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/Button";
+import { VintageIcon } from "@/components/ui/vintage-icon";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -14,6 +18,7 @@ import {
 
 export interface PortalSubHeaderProps {
   profile?: {
+    id?: string;
     firstName?: string;
     lastName?: string;
     tier?: string;
@@ -70,6 +75,19 @@ export function PortalSubHeader({ profile }: PortalSubHeaderProps) {
   const fullNameRaw = `${profile?.firstName || ""} ${profile?.lastName || ""}`.trim() || "Client";
   const fullName = fullNameRaw.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
   const tier = profile?.tier ? `${profile.tier} Member` : "Private Client";
+  const tierLabel = profile?.tier ? `${profile.tier} MEMBER` : 'PREMIUM MEMBER';
+  const avatarSrc = profile?.profilePhotoUrl || "/images/icons/default-avatar.svg";
+  const initials = profile?.firstName && profile?.lastName
+    ? `${profile.firstName[0]}${profile.lastName[0]}`.toUpperCase()
+    : 'JD';
+  const memberId = profile?.id ? (profile.id.length > 10 ? profile.id.slice(-10).toUpperCase() : profile.id) : '8839-2991-00';
+
+  const extraServices = [
+    { name: "Savings & Goals", href: "/savings", icon: PiggyBank, desc: "High-yield savings & goals" },
+    { name: "Personal Loans", href: "/support", icon: Banknote, desc: "Apply via support" },
+    { name: "Business Suite", href: "/support", icon: Briefcase, desc: "For your enterprise" },
+    { name: "Vault Premium +", href: "/settings", icon: ShieldCheck, desc: "Exclusive security features" },
+  ];
 
   return (
     <div className="w-full border-b border-paper-200 bg-paper-50/90 backdrop-blur-xs transition-colors">
@@ -86,28 +104,85 @@ export function PortalSubHeader({ profile }: PortalSubHeaderProps) {
                 ) : (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <button className="font-semibold tracking-wider hover:opacity-80 transition-opacity flex items-center gap-1 focus:outline-none">
+                      <button className="font-semibold tracking-wider hover:opacity-80 transition-opacity flex items-center gap-1 focus:outline-none focus-visible:ring-2 focus-visible:ring-ink-900 rounded-sm">
                         {fullName}
                         <ChevronDown className="h-4 w-4 opacity-50" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-64 p-4 mt-2 border border-paper-200 bg-paper-50 shadow-md rounded-md">
-                      <div className="flex flex-col gap-3">
-                        {profile?.profilePhotoUrl ? (
-                          <img src={profile.profilePhotoUrl} alt={fullName} className="w-24 h-32 object-cover rounded-md border border-paper-200" />
-                        ) : (
-                          <div className="w-24 h-32 bg-paper-200 rounded-md flex items-center justify-center text-ink-400 font-medium text-4xl">
-                            <User className="h-10 w-10 opacity-40" />
+                    <DropdownMenuContent align="start" className="w-[340px] p-0 border-paper-200 bg-white/95 backdrop-blur-md shadow-lg rounded-xl overflow-hidden mt-2">
+                      <div className="p-6">
+                        {/* Enhanced Profile Section */}
+                        <div className="flex flex-col items-center gap-4 mb-6">
+                          <div className="relative group">
+                            <Avatar className="h-24 w-24 border-[3px] border-white shadow-sm rounded-full">
+                              <AvatarImage src={avatarSrc} className="object-cover" />
+                              <AvatarFallback className="rounded-full text-3xl bg-paper-100 text-ink-900 font-display font-semibold shadow-none">
+                                {initials}
+                              </AvatarFallback>
+                            </Avatar>
+                            <div className="absolute bottom-1 right-1 h-5 w-5 bg-success rounded-full border-2 border-white flex items-center justify-center">
+                              <div className="absolute h-full w-full rounded-full bg-success animate-ping opacity-60" />
+                              <div className="h-1.5 w-1.5 bg-white rounded-full relative z-10" />
+                            </div>
                           </div>
-                        )}
-                        <div className="space-y-1">
-                          <h4 className="font-semibold text-ink-900 text-lg">{fullName}</h4>
-                          {profile?.profileType && <p className="text-xs uppercase tracking-wider text-ink-400 font-bold">{profile.profileType} Profile</p>}
+                          
+                          <div className="text-center space-y-1">
+                            <h3 className="font-display font-extrabold text-xl text-ink-900 tracking-tight">
+                              {fullName}
+                            </h3>
+                            <div className="flex items-center justify-center gap-2">
+                              <Badge variant="outline" className="text-vermilion-700 border-transparent bg-vermilion-100 shadow-none font-semibold tracking-wider text-[10px] px-2 py-0.5 rounded uppercase">
+                                <Sparkles className="w-3 h-3 mr-1 inline-block text-vermilion-600" />
+                                {tierLabel}
+                              </Badge>
+                            </div>
+                            <p className="text-[11px] text-ink-500 font-mono tracking-widest mt-1 uppercase opacity-80">
+                              ID: {memberId}
+                            </p>
+                          </div>
                         </div>
-                        <div className="space-y-1.5 pt-3 border-t border-paper-200 text-sm">
-                          {profile?.email && <p className="text-ink-600 truncate">{profile.email}</p>}
-                          {profile?.phone && <p className="text-ink-600">{profile.phone}</p>}
-                          {tier && <p className="text-ink-600 font-medium">{tier}</p>}
+
+                        {/* Extra Services Menu */}
+                        <div className="space-y-1 mt-4">
+                          <h4 className="text-[10px] font-bold text-ink-500 mb-2 uppercase tracking-[0.2em] pl-2">
+                            Quick Access
+                          </h4>
+                          <div className="space-y-1">
+                            {extraServices.map((service) => (
+                              <DropdownMenuItem key={service.name} asChild className="cursor-pointer">
+                                <Link
+                                  href={service.href}
+                                  className="flex items-center gap-4 rounded p-2.5 transition-colors duration-200 hover:bg-paper-50 group border border-transparent hover:border-paper-200 w-full"
+                                >
+                                  <div className="bg-paper-50 p-2 rounded border border-transparent group-hover:bg-paper-100 transition-colors">
+                                    <VintageIcon icon={service.icon} size="sm" variant="ink-900" />
+                                  </div>
+                                  <div className="flex-1">
+                                    <h5 className="font-semibold text-xs text-ink-900">{service.name}</h5>
+                                    <p className="text-[10px] text-ink-500 font-medium">{service.desc}</p>
+                                  </div>
+                                  <ChevronRight className="w-4 h-4 text-ink-500 group-hover:text-vermilion-600 group-hover:translate-x-1 transition-all" />
+                                </Link>
+                              </DropdownMenuItem>
+                            ))}
+                          </div>
+                        </div>
+
+                        {/* Actions */}
+                        <div className="mt-4 pt-4 border-t border-paper-200 flex flex-col gap-2">
+                          <DropdownMenuItem asChild className="cursor-pointer">
+                            <Link href="/settings" className="w-full flex items-center text-xs font-semibold text-ink-900 hover:bg-paper-50 p-2 rounded">
+                              <Settings className="w-4 h-4 mr-2" /> Settings & Preferences
+                            </Link>
+                          </DropdownMenuItem>
+                          <DropdownMenuItem asChild className="cursor-pointer">
+                            <button 
+                              onClick={() => { import('@/app/actions/auth').then(m => m.logoutAction()); }}
+                              className="w-full flex items-center text-xs font-semibold text-red-600 hover:bg-red-50 p-2 rounded text-left"
+                            >
+                              <LogOut className="w-4 h-4 mr-2" /> Sign Out
+                            </button>
+                          </DropdownMenuItem>
                         </div>
                       </div>
                     </DropdownMenuContent>

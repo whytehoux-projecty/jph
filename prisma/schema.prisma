@@ -251,6 +251,35 @@ model RegistrationForm {
   digitalSignature                   String   @map("digital_signature")
   signatureDate                      DateTime @map("signature_date")
 
+  // Business fields
+  businessName           String?   @map("business_name")
+  dbaName                String?   @map("dba_name")
+  ein                    String?
+  stateOfFormation       String?   @map("state_of_formation")
+  yearOfFormation        String?   @map("year_of_formation")
+  industry               String?
+  website                String?
+  entityType             String?   @map("entity_type")
+  businessRegistrationNo String?   @map("business_registration_no")
+  uboDeclaration         String?   @map("ubo_declaration") // JSON string of owners
+
+  // CDD fields
+  purposeOfAccount       String?   @map("purpose_of_account")
+  expectedMonthlyVolume  String?   @map("expected_monthly_volume")
+
+  // Proof of Address
+  proofOfAddressType      String?   @map("proof_of_address_type")
+  proofOfAddressUrl       String?   @map("proof_of_address_url")
+  poaWaiverRequested      Boolean   @default(false) @map("poa_waiver_requested")
+
+  // Global Tax & Sanctions
+  isUsTaxPerson          Boolean?  @map("is_us_tax_person")
+  foreignTaxResidencies  String?   @map("foreign_tax_residencies") // JSON
+  w8benCertification     Boolean   @default(false) @map("w8ben_certification")
+  isPep                  Boolean?  @map("is_pep")
+  pepDetails             String?   @map("pep_details") // JSON
+  sanctionsDeclaration   Boolean   @default(false) @map("sanctions_declaration")
+
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
@@ -543,3 +572,17 @@ model CreditScore {
 
   @@map("credit_scores")
 }
+
+// -----------------------------------------------------------------------------
+// System Settings
+// -----------------------------------------------------------------------------
+
+model SystemSettings {
+  id                    String   @id @default(cuid())
+  minimumInitialDeposit Float    @default(0.00) @map("minimum_initial_deposit")
+  updatedAt             DateTime @updatedAt @map("updated_at")
+  updatedBy             String?  @map("updated_by")
+
+  @@map("system_settings")
+}
+

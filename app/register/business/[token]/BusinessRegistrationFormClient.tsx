@@ -14,7 +14,7 @@ import {
 import { submitRegistrationForm } from '@/app/actions/registrationForm';
 import { registrationSchema } from '@/lib/registration/schema';
 
-export default function RegistrationFormClient({ application }: { application: any }) {
+export default function BusinessRegistrationFormClient({ application }: { application: any }) {
     const router = useRouter();
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,10 +57,8 @@ export default function RegistrationFormClient({ application }: { application: a
         fullLegalName: `${application.firstName} ${application.lastName}`,
         dateOfBirth: '',
         ssnItin: '',
-        mothersMaidenName: '',
         nationality: 'United States',
         countryOfResidence: 'United States',
-        maritalStatus: 'Single',
 
         // 2. Contact & Residential Details
         residentialAddress: '',
@@ -87,11 +85,7 @@ export default function RegistrationFormClient({ application }: { application: a
         idFrontDocumentUrl: '',
         idBackDocumentUrl: '',
 
-        // 5. Next of Kin Details
-        nextOfKinName: '',
-        nextOfKinRelationship: 'Spouse',
-        nextOfKinPhone: '',
-        nextOfKinAddress: '',
+
 
         // 6. Account Configuration & Preferences
         desiredAccountType: application.desiredAccountType || 'Everyday Checking',
@@ -108,6 +102,13 @@ export default function RegistrationFormClient({ application }: { application: a
         initialDepositAmount: '',
         
         // CDD & Business
+        businessName: '',
+        dbaName: '',
+        ein: '',
+        stateOfFormation: '',
+        yearOfFormation: '',
+        industry: '',
+        website: '',
         entityType: '',
         businessRegistrationNo: '',
         uboDeclaration: '',
@@ -147,7 +148,7 @@ export default function RegistrationFormClient({ application }: { application: a
 
     // Auto-save drafts
     useEffect(() => {
-        const saved = localStorage.getItem(`registration_${application.id}`);
+        const saved = localStorage.getItem(`business_registration_${application.id}`);
         if (saved) {
             try {
                 const parsed = JSON.parse(saved);
@@ -169,7 +170,7 @@ export default function RegistrationFormClient({ application }: { application: a
         delete (safeData as any).idFrontDocumentUrl;
         delete (safeData as any).idBackDocumentUrl;
         
-        localStorage.setItem(`registration_${application.id}`, JSON.stringify(safeData));
+        localStorage.setItem(`business_registration_${application.id}`, JSON.stringify(safeData));
     }, [formData, application.id]);
 
     // ID document upload
@@ -308,7 +309,7 @@ export default function RegistrationFormClient({ application }: { application: a
     const validateForm = () => {
         const finalData = {
             ...formData,
-            applicationType: 'PERSONAL',
+            applicationType: 'BUSINESS',
             mailingAddress: formData.isMailingSame ? formData.residentialAddress : formData.mailingAddress,
             initialDepositAmount: Number(formData.initialDepositAmount)
         };
@@ -339,14 +340,14 @@ export default function RegistrationFormClient({ application }: { application: a
         try {
             const finalData = {
                 ...formData,
-                applicationType: 'PERSONAL',
+                applicationType: 'BUSINESS',
                 mailingAddress: formData.isMailingSame ? formData.residentialAddress : formData.mailingAddress,
                 initialDepositAmount: Number(formData.initialDepositAmount)
             };
 
             await submitRegistrationForm(application.registrationToken, finalData);
             // clear localStorage auto-save
-            localStorage.removeItem(`registration_${application.id}`);
+            localStorage.removeItem(`business_registration_${application.id}`);
             
             setSuccess(true);
             window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -543,7 +544,7 @@ export default function RegistrationFormClient({ application }: { application: a
                         {/* Right: Form Title & Control Info */}
                         <div className="text-left md:text-right space-y-1">
                             <h1 className="text-xl md:text-2xl font-bold text-[#0D2545] tracking-tight">
-                                Application to open Personal account
+                                Application to open Business account
                             </h1>
                             <p className="text-[11px] font-mono font-bold text-neutral-600">
                                 FORM JPH-CIP-1040 (REV. 2026)
@@ -647,76 +648,20 @@ export default function RegistrationFormClient({ application }: { application: a
                 {/* 3. Personal Details Section (Grid Structure from Stanbic & SBB West Bank) */}
                 <div className="border-b border-[#0D2545]">
                     <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
-                        <span>Personal details</span>
+                        <span>Business Entity & Authorized Signatory details</span>
                         <span className="text-[10px] font-mono text-blue-200">SECTION 2</span>
                     </div>
 
                     <div className="p-4 space-y-4">
-                        {/* Row 1: Title, Gender, Marital Status & Passport Photo Affix Box */}
+                        {/* Row 1: Passport Photo Affix Box & Basic Info */}
                         <div className="grid md:grid-cols-12 gap-4">
                             <div className="md:col-span-9 space-y-3">
-                                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                                    {/* Title */}
-                                    <div className="border border-neutral-300 p-2 bg-white">
-                                        <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                            Title
-                                        </label>
-                                        <select
-                                            className="w-full bg-transparent font-medium text-xs outline-none"
-                                            value={formData.title}
-                                            onChange={(e) => updateField('title', e.target.value)}
-                                        >
-                                            <option>Mr</option>
-                                            <option>Mrs</option>
-                                            <option>Ms</option>
-                                            <option>Dr</option>
-                                            <option>Prof</option>
-                                        </select>
-                                    </div>
 
-                                    {/* Gender */}
-                                    <div className="border border-neutral-300 p-2 bg-white">
-                                        <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                            Gender
-                                        </label>
-                                        <div className="flex items-center gap-3 pt-0.5">
-                                            {['Male', 'Female'].map((g) => (
-                                                <label key={g} className="flex items-center gap-1 cursor-pointer">
-                                                    <input
-                                                        type="radio"
-                                                        name="gender"
-                                                        className="w-3.5 h-3.5 text-[#0D2545] rounded-none focus:ring-0"
-                                                        checked={formData.gender === g}
-                                                        onChange={() => updateField('gender', g)}
-                                                    />
-                                                    <span className="text-xs">{g}</span>
-                                                </label>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Marital Status */}
-                                    <div className="border border-neutral-300 p-2 bg-white">
-                                        <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                            Marital Status
-                                        </label>
-                                        <select
-                                            className="w-full bg-transparent font-medium text-xs outline-none"
-                                            value={formData.maritalStatus}
-                                            onChange={(e) => updateField('maritalStatus', e.target.value)}
-                                        >
-                                            <option>Single</option>
-                                            <option>Married</option>
-                                            <option>Divorced</option>
-                                            <option>Widowed</option>
-                                        </select>
-                                    </div>
-                                </div>
 
                                 {/* Full Legal Name */}
                                 <div className="border border-neutral-300 p-2 bg-white">
                                     <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                        First Names & Surname (Must match official ID) <span className="text-red-600">*</span>
+                                        Authorized Signatory Name (Must match official ID) <span className="text-red-600">*</span>
                                     </label>
                                     <input
                                         type="text"
@@ -728,6 +673,125 @@ export default function RegistrationFormClient({ application }: { application: a
                                     {errors.fullLegalName && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.fullLegalName}</p>}
                                 </div>
 
+
+                                    <div className="grid sm:grid-cols-2 gap-3 mt-3">
+                                        <div className="border border-neutral-300 p-2 bg-white sm:col-span-2">
+                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                                Business Name (Legal) <span className="text-red-600">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.businessName ? 'border-red-600' : 'border-neutral-200'} font-bold text-xs uppercase outline-none focus:bg-white`}
+                                                value={formData.businessName}
+                                                onChange={(e) => updateField('businessName', e.target.value.toUpperCase())}
+                                            />
+                                        </div>
+                                        <div className="border border-neutral-300 p-2 bg-white">
+                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                                DBA Name / Trading As
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 font-bold text-xs uppercase outline-none focus:bg-white"
+                                                value={formData.dbaName}
+                                                onChange={(e) => updateField('dbaName', e.target.value.toUpperCase())}
+                                            />
+                                        </div>
+                                        <div className="border border-neutral-300 p-2 bg-white">
+                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                                Business Tax ID (EIN) <span className="text-red-600">*</span>
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.ein ? 'border-red-600' : 'border-neutral-200'} font-bold text-xs uppercase outline-none focus:bg-white`}
+                                                value={formData.ein}
+                                                onChange={(e) => updateField('ein', e.target.value.toUpperCase())}
+                                            />
+                                        </div>
+                                        <div className="border border-neutral-300 p-2 bg-white">
+                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                                Entity Type <span className="text-red-600">*</span>
+                                            </label>
+                                            <select
+                                                className="w-full bg-transparent font-medium text-xs outline-none"
+                                                value={formData.entityType}
+                                                onChange={(e) => updateField('entityType', e.target.value)}
+                                            >
+                                                <option value="">Select Type</option>
+                                                <option value="LLC">LLC</option>
+                                                <option value="CORPORATION">Corporation</option>
+                                                <option value="PARTNERSHIP">Partnership</option>
+                                                <option value="SOLE_PROPRIETORSHIP">Sole Proprietorship</option>
+                                            </select>
+                                        </div>
+                                        <div className="border border-neutral-300 p-2 bg-white">
+                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                                Registration Number
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 font-bold text-xs uppercase outline-none focus:bg-white"
+                                                value={formData.businessRegistrationNo}
+                                                onChange={(e) => updateField('businessRegistrationNo', e.target.value.toUpperCase())}
+                                            />
+                                        </div>
+                                        <div className="border border-neutral-300 p-2 bg-white">
+                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                                State/Country of Formation
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 font-bold text-xs uppercase outline-none focus:bg-white"
+                                                value={formData.stateOfFormation}
+                                                onChange={(e) => updateField('stateOfFormation', e.target.value.toUpperCase())}
+                                            />
+                                        </div>
+                                        <div className="border border-neutral-300 p-2 bg-white">
+                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                                Year of Formation
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 font-bold text-xs uppercase outline-none focus:bg-white"
+                                                value={formData.yearOfFormation}
+                                                onChange={(e) => updateField('yearOfFormation', e.target.value.toUpperCase())}
+                                            />
+                                        </div>
+                                        <div className="border border-neutral-300 p-2 bg-white">
+                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                                Industry / Sector
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 font-bold text-xs uppercase outline-none focus:bg-white"
+                                                value={formData.industry}
+                                                onChange={(e) => updateField('industry', e.target.value.toUpperCase())}
+                                            />
+                                        </div>
+                                        <div className="border border-neutral-300 p-2 bg-white">
+                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                                Business Website
+                                            </label>
+                                            <input
+                                                type="text"
+                                                className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 font-bold text-xs uppercase outline-none focus:bg-white"
+                                                value={formData.website}
+                                                onChange={(e) => updateField('website', e.target.value.toLowerCase())}
+                                            />
+                                        </div>
+                                        <div className="border border-neutral-300 p-2 bg-white sm:col-span-2">
+                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                                UBO Declaration (Owners with {'>'}25%)
+                                            </label>
+                                            <textarea
+                                                className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 font-bold text-xs uppercase outline-none focus:bg-white resize-none"
+                                                rows={2}
+                                                value={formData.uboDeclaration}
+                                                onChange={(e) => updateField('uboDeclaration', e.target.value.toUpperCase())}
+                                                placeholder="List full names of all Ultimate Beneficial Owners..."
+                                            />
+                                        </div>
+                                    </div>
 
                             </div>
 
@@ -778,8 +842,8 @@ export default function RegistrationFormClient({ application }: { application: a
                             </div>
                         </div>
 
-                        {/* Row 2: Date of Birth & SSN / ITIN & Mother's Maiden Name */}
-                        <div className="grid sm:grid-cols-3 gap-3">
+                        {/* Row 2: Date of Birth & SSN / ITIN */}
+                        <div className="grid sm:grid-cols-2 gap-3">
                             <div className="border border-neutral-300 p-2 bg-white">
                                 <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
                                     Date of Birth (YYYY-MM-DD) <span className="text-red-600">*</span>
@@ -807,19 +871,7 @@ export default function RegistrationFormClient({ application }: { application: a
                                 {errors.ssnItin && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.ssnItin}</p>}
                             </div>
 
-                            <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                    Mother's Maiden Name (Security) <span className="text-red-600">*</span>
-                                </label>
-                                <input
-                                    type="password"
-                                    placeholder="Mother's birth surname"
-                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.mothersMaidenName ? 'border-red-600' : 'border-neutral-200'} font-medium text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
-                                    value={formData.mothersMaidenName}
-                                    onChange={(e) => updateField('mothersMaidenName', e.target.value)}
-                                />
-                                {errors.mothersMaidenName && <p className="text-[10px] text-red-600 mt-0.5 font-bold">{errors.mothersMaidenName}</p>}
-                            </div>
+
                         </div>
 
                         {/* Row 3: Nationality & Country of Residence */}
@@ -935,7 +987,7 @@ export default function RegistrationFormClient({ application }: { application: a
                 {/* 4. Employment Details Section (Stanbic Style) */}
                 <div className="border-b border-[#0D2545]">
                     <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
-                        <span>Employment details</span>
+                        <span>Business Operations & Financial Profile</span>
                         <span className="text-[10px] font-mono text-blue-200">SECTION 3</span>
                     </div>
 
@@ -960,11 +1012,11 @@ export default function RegistrationFormClient({ application }: { application: a
 
                             <div className="border border-neutral-300 p-2 bg-white">
                                 <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                    Occupation / Job Title <span className="text-red-600">*</span>
+                                    Number of Employees <span className="text-red-600">*</span>
                                 </label>
                                 <input
                                     type="text"
-                                    placeholder="e.g. Senior Partner, Physician"
+                                    placeholder="e.g. 50"
                                     className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.occupation ? 'border-red-600' : 'border-neutral-200'} text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
                                     value={formData.occupation}
                                     onChange={(e) => updateField('occupation', e.target.value)}
@@ -974,11 +1026,11 @@ export default function RegistrationFormClient({ application }: { application: a
 
                             <div className="border border-neutral-300 p-2 bg-white">
                                 <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                    Employer Name <span className="text-red-600">*</span>
+                                    Industry / Sector <span className="text-red-600">*</span>
                                 </label>
                                 <input
                                     type="text"
-                                    placeholder="e.g. Acme Corporation"
+                                    placeholder="e.g. Technology, Manufacturing"
                                     className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.employerName ? 'border-red-600' : 'border-neutral-200'} text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
                                     value={formData.employerName}
                                     onChange={(e) => updateField('employerName', e.target.value)}
@@ -1233,62 +1285,9 @@ export default function RegistrationFormClient({ application }: { application: a
                 </div>
                 </div>
 
+
+
                 <div className={step === 3 ? 'block' : 'hidden print:block'}>
-                {/* 6. Details of Next of Kin (from both attached forms) */}
-                <div className="border-b border-[#0D2545]">
-                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
-                        <span>Details of next of kin</span>
-                        <span className="text-[10px] font-mono text-blue-200">SECTION 5</span>
-                    </div>
-
-                    <div className="p-4 space-y-3">
-                        <div className="grid sm:grid-cols-3 gap-3">
-                            <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                    Next of Kin Full Name
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="JANE DOE"
-                                    className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 text-xs outline-none focus:bg-white focus:border-[#0D2545] uppercase"
-                                    value={formData.nextOfKinName}
-                                    onChange={(e) => updateField('nextOfKinName', e.target.value.toUpperCase())}
-                                />
-                            </div>
-
-                            <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                    Relationship
-                                </label>
-                                <select
-                                    className="w-full bg-transparent font-medium text-xs outline-none"
-                                    value={formData.nextOfKinRelationship}
-                                    onChange={(e) => updateField('nextOfKinRelationship', e.target.value)}
-                                >
-                                    <option>Spouse</option>
-                                    <option>Child</option>
-                                    <option>Parent</option>
-                                    <option>Sibling</option>
-                                    <option>Other</option>
-                                </select>
-                            </div>
-
-                            <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                    Contact Telephone
-                                </label>
-                                <input
-                                    type="text"
-                                    placeholder="+1 (555) 000-0000"
-                                    className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]"
-                                    value={formData.nextOfKinPhone}
-                                    onChange={(e) => updateField('nextOfKinPhone', e.target.value)}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
                 {/* 7. E-Banking & Account Funding (Stanbic Style) */}
                 <div className="border-b border-[#0D2545]">
                     <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
