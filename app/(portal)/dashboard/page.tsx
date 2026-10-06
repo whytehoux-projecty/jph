@@ -174,7 +174,7 @@ export default async function DashboardPage() {
                       </CardDescription>
                     </div>
                     <Link
-                      href="/transactions"
+                      href="/activities"
                       className="text-xs font-medium text-vermilion-600 hover:underline"
                     >
                       View all

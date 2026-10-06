@@ -18,6 +18,7 @@ import {
   Sun,
   Smartphone,
   CreditCard,
+  FileText,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/Button";
@@ -258,6 +259,12 @@ export default function SettingsClient({ initialProfile }: { initialProfile: any
             <Globe className="w-4 h-4" />
             {translate(preferences.language, "settings.preferencesTab") ||
               "Preferences"}
+          </TabsTrigger>
+          <TabsTrigger
+            value="statements"
+            className="flex-1 py-3 data-[state=active]:bg-white data-[state=active]:shadow-sm rounded-lg gap-2">
+            <FileText className="w-4 h-4" />
+            Statements
           </TabsTrigger>
         </TabsList>
 
@@ -771,6 +778,33 @@ export default function SettingsClient({ initialProfile }: { initialProfile: any
             <CardFooter className="bg-muted/30 flex justify-end">
               <Button onClick={() => handleSave("Preferences")}>
                 Save Preferences
+              </Button>
+            </CardFooter>
+          </Card>
+        </TabsContent>
+
+        {/* Statements Content */}
+        <TabsContent
+          value="statements"
+          className="space-y-6 animate-in fade-in slide-in-from-bottom-4">
+          <Card>
+            <CardHeader>
+              <CardTitle>Official Statement Request</CardTitle>
+              <CardDescription>
+                Request an official, stamped copy of your Statement of Account.
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="space-y-2">
+                <Label>Intended Use</Label>
+                <Input placeholder="e.g. Visa Application, Mortgage..." />
+              </div>
+            </CardContent>
+            <CardFooter className="bg-muted/30 flex justify-end">
+              <Button onClick={() => {
+                toast.success({ title: "Request submitted", description: "Your request has been pushed to admin for review." });
+              }}>
+                Submit Request
               </Button>
             </CardFooter>
           </Card>

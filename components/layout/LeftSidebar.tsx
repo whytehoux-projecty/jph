@@ -48,13 +48,11 @@ function SidebarTrigger({
 
 const navigation = [
   { name: "Dashboard",    href: "/dashboard",    icon: LayoutDashboard },
-  { name: "Transfer",     href: "/transfer",     icon: ArrowLeftRight },
-  { name: "Transactions", href: "/transactions", icon: Receipt },
-  { name: "Accounts",     href: "/accounts",     icon: Wallet },
-  { name: "Cards",        href: "/cards",        icon: CreditCard },
-  { name: "Bills",        href: "/bills",        icon: FileText },
+  { name: "Vaults",       href: "/vaults",       icon: Wallet },
+  { name: "Transfers",    href: "/transfer",     icon: ArrowLeftRight },
+  { name: "Activities",   href: "/activities",   icon: Receipt },
+  { name: "Savings",      href: "/savings",      icon: FileText },
   { name: "Beneficiaries",href: "/beneficiaries",icon: Users },
-  { name: "Statements",   href: "/statements",   icon: BarChart2 },        // Fix #12: use BarChart2 for Statements, FileText stays for Bills only
   { name: "Settings",     href: "/settings",     icon: Settings },
   { name: "Support",      href: "/support",      icon: HelpCircle },
 ];

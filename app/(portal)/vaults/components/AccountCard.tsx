@@ -34,7 +34,7 @@ export interface Account {
   balance: number;
   availableBalance: number;
   creditLimit?: number;
-  type: "checking" | "savings" | "credit" | "investment" | "loan";
+  type: "checking" | "savings" | "credit" | "investment" | "loan" | "wallet";
   interestRate: string;
   monthlyChange: number;
   openedDate: string;

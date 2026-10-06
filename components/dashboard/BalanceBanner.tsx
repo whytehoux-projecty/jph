@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { LayoutGrid, BarChart3, Eye, EyeOff } from "lucide-react";
+import { LayoutGrid, BarChart3, Eye, EyeOff, Plus } from "lucide-react";
 import { formatCurrency, languageToLocale, translate } from '@/lib/utils';
 import { updatePreferences } from "@/app/actions/profile";
+import Link from "next/link";
 
 interface BalanceBannerProps {
   totalBalance: number;
@@ -39,6 +40,15 @@ export function BalanceBanner({ totalBalance, currency, language, accounts, init
           >
             {showBalance ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
           </button>
+          
+          <div className="relative group ml-4">
+            <Link 
+              href="/deposit"
+              className="bg-vermilion-600 text-white text-xs font-semibold px-4 py-2 rounded-sm transition-opacity hover:opacity-90 flex items-center gap-1.5"
+            >
+              <Plus className="h-4 w-4" /> Deposit
+            </Link>
+          </div>
         </div>
 
         <div className="flex flex-col mt-4 w-full max-w-md">

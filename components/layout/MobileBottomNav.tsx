@@ -7,10 +7,10 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { name: "Home", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Activity", href: "/transactions", icon: List },
+  { name: "Activity", href: "/activities", icon: List },
   { name: "Transfer", href: "/transfer", icon: ArrowLeftRight },
-  { name: "Cards", href: "/cards", icon: CreditCard },
-  { name: "More", href: "/settings", icon: Menu }, // Or another appropriate icon for More
+  { name: "Vaults", href: "/vaults", icon: CreditCard },
+  { name: "More", href: "/settings", icon: Menu },
 ];
 
 export function MobileBottomNav() {

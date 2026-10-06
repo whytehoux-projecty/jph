@@ -9,7 +9,8 @@ export async function getProfile() {
   if (!session?.user?.id) throw new Error('Unauthorized');
 
   const user = await prisma.user.findUnique({
-    where: { id: session.user.id }
+    where: { id: session.user.id },
+    include: { accounts: { take: 1 } }
   });
 
   return user;

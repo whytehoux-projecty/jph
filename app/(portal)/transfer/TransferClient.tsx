@@ -1551,7 +1551,12 @@ function TransferContent({ initialAccounts, userPreferences: initialPreferences,
   );
 }
 
-export default function TransferClient({ initialAccounts = [], userPreferences = { language: "en", currency: "USD" }, transferMethods = [] }: { initialAccounts?: any[]; userPreferences?: any; transferMethods?: any[] }) {
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
+import BillsClient from "../bills/BillsClient";
+
+export default function TransferClient({ initialAccounts = [], userPreferences = { language: "en", currency: "USD" }, transferMethods = [], initialProviders = {} }: { initialAccounts?: any[]; userPreferences?: any; transferMethods?: any[]; initialProviders?: any }) {
+  const [activeTab, setActiveTab] = useState("transfers");
+
   return (
     <Suspense
       fallback={
@@ -1559,7 +1564,21 @@ export default function TransferClient({ initialAccounts = [], userPreferences =
           <Skeleton className="h-12 w-12 rounded-full" />
         </div>
       }>
-      <TransferContent initialAccounts={initialAccounts} userPreferences={userPreferences} transferMethods={transferMethods} />
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <div className="w-full max-w-7xl mx-auto mb-6">
+          <TabsList className="w-full md:w-auto inline-flex p-1 bg-slate-100 rounded-lg">
+            <TabsTrigger value="transfers" className="px-6 py-2.5 capitalize text-sm font-medium">Transfers</TabsTrigger>
+            <TabsTrigger value="payments" className="px-6 py-2.5 capitalize text-sm font-medium">Payments (Bills)</TabsTrigger>
+          </TabsList>
+        </div>
+        
+        <TabsContent value="transfers" className="m-0">
+          <TransferContent initialAccounts={initialAccounts} userPreferences={userPreferences} transferMethods={transferMethods} />
+        </TabsContent>
+        <TabsContent value="payments" className="m-0">
+          <BillsClient initialAccounts={initialAccounts} initialProviders={initialProviders} />
+        </TabsContent>
+      </Tabs>
     </Suspense>
   );
 }

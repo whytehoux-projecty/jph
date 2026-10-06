@@ -457,3 +457,43 @@ export async function updateUserTransferOverrides(userId: string, overridesJson:
 
   revalidatePath('/admin/customers/account-holders');
 }
+
+export async function updateAccountManagerInfo(formData: FormData) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+
+  const userId = formData.get('userId') as string;
+  const accountManagerName = formData.get('accountManagerName') as string;
+  const accountManagerTitle = formData.get('accountManagerTitle') as string;
+  const accountManagerEmail = formData.get('accountManagerEmail') as string;
+  const accountManagerPhone = formData.get('accountManagerPhone') as string;
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      accountManagerName: accountManagerName || null,
+      accountManagerTitle: accountManagerTitle || null,
+      accountManagerEmail: accountManagerEmail || null,
+      accountManagerPhone: accountManagerPhone || null,
+    }
+  });
+  revalidatePath('/admin');
+}
+
+export async function updateCreditScoreSettings(formData: FormData) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+
+  const userId = formData.get('userId') as string;
+  const creditScoreAutoMode = formData.get('creditScoreAutoMode') as string;
+  const creditScoreFixedChange = parseInt(formData.get('creditScoreFixedChange') as string) || 0;
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: {
+      creditScoreAutoMode,
+      creditScoreFixedChange,
+    }
+  });
+  revalidatePath('/admin');
+}

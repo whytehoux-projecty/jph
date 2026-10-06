@@ -1,12 +1,12 @@
 import { getAccounts } from "@/app/actions/accounts";
 import { getProfile } from "@/app/actions/profile";
-import AccountsClient from "./AccountsClient";
+import VaultsClient from "./VaultsClient";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 
 export const dynamic = "force-dynamic";
 
-export default async function AccountsPage() {
+export default async function VaultsPage() {
   let user, rawAccounts, pendingActionsCount = 0;
   
   try {
@@ -52,7 +52,7 @@ export default async function AccountsPage() {
   }));
 
   return (
-    <AccountsClient 
+    <VaultsClient 
       initialAccounts={initialAccounts}
       userPreferences={userPreferences}
       pendingActionsCount={pendingActionsCount}

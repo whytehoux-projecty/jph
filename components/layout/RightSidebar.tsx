@@ -25,6 +25,10 @@ export interface UserProfile {
   pinSetupComplete: boolean;
   profilePhotoUrl?: string | null;
   hideBalance?: boolean;
+  email?: string;
+  phone?: string | null;
+  profileType?: string;
+  accountNumber?: string;
 }
 
 interface RightSidebarProps {
