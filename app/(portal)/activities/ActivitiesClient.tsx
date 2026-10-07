@@ -3,6 +3,7 @@
 
 import { useState, useEffect, useRef, Suspense, Fragment } from "react";
 import { updateCategory, addNote, disputeTransaction } from "@/app/actions/transactions";
+import { getTransferStatuses } from "@/app/actions/transfer";
 import {
   ArrowUpRight,
   ArrowDownLeft,
@@ -895,6 +896,29 @@ export default function TransactionsClient({
   useEffect(() => {
     transactionsRef.current = transactions;
   }, [transactions]);
+
+  // Live status: while any transaction is pending, re-check its status every 10s.
+  const hasPendingTx = transactions.some((t) => t.status === "pending");
+  useEffect(() => {
+    if (!hasPendingTx) return;
+    const id = setInterval(async () => {
+      const refs = transactionsRef.current
+        .filter((t) => t.status === "pending" && t.reference)
+        .map((t) => t.reference as string);
+      if (!refs.length) return;
+      try {
+        const latest = await getTransferStatuses(refs);
+        if (!latest.length) return;
+        const map = new Map(latest.map((l) => [l.reference, l.status.toLowerCase()]));
+        setTransactions((prev) =>
+          prev.map((t) => (map.has(t.reference) && map.get(t.reference) !== t.status ? { ...t, status: map.get(t.reference) } : t)),
+        );
+      } catch {
+        /* keep last known statuses */
+      }
+    }, 10000);
+    return () => clearInterval(id);
+  }, [hasPendingTx]);
 
 
 

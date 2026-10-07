@@ -1,5 +1,6 @@
 import Link from 'next/link';
-import { Phone, Mail, MapPin } from 'lucide-react';
+import { cn } from '@/lib/utils';
+import { Phone, Mail, MapPin, Lock } from 'lucide-react';
 import { ROUTES, BANK_INFO } from '@/lib/constants';
 import { BRAND, yearsOfService } from '@/src/content/facts';
 
@@ -56,36 +57,60 @@ const legalLinks = [
 ];
 
 export function Footer({ isAbsolute, isSlim }: { isAbsolute?: boolean; isSlim?: boolean } = {}) {
-    // Slim footer variant — used inside portal layout
     if (isAbsolute || isSlim) {
         return (
             <footer
-                className={
+                className={cn(
+                    "w-full bg-paper-100 mt-auto border-t border-paper-200",
                     isAbsolute
-                        ? 'absolute bottom-0 left-0 right-0 z-20 theme-ink py-3 pb-[calc(4rem+env(safe-area-inset-bottom))]'
-                        : 'w-full theme-ink py-4 mt-auto pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-4'
-                }
-                style={{ background: 'var(--bg)' }}
+                        ? 'absolute bottom-0 left-0 right-0 z-20 pb-[calc(4rem+env(safe-area-inset-bottom))]'
+                        : 'pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-8'
+                )}
             >
-                <div className="container mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-4 max-w-7xl">
-                    <p className="text-[11px] text-ink-500 text-center" style={{ color: 'var(--text-muted)' }}>
-                        © {new Date().getFullYear()} {BRAND.legalName} All rights reserved. {BRAND.fdic}
-                        {' · '}
-                        <a href={`tel:${BRAND.phoneTel}`} className="whitespace-nowrap hover:underline">
-                            {BRAND.phoneDisplay}
-                        </a>
-                    </p>
-                    <div className="flex gap-4">
-                        {legalLinks.map((l) => (
-                            <a
-                                key={l.name}
-                                href={l.href}
-                                className="text-[11px] hover:underline transition-colors"
-                                style={{ color: 'var(--text-muted)' }}
+                <div className="container mx-auto px-4 md:px-6 lg:px-8 max-w-7xl pt-4">
+                    {/* Secure Area Header */}
+                    <div className="flex justify-between items-center pb-4 border-b border-paper-200">
+                        <div className="flex items-center gap-1.5 text-ink-900 font-semibold text-xs uppercase tracking-wider">
+                            <Lock className="w-3.5 h-3.5 text-ink-600" /> Secure Area
+                        </div>
+                        <div className="flex items-center gap-3 text-[11px] text-ink-600">
+                            <button className="hover:underline">En Español</button>
+                            <span className="text-paper-300">|</span>
+                            <button onClick={() => import('@/app/actions/auth').then(m => m.logoutAction())} className="hover:underline">Log out</button>
+                        </div>
+                    </div>
+
+                    {/* Utility Links */}
+                    <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-2 py-6">
+                        {[...footerSections.flatMap(s => s.links), ...legalLinks].slice(0, 12).map((link, i) => (
+                            <Link 
+                                key={i}
+                                href={link.href}
+                                className="text-[11px] text-ink-600 hover:underline transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-paper-50"
                             >
-                                {l.name}
-                            </a>
+                                {link.name}
+                            </Link>
                         ))}
+                        <span className="text-[11px] text-ink-600 hover:underline cursor-pointer">AdChoices</span>
+                    </div>
+
+                    {/* Legal Disclaimers */}
+                    <div className="space-y-4 text-[10px] text-ink-400 leading-relaxed max-w-6xl mx-auto text-center md:text-justify mb-8">
+                        <p>
+                            Investing involves risk. It is possible to lose money by investing in securities. You should review any planned financial transactions that may have tax or legal implications with your personal tax or legal advisor.
+                        </p>
+                        <p>
+                            {BRAND.legalName} and its affiliates offer investment products sponsored, managed, distributed or provided by companies that are affiliates of {BRAND.legalName}. 
+                        </p>
+                        <p>
+                            Bank products and services are offered by {BRAND.legalName}, N.A. and affiliated banks, Members FDIC and wholly owned subsidiaries of {BRAND.legalName} Corporation.
+                        </p>
+                        <p>
+                            Investment products: <strong>Are Not FDIC Insured | Are Not Bank Guaranteed | May Lose Value</strong>
+                        </p>
+                        <p className="pt-4 text-center">
+                            © {new Date().getFullYear()} {BRAND.legalName} Corporation. All rights reserved.
+                        </p>
                     </div>
                 </div>
             </footer>

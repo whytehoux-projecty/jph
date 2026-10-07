@@ -85,11 +85,34 @@ export function PortalSubHeader({ profile }: PortalSubHeaderProps) {
 
   return (
     <div className="w-full border-b border-paper-200 bg-paper-50/90 backdrop-blur-xs transition-colors">
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 px-4 md:px-6 lg:px-8 py-2">
-        {/* Left: Personalized greeting or Page Title */}
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex items-center gap-2">
-            {pathname === "/dashboard" || pathname === "/" ? (
+      <div className="flex flex-col sm:flex-row sm:items-end justify-start gap-x-6 gap-y-2 px-4 md:px-6 lg:px-8 pt-3 pb-0">
+        {/* Left: Portal subpage navigation links */}
+        <nav className="flex items-end gap-1 overflow-x-auto scrollbar-hide w-full sm:w-auto" aria-label="Secondary navigation">
+          {portalTabs.map((link) => {
+            const isActive = pathname?.startsWith(link.route);
+
+            return (
+              <Link
+                key={link.label}
+                href={link.route}
+                aria-current={isActive ? "page" : undefined}
+                className={cn(
+                  "shrink-0 px-4 py-2 rounded-t-md text-[13px] transition-all duration-150 font-medium whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vermilion-600 focus-visible:ring-offset-1 flex items-center gap-1.5 -mb-[1px]",
+                  isActive
+                    ? "bg-paper-200 text-ink-900 border border-paper-200 border-b-paper-200 font-semibold"
+                    : "text-ink-500 hover:text-ink-900 hover:bg-paper-100 border border-transparent border-b-transparent"
+                )}
+              >
+                {link.label}
+              </Link>
+            );
+          })}
+        </nav>
+
+        {/* Right: Personalized greeting (Dashboard only) */}
+        {(pathname === "/dashboard" || pathname === "/") && (
+          <div className="flex flex-wrap items-center gap-2.5 sm:ml-auto pb-2">
+            <div className="flex items-center gap-2">
               <span className="text-sm tracking-tight text-ink-900 leading-snug">
                 {showWelcome ? (
                   <>
@@ -103,7 +126,7 @@ export function PortalSubHeader({ profile }: PortalSubHeaderProps) {
                         <ChevronDown className="h-4 w-4 opacity-50" />
                       </button>
                     </DropdownMenuTrigger>
-                    <DropdownMenuContent align="start" className="w-[340px] p-0 border-paper-200 bg-white/95 backdrop-blur-md shadow-lg rounded-xl overflow-hidden mt-2">
+                    <DropdownMenuContent align="end" className="w-[340px] p-0 border-paper-200 bg-white/95 backdrop-blur-md shadow-lg rounded-xl overflow-hidden mt-2">
                       <div className="p-6">
                         {/* Enhanced Profile Section */}
                         <div className="flex flex-col items-center gap-4 mb-6">
@@ -183,42 +206,9 @@ export function PortalSubHeader({ profile }: PortalSubHeaderProps) {
                   </DropdownMenu>
                 )}
               </span>
-            ) : (
-              <span className="text-sm tracking-tight text-ink-900 leading-snug font-semibold">
-                {pathname?.startsWith("/transfer") && "Transfers & Pay Bills"}
-                {pathname?.startsWith("/vaults") && "Vaults & Cards"}
-                {pathname?.startsWith("/deposit") && "Deposits"}
-                {pathname?.startsWith("/savings") && "Savings & Loans"}
-                {pathname?.startsWith("/settings") && "Settings & Preferences"}
-                {pathname?.startsWith("/support") && "Support Center"}
-                {pathname?.startsWith("/activities") && "Activities"}
-              </span>
-            )}
+            </div>
           </div>
-        </div>
-
-        {/* Right: Portal subpage navigation links */}
-        <nav className="flex items-center gap-1 overflow-x-auto scrollbar-hide py-0.5" aria-label="Secondary navigation">
-          {portalTabs.map((link) => {
-            const isActive = pathname?.startsWith(link.route);
-
-            return (
-              <Link
-                key={link.label}
-                href={link.route}
-                aria-current={isActive ? "page" : undefined}
-                className={cn(
-                  "shrink-0 px-3 py-1.5 rounded-md text-[13px] transition-all duration-150 font-medium whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vermilion-600 focus-visible:ring-offset-1 flex items-center gap-1.5",
-                  isActive
-                    ? "bg-white text-ink-900 border border-paper-200 shadow-sm font-semibold"
-                    : "text-ink-500 hover:text-ink-900 hover:bg-paper-100 border border-transparent"
-                )}
-              >
-                {link.label}
-              </Link>
-            );
-          })}
-        </nav>
+        )}
       </div>
     </div>
   );
