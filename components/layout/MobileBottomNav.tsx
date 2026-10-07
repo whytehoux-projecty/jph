@@ -7,9 +7,9 @@ import { cn } from "@/lib/utils";
 
 const navItems = [
   { name: "Home", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Activity", href: "/activities", icon: List },
-  { name: "Transfer", href: "/transfer", icon: ArrowLeftRight },
-  { name: "Vaults", href: "/vaults", icon: CreditCard },
+  { name: "Activities", href: "/activities", icon: List },
+  { name: "Transfers & Pay Bills", href: "/transfer", icon: ArrowLeftRight },
+  { name: "Vaults & Cards", href: "/vaults", icon: CreditCard },
   { name: "More", href: "/settings", icon: Menu },
 ];
 

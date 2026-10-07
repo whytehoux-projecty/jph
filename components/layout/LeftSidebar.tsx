@@ -48,10 +48,11 @@ function SidebarTrigger({
 
 const navigation = [
   { name: "Dashboard",    href: "/dashboard",    icon: LayoutDashboard },
-  { name: "Vaults",       href: "/vaults",       icon: Wallet },
-  { name: "Transfers",    href: "/transfer",     icon: ArrowLeftRight },
+  { name: "Vaults & Cards", href: "/vaults",       icon: Wallet },
+  { name: "Transfers & Pay Bills", href: "/transfer", icon: ArrowLeftRight },
+  { name: "Deposits",     href: "/deposit",      icon: Receipt },
   { name: "Activities",   href: "/activities",   icon: Receipt },
-  { name: "Savings",      href: "/savings",      icon: FileText },
+  { name: "Savings & Loans", href: "/savings",    icon: FileText },
   { name: "Beneficiaries",href: "/beneficiaries",icon: Users },
   { name: "Settings",     href: "/settings",     icon: Settings },
   { name: "Support",      href: "/support",      icon: HelpCircle },
