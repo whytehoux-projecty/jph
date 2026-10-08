@@ -138,6 +138,10 @@ model AccountApplication {
   isUsCitizenOrResident Boolean  @default(false) @map("is_us_citizen_or_resident")
   consentComms          Boolean  @default(false) @map("consent_comms")
   consentPrivacy        Boolean  @default(false) @map("consent_privacy")
+  consentTerms          Boolean  @default(false) @map("consent_terms")
+  country               String?  // ISO code from the request form, e.g. US, DE, CA, ZA, AU, TH
+  idTypesHeld           String?  @map("id_types_held") // JSON array of ID option ids the applicant holds
+  middleName            String?  @map("middle_name")
   firstName             String   @map("first_name")
   lastName              String   @map("last_name")
   email                 String

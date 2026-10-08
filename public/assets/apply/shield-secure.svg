@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <style>
+    .shield-path {
+      fill: none;
+      stroke: #F3EEE3;
+      stroke-width: 3;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+      stroke-dasharray: 600;
+      stroke-dashoffset: 600;
+      animation: drawShield 1.2s ease-in-out forwards;
+    }
+    .arch {
+      fill: #DB4429;
+      opacity: 0;
+      animation: fadeInArch 0.4s ease-out 1.2s forwards;
+    }
+    .pulse {
+      fill: none;
+      stroke: #DB4429;
+      stroke-width: 2;
+      opacity: 0;
+      animation: pulseAnim 1.4s ease-out 1.6s infinite;
+    }
+    @keyframes drawShield {
+      to { stroke-dashoffset: 0; }
+    }
+    @keyframes fadeInArch {
+      to { opacity: 1; }
+    }
+    @keyframes pulseAnim {
+      0% { opacity: 0; r: 10; }
+      20% { opacity: 0.6; r: 10; stroke-width: 3; }
+      100% { opacity: 0; r: 50; stroke-width: 0; }
+    }
+  </style>
+  <path class="shield-path" d="M96 20 C96 20, 156 30, 156 60 C156 120, 96 168, 96 168 C96 168, 36 120, 36 60 C36 30, 96 20, 96 20 Z" />
+  <path class="arch" d="M86 100 L86 86 C86 80, 106 80, 106 86 L106 100 Z" />
+  <circle class="pulse" cx="96" cy="93" r="10" />
+</svg>

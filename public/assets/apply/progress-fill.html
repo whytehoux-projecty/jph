@@ -1,0 +1,37 @@
+<style>
+  .progress-container {
+    width: 400px;
+    height: 8px; /* The prompt said 400x24 area, bar height can be smaller */
+    background: #E4DDCC;
+    border-radius: 12px;
+    position: relative;
+    overflow: hidden;
+    display: flex;
+  }
+  .progress-fill {
+    height: 100%;
+    background: #DB4429;
+    border-radius: 12px;
+    width: 0%;
+    transition: width 0.5s ease-out;
+    position: relative;
+    overflow: hidden;
+  }
+  /* Glint effect */
+  .progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0; left: -100%;
+    width: 50%; height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.4), transparent);
+    animation: glint 1s ease-out infinite; /* the user asked to trigger separately, so we can let the glint run on width change in JS */
+  }
+  @keyframes glint {
+    0% { left: -100%; }
+    100% { left: 200%; }
+  }
+</style>
+<div class="progress-container">
+  <!-- Use inline style or classes to set width to 33%, 66%, or 100% -->
+  <div class="progress-fill" style="width: 33%;"></div>
+</div>

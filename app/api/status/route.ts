@@ -18,7 +18,10 @@ export async function GET(request: NextRequest) {
             const application = await prisma.accountApplication.findFirst({
                 where: { 
                     referenceId: ref,
-                    email: encryptedEmail 
+                    OR: [
+                        { email: email.trim().toLowerCase() },
+                        { email: encryptedEmail },
+                    ]
                 }
             });
 

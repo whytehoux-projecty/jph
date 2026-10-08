@@ -13,9 +13,46 @@ import {
 } from 'lucide-react';
 import { submitRegistrationForm } from '@/app/actions/registrationForm';
 import { registrationSchema } from '@/lib/registration/schema';
+import { getCountryConfig } from '@/lib/countries/config';
+
+/** Local currency and banking terminology per country (used to tailor funding fields). */
+const COUNTRY_BANKING: Record<string, {
+    currency: string; currencyLabel: string; currencySymbol: string;
+    transferMethod: string; codeLabel: string; codeLen: number; accountLabel: string; taxIdPlaceholder: string;
+}> = {
+    US: { currency: 'USD', currencyLabel: 'USD ($)', currencySymbol: '$', transferMethod: 'External Bank Transfer (ACH)', codeLabel: 'External Bank 9-Digit Routing Number', codeLen: 9, accountLabel: 'External Bank Account Number', taxIdPlaceholder: 'XXX-XX-XXXX' },
+    DE: { currency: 'EUR', currencyLabel: 'EUR (€)', currencySymbol: '€', transferMethod: 'SEPA Bank Transfer', codeLabel: 'External Bank BIC / SWIFT Code', codeLen: 11, accountLabel: 'External Bank IBAN', taxIdPlaceholder: '11-digit Steuer-ID' },
+    CA: { currency: 'CAD', currencyLabel: 'CAD (C$)', currencySymbol: 'C$', transferMethod: 'EFT / Interac e-Transfer', codeLabel: 'Institution & Transit Number (8 digits)', codeLen: 8, accountLabel: 'External Bank Account Number', taxIdPlaceholder: '9-digit SIN' },
+    ZA: { currency: 'ZAR', currencyLabel: 'ZAR (R)', currencySymbol: 'R', transferMethod: 'EFT Bank Transfer', codeLabel: 'External Bank Branch Code (6 digits)', codeLen: 6, accountLabel: 'External Bank Account Number', taxIdPlaceholder: '10-digit tax number' },
+    AU: { currency: 'AUD', currencyLabel: 'AUD (A$)', currencySymbol: 'A$', transferMethod: 'Direct Debit / Bank Transfer', codeLabel: 'External Bank BSB (6 digits)', codeLen: 6, accountLabel: 'External Bank Account Number', taxIdPlaceholder: '9-digit TFN' },
+    TH: { currency: 'THB', currencyLabel: 'THB (฿)', currencySymbol: '฿', transferMethod: 'PromptPay / Bank Transfer', codeLabel: 'External Bank Code / SWIFT', codeLen: 11, accountLabel: 'External Bank Account Number', taxIdPlaceholder: '13-digit tax ID' },
+    OTHER: { currency: 'USD', currencyLabel: 'USD ($)', currencySymbol: '$', transferMethod: 'Incoming Wire Transfer', codeLabel: 'External Bank SWIFT / BIC Code', codeLen: 11, accountLabel: 'External Bank Account Number / IBAN', taxIdPlaceholder: 'Tax identification number' },
+};
 
 export default function BusinessRegistrationFormClient({ application }: { application: any }) {
     const router = useRouter();
+
+    // Country-aware tailoring, driven by the approved application request
+    const country = getCountryConfig(application.country) ?? getCountryConfig('US')!;
+    const banking = COUNTRY_BANKING[country.code] ?? COUNTRY_BANKING.US;
+    const isUs = country.code === 'US';
+    let heldIds: string[] = [];
+    try { heldIds = JSON.parse(application.idTypesHeld || '[]'); } catch { heldIds = []; }
+    const optionsFor = (group: 'primary' | 'taxId' | 'address') => {
+        const all = country.idOptions.filter((o) => o.group === group);
+        const held = all.filter((o) => heldIds.includes(o.id));
+        return held.length > 0 ? held : all;
+    };
+    const primaryIdOptions = optionsFor('primary');
+    const taxIdOptions = optionsFor('taxId');
+    const poaOptions = optionsFor('address');
+    const taxIdLabel = taxIdOptions.map((o) => o.label.replace(/\s*\(.*\)/, '')).join(' / ') || 'Tax ID';
+    const addressLine = [application.address, application.city, application.state, application.zipCode].filter(Boolean).join(', ').toUpperCase();
+    const currencyChoices = Array.from(new Set([banking.currency, 'USD', 'EUR'])).map((c) => ({
+        code: c,
+        label: Object.values(COUNTRY_BANKING).find((b) => b.currency === c)?.currencyLabel ?? c,
+    }));
+
     const [step, setStep] = useState(1);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [success, setSuccess] = useState(false);
@@ -54,14 +91,14 @@ export default function BusinessRegistrationFormClient({ application }: { applic
         // Title & Name
         title: 'Mr',
         gender: 'Male',
-        fullLegalName: `${application.firstName} ${application.lastName}`,
+        fullLegalName: [application.firstName, application.middleName, application.lastName].filter(Boolean).join(' ').toUpperCase(),
         dateOfBirth: '',
         ssnItin: '',
-        nationality: 'United States',
-        countryOfResidence: 'United States',
+        nationality: country.name,
+        countryOfResidence: country.name,
 
         // 2. Contact & Residential Details
-        residentialAddress: '',
+        residentialAddress: addressLine,
         mailingAddress: '',
         isMailingSame: true,
         primaryPhoneType: 'Mobile',
@@ -77,7 +114,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
         // 4. Identity Verification
         passportPhotoUrl: '',
-        primaryIdType: "Driver's License",
+        primaryIdType: primaryIdOptions[0]?.label ?? '',
         idNumber: '',
         stateCountryOfIssuance: '',
         issueDate: '',
@@ -89,14 +126,14 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
         // 6. Account Configuration & Preferences
         desiredAccountType: application.desiredAccountType || 'Everyday Checking',
-        currencyPreference: application.currencyPreference || 'USD',
+        currencyPreference: banking.currency,
         overdraftProtection: false,
         debitCardRequest: true,
-        nameToAppearOnCard: `${application.firstName} ${application.lastName}`,
+        nameToAppearOnCard: [application.firstName, application.lastName].filter(Boolean).join(' ').toUpperCase(),
         statementPreference: 'E-Statements',
 
         // 7. Initial Funding
-        fundingMethod: 'External Bank Transfer (ACH)',
+        fundingMethod: banking.transferMethod,
         externalAccountRoutingNumber: '',
         externalAccountNumber: '',
         initialDepositAmount: '',
@@ -117,11 +154,11 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
         // Compliance & PoA
         poaWaiverRequested: false,
-        proofOfAddressType: 'Utility Bill',
+        proofOfAddressType: poaOptions[0]?.label ?? 'Utility Bill',
         proofOfAddressUrl: '',
-        isUsTaxPerson: true,
+        isUsTaxPerson: isUs,
         w8benCertification: false,
-        foreignTaxResidencies: '',
+        foreignTaxResidencies: isUs ? '' : country.name,
         isPep: false,
         pepDetails: '',
         sanctionsDeclaration: false,
@@ -341,6 +378,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
             const finalData = {
                 ...formData,
                 applicationType: 'BUSINESS',
+                countryCode: country.code,
                 mailingAddress: formData.isMailingSame ? formData.residentialAddress : formData.mailingAddress,
                 initialDepositAmount: Number(formData.initialDepositAmount)
             };
@@ -361,7 +399,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
     if (success) {
         return (
-            <div className="bg-white p-8 md:p-14 shadow-2xl border-2 border-[#0D2545] rounded-xl text-center space-y-6 animate-in fade-in duration-500">
+            <div className="bg-white p-8 md:p-14 shadow-2xl border-2 border-ink-900 rounded-xl text-center space-y-6 animate-in fade-in duration-500">
                 <div className="w-20 h-20 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center mx-auto">
                     <CheckCircle2 className="w-10 h-10" />
                 </div>
@@ -369,7 +407,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                     <span className="text-xs uppercase tracking-widest font-bold text-neutral-500">
                         Official Execution Receipt
                     </span>
-                    <h2 className="text-2xl md:text-3xl font-bold text-[#0D2545] tracking-tight">
+                    <h2 className="text-2xl md:text-3xl font-bold text-ink-900 tracking-tight">
                         Registration Application Submitted
                     </h2>
                     <p className="text-xs font-mono text-neutral-600">
@@ -382,14 +420,14 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                 <div className="p-4 bg-neutral-50 border border-neutral-300 max-w-md mx-auto text-left text-xs text-neutral-700 space-y-1.5 font-mono">
                     <div><strong>APPLICANT:</strong> {formData.fullLegalName}</div>
                     <div><strong>ACCOUNT TYPE:</strong> {formData.desiredAccountType}</div>
-                    <div><strong>INITIAL FUNDING:</strong> ${Number(formData.initialDepositAmount).toFixed(2)}</div>
+                    <div><strong>INITIAL FUNDING:</strong> {banking.currencySymbol}{Number(formData.initialDepositAmount).toFixed(2)} {formData.currencyPreference}</div>
                     <div><strong>DATE OF EXECUTION:</strong> {formData.signatureDate}</div>
                     <div><strong>STATUS:</strong> PENDING COMPLIANCE PROVISIONING</div>
                 </div>
                 <div className="pt-4">
                     <button
                         onClick={() => router.push('/login')}
-                        className="px-8 py-3 bg-[#0D2545] text-white font-bold text-xs uppercase tracking-wider hover:bg-[#1B355B] transition-colors shadow"
+                        className="px-8 py-3 bg-ink-900 text-white font-bold text-xs uppercase tracking-wider hover:bg-[#1B355B] transition-colors shadow"
                     >
                         Access Heritage Vault Portal
                     </button>
@@ -443,7 +481,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
             {activeCameraTarget && (
                 <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in">
                     <div className="bg-white rounded-lg shadow-2xl max-w-lg w-full overflow-hidden border border-neutral-300">
-                        <div className="bg-[#0D2545] text-white px-5 py-3 flex items-center justify-between">
+                        <div className="bg-ink-900 text-white px-5 py-3 flex items-center justify-between">
                             <div className="flex items-center gap-2">
                                 <Camera className="w-5 h-5 text-amber-400" />
                                 <span className="font-bold text-xs uppercase tracking-wide">
@@ -480,7 +518,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                 <button
                                     type="button"
                                     onClick={capturePhoto}
-                                    className="px-5 py-2 text-xs font-bold text-white bg-[#0D2545] hover:bg-[#1B355B] rounded flex items-center gap-1.5 uppercase tracking-wide"
+                                    className="px-5 py-2 text-xs font-bold text-white bg-ink-900 hover:bg-[#1B355B] rounded flex items-center gap-1.5 uppercase tracking-wide"
                                 >
                                     <Camera className="w-4 h-4" />
                                     Capture
@@ -496,7 +534,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                 <button
                     type="button"
                     onClick={handleDownloadPdf}
-                    className="px-4 py-2 bg-white border border-[#0D2545] text-[#0D2545] text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-neutral-50 transition-colors shadow-sm rounded"
+                    className="px-4 py-2 bg-white border border-ink-900 text-ink-900 text-xs font-bold uppercase tracking-wider flex items-center gap-2 hover:bg-neutral-50 transition-colors shadow-sm rounded"
                 >
                     <Download className="w-4 h-4" />
                     Download Form (PDF)
@@ -506,13 +544,13 @@ export default function BusinessRegistrationFormClient({ application }: { applic
             {/* Embedded Fillable PDF Form Container (Styled after Stanbic Bank & SBB West Bank Forms) */}
             <form
                 onSubmit={handleSubmit}
-                className="bg-white text-neutral-900 shadow-2xl shadow-black/80 border-2 border-[#0D2545] rounded-xl overflow-hidden relative font-sans text-xs print:shadow-none print:border-none"
+                className="bg-white text-neutral-900 shadow-2xl shadow-black/80 border-2 border-ink-900 rounded-xl overflow-hidden relative font-sans text-xs print:shadow-none print:border-none"
             >
                 {/* Print-only Hard Copy Instructions */}
                 <div className="hidden print:block p-6 bg-neutral-50 border-b-2 border-dashed border-neutral-300">
-                    <h3 className="font-bold uppercase mb-2 text-[#0D2545] text-sm">Hard Copy Submission Instructions</h3>
+                    <h3 className="font-bold uppercase mb-2 text-ink-900 text-sm">Hard Copy Submission Instructions</h3>
                     <p className="mb-1 text-xs text-neutral-800">If you are filling out this form by hand, please return the completed and signed physical copy to our central post office address:</p>
-                    <p className="font-mono mt-2 mb-3 text-xs font-bold text-[#0D2545]">Heritage Trust Bank, N.A.<br/>PO Box 10293, Wall Street Station<br/>New York, NY 10005</p>
+                    <p className="font-mono mt-2 mb-3 text-xs font-bold text-ink-900">Heritage Trust Bank, N.A.<br/>PO Box 10293, Wall Street Station<br/>New York, NY 10005</p>
                     <p className="text-xs text-neutral-800">Alternatively, you may scan the complete, signed form along with copies of your ID and email them securely to: <strong>onboarding@heritagetrust.com</strong></p>
                     {downloadTimestamp && (
                         <p className="mt-4 pt-3 border-t border-neutral-300 font-mono text-[10px] text-neutral-500 font-bold uppercase">
@@ -522,13 +560,13 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                 </div>
 
                 {/* 1. Official Bank Letterhead & Header (Stanbic Bank Layout) */}
-                <div className="p-6 md:p-8 bg-white border-b-2 border-[#0D2545]">
+                <div className="p-6 md:p-8 bg-white border-b-2 border-ink-900">
                     <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
                         {/* Left: Bank Logo & Group Affiliation */}
                         <div className="space-y-1.5">
-                            <div className="inline-flex items-center justify-center bg-[#0D2545] px-5 py-3 rounded shadow-md mb-2 print:border-2 print:border-black print:bg-[#0D2545] print:shadow-none">
+                            <div className="inline-flex items-center justify-center mb-2">
                                 <img
-                                    src="/images/logos/heritage-trust-logo-reversed.svg"
+                                    src="/images/logos/heritage-trust-logo.svg"
                                     alt="Heritage Trust Bank Logo"
                                     className="h-10 md:h-12 w-auto object-contain"
                                 />
@@ -543,13 +581,13 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
                         {/* Right: Form Title & Control Info */}
                         <div className="text-left md:text-right space-y-1">
-                            <h1 className="text-xl md:text-2xl font-bold text-[#0D2545] tracking-tight">
+                            <h1 className="text-xl md:text-2xl font-bold text-ink-900 tracking-tight">
                                 Application to open Business account
                             </h1>
                             <p className="text-[11px] font-mono font-bold text-neutral-600">
                                 FORM JPH-CIP-1040 (REV. 2026)
                             </p>
-                            <span className="inline-block text-[10px] font-mono bg-blue-50 text-[#0D2545] px-2 py-0.5 border border-blue-200">
+                            <span className="inline-block text-[10px] font-mono bg-blue-50 text-ink-900 px-2 py-0.5 border border-blue-200">
                                 USA PATRIOT ACT § 326 COMPLIANT
                             </span>
                         </div>
@@ -559,7 +597,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                     <div className="mt-6 pt-4 border-t border-neutral-200 flex flex-wrap items-center justify-between gap-4 text-[11px]">
                         <div>
                             <span className="font-bold text-neutral-800">Please complete in </span>
-                            <span className="font-black text-[#0D2545] uppercase tracking-wider">BLOCK</span>
+                            <span className="font-black text-ink-900 uppercase tracking-wider">BLOCK</span>
                             <span className="font-bold text-neutral-800"> letters.</span>
                         </div>
                         <div className="flex flex-wrap items-center gap-4 font-mono text-[11px]">
@@ -569,13 +607,13 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                             </div>
                             <div>
                                 <span className="text-neutral-500 mr-1.5">Date (DD-MM-YYYY):</span>
-                                <span className="font-bold text-[#0D2545] bg-neutral-100 px-2 py-0.5 border border-neutral-300">
+                                <span className="font-bold text-ink-900 bg-neutral-100 px-2 py-0.5 border border-neutral-300">
                                     {new Date().toLocaleDateString('en-GB').replace(/\//g, '-')}
                                 </span>
                             </div>
                             <div>
                                 <span className="text-neutral-500 mr-1.5">CIF / Token:</span>
-                                <span className="font-bold text-[#0D2545] bg-neutral-100 px-2 py-0.5 border border-neutral-300">
+                                <span className="font-bold text-ink-900 bg-neutral-100 px-2 py-0.5 border border-neutral-300">
                                     {application.registrationToken.substring(0, 10).toUpperCase()}
                                 </span>
                             </div>
@@ -591,8 +629,8 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
                 <div className={step === 1 ? 'block' : 'hidden print:block'}>
                 {/* 2. Accounts Required Section (Stanbic Style) */}
-                <div className="border-b border-[#0D2545]">
-                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
+                <div className="border-b border-ink-900">
+                    <div className="bg-ink-900 text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
                         <span>Accounts required</span>
                         <span className="text-[10px] font-mono text-blue-200">SECTION 1</span>
                     </div>
@@ -607,14 +645,14 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                 <label
                                     key={acc.id}
                                     className={`flex items-center gap-2.5 p-2.5 border cursor-pointer transition-colors ${formData.desiredAccountType === acc.id
-                                        ? 'bg-blue-50/80 border-[#0D2545] font-bold text-[#0D2545]'
+                                        ? 'bg-blue-50/80 border-ink-900 font-bold text-ink-900'
                                         : 'bg-white border-neutral-300 text-neutral-700 hover:bg-neutral-100'
                                         }`}
                                 >
                                     <input
                                         type="radio"
                                         name="accountType"
-                                        className="w-4 h-4 text-[#0D2545] rounded-none focus:ring-0"
+                                        className="w-4 h-4 text-ink-900 rounded-none focus:ring-0"
                                         checked={formData.desiredAccountType === acc.id}
                                         onChange={() => updateField('desiredAccountType', acc.id)}
                                     />
@@ -626,14 +664,13 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                         {/* Currency Selector */}
                         <div className="mt-3 pt-3 border-t border-neutral-200 flex flex-wrap items-center gap-4 text-xs">
                             <span className="font-bold text-neutral-700">Account Currency:</span>
-                            {['USD ($)', 'EUR (€)', 'GBP (£)'].map((curr) => {
-                                const code = curr.substring(0, 3);
+                            {currencyChoices.map(({ code, label: curr }) => {
                                 return (
                                     <label key={code} className="flex items-center gap-1.5 cursor-pointer">
                                         <input
                                             type="radio"
                                             name="currency"
-                                            className="w-3.5 h-3.5 text-[#0D2545] rounded-none focus:ring-0"
+                                            className="w-3.5 h-3.5 text-ink-900 rounded-none focus:ring-0"
                                             checked={formData.currencyPreference === code}
                                             onChange={() => updateField('currencyPreference', code)}
                                         />
@@ -646,8 +683,8 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                 </div>
 
                 {/* 3. Personal Details Section (Grid Structure from Stanbic & SBB West Bank) */}
-                <div className="border-b border-[#0D2545]">
-                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
+                <div className="border-b border-ink-900">
+                    <div className="bg-ink-900 text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
                         <span>Business Entity & Authorized Signatory details</span>
                         <span className="text-[10px] font-mono text-blue-200">SECTION 2</span>
                     </div>
@@ -660,13 +697,13 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
                                 {/* Full Legal Name */}
                                 <div className="border border-neutral-300 p-2 bg-white">
-                                    <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                    <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                         Authorized Signatory Name (Must match official ID) <span className="text-red-600">*</span>
                                     </label>
                                     <input
                                         type="text"
                                         placeholder="JOHN ALEXANDER DOE"
-                                        className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.fullLegalName ? 'border-red-600' : 'border-neutral-200'} font-bold text-xs uppercase outline-none focus:bg-white focus:border-[#0D2545]`}
+                                        className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.fullLegalName ? 'border-red-600' : 'border-neutral-200'} font-bold text-xs uppercase outline-none focus:bg-white focus:border-ink-900`}
                                         value={formData.fullLegalName}
                                         onChange={(e) => updateField('fullLegalName', e.target.value.toUpperCase())}
                                     />
@@ -676,7 +713,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
                                     <div className="grid sm:grid-cols-2 gap-3 mt-3">
                                         <div className="border border-neutral-300 p-2 bg-white sm:col-span-2">
-                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                            <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                                 Business Name (Legal) <span className="text-red-600">*</span>
                                             </label>
                                             <input
@@ -687,7 +724,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                             />
                                         </div>
                                         <div className="border border-neutral-300 p-2 bg-white">
-                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                            <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                                 DBA Name / Trading As
                                             </label>
                                             <input
@@ -698,18 +735,19 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                             />
                                         </div>
                                         <div className="border border-neutral-300 p-2 bg-white">
-                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                                Business Tax ID (EIN) <span className="text-red-600">*</span>
+                                            <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
+                                                {country.businessTaxIdLabel} <span className="text-red-600">*</span>
                                             </label>
                                             <input
                                                 type="text"
                                                 className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.ein ? 'border-red-600' : 'border-neutral-200'} font-bold text-xs uppercase outline-none focus:bg-white`}
                                                 value={formData.ein}
                                                 onChange={(e) => updateField('ein', e.target.value.toUpperCase())}
+                                                placeholder={banking.taxIdPlaceholder}
                                             />
                                         </div>
                                         <div className="border border-neutral-300 p-2 bg-white">
-                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                            <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                                 Entity Type <span className="text-red-600">*</span>
                                             </label>
                                             <select
@@ -718,14 +756,13 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                                 onChange={(e) => updateField('entityType', e.target.value)}
                                             >
                                                 <option value="">Select Type</option>
-                                                <option value="LLC">LLC</option>
-                                                <option value="CORPORATION">Corporation</option>
-                                                <option value="PARTNERSHIP">Partnership</option>
-                                                <option value="SOLE_PROPRIETORSHIP">Sole Proprietorship</option>
+                                                {country.entityTypes.map(type => (
+                                                    <option key={type.value} value={type.value}>{type.label}</option>
+                                                ))}
                                             </select>
                                         </div>
                                         <div className="border border-neutral-300 p-2 bg-white">
-                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                            <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                                 Registration Number
                                             </label>
                                             <input
@@ -736,7 +773,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                             />
                                         </div>
                                         <div className="border border-neutral-300 p-2 bg-white">
-                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                            <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                                 State/Country of Formation
                                             </label>
                                             <input
@@ -747,7 +784,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                             />
                                         </div>
                                         <div className="border border-neutral-300 p-2 bg-white">
-                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                            <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                                 Year of Formation
                                             </label>
                                             <input
@@ -758,7 +795,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                             />
                                         </div>
                                         <div className="border border-neutral-300 p-2 bg-white">
-                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                            <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                                 Industry / Sector
                                             </label>
                                             <input
@@ -769,7 +806,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                             />
                                         </div>
                                         <div className="border border-neutral-300 p-2 bg-white">
-                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                            <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                                 Business Website
                                             </label>
                                             <input
@@ -780,7 +817,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                             />
                                         </div>
                                         <div className="border border-neutral-300 p-2 bg-white sm:col-span-2">
-                                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                            <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                                 UBO Declaration (Owners with {'>'}25%)
                                             </label>
                                             <textarea
@@ -797,7 +834,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
                             {/* Passport Photo Box (Affix Passport Photograph here - SBB West Bank Style) */}
                             <div className="md:col-span-3">
-                                <div className="border-2 border-dashed border-[#0D2545]/40 h-full min-h-[120px] p-2 flex flex-col items-center justify-center text-center bg-neutral-50">
+                                <div className="border-2 border-dashed border-ink-900/40 h-full min-h-[120px] p-2 flex flex-col items-center justify-center text-center bg-neutral-50">
                                     {photoPreview ? (
                                         <div className="relative w-full h-full flex flex-col items-center">
                                             <img src={photoPreview} alt="Applicant Photo" className="w-20 h-24 object-cover border border-neutral-400 mb-1" />
@@ -814,17 +851,17 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                         </div>
                                     ) : (
                                         <>
-                                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-[#0D2545] mb-1">
+                                            <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-ink-900 mb-1">
                                                 <UserCheck className="w-4 h-4" />
                                             </div>
-                                            <span className="text-[9px] font-bold uppercase text-[#0D2545] leading-tight block mb-1.5">
+                                            <span className="text-[9px] font-bold uppercase text-ink-900 leading-tight block mb-1.5">
                                                 Affix Passport Photograph / Selfie
                                             </span>
                                             <div className="flex items-center gap-1.5 print:hidden">
                                                 <button
                                                     type="button"
                                                     onClick={() => openCamera('photo')}
-                                                    className="px-2 py-1 bg-[#0D2545] text-white text-[9px] font-bold rounded-none flex items-center gap-1"
+                                                    className="px-2 py-1 bg-ink-900 text-white text-[9px] font-bold rounded-none flex items-center gap-1"
                                                 >
                                                     <Camera className="w-2.5 h-2.5" /> Snap
                                                 </button>
@@ -845,12 +882,12 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                         {/* Row 2: Date of Birth & SSN / ITIN */}
                         <div className="grid sm:grid-cols-2 gap-3">
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Date of Birth (YYYY-MM-DD) <span className="text-red-600">*</span>
                                 </label>
                                 <input
                                     type="date"
-                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.dateOfBirth ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.dateOfBirth ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-ink-900`}
                                     value={formData.dateOfBirth}
                                     onChange={(e) => updateField('dateOfBirth', e.target.value)}
                                 />
@@ -858,13 +895,13 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                             </div>
 
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                    SSN / ITIN / Tax ID <span className="text-red-600">*</span>
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
+                                    {taxIdLabel} <span className="text-red-600">*</span>
                                 </label>
                                 <input
                                     type="password"
-                                    placeholder="XXX-XX-XXXX"
-                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.ssnItin ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    placeholder={banking.taxIdPlaceholder}
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.ssnItin ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-ink-900`}
                                     value={formData.ssnItin}
                                     onChange={(e) => updateField('ssnItin', e.target.value)}
                                 />
@@ -877,23 +914,23 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                         {/* Row 3: Nationality & Country of Residence */}
                         <div className="grid sm:grid-cols-2 gap-3">
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Primary Nationality
                                 </label>
                                 <input
                                     type="text"
-                                    className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 text-xs outline-none focus:bg-white focus:border-[#0D2545]"
+                                    className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 text-xs outline-none focus:bg-white focus:border-ink-900"
                                     value={formData.nationality}
                                     onChange={(e) => updateField('nationality', e.target.value)}
                                 />
                             </div>
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Country of Residence
                                 </label>
                                 <input
                                     type="text"
-                                    className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 text-xs outline-none focus:bg-white focus:border-[#0D2545]"
+                                    className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 text-xs outline-none focus:bg-white focus:border-ink-900"
                                     value={formData.countryOfResidence}
                                     onChange={(e) => updateField('countryOfResidence', e.target.value)}
                                 />
@@ -902,13 +939,13 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
                         {/* Row 4: Physical Residential Address */}
                         <div className="border border-neutral-300 p-2 bg-white">
-                            <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                            <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                 Physical Residential Address (Street, Apt/Suite, City, State, ZIP) <span className="text-red-600">*</span>
                             </label>
                             <input
                                 type="text"
                                 placeholder="100 WALL STREET, SUITE 400, NEW YORK, NY 10005"
-                                className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.residentialAddress ? 'border-red-600' : 'border-neutral-200'} font-medium text-xs outline-none focus:bg-white focus:border-[#0D2545] uppercase`}
+                                className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.residentialAddress ? 'border-red-600' : 'border-neutral-200'} font-medium text-xs outline-none focus:bg-white focus:border-ink-900 uppercase`}
                                 value={formData.residentialAddress}
                                 onChange={(e) => updateField('residentialAddress', e.target.value.toUpperCase())}
                             />
@@ -918,7 +955,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                 <label className="flex items-center gap-2 cursor-pointer">
                                     <input
                                         type="checkbox"
-                                        className="w-3.5 h-3.5 text-[#0D2545] rounded-none focus:ring-0"
+                                        className="w-3.5 h-3.5 text-ink-900 rounded-none focus:ring-0"
                                         checked={formData.isMailingSame}
                                         onChange={(e) => updateField('isMailingSame', e.target.checked)}
                                     />
@@ -931,7 +968,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                         <input
                                             type="text"
                                             placeholder="P.O. Box or alternate mailing address"
-                                            className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 font-medium text-xs outline-none focus:bg-white focus:border-[#0D2545] uppercase"
+                                            className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 font-medium text-xs outline-none focus:bg-white focus:border-ink-900 uppercase"
                                             value={formData.mailingAddress}
                                             onChange={(e) => updateField('mailingAddress', e.target.value.toUpperCase())}
                                         />
@@ -943,7 +980,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                         {/* Row 5: Telephone & Email */}
                         <div className="grid sm:grid-cols-3 gap-3">
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Primary Telephone (Mobile)
                                 </label>
                                 <input
@@ -955,20 +992,20 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                             </div>
 
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Secondary / Work Telephone
                                 </label>
                                 <input
                                     type="text"
                                     placeholder="+1 (555) 000-0000"
-                                    className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]"
+                                    className="w-full bg-neutral-50 px-2 py-1.5 border border-neutral-200 font-mono text-xs outline-none focus:bg-white focus:border-ink-900"
                                     value={formData.secondaryPhone}
                                     onChange={(e) => updateField('secondaryPhone', e.target.value)}
                                 />
                             </div>
 
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Email Address (Online Banking Login ID)
                                 </label>
                                 <input
@@ -985,8 +1022,8 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
                 <div className={step === 2 ? 'block' : 'hidden print:block'}>
                 {/* 4. Employment Details Section (Stanbic Style) */}
-                <div className="border-b border-[#0D2545]">
-                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
+                <div className="border-b border-ink-900">
+                    <div className="bg-ink-900 text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
                         <span>Business Operations & Financial Profile</span>
                         <span className="text-[10px] font-mono text-blue-200">SECTION 3</span>
                     </div>
@@ -994,7 +1031,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                     <div className="p-4 space-y-3">
                         <div className="grid sm:grid-cols-3 gap-3">
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Employment Status <span className="text-red-600">*</span>
                                 </label>
                                 <select
@@ -1011,13 +1048,13 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                             </div>
 
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Number of Employees <span className="text-red-600">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     placeholder="e.g. 50"
-                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.occupation ? 'border-red-600' : 'border-neutral-200'} text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.occupation ? 'border-red-600' : 'border-neutral-200'} text-xs outline-none focus:bg-white focus:border-ink-900`}
                                     value={formData.occupation}
                                     onChange={(e) => updateField('occupation', e.target.value)}
                                 />
@@ -1025,13 +1062,13 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                             </div>
 
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Industry / Sector <span className="text-red-600">*</span>
                                 </label>
                                 <input
                                     type="text"
                                     placeholder="e.g. Technology, Manufacturing"
-                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.employerName ? 'border-red-600' : 'border-neutral-200'} text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.employerName ? 'border-red-600' : 'border-neutral-200'} text-xs outline-none focus:bg-white focus:border-ink-900`}
                                     value={formData.employerName}
                                     onChange={(e) => updateField('employerName', e.target.value)}
                                 />
@@ -1041,7 +1078,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
                         <div className="grid sm:grid-cols-2 gap-3">
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Source of Funds
                                 </label>
                                 <select
@@ -1058,7 +1095,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                             </div>
 
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Estimated Gross Annual Income (USD)
                                 </label>
                                 <select
@@ -1076,7 +1113,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                         
                         <div className="grid sm:grid-cols-2 gap-3 mt-3">
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Purpose of Account <span className="text-red-600">*</span>
                                 </label>
                                 <select
@@ -1094,7 +1131,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                             </div>
 
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Expected Monthly Volume (USD) <span className="text-red-600">*</span>
                                 </label>
                                 <select
@@ -1114,8 +1151,8 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                 </div>
 
                 {/* 5. Means of Identification (SBB West Bank Style) */}
-                <div className="border-b border-[#0D2545]">
-                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
+                <div className="border-b border-ink-900">
+                    <div className="bg-ink-900 text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
                         <span>Means of identification</span>
                         <span className="text-[10px] font-mono text-blue-200">SECTION 4</span>
                     </div>
@@ -1123,7 +1160,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                     <div className="p-4 space-y-3">
                         <div className="grid sm:grid-cols-5 gap-3">
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Primary ID Type <span className="text-red-600">*</span>
                                 </label>
                                 <select
@@ -1131,20 +1168,19 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                     value={formData.primaryIdType}
                                     onChange={(e) => updateField('primaryIdType', e.target.value)}
                                 >
-                                    <option>Driver's License</option>
-                                    <option>State ID Card</option>
-                                    <option>Passport</option>
-                                    <option>Permanent Resident Card</option>
+                                    {primaryIdOptions.map(o => (
+                                        <option key={o.id} value={o.label}>{o.label}</option>
+                                    ))}
                                 </select>
                             </div>
 
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     ID Card Number <span className="text-red-600">*</span>
                                 </label>
                                 <input
                                     type="text"
-                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.idNumber ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.idNumber ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-ink-900`}
                                     value={formData.idNumber}
                                     onChange={(e) => updateField('idNumber', e.target.value)}
                                 />
@@ -1152,12 +1188,12 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                             </div>
 
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                    State / Country <span className="text-red-600">*</span>
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
+                                    {country.regionLabel} / Country <span className="text-red-600">*</span>
                                 </label>
                                 <input
                                     type="text"
-                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.stateCountryOfIssuance ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.stateCountryOfIssuance ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-ink-900`}
                                     value={formData.stateCountryOfIssuance}
                                     onChange={(e) => updateField('stateCountryOfIssuance', e.target.value)}
                                 />
@@ -1165,12 +1201,12 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                             </div>
 
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Issue Date (YYYY-MM-DD) <span className="text-red-600">*</span>
                                 </label>
                                 <input
                                     type="date"
-                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.issueDate ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.issueDate ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-ink-900`}
                                     value={formData.issueDate}
                                     onChange={(e) => updateField('issueDate', e.target.value)}
                                 />
@@ -1178,12 +1214,12 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                             </div>
 
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Expiry Date (YYYY-MM-DD) <span className="text-red-600">*</span>
                                 </label>
                                 <input
                                     type="date"
-                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.expirationDate ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.expirationDate ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-ink-900`}
                                     value={formData.expirationDate}
                                     onChange={(e) => updateField('expirationDate', e.target.value)}
                                 />
@@ -1208,7 +1244,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                     <button
                                         type="button"
                                         onClick={() => idFrontInputRef.current?.click()}
-                                        className="px-3 py-1.5 bg-[#0D2545] text-white text-[10px] font-bold uppercase tracking-wider rounded-none print:hidden"
+                                        className="px-3 py-1.5 bg-ink-900 text-white text-[10px] font-bold uppercase tracking-wider rounded-none print:hidden"
                                     >
                                         Select File
                                     </button>
@@ -1230,7 +1266,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                     <button
                                         type="button"
                                         onClick={() => idBackInputRef.current?.click()}
-                                        className="px-3 py-1.5 bg-[#0D2545] text-white text-[10px] font-bold uppercase tracking-wider rounded-none print:hidden"
+                                        className="px-3 py-1.5 bg-ink-900 text-white text-[10px] font-bold uppercase tracking-wider rounded-none print:hidden"
                                     >
                                         Select File
                                     </button>
@@ -1248,7 +1284,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                     <label className="flex items-center gap-1 cursor-pointer">
                                         <input
                                             type="checkbox"
-                                            className="w-3.5 h-3.5 text-[#0D2545] rounded focus:ring-0"
+                                            className="w-3.5 h-3.5 text-ink-900 rounded focus:ring-0"
                                             checked={formData.poaWaiverRequested}
                                             onChange={(e) => updateField('poaWaiverRequested', e.target.checked)}
                                         />
@@ -1271,7 +1307,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                                     alert("PoA Upload mock triggered. In a real environment, this opens file selection.");
                                                     updateField('proofOfAddressUrl', 'mock-url');
                                                 }}
-                                                className={`px-3 py-1.5 bg-[#0D2545] text-white text-[10px] font-bold uppercase tracking-wider rounded-none print:hidden ${errors.proofOfAddressUrl ? 'ring-2 ring-red-600' : ''}`}
+                                                className={`px-3 py-1.5 bg-ink-900 text-white text-[10px] font-bold uppercase tracking-wider rounded-none print:hidden ${errors.proofOfAddressUrl ? 'ring-2 ring-red-600' : ''}`}
                                             >
                                                 Select Document
                                             </button>
@@ -1289,8 +1325,8 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
                 <div className={step === 3 ? 'block' : 'hidden print:block'}>
                 {/* 7. E-Banking & Account Funding (Stanbic Style) */}
-                <div className="border-b border-[#0D2545]">
-                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
+                <div className="border-b border-ink-900">
+                    <div className="bg-ink-900 text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
                         <span>E-Banking & Initial Funding details</span>
                         <span className="text-[10px] font-mono text-blue-200">SECTION 6</span>
                     </div>
@@ -1298,14 +1334,14 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                     <div className="p-4 space-y-3">
                         <div className="grid sm:grid-cols-2 gap-3">
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                    Initial Deposit Amount ($ USD) <span className="text-red-600">*</span>
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
+                                    Initial Deposit Amount ({banking.currencyLabel}) <span className="text-red-600">*</span>
                                 </label>
                                 <input
                                     type="number"
                                     step="0.01"
                                     placeholder="500.00"
-                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.initialDepositAmount ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                    className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.initialDepositAmount ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-ink-900`}
                                     value={formData.initialDepositAmount}
                                     onChange={(e) => updateField('initialDepositAmount', e.target.value)}
                                 />
@@ -1313,7 +1349,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                             </div>
 
                             <div className="border border-neutral-300 p-2 bg-white">
-                                <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
+                                <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
                                     Funding Method <span className="text-red-600">*</span>
                                 </label>
                                 <select
@@ -1321,24 +1357,24 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                     value={formData.fundingMethod}
                                     onChange={(e) => updateField('fundingMethod', e.target.value)}
                                 >
-                                    <option>External Bank Transfer (ACH)</option>
+                                    <option>{banking.transferMethod}</option>
                                     <option>Incoming Wire Transfer</option>
                                     <option>Mobile Check Deposit</option>
                                 </select>
                             </div>
                         </div>
 
-                        {formData.fundingMethod === 'External Bank Transfer (ACH)' && (
+                        {formData.fundingMethod === banking.transferMethod && (
                             <div className="grid sm:grid-cols-2 gap-3">
                                 <div className="border border-neutral-300 p-2 bg-white">
-                                    <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                        External Bank 9-Digit Routing Number <span className="text-red-600">*</span>
+                                    <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
+                                        {banking.codeLabel} <span className="text-red-600">*</span>
                                     </label>
                                     <input
                                         type="password"
-                                        maxLength={9}
-                                        placeholder="XXXXXXXXX"
-                                        className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.externalAccountRoutingNumber ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                        maxLength={banking.codeLen}
+                                        placeholder={"X".repeat(banking.codeLen)}
+                                        className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.externalAccountRoutingNumber ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-ink-900`}
                                         value={formData.externalAccountRoutingNumber}
                                         onChange={(e) => updateField('externalAccountRoutingNumber', e.target.value)}
                                     />
@@ -1346,13 +1382,13 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                 </div>
 
                                 <div className="border border-neutral-300 p-2 bg-white">
-                                    <label className="block text-[10px] font-bold uppercase text-[#0D2545] mb-1">
-                                        External Bank Account Number <span className="text-red-600">*</span>
+                                    <label className="block text-[10px] font-bold uppercase text-ink-900 mb-1">
+                                        {banking.accountLabel} <span className="text-red-600">*</span>
                                     </label>
                                     <input
                                         type="password"
                                         placeholder="XXXXXXXXXXXX"
-                                        className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.externalAccountNumber ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-[#0D2545]`}
+                                        className={`w-full bg-neutral-50 px-2 py-1.5 border ${errors.externalAccountNumber ? 'border-red-600' : 'border-neutral-200'} font-mono text-xs outline-none focus:bg-white focus:border-ink-900`}
                                         value={formData.externalAccountNumber}
                                         onChange={(e) => updateField('externalAccountNumber', e.target.value)}
                                     />
@@ -1366,8 +1402,8 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
                 <div className={step === 4 ? 'block' : 'hidden print:block'}>
                 {/* 8. Consent & Regulatory Disclosures (Two-Column Table from Stanbic Bank Form) */}
-                <div className="border-b border-[#0D2545]">
-                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
+                <div className="border-b border-ink-900">
+                    <div className="bg-ink-900 text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between">
                         <span>Consent & Regulatory Declarations</span>
                         <span className="text-[10px] font-mono text-blue-200">SECTION 7</span>
                     </div>
@@ -1375,7 +1411,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                     <div className="p-4">
                         <table className="w-full border-collapse border border-neutral-300 text-[11px]">
                             <thead>
-                                <tr className="bg-neutral-100 text-[#0D2545]">
+                                <tr className="bg-neutral-100 text-ink-900">
                                     <th className="border border-neutral-300 p-2.5 text-left font-bold uppercase">
                                         Consent & Certification Items
                                     </th>
@@ -1395,7 +1431,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                             <label className="flex items-center gap-1 cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    className="w-4 h-4 text-[#0D2545] rounded-none focus:ring-0"
+                                                    className="w-4 h-4 text-ink-900 rounded-none focus:ring-0"
                                                     checked={formData.isUsTaxPerson}
                                                     onChange={(e) => updateField('isUsTaxPerson', e.target.checked)}
                                                 />
@@ -1414,7 +1450,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                         <td className="border border-neutral-300 p-2.5 text-center bg-neutral-50/50">
                                             <input
                                                 type="text"
-                                                className="w-full bg-white px-2 py-1 border border-neutral-300 text-xs outline-none focus:border-[#0D2545]"
+                                                className="w-full bg-white px-2 py-1 border border-neutral-300 text-xs outline-none focus:border-ink-900"
                                                 value={formData.foreignTaxResidencies}
                                                 onChange={(e) => updateField('foreignTaxResidencies', e.target.value)}
                                             />
@@ -1441,7 +1477,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                             <label className="flex items-center gap-1 cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    className="w-4 h-4 text-[#0D2545] rounded-none focus:ring-0"
+                                                    className="w-4 h-4 text-ink-900 rounded-none focus:ring-0"
                                                     checked={formData.isUsTaxPerson ? formData.w9Certification : formData.w8benCertification}
                                                     onChange={(e) => updateField(formData.isUsTaxPerson ? 'w9Certification' : 'w8benCertification', e.target.checked)}
                                                 />
@@ -1459,7 +1495,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                                 <input
                                                     type="text"
                                                     placeholder="Provide PEP details/position..."
-                                                    className={`w-full bg-white px-2 py-1.5 border ${errors.pepDetails ? 'border-red-600' : 'border-neutral-300'} text-xs outline-none focus:border-[#0D2545]`}
+                                                    className={`w-full bg-white px-2 py-1.5 border ${errors.pepDetails ? 'border-red-600' : 'border-neutral-300'} text-xs outline-none focus:border-ink-900`}
                                                     value={formData.pepDetails}
                                                     onChange={(e) => updateField('pepDetails', e.target.value)}
                                                 />
@@ -1472,7 +1508,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                             <label className="flex items-center gap-1 cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    className="w-4 h-4 text-[#0D2545] rounded-none focus:ring-0"
+                                                    className="w-4 h-4 text-ink-900 rounded-none focus:ring-0"
                                                     checked={formData.isPep}
                                                     onChange={(e) => updateField('isPep', e.target.checked)}
                                                 />
@@ -1492,7 +1528,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                             <label className="flex items-center gap-1 cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    className="w-4 h-4 text-[#0D2545] rounded-none focus:ring-0"
+                                                    className="w-4 h-4 text-ink-900 rounded-none focus:ring-0"
                                                     checked={formData.sanctionsDeclaration}
                                                     onChange={(e) => updateField('sanctionsDeclaration', e.target.checked)}
                                                 />
@@ -1512,7 +1548,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                             <label className="flex items-center gap-1 cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    className="w-4 h-4 text-[#0D2545] rounded-none focus:ring-0"
+                                                    className="w-4 h-4 text-ink-900 rounded-none focus:ring-0"
                                                     checked={formData.electronicCommunicationsDisclosure}
                                                     onChange={(e) => updateField('electronicCommunicationsDisclosure', e.target.checked)}
                                                 />
@@ -1532,7 +1568,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                             <label className="flex items-center gap-1 cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    className="w-4 h-4 text-[#0D2545] rounded-none focus:ring-0"
+                                                    className="w-4 h-4 text-ink-900 rounded-none focus:ring-0"
                                                     checked={formData.depositAccountAgreement}
                                                     onChange={(e) => updateField('depositAccountAgreement', e.target.checked)}
                                                 />
@@ -1551,7 +1587,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                             <label className="flex items-center gap-1 cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    className="w-4 h-4 text-[#0D2545] rounded-none focus:ring-0"
+                                                    className="w-4 h-4 text-ink-900 rounded-none focus:ring-0"
                                                     checked={formData.marketingConsent}
                                                     onChange={(e) => updateField('marketingConsent', e.target.checked)}
                                                 />
@@ -1560,7 +1596,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                             <label className="flex items-center gap-1 cursor-pointer">
                                                 <input
                                                     type="checkbox"
-                                                    className="w-4 h-4 text-[#0D2545] rounded-none focus:ring-0"
+                                                    className="w-4 h-4 text-ink-900 rounded-none focus:ring-0"
                                                     checked={!formData.marketingConsent}
                                                     onChange={(e) => updateField('marketingConsent', !e.target.checked)}
                                                 />
@@ -1576,7 +1612,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
                 {/* 9. Declaration & Specimen Signature (SBB West Bank & Stanbic Style) */}
                 <div className="p-6 md:p-8 bg-white">
-                    <div className="bg-[#0D2545] text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between mb-4">
+                    <div className="bg-ink-900 text-white font-bold text-xs uppercase px-4 py-2 flex items-center justify-between mb-4">
                         <span>Declaration & Specimen Signature</span>
                         <span className="text-[10px] font-mono text-blue-200">SECTION 8</span>
                     </div>
@@ -1590,7 +1626,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                         <button
                             type="button"
                             onClick={() => openCamera('signature')}
-                            className="py-3 px-4 bg-[#0D2545] hover:bg-[#1B355B] text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border border-[#0D2545] shadow-sm"
+                            className="py-3 px-4 bg-ink-900 hover:bg-[#1B355B] text-white font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border border-ink-900 shadow-sm"
                         >
                             <Camera className="w-4 h-4 text-amber-400" />
                             <span>1. Snap Signature (Camera)</span>
@@ -1601,17 +1637,17 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                             onClick={() => fileInputRef.current?.click()}
                             className="py-3 px-4 bg-white hover:bg-neutral-100 text-neutral-900 font-bold text-xs uppercase tracking-wider transition-colors flex items-center justify-center gap-2 border border-neutral-400 shadow-sm"
                         >
-                            <Upload className="w-4 h-4 text-[#0D2545]" />
+                            <Upload className="w-4 h-4 text-ink-900" />
                             <span>2. Upload Signature (PDF / PNG / JPEG)</span>
                         </button>
                     </div>
 
                     {/* Specimen Signature Box (Styled after SBB Specimen 1 & Stanbic) */}
-                    <div className={`p-5 border-2 ${errors.digitalSignature ? 'border-red-600 bg-red-50/40' : 'border-[#0D2545] bg-white'} relative`}>
+                    <div className={`p-5 border-2 ${errors.digitalSignature ? 'border-red-600 bg-red-50/40' : 'border-ink-900 bg-white'} relative`}>
                         <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
                             {/* Left: Specimen Signature Area */}
                             <div className="flex-1">
-                                <span className="text-[10px] font-bold text-[#0D2545] uppercase tracking-wider block mb-2">
+                                <span className="text-[10px] font-bold text-ink-900 uppercase tracking-wider block mb-2">
                                     SPECIMEN 1 — PRIMARY APPLICANT SIGNATURE
                                 </span>
 
@@ -1663,7 +1699,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
 
                             {/* Right: Date */}
                             <div className="md:w-48">
-                                <label className="block text-[10px] font-bold text-[#0D2545] uppercase mb-1">
+                                <label className="block text-[10px] font-bold text-ink-900 uppercase mb-1">
                                     Date (DD-MM-YYYY):
                                 </label>
                                 <input
@@ -1687,7 +1723,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                     {/* Final Submission Button */}
                     <div className="mt-8 pt-6 border-t border-neutral-300 flex flex-col sm:flex-row items-center justify-between gap-4 print:hidden">
                         <div className="text-[11px] text-neutral-500 flex items-center gap-2">
-                            <Lock className="w-4 h-4 text-[#0D2545] shrink-0" />
+                            <Lock className="w-4 h-4 text-ink-900 shrink-0" />
                             <span>Encrypted under Section 326 of the USA PATRIOT Act and FDIC guidelines.</span>
                         </div>
 
@@ -1706,7 +1742,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                 <button
                                     type="button"
                                     onClick={() => { setStep(s => s + 1); window.scrollTo({ top: 0, behavior: 'smooth' }); }}
-                                    className="px-8 py-3.5 bg-[#0D2545] hover:bg-[#1B355B] text-white font-bold text-xs uppercase tracking-wider transition-colors shadow-md"
+                                    className="px-8 py-3.5 bg-ink-900 hover:bg-[#1B355B] text-white font-bold text-xs uppercase tracking-wider transition-colors shadow-md"
                                 >
                                     Continue to Step {step + 1}
                                 </button>

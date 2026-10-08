@@ -1,8 +1,10 @@
 import { z } from 'zod';
+import { getCountryConfig } from '@/lib/countries/config';
 
 export const registrationSchema = z.object({
     // Type
     applicationType: z.enum(['PERSONAL', 'BUSINESS']),
+    countryCode: z.string().optional(),
     
     // Personal Details (if PERSONAL or primary applicant)
     title: z.string().optional(),
@@ -12,8 +14,8 @@ export const registrationSchema = z.object({
     nationality: z.string().min(2, "Nationality is required"),
     countryOfResidence: z.string().min(2, "Country of residence is required"),
     dateOfBirth: z.string().min(10, "Date of birth is required"),
-    ssnItin: z.string().min(4, "SSN / ITIN / Foreign TIN is required"),
-    mothersMaidenName: z.string().min(2, "Mother's maiden name is required"),
+    ssnItin: z.string().min(4, "Tax ID / SSN is required"),
+    mothersMaidenName: z.string().optional(), // Make optional because business form does not have it
 
     // Next of Kin (Personal only)
     nextOfKinName: z.string().optional(),
@@ -22,6 +24,13 @@ export const registrationSchema = z.object({
     nextOfKinAddress: z.string().optional(),
 
     // Business Details
+    businessName: z.string().optional(),
+    dbaName: z.string().optional(),
+    ein: z.string().optional(),
+    stateOfFormation: z.string().optional(),
+    yearOfFormation: z.string().optional(),
+    industry: z.string().optional(),
+    website: z.string().optional(),
     entityType: z.string().optional(),
     businessRegistrationNo: z.string().optional(),
     uboDeclaration: z.string().optional(), // JSON string
@@ -34,8 +43,8 @@ export const registrationSchema = z.object({
 
     // Employment & CDD
     employmentStatus: z.string().min(2, "Employment status is required"),
-    occupation: z.string().min(2, "Occupation is required"),
-    employerName: z.string().min(2, "Employer name is required"),
+    occupation: z.string().optional(), // Optional as Business uses employerName for industry in some parts
+    employerName: z.string().optional(),
     employerAddress: z.string().optional(),
     primarySourceOfFunds: z.string().min(2, "Source of funds is required"),
     estimatedAnnualIncome: z.string().min(2, "Estimated annual income is required"),
@@ -83,11 +92,24 @@ export const registrationSchema = z.object({
     signatureDate: z.string().min(10, "Signature date is required"),
 }).superRefine((data, ctx) => {
     if (data.applicationType === 'BUSINESS') {
+        if (!data.businessName) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Business name is required", path: ["businessName"] });
+        }
+        if (!data.ein) {
+            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Business Tax ID is required", path: ["ein"] });
+        }
         if (!data.entityType) {
             ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Entity type is required", path: ["entityType"] });
         }
-        if (!data.businessRegistrationNo) {
-            ctx.addIssue({ code: z.ZodIssueCode.custom, message: "Registration number is required", path: ["businessRegistrationNo"] });
+
+        // Country specific validation for Business Tax ID
+        if (data.countryCode && data.ein) {
+            const config = getCountryConfig(data.countryCode);
+            if (config?.businessTaxIdPattern) {
+                if (!config.businessTaxIdPattern.test(data.ein)) {
+                    ctx.addIssue({ code: z.ZodIssueCode.custom, message: `Invalid format for ${config.businessTaxIdLabel}`, path: ["ein"] });
+                }
+            }
         }
     }
     

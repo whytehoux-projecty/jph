@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" width="128" height="128">
+  <style>
+    path, rect, circle, polyline {
+      fill: none;
+      stroke: #F3EEE3;
+      stroke-width: 2;
+      stroke-linejoin: round;
+      stroke-linecap: round;
+    }
+    .accent {
+      stroke: #DB4429;
+    }
+    .animated {
+      stroke-dasharray: 400;
+      stroke-dashoffset: 0;
+    }
+    svg:hover .animated {
+      animation: drawIn 0.6s ease-in-out forwards;
+    }
+    @keyframes drawIn {
+      0% { stroke-dashoffset: 400; }
+      100% { stroke-dashoffset: 0; }
+    }
+  </style>
+  <!-- Checklist -->
+  <rect class="animated" x="32" y="24" width="64" height="80" rx="4" />
+  <path class="animated" d="M52 44 L80 44 M52 64 L80 64 M52 84 L64 84" />
+  <rect class="animated" x="40" y="40" width="8" height="8" />
+  <rect class="animated" x="40" y="60" width="8" height="8" />
+  <rect class="animated" x="40" y="80" width="8" height="8" />
+  <!-- Vermilion tick in second box -->
+  <path class="animated accent" d="M42 64 L44 66 L48 60" />
+  <!-- Magnifying glass -->
+  <circle class="animated" cx="80" cy="80" r="16" />
+  <path class="animated" d="M92 92 L104 104" stroke-width="4" />
+</svg>
