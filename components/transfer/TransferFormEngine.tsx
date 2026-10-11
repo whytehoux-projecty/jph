@@ -2,7 +2,23 @@
 
 import * as React from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, ArrowLeft, CheckCircle2, Lock, ShieldCheck } from "lucide-react";
+import {
+  AlertTriangle,
+  ArrowLeft,
+  CheckCircle2,
+  Lock,
+  ShieldCheck,
+  BookUser,
+  UserPlus,
+  RefreshCw,
+  Building2,
+  ChevronRight,
+  Info,
+  Globe2,
+  ArrowRightLeft,
+  Wallet,
+  Smartphone,
+} from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { SelectorCard } from "@/components/ui/SelectorCard";
 import { cn } from "@/lib/utils";
@@ -26,6 +42,39 @@ import {
   type Values,
 } from "@/lib/transfer-forms/validators";
 import { LiveStatusBadge } from "./LiveStatus";
+import {
+  BeneficiaryPopoutPanel,
+  type SelectedBeneficiaryData,
+} from "./BeneficiaryPopoutPanel";
+import { getRailForMethod } from "@/lib/beneficiary-rails";
+import { BrandIcon, getBrandIconSrc } from "@/components/ui/BrandIcon";
+
+export const getGateIcon = (val: string) => {
+  if (getBrandIconSrc(val)) {
+    return <BrandIcon name={val} size={24} />;
+  }
+  switch (val) {
+    case "ach":
+    case "wire_domestic":
+      return <Building2 className="h-5 w-5" />;
+    case "wire_international":
+      return <Globe2 className="h-5 w-5" />;
+    case "fednow":
+    case "own":
+      return <ArrowRightLeft className="h-5 w-5" />;
+    case "other":
+      return <BookUser className="h-5 w-5" />;
+    case "usdt":
+    case "usdc":
+      return <Wallet className="h-5 w-5" />;
+    case "zelle":
+    case "cashapp":
+    case "venmo":
+      return <Smartphone className="h-5 w-5" />;
+    default:
+      return <Building2 className="h-5 w-5" />;
+  }
+};
 
 export interface PortalAccount {
   id: string;
@@ -35,7 +84,7 @@ export interface PortalAccount {
   currency: string;
 }
 
-type Phase = "form" | "review" | "confirm" | "done";
+type Phase = "form" | "confirm" | "done";
 type Lookup = { status: "idle" | "loading" | "found" | "notfound"; maskedName?: string; isOwn?: boolean };
 
 const accountLabel = (a: PortalAccount) =>
@@ -59,7 +108,14 @@ interface Props {
   onSubmitted?: () => void;
 }
 
-export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOverrides = {}, onSubmitted }: Props) {
+export function TransferFormEngine({
+  type,
+  gate,
+  onGateChange,
+  accounts,
+  limitOverrides = {},
+  onSubmitted,
+}: Props) {
   const variant = gate ? type.variants[gate] ?? null : null;
   const [values, setValues] = React.useState<Values>(() => ({ ...defaultsFor(variant) }));
   const [touched, setTouched] = React.useState<Record<string, boolean>>({});
@@ -76,9 +132,14 @@ export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOv
   const idemKey = React.useRef<string>("");
   const topRef = React.useRef<HTMLDivElement>(null);
 
+  // Pop-out panel state
+  const [isPopoutOpen, setIsPopoutOpen] = React.useState(false);
+  const [popoutInitialMode, setPopoutInitialMode] = React.useState<"select" | "add">("select");
+  const [selectedBeneficiary, setSelectedBeneficiary] = React.useState<SelectedBeneficiaryData | null>(null);
+
   if (!idemKey.current) idemKey.current = crypto.randomUUID();
 
-  // When the gate changes from the outside (URL/back button) reset the values.
+  // When the gate changes from the outside reset values
   const lastGate = React.useRef(gate);
   React.useEffect(() => {
     if (lastGate.current !== gate) {
@@ -92,18 +153,25 @@ export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOv
       setPhase("form");
       setStep(0);
       setLookup({ status: "idle" });
+      setSelectedBeneficiary(null);
     }
   }, [gate, type]);
 
-  const allValues: Values = React.useMemo(() => (gate ? { ...values, [type.gate.name]: gate } : values), [values, gate, type]);
+  const allValues: Values = React.useMemo(
+    () => (gate ? { ...values, [type.gate.name]: gate } : values),
+    [values, gate, type]
+  );
   const visible = React.useMemo(
     () => (variant ? getVisibleFields(variant.fields, allValues) : []),
-    [variant, allValues],
+    [variant, allValues]
   );
 
   const selectedAccount = accounts.find((a) => a.id === values.fromAccountId);
   const txType = variant ? resolveTransactionType(variant, allValues) : "";
   const limit = variant ? limitOverrides[variant.methodId] ?? variant.perTransferLimit : 0;
+
+  // Beneficiary / Recipient flow detection
+  const isRecipientFlow = gate !== "own";
 
   /* -------------------------- account lookup effect -------------------------- */
   const lookupField = visible.find((f) => f.type === "account-lookup");
@@ -120,7 +188,11 @@ export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOv
       try {
         const res = await lookupInternalAccount(lookupValue);
         if (cancelled) return;
-        setLookup(res.found ? { status: "found", maskedName: res.maskedName, isOwn: res.isOwn } : { status: "notfound" });
+        setLookup(
+          res.found
+            ? { status: "found", maskedName: res.maskedName, isOwn: res.isOwn }
+            : { status: "notfound" }
+        );
       } catch {
         if (!cancelled) setLookup({ status: "notfound" });
       }
@@ -136,7 +208,9 @@ export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOv
     (f: FieldDef): string | null => {
       if (f.type === "notice") return null;
       if (f.type === "checkbox") {
-        return f.required === false || values[f.name] === "true" ? null : "Please confirm to continue.";
+        return f.required === false || values[f.name] === "true"
+          ? null
+          : "Please confirm to continue.";
       }
       const v = (values[f.name] ?? "").trim();
       if (!v) {
@@ -145,26 +219,33 @@ export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOv
           ? "Please make a selection."
           : "This field is required.";
       }
-      if (f.confirmOf && v !== (values[f.confirmOf] ?? "").trim()) return "The two entries do not match.";
+      if (f.confirmOf && v !== (values[f.confirmOf] ?? "").trim())
+        return "The two entries do not match.";
       if (f.type === "account-select" && f.excludeFrom && values[f.excludeFrom] === v)
         return "Choose a different account from the source.";
       if (f.validate) {
         const err = validateValue(f.validate, v, {
           values: allValues,
           max: f.validate === "amount" ? limit : undefined,
-          balance: f.validate === "amount" && txType !== "CRYPTO_DEPOSIT" ? selectedAccount?.balance : undefined,
+          balance:
+            f.validate === "amount" && txType !== "CRYPTO_DEPOSIT"
+              ? selectedAccount?.balance
+              : undefined,
         });
         if (err) return err;
       }
       if (f.type === "account-lookup") {
         if (lookup.status === "loading") return "Checking the account…";
-        if (lookup.status !== "found") return "We could not find an active account with this number.";
-        if (lookup.isOwn) return "This is one of your own accounts. Use “My own accounts” instead.";
-        if (values.payeeConfirmed !== "true") return "Confirm the account holder's name to continue.";
+        if (lookup.status !== "found")
+          return "We could not find an active account with this number.";
+        if (lookup.isOwn)
+          return "This is one of your own accounts. Use “My own accounts” instead.";
+        if (values.payeeConfirmed !== "true")
+          return "Confirm the account holder's name to continue.";
       }
       return null;
     },
-    [values, allValues, limit, txType, selectedAccount, lookup],
+    [values, allValues, limit, txType, selectedAccount, lookup]
   );
 
   const errors = React.useMemo(() => {
@@ -176,12 +257,11 @@ export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOv
     return out;
   }, [visible, validateField]);
 
-  const gateComplete = visible.length === (variant?.fields.filter((f) => conditionMet(f.showIf, allValues)).length ?? 0);
   const showError = (name: string) => (attempted || touched[name] ? errors[name] : undefined);
 
   /* ---------------------------------- handlers ---------------------------------- */
   const hasEnteredData = Object.entries(values).some(
-    ([k, v]) => v && k !== "fromAccountId" && v !== defaultsFor(variant)[k],
+    ([k, v]) => v && k !== "fromAccountId" && v !== defaultsFor(variant)[k]
   );
 
   const requestGateChange = (next: string) => {
@@ -199,16 +279,71 @@ export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOv
     });
   };
 
-  const goReview = () => {
-    setAttempted(true);
-    const keys = Object.keys(errors);
-    if (!gateComplete || keys.length) {
-      const first = keys[0];
-      if (first) document.getElementById(`tf-${first}`)?.focus();
-      return;
-    }
-    setPhase("review");
-    topRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  // Called when beneficiary is selected or created via pop-out panel
+  const handleBeneficiarySelected = (data: SelectedBeneficiaryData) => {
+    setSelectedBeneficiary(data);
+
+    // Sync fields into form values
+    setValues((prev) => {
+      const next = { ...prev };
+      next.recipientName = data.name;
+      if (data.details.bankName) next.bankName = data.details.bankName;
+      if (data.details.routingNumber) next.routingNumber = data.details.routingNumber;
+      if (data.details.accountNumber) {
+        next.accountNumber = data.details.accountNumber;
+        next.accountNumberConfirm = data.details.accountNumber;
+        next.toAccountNumber = data.details.accountNumber;
+      }
+      if (data.details.addressStreet) next.addressStreet = data.details.addressStreet;
+      if (data.details.addressCity) next.addressCity = data.details.addressCity;
+      if (data.details.addressState) next.addressState = data.details.addressState;
+      if (data.details.addressPostal) next.addressPostal = data.details.addressPostal;
+      if (data.details.accountType) next.accountType = data.details.accountType;
+      if (data.details.swiftBic) next.swiftBic = data.details.swiftBic;
+      if (data.details.iban) {
+        next.iban = data.details.iban;
+        next.ibanConfirm = data.details.iban;
+      }
+      if (data.details.country) next.country = data.details.country;
+      if (data.details.address) {
+        next.address = data.details.address;
+        next.addressConfirm = data.details.address;
+      }
+      if (data.details.network) next.network = data.details.network;
+      if (data.details.email || data.details.phone) {
+        next.zelleIdentifier = data.details.email || data.details.phone;
+      }
+      if (data.details.cashtag) next.cashtag = data.details.cashtag;
+      if (data.details.username) next.venmoUsername = data.details.username;
+      if (data.rail === "internal") next.payeeConfirmed = "true";
+
+      return next;
+    });
+  };
+
+  const clearBeneficiary = () => {
+    setSelectedBeneficiary(null);
+    setValues((prev) => {
+      const next = { ...prev };
+      delete next.recipientName;
+      delete next.accountNumber;
+      delete next.accountNumberConfirm;
+      delete next.routingNumber;
+      delete next.bankName;
+      delete next.addressStreet;
+      delete next.addressCity;
+      delete next.addressState;
+      delete next.addressPostal;
+      delete next.swiftBic;
+      delete next.iban;
+      delete next.ibanConfirm;
+      delete next.zelleIdentifier;
+      delete next.cashtag;
+      delete next.venmoUsername;
+      delete next.toAccountNumber;
+      delete next.payeeConfirmed;
+      return next;
+    });
   };
 
   const submit = async () => {
@@ -233,13 +368,17 @@ export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOv
       fd.append("variant", gate ?? "");
       fd.append("methodId", variant.methodId);
       fd.append("transactionType", txType);
-      fd.append("amount", values.amount);
-      fd.append("fromAccountId", values.fromAccountId);
+      fd.append("amount", values.amount || "0");
+      fd.append("fromAccountId", values.fromAccountId || "");
       fd.append("description", memo);
       fd.append("pinCode", pin);
       fd.append("idempotencyKey", idemKey.current);
-      fd.append("estimatedFee", String(estimateFee(variant, allValues, parseFloat(values.amount) || 0)));
-      if (lookup.status === "found" && lookup.maskedName) fd.append("recipientNameMasked", lookup.maskedName);
+      fd.append(
+        "estimatedFee",
+        String(estimateFee(variant, allValues, parseFloat(values.amount) || 0))
+      );
+      if (lookup.status === "found" && lookup.maskedName)
+        fd.append("recipientNameMasked", lookup.maskedName);
 
       const res = await submitTransfer(fd);
       if (!res.success) {
@@ -258,7 +397,10 @@ export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOv
   };
 
   const reset = () => {
-    setValues({ ...defaultsFor(variant), ...(values.fromAccountId ? { fromAccountId: values.fromAccountId } : {}) });
+    setValues({
+      ...defaultsFor(variant),
+      ...(values.fromAccountId ? { fromAccountId: values.fromAccountId } : {}),
+    });
     setTouched({});
     setAttempted(false);
     setPin("");
@@ -266,6 +408,7 @@ export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOv
     setPhase("form");
     setStep(0);
     setLookup({ status: "idle" });
+    setSelectedBeneficiary(null);
     idemKey.current = crypto.randomUUID();
     onGateChange(null);
   };
@@ -274,12 +417,32 @@ export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOv
   const amount = parseFloat(values.amount) || 0;
   const fee = variant ? estimateFee(variant, allValues, amount) : 0;
 
+  // Step 1 check: Is beneficiary selected/ready?
+  const isBeneficiaryComplete = React.useMemo(() => {
+    if (!isRecipientFlow) return !!values.toAccountId;
+    if (selectedBeneficiary) return true;
+    if (values.recipientName && (values.accountNumber || values.iban || values.zelleIdentifier || values.cashtag || values.venmoUsername || values.toAccountNumber || values.address)) {
+      return true;
+    }
+    return false;
+  }, [isRecipientFlow, selectedBeneficiary, values]);
+
+  // Step 2 check: Account and Amount
+  const isDetailsComplete = React.useMemo(() => {
+    return (
+      !!values.fromAccountId &&
+      amount > 0 &&
+      !errors.amount &&
+      !errors.fromAccountId
+    );
+  }, [values.fromAccountId, amount, errors.amount, errors.fromAccountId]);
+
   if (phase === "done" && result && variant) {
     return (
-      <div ref={topRef} className="space-y-5" aria-live="polite">
+      <div ref={topRef} className="space-y-6" aria-live="polite">
         <div className="flex items-start gap-3">
-          <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-full bg-success-bg text-success">
-            <CheckCircle2 className="h-5 w-5" />
+          <span className="mt-0.5 inline-flex h-10 w-10 items-center justify-center rounded-none bg-success-bg text-success border border-success/30">
+            <CheckCircle2 className="h-6 w-6" />
           </span>
           <div>
             <h3 className="font-display text-h3 text-ink-900">Request submitted</h3>
@@ -288,42 +451,73 @@ export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOv
             </p>
           </div>
         </div>
-        <dl className="divide-y divide-paper-200 rounded border border-paper-300 bg-paper-50 text-small">
+        <dl className="divide-y divide-paper-200 border border-paper-300 bg-paper-50 text-small rounded-none">
           <Row k="Reference" v={<span className="font-mono">{result.reference}</span>} />
           <Row k="Status" v={<LiveStatusBadge reference={result.reference} initialStatus={result.status} />} />
           <Row k="Method" v={`${type.title} · ${variant.label}`} />
           <Row k="Amount" v={fmtMoney(amount)} />
         </dl>
-        <div className="flex flex-wrap gap-3">
-          <Button onClick={reset}>Start another transfer</Button>
-          <Button variant="outline" onClick={() => (window.location.href = "/activities")}>
+        <div className="flex flex-wrap gap-3 pt-2">
+          <button
+            type="button"
+            onClick={reset}
+            className="rounded-none bg-ink-900 px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-white hover:bg-ink-800 transition-colors shadow-none"
+          >
+            Start another transfer
+          </button>
+          <button
+            type="button"
+            onClick={() => (window.location.href = "/activities")}
+            className="rounded-none border border-paper-300 bg-white px-6 py-2.5 text-xs font-semibold uppercase tracking-wider text-ink-700 hover:bg-paper-100 transition-colors shadow-none"
+          >
             View in Activities
-          </Button>
+          </button>
         </div>
       </div>
     );
   }
 
+  // Steps definition for the Stepper
+  const stepsList = isRecipientFlow
+    ? [
+        { title: "Beneficiary", subtitle: "Select or add recipient" },
+        { title: "Transfer Details", subtitle: "Amount & account" },
+        { title: "Review & Purpose", subtitle: "Notes & confirmation" },
+      ]
+    : [
+        { title: "Accounts", subtitle: "Source & destination" },
+        { title: "Amount & Timing", subtitle: "Schedule & notes" },
+        { title: "Review", subtitle: "Confirm details" },
+      ];
+
   return (
     <div ref={topRef} className="space-y-6">
-      {/* FIRST QUESTION */}
+      {/* SECTION 1: TRANSFER METHOD / FIRST QUESTION BUTTONS */}
       <fieldset className="space-y-3">
-        <legend className="font-display text-base font-semibold text-ink-900">{type.gate.label}</legend>
+        <legend className="font-display text-base font-semibold text-ink-900">
+          {type.gate.label}
+        </legend>
         {type.gate.help && <p className="text-xs text-ink-500">{type.gate.help}</p>}
         <div
           role="radiogroup"
           aria-label={type.gate.label}
-          className={cn("grid gap-3", type.gate.options.length > 2 ? "sm:grid-cols-2" : "sm:grid-cols-2")}
+          className={cn(
+            "grid gap-3",
+            type.gate.options.length > 2 ? "sm:grid-cols-2" : "sm:grid-cols-2"
+          )}
         >
           {type.gate.options.map((o) => (
             <SelectorCard
               key={o.value}
               role="radio"
+              icon={getGateIcon(o.value)}
               title={o.label}
               description={o.description}
               selected={gate === o.value}
-              disabled={phase !== "form" && phase !== "review"}
+              disabled={phase !== "form"}
               onClick={() => requestGateChange(o.value)}
+              layout="row"
+              className="rounded-none"
             />
           ))}
         </div>
@@ -338,25 +532,36 @@ export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOv
             exit={{ opacity: 0, height: 0 }}
             className="overflow-hidden"
           >
-            <div role="alertdialog" aria-label="Discard entered details" className="rounded border border-warning bg-warning-bg p-4 text-small text-warning">
+            <div
+              role="alertdialog"
+              aria-label="Discard entered details"
+              className="rounded-none border border-warning bg-warning-bg p-4 text-small text-warning"
+            >
               <div className="flex items-start gap-2">
                 <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" />
                 <div className="space-y-3">
-                  <p>Changing this answer will clear the details you have entered, because the form depends on it.</p>
+                  <p>
+                    Changing this answer will clear the details you have entered, because the form depends on it.
+                  </p>
                   <div className="flex gap-2">
-                    <Button
-                      size="small"
+                    <button
+                      type="button"
                       onClick={() => {
                         const next = pendingGate;
                         setPendingGate(undefined);
                         onGateChange(next ?? null);
                       }}
+                      className="rounded-none bg-ink-900 px-4 py-1.5 text-xs font-semibold text-white hover:bg-ink-800 transition-colors"
                     >
                       Change and clear
-                    </Button>
-                    <Button size="small" variant="outline" onClick={() => setPendingGate(undefined)}>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPendingGate(undefined)}
+                      className="rounded-none border border-paper-300 bg-white px-4 py-1.5 text-xs font-semibold text-ink-700 hover:bg-paper-100 transition-colors"
+                    >
                       Keep my details
-                    </Button>
+                    </button>
                   </div>
                 </div>
               </div>
@@ -365,183 +570,524 @@ export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOv
         )}
       </AnimatePresence>
 
-      {/* GATED FIELDS */}
-      {variant && phase === "form" && (
-        <form
-          noValidate
-          onSubmit={(e) => {
-            e.preventDefault();
-            goReview();
-          }}
-          className="space-y-6"
-        >
-          <div className="flex flex-col gap-y-5 max-w-md">
-            <AnimatePresence initial={false} mode="popLayout">
-              {visible.slice(step * 5, (step + 1) * 5).map((f) => (
-                <motion.div
-                  key={f.name}
-                  layout={false}
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  transition={{ duration: 0.25, ease: "easeOut" }}
-                  className="-mx-1 px-1 py-0.5"
-                  style={{ overflow: "hidden" }}
-                >
-                  <div>
-                    <FieldControl
-                      f={f}
-                      value={values[f.name] ?? ""}
-                      error={showError(f.name)}
-                      accounts={accounts}
-                      values={allValues}
-                      lookup={lookup}
-                      limit={limit}
-                      fee={fee}
-                      amount={amount}
-                      onChange={(v) => setValue(f.name, v, f)}
-                      onBlur={() => setTouched((t) => ({ ...t, [f.name]: true }))}
-                      onPayeeConfirm={(c) => setValue("payeeConfirmed", c ? "true" : "")}
-                    />
+      {/* SECTION DIVIDER BORDER LINE SEPARATING WIRE TRANSFER BUTTONS FROM THE FORM */}
+      {variant && (
+        <div className="border-t border-paper-300 pt-6 my-6">
+          {/* STABLE, FIXED-DIMENSION FORM CONTAINER */}
+          <div className="min-h-[460px] flex flex-col justify-between">
+            {phase === "form" && (
+              <>
+                {/* STEPPER HEADER WITH SQUARED-EDGE AESTHETICS */}
+                <div className="border-b border-paper-200 pb-4 mb-6">
+                  <div className="flex items-center gap-2">
+                    {stepsList.map((s, idx) => {
+                      const isActive = idx === step;
+                      const isDone = idx < step;
+                      return (
+                        <div key={s.title} className="flex-1">
+                          <div className="flex items-center justify-between mb-1.5">
+                            <span
+                              className={cn(
+                                "text-[11px] font-bold uppercase tracking-wider",
+                                isActive
+                                  ? "text-ink-900 font-bold"
+                                  : isDone
+                                  ? "text-pine-700"
+                                  : "text-ink-400"
+                              )}
+                            >
+                              {`0${idx + 1}. ${s.title}`}
+                            </span>
+                            {isDone && <CheckCircle2 className="h-3 w-3 text-pine-700" />}
+                          </div>
+                          <div
+                            className={cn(
+                              "h-1 w-full rounded-none transition-colors",
+                              isActive
+                                ? "bg-ink-900"
+                                : isDone
+                                ? "bg-pine-700"
+                                : "bg-paper-200"
+                            )}
+                          />
+                        </div>
+                      );
+                    })}
                   </div>
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </div>
+                </div>
 
-          <div className="flex flex-wrap items-center justify-start gap-3 border-t border-paper-200 pt-5 max-w-md">
-            {step > 0 && (
-              <Button
-                type="button"
-                variant="outline"
-                className="rounded-full px-8 shadow-none"
-                onClick={() => setStep((s) => Math.max(0, s - 1))}
-              >
-                Back
-              </Button>
-            )}
-            
-            {(step + 1) * 5 < visible.length || !gateComplete ? (
-              <Button
-                type="button"
-                className="rounded-full px-8 shadow-none"
-                onClick={() => {
-                  setAttempted(true);
-                  const currentStepFields = visible.slice(step * 5, (step + 1) * 5);
-                  const hasError = currentStepFields.some((f) => errors[f.name]);
-                  if (hasError) {
-                    const first = currentStepFields.find((f) => errors[f.name])?.name;
-                    if (first) document.getElementById(`tf-${first}`)?.focus();
-                    return;
-                  }
-                  setAttempted(false);
-                  setStep((s) => s + 1);
-                }}
-              >
-                Next
-              </Button>
-            ) : (
-              <Button type="submit" className="rounded-full px-8 shadow-none bg-ink-900 hover:bg-ink-800 text-white">
-                Review Details
-              </Button>
-            )}
-          </div>
-        </form>
-      )}
+                {/* FORM PAGE 0: RECIPIENT / BENEFICIARY SELECTION */}
+                {step === 0 && (
+                  <div className="space-y-6 flex-1 flex flex-col justify-between">
+                    {isRecipientFlow ? (
+                      /* External / Wire / P2P / Crypto / Internal Other Beneficiary section */
+                      <div className="space-y-4">
+                        <div className="space-y-1">
+                          <h3 className="font-display text-base font-bold text-ink-900">
+                            Recipient / Beneficiary
+                          </h3>
+                          <p className="text-xs text-ink-500">
+                            Select a saved contact or enter a new beneficiary for this {variant.label}.
+                          </p>
+                        </div>
 
-      {/* REVIEW */}
-      {variant && phase === "review" && (
-        <div className="space-y-6 max-w-2xl">
-          <h3 className="font-display text-lg font-semibold text-ink-900">Review transfer details</h3>
-          <dl className="text-small">
-            <Row k="Method" v={`${type.title} · ${variant.label}`} />
-            {visible
-              .filter((f) => f.type !== "notice" && !f.confirmOf)
-              .map((f) => (
-                <Row key={f.name} k={f.label} v={reviewValue(f, allValues, accounts, lookup)} />
-              ))}
-            <Row k="Estimated fee (demo)" v={fmtMoney(fee)} />
-            <Row
-              k={txType === "CRYPTO_DEPOSIT" ? "You will receive" : "Total debit"}
-              v={<span>{fmtMoney(txType === "CRYPTO_DEPOSIT" ? amount - fee : amount + fee)}</span>}
-            />
-            {values.currency && values.currency !== "USD" && (
-              <Row
-                k="Beneficiary receives (indicative)"
-                v={`≈ ${(amount * (DEMO_RATES[values.currency] ?? 1)).toLocaleString("en-US", { maximumFractionDigits: 2 })} ${values.currency}`}
-              />
-            )}
-          </dl>
-          
-          <div className="text-[10px] text-ink-500 space-y-3 leading-relaxed py-2">
-            <p>Please make sure there are sufficient funds in the account from which you are transferring money in order to avoid a possible fee. For details, refer to your account agreement and applicable fee schedule.</p>
-            <p>Transfers made after the 10:45 p.m. ET daily cutoff time but before 11:59 p.m. ET will be posted as of the next business day in your transaction history, but will be included in the balance we use to pay transactions that night. Immediate access to these funds is available at ATMs and financial centers. For additional details, see the Online Banking Service Agreement.</p>
-            <p>Once you make an immediate transfer, you can't modify or cancel it.</p>
-            <p>Transfer and posting dates are based on Eastern Time.</p>
-          </div>
+                        {!isBeneficiaryComplete ? (
+                          /* Minimal structure fitting right in the box */
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPopoutInitialMode("select");
+                                setIsPopoutOpen(true);
+                              }}
+                              className="group flex items-center gap-3.5 p-4 rounded-none border border-paper-300 bg-paper-50 hover:border-ink-900 hover:bg-white transition-all text-left"
+                            >
+                              <div className="h-10 w-10 shrink-0 rounded-none bg-paper-100 flex items-center justify-center text-ink-900 group-hover:bg-ink-900 group-hover:text-white transition-colors">
+                                <BookUser className="h-5 w-5" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <span className="font-display text-small font-bold text-ink-900 block leading-tight">
+                                  Select Saved Beneficiary
+                                </span>
+                                <span className="text-xs text-ink-500 mt-1 block leading-snug">
+                                  Choose from your saved contacts for {variant.label}.
+                                </span>
+                              </div>
+                            </button>
 
-          <div className="flex flex-wrap justify-start gap-3 items-center">
-            <Button onClick={() => setPhase("confirm")} className="rounded-full px-8 shadow-none bg-ink-900 hover:bg-ink-800 text-white">Transfer</Button>
-            <Button variant="outline" onClick={() => setPhase("form")} className="rounded-full px-8 shadow-none border-ink-900 text-ink-900 hover:bg-ink-50">
-              Edit
-            </Button>
-            <Button variant="outline" onClick={reset} className="rounded-full px-8 shadow-none bg-transparent border-transparent text-ink-600 hover:bg-paper-100">Cancel</Button>
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setPopoutInitialMode("add");
+                                setIsPopoutOpen(true);
+                              }}
+                              className="group flex items-center gap-3.5 p-4 rounded-none border border-paper-300 bg-paper-50 hover:border-ink-900 hover:bg-white transition-all text-left"
+                            >
+                              <div className="h-10 w-10 shrink-0 rounded-none bg-paper-100 flex items-center justify-center text-ink-900 group-hover:bg-ink-900 group-hover:text-white transition-colors">
+                                <UserPlus className="h-5 w-5" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <span className="font-display text-small font-bold text-ink-900 block leading-tight">
+                                  Add New Beneficiary
+                                </span>
+                                <span className="text-xs text-ink-500 mt-1 block leading-snug">
+                                  Enter recipient details and optionally save to contacts.
+                                </span>
+                              </div>
+                            </button>
+                          </div>
+                        ) : (
+                          /* Selected Beneficiary Summary Card */
+                          <div className="border border-paper-300 bg-white p-5 rounded-none space-y-3">
+                            <div className="flex items-start justify-between gap-3">
+                              <div className="flex items-center gap-3.5">
+                                <div className="h-10 w-10 border border-paper-300 bg-paper-50 flex items-center justify-center p-1 shrink-0 rounded-none">
+                                  {getGateIcon(gate || "")}
+                                </div>
+                                <div>
+                                  <span className="inline-block px-2 py-0.5 text-[10px] font-bold uppercase tracking-wider bg-pine-700/10 text-pine-700 rounded-none mb-1">
+                                    {selectedBeneficiary?.isSaved ? "Saved Beneficiary" : "Recipient Selected"}
+                                  </span>
+                                  <h4 className="font-display text-base font-bold text-ink-900">
+                                    {selectedBeneficiary?.name || values.recipientName}
+                                    {selectedBeneficiary?.nickname && (
+                                      <span className="ml-2 text-xs font-normal text-ink-500">
+                                        ({selectedBeneficiary.nickname})
+                                      </span>
+                                    )}
+                                  </h4>
+                                </div>
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setPopoutInitialMode("select");
+                                    setIsPopoutOpen(true);
+                                  }}
+                                  className="text-xs font-semibold text-ink-900 hover:underline px-2 py-1 rounded-none border border-paper-300 bg-paper-50 hover:bg-white"
+                                >
+                                  Change
+                                </button>
+                                <button
+                                  type="button"
+                                  onClick={clearBeneficiary}
+                                  className="text-xs font-semibold text-vermilion-600 hover:underline px-2 py-1"
+                                >
+                                  Clear
+                                </button>
+                              </div>
+                            </div>
+
+                            <div className="text-xs text-ink-600 font-mono space-y-1 border-t border-paper-200 pt-3">
+                              {values.bankName && (
+                                <p>Bank: <strong className="text-ink-900">{values.bankName}</strong></p>
+                              )}
+                              {values.routingNumber && (
+                                <p>Routing (ABA): <strong className="text-ink-900">{values.routingNumber}</strong></p>
+                              )}
+                              {values.accountNumber && (
+                                <p>Account: <strong className="text-ink-900">••••{values.accountNumber.slice(-4)}</strong></p>
+                              )}
+                              {values.swiftBic && (
+                                <p>SWIFT/BIC: <strong className="text-ink-900">{values.swiftBic}</strong></p>
+                              )}
+                              {values.iban && (
+                                <p>IBAN: <strong className="text-ink-900">{values.iban}</strong></p>
+                              )}
+                              {values.zelleIdentifier && (
+                                <p>Zelle Contact: <strong className="text-ink-900">{values.zelleIdentifier}</strong></p>
+                              )}
+                              {values.cashtag && (
+                                <p>Cashtag: <strong className="text-ink-900">{values.cashtag}</strong></p>
+                              )}
+                              {values.venmoUsername && (
+                                <p>Venmo: <strong className="text-ink-900">@{values.venmoUsername.replace(/^@/, "")}</strong></p>
+                              )}
+                              {values.address && (
+                                <p>Wallet Address: <strong className="text-ink-900">{values.address}</strong></p>
+                              )}
+                              {values.toAccountNumber && (
+                                <p>Internal Account: <strong className="text-ink-900">••••{values.toAccountNumber.slice(-4)}</strong></p>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    ) : (
+                      /* Own accounts Step 0: destination account */
+                      <div className="space-y-4 max-w-md">
+                        <div className="space-y-1">
+                          <h3 className="font-display text-base font-bold text-ink-900">
+                            Destination Account
+                          </h3>
+                          <p className="text-xs text-ink-500">
+                            Choose which of your own accounts receives the funds.
+                          </p>
+                        </div>
+                        {visible
+                          .filter((f) => f.name === "toAccountId")
+                          .map((f) => (
+                            <FieldControl
+                              key={f.name}
+                              f={f}
+                              value={values[f.name] ?? ""}
+                              error={showError(f.name)}
+                              accounts={accounts}
+                              values={allValues}
+                              lookup={lookup}
+                              limit={limit}
+                              fee={fee}
+                              amount={amount}
+                              onChange={(v) => setValue(f.name, v, f)}
+                              onBlur={() => setTouched((t) => ({ ...t, [f.name]: true }))}
+                              onPayeeConfirm={() => {}}
+                            />
+                          ))}
+                      </div>
+                    )}
+
+                    {/* Step 0 Navigation Footer */}
+                    <div className="border-t border-paper-200 pt-5 mt-auto flex items-center justify-between">
+                      <span className="text-xs text-ink-500">
+                        {!isBeneficiaryComplete && "Select or add a beneficiary to proceed"}
+                      </span>
+                      <button
+                        type="button"
+                        disabled={!isBeneficiaryComplete}
+                        onClick={() => setStep(1)}
+                        className="inline-flex items-center gap-2 rounded-none bg-ink-900 px-8 py-3 text-xs font-semibold uppercase tracking-wider text-white hover:bg-ink-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-none"
+                      >
+                        Next: Transfer Details
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* FORM PAGE 1: TRANSFER DETAILS (ACCOUNT & AMOUNT) */}
+                {step === 1 && (
+                  <div className="space-y-6 flex-1 flex flex-col justify-between">
+                    <div className="space-y-5 max-w-md">
+                      <div className="space-y-1">
+                        <h3 className="font-display text-base font-bold text-ink-900">
+                          Transfer Details
+                        </h3>
+                        <p className="text-xs text-ink-500">
+                          Select source account and enter transfer amount.
+                        </p>
+                      </div>
+
+                      {visible
+                        .filter((f) =>
+                          ["fromAccountId", "amount", "speed", "currency", "entryClass", "network"].includes(
+                            f.name
+                          )
+                        )
+                        .map((f) => (
+                          <FieldControl
+                            key={f.name}
+                            f={f}
+                            value={values[f.name] ?? ""}
+                            error={showError(f.name)}
+                            accounts={accounts}
+                            values={allValues}
+                            lookup={lookup}
+                            limit={limit}
+                            fee={fee}
+                            amount={amount}
+                            onChange={(v) => setValue(f.name, v, f)}
+                            onBlur={() => setTouched((t) => ({ ...t, [f.name]: true }))}
+                            onPayeeConfirm={() => {}}
+                          />
+                        ))}
+                    </div>
+
+                    {/* Step 1 Navigation Footer with Squared-Edge Aesthetics */}
+                    <div className="border-t border-paper-200 pt-5 mt-auto flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => setStep(0)}
+                        className="inline-flex items-center gap-2 rounded-none border border-paper-300 bg-white px-6 py-3 text-xs font-semibold uppercase tracking-wider text-ink-700 hover:bg-paper-100 transition-colors shadow-none"
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                        Previous
+                      </button>
+                      <button
+                        type="button"
+                        disabled={!isDetailsComplete}
+                        onClick={() => {
+                          setAttempted(true);
+                          if (isDetailsComplete) setStep(2);
+                        }}
+                        className="inline-flex items-center gap-2 rounded-none bg-ink-900 px-8 py-3 text-xs font-semibold uppercase tracking-wider text-white hover:bg-ink-800 transition-colors disabled:opacity-40 disabled:cursor-not-allowed shadow-none"
+                      >
+                        Next: Review Details
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* FORM PAGE 2: ADDITIONAL DETAILS & REVIEW */}
+                {step === 2 && (
+                  <div className="space-y-6 flex-1 flex flex-col justify-between">
+                    <div className="space-y-5 max-w-xl">
+                      <div className="space-y-1">
+                        <h3 className="font-display text-base font-bold text-ink-900">
+                          Additional Details & Review
+                        </h3>
+                        <p className="text-xs text-ink-500">
+                          Confirm transfer details and add any optional notes.
+                        </p>
+                      </div>
+
+                      {/* Purpose & Memo & Timing fields */}
+                      <div className="space-y-4">
+                        {visible
+                          .filter((f) =>
+                            [
+                              "purpose",
+                              "memo",
+                              "note",
+                              "timing",
+                              "scheduledDate",
+                              "chargeBearer",
+                            ].includes(f.name)
+                          )
+                          .map((f) => (
+                            <FieldControl
+                              key={f.name}
+                              f={f}
+                              value={values[f.name] ?? ""}
+                              error={showError(f.name)}
+                              accounts={accounts}
+                              values={allValues}
+                              lookup={lookup}
+                              limit={limit}
+                              fee={fee}
+                              amount={amount}
+                              onChange={(v) => setValue(f.name, v, f)}
+                              onBlur={() => setTouched((t) => ({ ...t, [f.name]: true }))}
+                              onPayeeConfirm={() => {}}
+                            />
+                          ))}
+                      </div>
+
+                      {/* Acknowledgements */}
+                      <div className="space-y-3">
+                        {visible
+                          .filter((f) => f.type === "checkbox")
+                          .map((f) => (
+                            <FieldControl
+                              key={f.name}
+                              f={f}
+                              value={values[f.name] ?? ""}
+                              error={showError(f.name)}
+                              accounts={accounts}
+                              values={allValues}
+                              lookup={lookup}
+                              limit={limit}
+                              fee={fee}
+                              amount={amount}
+                              onChange={(v) => setValue(f.name, v, f)}
+                              onBlur={() => setTouched((t) => ({ ...t, [f.name]: true }))}
+                              onPayeeConfirm={() => {}}
+                            />
+                          ))}
+                      </div>
+
+                      {/* Compact Summary Review Table */}
+                      <div className="border border-paper-300 bg-paper-50 p-4 rounded-none text-small space-y-2">
+                        <div className="flex justify-between border-b border-paper-200 pb-2 items-center">
+                          <span className="text-ink-500">Method</span>
+                          <span className="font-semibold text-ink-900 flex items-center gap-2">
+                            {gate && <span className="shrink-0 inline-flex items-center justify-center text-ink-700">{getGateIcon(gate)}</span>}
+                            {variant.label}
+                          </span>
+                        </div>
+                        {isRecipientFlow && (
+                          <div className="flex justify-between border-b border-paper-200 pb-2 items-center">
+                            <span className="text-ink-500">Recipient</span>
+                            <span className="font-semibold text-ink-900 flex items-center gap-2">
+                              {gate && <span className="shrink-0 inline-flex items-center justify-center text-ink-700">{getGateIcon(gate)}</span>}
+                              {selectedBeneficiary?.name || values.recipientName}
+                            </span>
+                          </div>
+                        )}
+                        <div className="flex justify-between border-b border-paper-200 pb-2">
+                          <span className="text-ink-500">From Account</span>
+                          <span className="font-semibold text-ink-900">
+                            {selectedAccount ? accountLabel(selectedAccount) : "—"}
+                          </span>
+                        </div>
+                        <div className="flex justify-between border-b border-paper-200 pb-2">
+                          <span className="text-ink-500">Transfer Amount</span>
+                          <span className="font-semibold text-ink-900">{fmtMoney(amount)}</span>
+                        </div>
+                        <div className="flex justify-between border-b border-paper-200 pb-2">
+                          <span className="text-ink-500">Estimated Fee</span>
+                          <span className="font-semibold text-ink-900">{fmtMoney(fee)}</span>
+                        </div>
+                        <div className="flex justify-between pt-1 font-bold text-ink-900">
+                          <span>Total Debit</span>
+                          <span>{fmtMoney(amount + fee)}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Step 2 Navigation Footer with Squared-Edge Aesthetics */}
+                    <div className="border-t border-paper-200 pt-5 mt-auto flex items-center justify-between">
+                      <button
+                        type="button"
+                        onClick={() => setStep(1)}
+                        className="inline-flex items-center gap-2 rounded-none border border-paper-300 bg-white px-6 py-3 text-xs font-semibold uppercase tracking-wider text-ink-700 hover:bg-paper-100 transition-colors shadow-none"
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                        Previous
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setAttempted(true);
+                          const ackErrors = visible
+                            .filter((f) => f.type === "checkbox")
+                            .some((f) => errors[f.name]);
+                          if (!ackErrors) setPhase("confirm");
+                        }}
+                        className="inline-flex items-center gap-2 rounded-none bg-ink-900 px-8 py-3 text-xs font-semibold uppercase tracking-wider text-white hover:bg-ink-800 transition-colors shadow-none"
+                      >
+                        Continue to PIN
+                        <ChevronRight className="h-4 w-4" />
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {/* PIN CONFIRM PHASE */}
+            {variant && phase === "confirm" && (
+              <div className="space-y-6 flex-1 flex flex-col justify-between">
+                <div className="space-y-5 max-w-sm">
+                  <div>
+                    <h3 className="font-display text-base font-bold text-ink-900">
+                      Confirm with Transaction PIN
+                    </h3>
+                    <p className="text-small text-ink-500 mt-1">
+                      Sending {fmtMoney(amount)} via {variant.label}. Enter your 4-6 digit PIN to submit.
+                    </p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label htmlFor="tf-pin" className="block text-xs font-semibold uppercase tracking-wider text-ink-900">
+                      Transaction PIN
+                    </label>
+                    <div className="relative">
+                      <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-500" />
+                      <input
+                        id="tf-pin"
+                        type="password"
+                        inputMode="numeric"
+                        autoComplete="off"
+                        maxLength={6}
+                        value={pin}
+                        onChange={(e) => {
+                          setPin(e.target.value.replace(/\D/g, ""));
+                          setPinError(null);
+                        }}
+                        aria-invalid={!!pinError}
+                        className={cn(
+                          inputClass(!!pinError),
+                          "pl-9 text-center font-mono tracking-[0.4em] rounded-none"
+                        )}
+                        placeholder="••••"
+                      />
+                    </div>
+                    {pinError && <p className="text-xs text-vermilion-600">{pinError}</p>}
+                  </div>
+                  {submitError && (
+                    <div className="rounded-none border border-error bg-error-bg p-3 text-small text-error">
+                      {submitError}
+                    </div>
+                  )}
+                </div>
+
+                {/* PIN Phase Navigation Footer with Squared-Edge Aesthetics */}
+                <div className="border-t border-paper-200 pt-5 mt-auto flex items-center justify-between">
+                  <button
+                    type="button"
+                    onClick={() => setPhase("form")}
+                    disabled={submitting}
+                    className="inline-flex items-center gap-2 rounded-none border border-paper-300 bg-white px-6 py-3 text-xs font-semibold uppercase tracking-wider text-ink-700 hover:bg-paper-100 transition-colors shadow-none"
+                  >
+                    <ArrowLeft className="h-4 w-4" />
+                    Back to Review
+                  </button>
+                  <button
+                    type="button"
+                    onClick={submit}
+                    disabled={submitting || pin.length < 4}
+                    className="inline-flex items-center gap-2 rounded-none bg-ink-900 px-8 py-3 text-xs font-semibold uppercase tracking-wider text-white hover:bg-ink-800 transition-colors shadow-none disabled:opacity-50"
+                  >
+                    {submitting ? "Submitting…" : "Submit Request"}
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
         </div>
       )}
 
-      {/* PIN CONFIRM */}
-      {variant && phase === "confirm" && (
-        <div className="space-y-5">
-          <div>
-            <h3 className="font-display text-base font-semibold text-ink-900">Confirm with your PIN</h3>
-            <p className="text-small text-ink-500">
-              Sending {fmtMoney(amount)} via {variant.label}. Enter your Transaction PIN to submit this request for approval.
-            </p>
-          </div>
-          <div className="max-w-xs space-y-1.5">
-            <label htmlFor="tf-pin" className="block text-small font-medium text-ink-900">
-              Transaction PIN
-            </label>
-            <div className="relative">
-              <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-ink-500" />
-              <input
-                id="tf-pin"
-                type="password"
-                inputMode="numeric"
-                autoComplete="off"
-                maxLength={6}
-                value={pin}
-                onChange={(e) => {
-                  setPin(e.target.value.replace(/\D/g, ""));
-                  setPinError(null);
-                }}
-                aria-invalid={!!pinError}
-                aria-describedby={pinError ? "tf-pin-err" : undefined}
-                className={cn(inputClass(!!pinError), "pl-9 text-center font-mono tracking-[0.4em]")}
-                placeholder="••••"
-              />
-            </div>
-            {pinError && (
-              <p id="tf-pin-err" className="text-xs text-vermilion-600">
-                {pinError}
-              </p>
-            )}
-          </div>
-          {submitError && (
-            <p role="alert" className="rounded border border-error bg-error-bg p-3 text-small text-error">
-              {submitError}
-            </p>
-          )}
-          <div className="flex flex-wrap justify-start gap-3 items-center pt-2">
-            <Button onClick={submit} loading={submitting} className="rounded-full px-8 shadow-none bg-ink-900 hover:bg-ink-800 text-white">
-              Submit request
-            </Button>
-            <Button variant="outline" onClick={() => setPhase("review")} disabled={submitting} className="rounded-full px-8 shadow-none border-ink-900 text-ink-900 hover:bg-ink-50">
-              Back
-            </Button>
-          </div>
-        </div>
+      {/* BENEFICIARY POP-OUT PANEL */}
+      {gate && (
+        <BeneficiaryPopoutPanel
+          isOpen={isPopoutOpen}
+          onClose={() => setIsPopoutOpen(false)}
+          methodId={gate}
+          methodLabel={variant?.label || type.title}
+          initialMode={popoutInitialMode}
+          onSelectBeneficiary={handleBeneficiarySelected}
+        />
       )}
     </div>
   );
@@ -549,41 +1095,20 @@ export function TransferFormEngine({ type, gate, onGateChange, accounts, limitOv
 
 /* ---------------------------------- helpers ---------------------------------- */
 
-const isWide = (f: FieldDef) =>
-  ["radio", "textarea", "notice", "checkbox", "account-lookup"].includes(f.type) ||
-  f.name === "memo" ||
-  f.name === "note";
-
 const inputClass = (invalid: boolean) =>
   cn(
-    "w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none transition-shadow",
+    "w-full h-12 rounded-none border bg-paper-50 px-3 text-body outline-none transition-shadow",
     "focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900",
-    invalid ? "border-vermilion-600" : "border-paper-300",
+    invalid ? "border-vermilion-600" : "border-paper-300"
   );
 
 function Row({ k, v }: { k: string; v: React.ReactNode }) {
   return (
-    <div className="flex items-start gap-4 py-3 border-b border-paper-200 last:border-0 text-small">
+    <div className="flex items-start gap-4 py-3 px-4 border-b border-paper-200 last:border-0 text-small">
       <dt className="text-ink-600 w-32 shrink-0 pt-0.5">{k}</dt>
       <dd className="text-ink-900 font-semibold break-words flex-1">{v}</dd>
     </div>
   );
-}
-
-function reviewValue(f: FieldDef, values: Values, accounts: PortalAccount[], lookup: Lookup): React.ReactNode {
-  const v = values[f.name] ?? "";
-  if (f.type === "checkbox") return v === "true" ? "Acknowledged" : "No";
-  if (!v) return <span className="text-ink-500">Not provided</span>;
-  if (f.type === "account-select") {
-    const a = accounts.find((x) => x.id === v);
-    return a ? accountLabel(a) : v;
-  }
-  if (f.type === "account-lookup")
-    return `••••${v.slice(-4)}${lookup.maskedName ? ` · ${lookup.maskedName}` : ""}`;
-  if (f.options) return f.options.find((o) => o.value === v)?.label ?? v;
-  if (f.type === "amount") return fmtMoney(parseFloat(v));
-  if (f.sensitive) return maskTail(v);
-  return displayMask(f.mask, v);
 }
 
 interface ControlProps {
@@ -601,7 +1126,20 @@ interface ControlProps {
   onPayeeConfirm: (checked: boolean) => void;
 }
 
-function FieldControl({ f, value, error, accounts, values, lookup, limit, fee, amount, onChange, onBlur, onPayeeConfirm }: ControlProps) {
+function FieldControl({
+  f,
+  value,
+  error,
+  accounts,
+  values,
+  lookup,
+  limit,
+  fee,
+  amount,
+  onChange,
+  onBlur,
+  onPayeeConfirm,
+}: ControlProps) {
   const id = `tf-${f.name}`;
   const errId = `${id}-err`;
   const helpId = `${id}-help`;
@@ -610,7 +1148,7 @@ function FieldControl({ f, value, error, accounts, values, lookup, limit, fee, a
 
   if (f.type === "notice") {
     return (
-      <div role="note" className="rounded border border-info bg-info-bg p-3 text-small text-info break-all">
+      <div role="note" className="rounded-none border border-info bg-info-bg p-3 text-small text-info break-all">
         <strong className="block text-[11px] uppercase tracking-wider">{f.label}</strong>
         {f.content}
       </div>
@@ -620,7 +1158,10 @@ function FieldControl({ f, value, error, accounts, values, lookup, limit, fee, a
   if (f.type === "checkbox") {
     return (
       <div>
-        <label htmlFor={id} className="flex cursor-pointer items-start gap-3 rounded border border-paper-300 bg-paper-50 p-3 text-small text-ink-700">
+        <label
+          htmlFor={id}
+          className="flex cursor-pointer items-start gap-3 rounded-none border border-paper-300 bg-paper-50 p-3 text-small text-ink-700 hover:border-ink-900 transition-colors"
+        >
           <input
             id={id}
             type="checkbox"
@@ -629,21 +1170,17 @@ function FieldControl({ f, value, error, accounts, values, lookup, limit, fee, a
             onBlur={onBlur}
             aria-invalid={!!error}
             aria-describedby={describedBy}
-            className="mt-0.5 h-4 w-4 accent-[#1F4D3F]"
+            className="mt-0.5 h-4 w-4 rounded-none accent-pine-700"
           />
-          <span>{f.content}</span>
+          <span className="text-xs leading-relaxed">{f.content}</span>
         </label>
-        {error && (
-          <p id={errId} className="mt-1 text-xs text-vermilion-600">
-            {error}
-          </p>
-        )}
+        {error && <p id={errId} className="mt-1 text-xs text-vermilion-600">{error}</p>}
       </div>
     );
   }
 
   const label = (
-    <label htmlFor={id} className="block text-small font-medium text-ink-900">
+    <label htmlFor={id} className="block text-xs font-semibold uppercase tracking-wider text-ink-900">
       {f.label}
       {optionalTag && <span className="ml-1 text-xs font-normal text-ink-500">(optional)</span>}
     </label>
@@ -651,23 +1188,15 @@ function FieldControl({ f, value, error, accounts, values, lookup, limit, fee, a
 
   const footer = (
     <>
-      {f.help && !error && (
-        <p id={helpId} className="text-xs text-ink-500">
-          {f.help}
-        </p>
-      )}
-      {error && (
-        <p id={errId} role="alert" className="text-xs text-vermilion-600">
-          {error}
-        </p>
-      )}
+      {f.help && !error && <p id={helpId} className="text-xs text-ink-500">{f.help}</p>}
+      {error && <p id={errId} role="alert" className="text-xs text-vermilion-600">{error}</p>}
     </>
   );
 
   if (f.type === "radio") {
     return (
       <div className="space-y-1.5">
-        <span id={id} className="block text-small font-medium text-ink-900">
+        <span id={id} className="block text-xs font-semibold uppercase tracking-wider text-ink-900">
           {f.label}
         </span>
         <div role="radiogroup" aria-labelledby={id} className="grid gap-3 sm:grid-cols-2">
@@ -682,6 +1211,8 @@ function FieldControl({ f, value, error, accounts, values, lookup, limit, fee, a
                 onChange(o.value);
                 onBlur();
               }}
+              layout="row"
+              className="rounded-none"
             />
           ))}
         </div>
@@ -712,7 +1243,11 @@ function FieldControl({ f, value, error, accounts, values, lookup, limit, fee, a
             </option>
           ))}
         </select>
-        {selected && !error && <p className="text-xs text-ink-500">Available balance {fmtMoney(selected.balance, selected.currency)}</p>}
+        {selected && !error && (
+          <p className="text-xs text-ink-500">
+            Available balance: {fmtMoney(selected.balance, selected.currency)}
+          </p>
+        )}
         {footer}
       </div>
     );
@@ -731,7 +1266,7 @@ function FieldControl({ f, value, error, accounts, values, lookup, limit, fee, a
           aria-describedby={describedBy}
           className={inputClass(!!error)}
         >
-          <option value="">Select</option>
+          <option value="">Select option</option>
           {f.options?.map((o) => (
             <option key={o.value} value={o.value}>
               {o.label}
@@ -756,7 +1291,7 @@ function FieldControl({ f, value, error, accounts, values, lookup, limit, fee, a
           aria-invalid={!!error}
           aria-describedby={describedBy}
           rows={3}
-          className={cn(inputClass(!!error), "h-auto py-3")}
+          className={cn(inputClass(!!error), "h-auto py-3 rounded-none")}
         />
         {footer}
       </div>
@@ -770,7 +1305,11 @@ function FieldControl({ f, value, error, accounts, values, lookup, limit, fee, a
     <div className="space-y-1.5">
       {label}
       <div className="relative">
-        {f.prefix && <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-500">{f.prefix}</span>}
+        {f.prefix && (
+          <span className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-ink-500">
+            {f.prefix}
+          </span>
+        )}
         <input
           id={id}
           type={f.type === "date" ? "date" : "text"}
@@ -780,12 +1319,16 @@ function FieldControl({ f, value, error, accounts, values, lookup, limit, fee, a
           value={shown}
           maxLength={f.maxLength && !f.mask ? f.maxLength : undefined}
           placeholder={f.placeholder}
-          onChange={(e) => onChange(f.mask === "iban" ? e.target.value : e.target.value)}
+          onChange={(e) => onChange(e.target.value)}
           onBlur={onBlur}
           onPaste={f.confirmOf ? (e) => e.preventDefault() : undefined}
           aria-invalid={!!error}
           aria-describedby={describedBy}
-          className={cn(inputClass(!!error), f.prefix && "pl-7", (f.type === "amount" || f.mask?.startsWith("digits")) && "font-mono tabular-nums")}
+          className={cn(
+            inputClass(!!error),
+            f.prefix && "pl-7",
+            (f.type === "amount" || f.mask?.startsWith("digits")) && "font-mono tabular-nums"
+          )}
         />
       </div>
       {f.maxLength && f.type === "text" && !f.mask && value.length > f.maxLength * 0.7 && (
@@ -795,21 +1338,26 @@ function FieldControl({ f, value, error, accounts, values, lookup, limit, fee, a
       )}
       {f.type === "amount" && f.stableEstimate && amount > 0 && (
         <p className="text-xs text-ink-700">
-          ≈ {(Math.max(amount - fee, 0)).toLocaleString("en-US", { maximumFractionDigits: 2 })} {(values.asset || "").toUpperCase()} after estimated fees of {fmtMoney(fee)} (demo estimate, 1:1 peg)
+          ≈ {Math.max(amount - fee, 0).toLocaleString("en-US", { maximumFractionDigits: 2 })}{" "}
+          {(values.asset || "").toUpperCase()} after estimated fees of {fmtMoney(fee)} (demo estimate)
         </p>
       )}
-      {f.type === "amount" && limit > 0 && !error && <p className="text-xs text-ink-500">Limit per transfer: {fmtMoney(limit)} (demo)</p>}
+      {f.type === "amount" && limit > 0 && !error && (
+        <p className="text-xs text-ink-500">Limit per transfer: {fmtMoney(limit)} (demo)</p>
+      )}
       {f.type === "account-lookup" && (
         <div aria-live="polite" className="space-y-2">
           {lookup.status === "loading" && <p className="text-xs text-ink-500">Checking account…</p>}
-          {lookup.status === "notfound" && <p className="text-xs text-vermilion-600">No active account found with this number.</p>}
+          {lookup.status === "notfound" && (
+            <p className="text-xs text-vermilion-600">No active account found with this number.</p>
+          )}
           {lookup.status === "found" && (
-            <label className="flex cursor-pointer items-start gap-2 rounded border border-pine-700/40 bg-success-bg p-3 text-small text-ink-900">
+            <label className="flex cursor-pointer items-start gap-2 rounded-none border border-pine-700/40 bg-success-bg p-3 text-small text-ink-900">
               <input
                 type="checkbox"
                 checked={values.payeeConfirmed === "true"}
                 onChange={(e) => onPayeeConfirm(e.target.checked)}
-                className="mt-0.5 h-4 w-4 accent-[#1F4D3F]"
+                className="mt-0.5 h-4 w-4 rounded-none accent-pine-700"
               />
               <span>
                 Account holder: <strong>{lookup.maskedName}</strong>. I confirm this is the right person.

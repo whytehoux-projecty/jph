@@ -241,11 +241,11 @@ export function FeeCalculator({
         (methodId === "wire_domestic" || methodId === "wire_international") && (
           <div className="flex items-center justify-between text-[11px] text-muted-foreground">
             <span>Delivery speed</span>
-            <div className="inline-flex rounded-full bg-slate-100 p-0.5">
+            <div className="inline-flex rounded-none bg-slate-100 p-0.5 border border-slate-200">
               <button
                 type="button"
                 onClick={() => setUseExpress(false)}
-                className={`px-2.5 py-1 rounded-full transition ${
+                className={`px-2.5 py-1 rounded-none transition ${
                   !useExpress
                     ? "bg-white text-ink-900 shadow-sm"
                     : "text-muted-foreground hover:text-ink-900 hover:bg-white/60"
@@ -256,7 +256,7 @@ export function FeeCalculator({
               <button
                 type="button"
                 onClick={() => setUseExpress(true)}
-                className={`px-2.5 py-1 rounded-full transition ${
+                className={`px-2.5 py-1 rounded-none transition ${
                   useExpress
                     ? "bg-white text-ink-900 shadow-sm"
                     : "text-muted-foreground hover:text-ink-900 hover:bg-white/60"

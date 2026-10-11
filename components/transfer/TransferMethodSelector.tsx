@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { BrandIcon, getBrandIconSrc } from "@/components/ui/BrandIcon";
 
 export type UiTransferTypeId = string;
 
@@ -64,12 +65,13 @@ export function TransferMethodSelector({
         const Icon = type.isBlockedByAdmin ? Lock : getIconForMethod(type.methodId);
         const isActive = selectedTypeId === type.methodId;
         const isDisabled = !type.isEnabled || type.isBlockedByAdmin;
+        const hasBrandIcon = !type.isBlockedByAdmin && !!getBrandIconSrc(type.methodId);
 
         return (
           <label
             key={type.methodId}
             className={cn(
-              "relative flex flex-col items-start rounded-lg border p-3 text-left cursor-pointer transition-all min-h-[64px]",
+              "relative flex flex-col items-start rounded-none border p-3 text-left cursor-pointer transition-all min-h-[64px]",
               isActive
                 ? "border-(--heritage-gold) bg-[#FDFBF7] shadow-sm ring-1 ring-(--heritage-gold)"
                 : "border-slate-200 bg-white hover:border-(--ink-900)/30 hover:bg-slate-50",
@@ -95,13 +97,17 @@ export function TransferMethodSelector({
             <div className="flex items-center gap-3 w-full pr-6">
               <div
                 className={cn(
-                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-md transition-colors",
+                  "flex h-8 w-8 shrink-0 items-center justify-center rounded-none transition-colors",
                   isActive
                     ? "bg-(--heritage-gold)/10 text-(--heritage-gold)"
                     : "bg-(--ink-900)/5 text-(--ink-900)"
                 )}
               >
-                <Icon className="h-4 w-4" />
+                {hasBrandIcon ? (
+                  <BrandIcon name={type.methodId} size={22} />
+                ) : (
+                  <Icon className="h-4 w-4" />
+                )}
               </div>
               <div className="flex flex-col min-w-0">
                 <div className="flex items-center gap-2">
@@ -109,7 +115,7 @@ export function TransferMethodSelector({
                     {type.displayName}
                   </span>
                   {type.badge && (
-                    <span className="shrink-0 rounded bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
+                    <span className="shrink-0 rounded-none bg-blue-50 px-1.5 py-0.5 text-[10px] font-semibold text-blue-700">
                       {type.badge}
                     </span>
                   )}

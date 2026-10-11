@@ -241,11 +241,11 @@ export function BeneficiarySelector({
   return (
     <div className="space-y-3">
       <div className="flex items-center justify-between gap-2">
-        <div className="inline-flex rounded-full bg-slate-100 p-1 text-xs">
+        <div className="inline-flex rounded-none bg-slate-100 p-1 text-xs border border-slate-200">
           <button
             type="button"
             onClick={() => setTab("saved")}
-            className={`px-3 py-1 rounded-full transition ${
+            className={`px-3 py-1 rounded-none transition ${
               tab === "saved" ? activeTabClasses : inactiveTabClasses
             } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}>
             Saved
@@ -253,7 +253,7 @@ export function BeneficiarySelector({
           <button
             type="button"
             onClick={() => setTab("recent")}
-            className={`px-3 py-1 rounded-full transition ${
+            className={`px-3 py-1 rounded-none transition ${
               tab === "recent" ? activeTabClasses : inactiveTabClasses
             } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}>
             Recent
@@ -261,7 +261,7 @@ export function BeneficiarySelector({
           <button
             type="button"
             onClick={() => setTab("new")}
-            className={`px-3 py-1 rounded-full transition ${
+            className={`px-3 py-1 rounded-none transition ${
               tab === "new" ? activeTabClasses : inactiveTabClasses
             } focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50`}>
             New

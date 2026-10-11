@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/Button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { z } from 'zod';
+import { BrandIcon, getBrandIconSrc } from '@/components/ui/BrandIcon';
 
 interface DynamicBeneficiaryFormProps {
   initialData?: any;
@@ -123,15 +124,21 @@ export function DynamicBeneficiaryForm({ initialData, onSubmit, onCancel, isSubm
           <SelectContent>
             {Object.values(beneficiaryRails).map(rail => (
               <SelectItem key={rail.id} value={rail.id}>
-                {rail.displayName}
+                <div className="flex items-center gap-2">
+                  {getBrandIconSrc(rail.id) && <BrandIcon name={rail.id} size={16} />}
+                  <span>{rail.displayName}</span>
+                </div>
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      <div className="bg-slate-50 border border-slate-100 p-4 rounded-md space-y-4">
-        <h4 className="text-sm font-medium text-slate-700 mb-2">Transfer Details</h4>
+      <div className="bg-slate-50 border border-slate-100 p-4 rounded-none space-y-4">
+        <div className="flex items-center gap-2 mb-2">
+          {getBrandIconSrc(railId) && <BrandIcon name={railId} size={18} />}
+          <h4 className="text-sm font-medium text-slate-700">Transfer Details</h4>
+        </div>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {activeRail?.fields.map((field) => (
             <div key={field.name} className="space-y-2">
@@ -223,8 +230,8 @@ export function DynamicBeneficiaryForm({ initialData, onSubmit, onCancel, isSubm
           }} className="text-red-600 hover:bg-red-50 hover:text-red-700 h-8 text-xs">Delete</Button>
         ) : <div></div>}
         <div className="flex justify-end gap-2">
-          <Button type="button" variant="ghost" onClick={onCancel}>Cancel</Button>
-          <Button type="submit" disabled={isSubmitting} variant="primary">
+          <Button type="button" variant="ghost" onClick={onCancel} className="rounded-none">Cancel</Button>
+          <Button type="submit" disabled={isSubmitting} variant="primary" className="rounded-none">
             {isSubmitting ? 'Saving...' : 'Save Beneficiary'}
           </Button>
         </div>

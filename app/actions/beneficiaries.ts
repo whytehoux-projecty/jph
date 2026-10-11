@@ -15,17 +15,24 @@ export async function getBeneficiaries() {
   return beneficiaries;
 }
 
-export async function getBeneficiariesByMethod(method: string) {
+export async function getBeneficiariesByMethod(method?: string) {
   const session = await auth();
   if (!session?.user?.id) throw new Error('Unauthorized');
 
-  const isInternal = method === 'INTERNAL';
+  if (!method) {
+    return prisma.beneficiary.findMany({
+      where: { userId: session.user.id, deletedAt: null },
+      orderBy: { createdAt: 'desc' },
+    });
+  }
+
+  const isInternal = method === 'INTERNAL' || method === 'internal';
 
   const beneficiaries = await prisma.beneficiary.findMany({
     where: { 
       userId: session.user.id,
       deletedAt: null,
-      isInternal
+      ...(method === 'INTERNAL' || method === 'EXTERNAL' ? { isInternal } : {}),
     },
     orderBy: { createdAt: 'desc' },
   });
@@ -39,14 +46,34 @@ export async function createBeneficiary(data: {
   rail: string;
   details: string;
   isInternal?: boolean;
+  accountNumber?: string;
+  bankName?: string;
+  swiftCode?: string;
 }) {
   const session = await auth();
   if (!session?.user?.id) throw new Error('Unauthorized');
 
+  let parsedDetails: any = {};
+  try {
+    parsedDetails = typeof data.details === 'string' ? JSON.parse(data.details) : (data.details || {});
+  } catch {
+    parsedDetails = {};
+  }
+
+  const accountNumber = data.accountNumber || parsedDetails.accountNumber || parsedDetails.iban || parsedDetails.address || parsedDetails.cashtag || parsedDetails.username || null;
+  const bankName = data.bankName || parsedDetails.bankName || null;
+  const swiftCode = data.swiftCode || parsedDetails.swiftBic || null;
+
   const beneficiary = await prisma.beneficiary.create({
     data: {
-      ...data,
+      name: data.name,
+      nickname: data.nickname || null,
+      rail: data.rail,
+      details: typeof data.details === 'string' ? data.details : JSON.stringify(data.details),
       isInternal: data.isInternal ?? false,
+      accountNumber,
+      bankName,
+      swiftCode,
       userId: session.user.id,
     }
   });

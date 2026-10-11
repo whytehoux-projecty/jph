@@ -31,7 +31,7 @@ export const SelectorCard = React.forwardRef<HTMLButtonElement, SelectorCardProp
       selected = false,
       badge,
       role = "button",
-      layout = "stack",
+      layout = "row",
       size = "md",
       disabled,
       className,
@@ -54,7 +54,7 @@ export const SelectorCard = React.forwardRef<HTMLButtonElement, SelectorCardProp
         {...aria}
         {...props}
         className={cn(
-          "group relative w-full rounded border text-left transition-all duration-200 outline-none",
+          "group relative w-full rounded-none border text-left transition-all duration-200 outline-none",
           "focus-visible:ring-2 focus-visible:ring-ink-900 focus-visible:ring-offset-2 focus-visible:ring-offset-paper-50",
           layout === "stack"
             ? "flex flex-col items-start gap-3"
@@ -71,7 +71,7 @@ export const SelectorCard = React.forwardRef<HTMLButtonElement, SelectorCardProp
           <span
             aria-hidden="true"
             className={cn(
-              "shrink-0 inline-flex items-center justify-center rounded transition-colors",
+              "shrink-0 inline-flex items-center justify-center rounded-none transition-colors",
               size === "lg" ? "h-14 w-14" : "h-10 w-10",
               selected ? "bg-white/20 text-white" : "bg-paper-100 text-ink-900",
             )}
@@ -93,7 +93,7 @@ export const SelectorCard = React.forwardRef<HTMLButtonElement, SelectorCardProp
             {badge && (
               <span
                 className={cn(
-                  "rounded-full px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
+                  "rounded-none px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider",
                   selected ? "bg-vermilion-600 text-white" : "bg-vermilion-100 text-vermilion-700",
                 )}
               >

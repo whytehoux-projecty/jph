@@ -130,7 +130,7 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
   }, [value]);
 
   const scheduleTypeButtonClasses =
-    "flex-1 px-3 py-1.5 rounded-full text-xs font-medium transition";
+    "flex-1 px-3 py-1.5 rounded-none text-xs font-medium transition";
 
   const pillActive =
     "bg-(--ink-900) text-white shadow-sm border border-(--ink-900)";
@@ -139,11 +139,11 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
     "bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-200";
 
   const frequencyButtonClasses =
-    "px-3 py-1.5 rounded-full text-xs transition border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50";
+    "px-3 py-1.5 rounded-none text-xs transition border focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-(--ink-900) focus-visible:ring-offset-2 focus-visible:ring-offset-slate-50";
 
   return (
     <div className="space-y-4">
-      <div className="inline-flex w-full rounded-full bg-slate-100 p-1 text-xs">
+      <div className="inline-flex w-full rounded-none bg-slate-100 p-1 text-xs">
         <button
           type="button"
           onClick={() =>
@@ -325,7 +325,7 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
                   endOnDate: null,
                 })
               }
-              className={`px-3 py-1.5 rounded-full border ${
+              className={`px-3 py-1.5 rounded-none border ${
                 value.endType === "never"
                   ? "border-(--ink-900) bg-vermilion-600/10 text-ink-900"
                   : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
@@ -340,7 +340,7 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
                   endOnDate: null,
                 })
               }
-              className={`px-3 py-1.5 rounded-full border ${
+              className={`px-3 py-1.5 rounded-none border ${
                 value.endType === "after"
                   ? "border-(--ink-900) bg-vermilion-600/10 text-ink-900"
                   : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"
@@ -355,7 +355,7 @@ export function ScheduleTransfer({ value, onChange }: ScheduleTransferProps) {
                   endAfterOccurrences: null,
                 })
               }
-              className={`px-3 py-1.5 rounded-full border ${
+              className={`px-3 py-1.5 rounded-none border ${
                 value.endType === "on"
                   ? "border-(--ink-900) bg-vermilion-600/10 text-ink-900"
                   : "border-slate-200 bg-white text-slate-700 hover:bg-slate-50"

@@ -40,6 +40,7 @@ import { beneficiaryRails } from '@/lib/beneficiary-rails';
 import { DynamicBeneficiaryForm } from '@/components/beneficiaries/DynamicBeneficiaryForm';
 import { updateBeneficiary } from '@/app/actions/beneficiaries';
 import { Eye, EyeOff, Edit2 } from 'lucide-react';
+import { BrandIcon, getBrandIconSrc } from '@/components/ui/BrandIcon';
 
 interface Beneficiary {
     id: string;
@@ -193,9 +194,13 @@ export default function BeneficiariesClient({ initialBeneficiaries }: { initialB
                         <Card key={beneficiary.id} className="group hover:shadow-lg transition-all duration-300 border-border/60 hover:border-vintage-gold/50">
                             <CardHeader className="flex flex-row items-start justify-between pb-2 space-y-0">
                                 <div className="flex items-center gap-3">
-                                    <Avatar className="h-12 w-12 border-2 border-white shadow-sm">
-                                        <AvatarFallback className="bg-pine-700/10 text-pine-700 font-bold text-lg">
-                                            {beneficiary.name.charAt(0)}
+                                    <Avatar className="h-12 w-12 border-2 border-white shadow-sm rounded-none">
+                                        <AvatarFallback className="bg-pine-700/10 text-pine-700 font-bold text-lg rounded-none flex items-center justify-center">
+                                            {getBrandIconSrc(beneficiary.rail) ? (
+                                                <BrandIcon name={beneficiary.rail} size={28} />
+                                            ) : (
+                                                beneficiary.name.charAt(0)
+                                            )}
                                         </AvatarFallback>
                                     </Avatar>
                                     <div>
@@ -206,14 +211,14 @@ export default function BeneficiariesClient({ initialBeneficiaries }: { initialB
                                 <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                                     <Button
                                         variant="ghost"
-                                        className="h-8 w-8 p-0 text-muted-foreground hover:text-ink-900 flex items-center justify-center"
+                                        className="h-8 w-8 p-0 text-muted-foreground hover:text-ink-900 flex items-center justify-center rounded-none"
                                         onClick={() => { setEditingId(beneficiary.id); setIsDialogOpen(true); }}
                                     >
                                         <Edit2 className="w-4 h-4" />
                                     </Button>
                                     <Button
                                         variant="ghost"
-                                        className="h-8 w-8 p-0 text-muted-foreground hover:text-red-600 flex items-center justify-center"
+                                        className="h-8 w-8 p-0 text-muted-foreground hover:text-red-600 flex items-center justify-center rounded-none"
                                         onClick={() => setDeleteTarget(beneficiary.id)}
                                     >
                                         <Trash2 className="w-4 h-4" />
@@ -226,7 +231,12 @@ export default function BeneficiariesClient({ initialBeneficiaries }: { initialB
                                         <span className="flex items-center gap-2 text-muted-foreground">
                                             <Globe className="w-4 h-4" /> Method
                                         </span>
-                                        <span className="font-medium text-ink-900">{rail?.displayName}</span>
+                                        <span className="font-medium text-ink-900 flex items-center gap-1.5">
+                                            {getBrandIconSrc(beneficiary.rail) && (
+                                                <BrandIcon name={beneficiary.rail} size={16} />
+                                            )}
+                                            {rail?.displayName}
+                                        </span>
                                     </div>
                                     <div className="flex items-center justify-between text-sm">
                                         <span className="flex items-center gap-2 text-muted-foreground">

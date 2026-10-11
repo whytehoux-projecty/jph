@@ -23,7 +23,7 @@ export default function TransferLanding() {
       <div className="grid gap-4 md:grid-cols-2">
         <SelectorCard
           size="md"
-          layout="stack"
+          layout="row"
           icon={<SendIcon className="h-8 w-8" />}
           title="Transfers"
           description="Move money between accounts, wire or ACH to another bank, send stablecoins, or pay a friend."
@@ -31,7 +31,7 @@ export default function TransferLanding() {
         />
         <SelectorCard
           size="md"
-          layout="stack"
+          layout="row"
           icon={<BillsIcon className="h-8 w-8" />}
           title="Pay Bills"
           description="Pay utilities, cards and other providers from one of your accounts."

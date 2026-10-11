@@ -129,7 +129,7 @@ export function TransferHub({ accounts, methodConfigs }: Props) {
               aria-controls="transfer-panel"
               aria-expanded={selected}
               className={cn(
-                "shrink-0 px-5 py-2.5 rounded-t-md text-[13px] transition-all duration-150 font-medium whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vermilion-600 focus-visible:ring-offset-1 flex items-center gap-2 -mb-[1px]",
+                "shrink-0 px-5 py-2.5 rounded-none text-[13px] transition-all duration-150 font-medium whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-900 focus-visible:ring-offset-1 flex items-center gap-2 -mb-[1px]",
                 selected
                   ? "bg-white text-ink-900 border border-paper-300 border-b-white font-semibold"
                   : "text-ink-500 hover:text-ink-900 hover:bg-paper-100 border border-transparent border-b-transparent"
@@ -155,8 +155,8 @@ export function TransferHub({ accounts, methodConfigs }: Props) {
               transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
               style={{ overflow: "hidden" }}
             >
-              <div className="grid overflow-hidden rounded-b-md border border-paper-300 border-t-0 bg-white lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] shadow-sm">
-                <div className="p-5 sm:p-8">
+              <div className="grid overflow-hidden rounded-none border border-paper-300 border-t-0 bg-white lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] shadow-sm">
+                <div className="p-5 sm:p-8 flex flex-col justify-between">
                   <TransferFormEngine
                     key={active.id}
                     type={active}
@@ -198,9 +198,9 @@ function InfoPanel({
   return (
     <aside
       aria-label={`About ${type.title}`}
-      className="space-y-5 border-t border-paper-300 bg-paper-100 p-5 sm:p-8 lg:border-l lg:border-t-0 rounded-br-md"
+      className="space-y-5 border-t border-paper-300 bg-paper-100 p-5 sm:p-8 lg:border-l lg:border-t-0 rounded-none"
     >
-      <Art className="h-auto w-full rounded" />
+      <Art className="h-auto w-full rounded-none" />
       <div className="space-y-2">
         <h2 className="font-display text-base font-semibold text-ink-900">{type.title}</h2>
         <p className="text-small text-ink-700">{type.about.what}</p>
@@ -212,7 +212,7 @@ function InfoPanel({
       <ol className="space-y-2.5" aria-label="How it works">
         {type.about.steps.map((s, i) => (
           <li key={s} className="flex items-start gap-3 text-small text-ink-700">
-            <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-ink-900 text-[11px] font-semibold text-paper-50">
+            <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-none bg-ink-900 text-[11px] font-semibold text-paper-50">
               {i + 1}
             </span>
             {s}
