@@ -1,93 +1,92 @@
-"use client"
+"use client";
 
-import * as React from "react"
-import { Check, ChevronsUpDown, Globe } from "lucide-react"
+import * as React from "react";
+import { Check, ChevronsUpDown, Globe } from "lucide-react";
 
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/Button"
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/Button";
 import {
-    Command,
-    CommandEmpty,
-    CommandGroup,
-    CommandInput,
-    CommandItem,
-    CommandList
-} from "@/components/ui/command"
+  Command,
+  CommandEmpty,
+  CommandGroup,
+  CommandInput,
+  CommandItem,
+  CommandList,
+} from "@/components/ui/command";
 import {
-    Popover,
-    PopoverContent,
-    PopoverTrigger,
-} from "@/components/ui/popover"
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 
-const regions = [
-    { value: "usa", label: "USA" },
-    { value: "canada", label: "Canada" },
-    { value: "east-asia", label: "East Asia (CN, JP, KR)" },
-    { value: "west-africa", label: "West Africa (NG, GH, SN)" },
-    { value: "central-europe", label: "Central Europe (EU)" },
-    { value: "germany", label: "Germany" },
-    { value: "france", label: "France" },
-    { value: "uk", label: "United Kingdom" },
-    { value: "italy", label: "Italy" },
-    { value: "spain", label: "Spain" },
-    { value: "switzerland", label: "Switzerland" },
-    { value: "belgium", label: "Belgium" },
-]
+export const REGIONS = [
+  { value: "usa", label: "United States (US)" },
+  { value: "canada", label: "Canada (CA)" },
+  { value: "uk", label: "United Kingdom (UK)" },
+  { value: "germany", label: "Germany (DE)" },
+  { value: "france", label: "France (FR)" },
+  { value: "central-europe", label: "Central Europe (EU)" },
+  { value: "east-asia", label: "East Asia (JP, KR, CN)" },
+  { value: "west-africa", label: "West Africa (NG, GH)" },
+];
 
 interface CountrySelectorProps {
-    value: string;
-    onChange: (value: string) => void;
+  value: string;
+  onChange: (value: string) => void;
 }
 
 export function CountrySelector({ value, onChange }: CountrySelectorProps) {
-    const [open, setOpen] = React.useState(false)
+  const [open, setOpen] = React.useState(false);
 
-    return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
-                <Button
-                    variant="outline"
-                    role="combobox"
-                    aria-expanded={open}
-                    className="w-full justify-between h-12 text-left font-normal"
+  return (
+    <Popover open={open} onOpenChange={setOpen}>
+      <PopoverTrigger asChild>
+        <Button
+          variant="outline"
+          role="combobox"
+          aria-expanded={open}
+          className="w-full justify-between h-11 rounded-none border-paper-300 bg-white hover:border-ink-900 text-left font-normal px-3.5 text-small text-ink-900 transition-colors"
+        >
+          <div className="flex items-center gap-2.5 truncate">
+            <Globe className="w-4 h-4 text-ink-500 shrink-0" />
+            <span className="truncate">
+              {value
+                ? REGIONS.find((r) => r.value === value)?.label || value.toUpperCase()
+                : "Select Region or Country..."}
+            </span>
+          </div>
+          <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+        </Button>
+      </PopoverTrigger>
+      <PopoverContent className="w-[320px] p-0 rounded-none border border-paper-300 shadow-xl bg-white" align="start">
+        <Command>
+          <CommandInput placeholder="Search region or country..." className="text-small rounded-none" />
+          <CommandList>
+            <CommandEmpty className="text-small text-ink-500 py-3 text-center">No region found.</CommandEmpty>
+            <CommandGroup heading="Supported Billing Jurisdictions" className="text-ink-900 font-sans">
+              {REGIONS.map((region) => (
+                <CommandItem
+                  key={region.value}
+                  value={region.value}
+                  onSelect={(currentValue) => {
+                    onChange(currentValue === value ? "" : currentValue);
+                    setOpen(false);
+                  }}
+                  className="rounded-none cursor-pointer text-small hover:bg-paper-100 py-2.5"
                 >
-                    <div className="flex items-center gap-2">
-                        <Globe className="w-4 h-4 text-muted-foreground" />
-                        {value
-                            ? regions.find((region) => region.value === value)?.label
-                            : "Select Region or Country..."}
-                    </div>
-                    <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-[300px] p-0">
-                <Command>
-                    <CommandInput placeholder="Search country..." />
-                    <CommandList>
-                        <CommandEmpty>No region found.</CommandEmpty>
-                        <CommandGroup heading="Regions & Countries">
-                            {regions.map((region) => (
-                                <CommandItem
-                                    key={region.value}
-                                    value={region.value}
-                                    onSelect={(currentValue) => {
-                                        onChange(currentValue === value ? "" : currentValue)
-                                        setOpen(false)
-                                    }}
-                                >
-                                    <Check
-                                        className={cn(
-                                            "mr-2 h-4 w-4",
-                                            value === region.value ? "opacity-100" : "opacity-0"
-                                        )}
-                                    />
-                                    {region.label}
-                                </CommandItem>
-                            ))}
-                        </CommandGroup>
-                    </CommandList>
-                </Command>
-            </PopoverContent>
-        </Popover>
-    )
+                  <Check
+                    className={cn(
+                      "mr-2 h-4 w-4 text-vermilion-600",
+                      value === region.value ? "opacity-100" : "opacity-0"
+                    )}
+                  />
+                  <span>{region.label}</span>
+                </CommandItem>
+              ))}
+            </CommandGroup>
+          </CommandList>
+        </Command>
+      </PopoverContent>
+    </Popover>
+  );
 }

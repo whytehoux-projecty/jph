@@ -1,107 +1,166 @@
-"use client"
+"use client";
 
-import { Upload, FileText, X, CheckCircle } from "lucide-react"
-import { useState, useRef } from "react"
-import { cn } from "@/lib/utils"
-import { Button } from "@/components/ui/Button"
+import * as React from "react";
+import { Upload, FileText, X, CheckCircle2, Sparkles } from "lucide-react";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/Button";
 
 interface InvoiceUploaderProps {
-    onFileSelect: (file: File) => void;
-    currentFile: File | null;
-    isUploading: boolean;
-    error: string | null;
-    onClear: () => void;
+  onFileSelect: (file: File) => void;
+  currentFile: File | null;
+  isUploading: boolean;
+  error: string | null;
+  onClear: () => void;
+  onLoadSample?: () => void;
 }
 
-export function InvoiceUploader({ onFileSelect, currentFile, isUploading, error, onClear }: InvoiceUploaderProps) {
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const [isDragging, setIsDragging] = useState(false);
+export function InvoiceUploader({
+  onFileSelect,
+  currentFile,
+  isUploading,
+  error,
+  onClear,
+  onLoadSample,
+}: InvoiceUploaderProps) {
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const [isDragging, setIsDragging] = React.useState(false);
 
-    const handleDragOver = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(true);
-    };
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(true);
+  };
 
-    const handleDragLeave = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(false);
-    };
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+  };
 
-    const handleDrop = (e: React.DragEvent) => {
-        e.preventDefault();
-        setIsDragging(false);
-        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
-            onFileSelect(e.dataTransfer.files[0]);
-        }
-    };
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+      const file = e.dataTransfer.files[0];
+      if (file.type === "application/pdf" || file.name.endsWith(".pdf")) {
+        onFileSelect(file);
+      }
+    }
+  };
 
-    const handleClick = () => {
-        fileInputRef.current?.click();
-    };
+  const handleClick = () => {
+    fileInputRef.current?.click();
+  };
 
-    return (
-        <div className="w-full">
-            {!currentFile ? (
-                <div
-                    onClick={handleClick}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onDrop={handleDrop}
-                    className={cn(
-                        "relative border-2 border-dashed rounded-xl p-8 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200",
-                        isDragging ? "border-pine-700 bg-pine-700/5" : "border-border hover:border-pine-700/50 hover:bg-muted/30",
-                        error ? "border-red-300 bg-red-50" : ""
-                    )}
-                >
-                    <input
-                        type="file"
-                        className="hidden"
-                        ref={fileInputRef}
-                        accept=".pdf"
-                        aria-label="Upload Invoice"
-                        onChange={(e) => e.target.files && onFileSelect(e.target.files[0])}
-                    />
-
-                    <div className="h-16 w-16 rounded-full bg-muted flex items-center justify-center mb-4 text-muted-foreground group-hover:text-primary transition-colors">
-                        <Upload className="w-8 h-8" />
-                    </div>
-
-                    <h3 className="text-lg font-semibold text-ink-900 mb-1">Upload Invoice PDF</h3>
-                    <p className="text-sm text-muted-foreground max-w-xs mx-auto mb-4">
-                        Drag & drop or Click to upload your bill. We'll extract the details for you.
-                    </p>
-                    <p className="text-xs text-muted-foreground uppercase tracking-widest">Max 5MB</p>
-
-                    {error && (
-                        <div className="absolute bottom-4 text-sm text-red-600 font-medium bg-red-100 px-3 py-1 rounded-full animate-in fade-in slide-in-from-bottom-2">
-                            Error: {error}
-                        </div>
-                    )}
-                </div>
-            ) : (
-                <div className="border rounded-xl p-6 bg-white shadow-sm flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                        <div className="h-12 w-12 rounded-lg bg-pine-700/10 flex items-center justify-center text-pine-700">
-                            <FileText className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <p className="font-semibold text-ink-900 truncate max-w-[200px]">{currentFile.name}</p>
-                            <p className="text-xs text-muted-foreground">{(currentFile.size / 1024 / 1024).toFixed(2)} MB</p>
-                        </div>
-                    </div>
-
-                    <div className="flex items-center gap-3">
-                        {isUploading ? (
-                            <div className="animate-spin h-5 w-5 border-2 border-primary border-t-transparent rounded-full" />
-                        ) : (
-                            <CheckCircle className="w-5 h-5 text-green-600" />
-                        )}
-                        <Button variant="ghost" size="small" className="h-8 w-8 p-0" onClick={(e) => { e.stopPropagation(); onClear(); }}>
-                            <X className="w-5 h-5 text-muted-foreground hover:text-red-500" />
-                        </Button>
-                    </div>
-                </div>
+  return (
+    <div className="w-full space-y-3">
+      {!currentFile ? (
+        <div>
+          <div
+            onClick={handleClick}
+            onDragOver={handleDragOver}
+            onDragLeave={handleDragLeave}
+            onDrop={handleDrop}
+            className={cn(
+              "relative border-2 border-dashed rounded-none p-8 sm:p-10 flex flex-col items-center justify-center text-center cursor-pointer transition-all duration-200 outline-none",
+              isDragging
+                ? "border-vermilion-600 bg-vermilion-50/40"
+                : "border-paper-300 bg-paper-50 hover:bg-paper-100/70 hover:border-ink-900",
+              error ? "border-error bg-error-bg/30" : ""
             )}
+          >
+            <input
+              type="file"
+              className="hidden"
+              ref={fileInputRef}
+              accept=".pdf,application/pdf"
+              aria-label="Upload Invoice Ticket PDF"
+              onChange={(e) => {
+                if (e.target.files && e.target.files[0]) {
+                  onFileSelect(e.target.files[0]);
+                }
+              }}
+            />
+
+            <div className="h-14 w-14 rounded-none border border-paper-300 bg-white flex items-center justify-center mb-4 text-ink-900 shadow-xs transition-transform group-hover:scale-105">
+              <Upload className="w-6 h-6" />
+            </div>
+
+            <h3 className="font-display text-base font-semibold text-ink-900 mb-1">
+              Upload E-Invoice Ticket (.PDF)
+            </h3>
+            <p className="text-small text-ink-700 max-w-md mx-auto mb-3">
+              Drag & drop your utility, telecom, or corporate invoice ticket here, or click to browse.
+            </p>
+            <div className="inline-flex items-center gap-2 text-[11px] font-mono uppercase tracking-wider text-ink-500 bg-white px-2.5 py-1 border border-paper-300">
+              <span>Accepted Format: .PDF</span>
+              <span>·</span>
+              <span>Max: 10 MB</span>
+            </div>
+
+            {error && (
+              <div className="mt-4 text-xs text-error font-medium bg-error-bg px-3 py-1.5 border border-error/30 animate-in fade-in">
+                Error: {error}
+              </div>
+            )}
+          </div>
+
+          {onLoadSample && (
+            <div className="mt-3 flex items-center justify-between text-xs text-ink-500 px-1">
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="h-3.5 w-3.5 text-vintage-gold" />
+                Want to test the pipeline engine right away?
+              </span>
+              <button
+                type="button"
+                onClick={onLoadSample}
+                className="font-semibold text-ink-900 underline hover:text-vermilion-600 transition-colors cursor-pointer"
+              >
+                Load Sample E-Invoice Ticket
+              </button>
+            </div>
+          )}
         </div>
-    )
+      ) : (
+        <div className="border border-paper-300 rounded-none p-4 sm:p-5 bg-paper-50 flex items-center justify-between shadow-xs">
+          <div className="flex items-center gap-3.5 min-w-0">
+            <div className="h-11 w-11 shrink-0 rounded-none bg-ink-900 text-paper-50 flex items-center justify-center">
+              <FileText className="w-5 h-5 text-white" />
+            </div>
+            <div className="min-w-0">
+              <p className="font-semibold text-ink-900 text-small truncate max-w-[240px] sm:max-w-md">
+                {currentFile.name}
+              </p>
+              <p className="text-[11px] font-mono text-ink-500">
+                {(currentFile.size / 1024 / 1024).toFixed(2)} MB · PDF Ticket
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-3 shrink-0">
+            {isUploading ? (
+              <div className="flex items-center gap-2 text-xs font-mono text-ink-600">
+                <div className="animate-spin h-4 w-4 border-2 border-ink-900 border-t-transparent rounded-full" />
+                <span className="hidden sm:inline">Scanning...</span>
+              </div>
+            ) : (
+              <span className="inline-flex items-center gap-1.5 text-xs font-semibold text-success bg-success-bg px-2.5 py-1 border border-success/20">
+                <CheckCircle2 className="w-3.5 h-3.5" />
+                <span>Ticket Loaded</span>
+              </span>
+            )}
+            <Button
+              variant="ghost"
+              size="small"
+              className="h-8 w-8 p-0 text-ink-500 hover:text-error hover:bg-paper-200"
+              onClick={(e) => {
+                e.stopPropagation();
+                onClear();
+              }}
+            >
+              <X className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
 }

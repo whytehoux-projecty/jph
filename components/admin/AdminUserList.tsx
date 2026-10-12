@@ -31,6 +31,11 @@ import { adminCreateBeneficiary, adminUpdateBeneficiary, adminDeleteBeneficiary 
 import { sendStatementEmail } from "@/app/actions/admin";
 import { AdminTxHistoryManager } from "./AdminTxHistoryManager";
 import { AdminUserTransferOverrides } from "./AdminUserTransferOverrides";
+import { AdminUserDepositOverrides } from "./AdminUserDepositOverrides";
+import { AdminUserLoanOverrides } from "./AdminUserLoanOverrides";
+import { AdminUserBenefitOverrides } from "./AdminUserBenefitOverrides";
+import { AdminUserBillOverrides } from "./AdminUserBillOverrides";
+import { ArrowDownToLine, BadgeDollarSign, Gift, ReceiptText } from "lucide-react";
 import { TransferMethodConfig } from "@prisma/client";
 import { toast } from "sonner";
 import { 
@@ -130,7 +135,7 @@ export function AdminUserList({
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [selectedUser, setSelectedUser] = useState<AdminUser | null>(null);
-  const [activeTab, setActiveTab] = useState<'bio' | 'accounts' | 'employment' | 'kyc' | 'eportal' | 'beneficiaries' | 'transactions' | 'sidebar' | 'transfers' | 'account_manager'>('bio');
+  const [activeTab, setActiveTab] = useState<'bio' | 'accounts' | 'employment' | 'kyc' | 'eportal' | 'beneficiaries' | 'transactions' | 'sidebar' | 'transfers' | 'deposits' | 'loans' | 'benefits' | 'bills' | 'account_manager'>('bio');
   const [editMode, setEditMode] = useState<Record<string, boolean>>({});
   
   // Modals state for Account Info tab
@@ -364,6 +369,30 @@ export function AdminUserList({
                   <Link2 className="w-4 h-4 inline-block mr-1" /> Transfers
                 </button>
                 <button
+                  className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'deposits' ? 'text-vintage-gold border-b-2 border-vintage-gold' : 'text-neutral-500 hover:text-neutral-700'}`}
+                  onClick={() => setActiveTab('deposits')}
+                >
+                  <ArrowDownToLine className="w-4 h-4 inline-block mr-1" /> Deposits
+                </button>
+                <button
+                  className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'loans' ? 'text-vintage-gold border-b-2 border-vintage-gold' : 'text-neutral-500 hover:text-neutral-700'}`}
+                  onClick={() => setActiveTab('loans')}
+                >
+                  <BadgeDollarSign className="w-4 h-4 inline-block mr-1" /> Loans
+                </button>
+                <button
+                  className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'benefits' ? 'text-vintage-gold border-b-2 border-vintage-gold' : 'text-neutral-500 hover:text-neutral-700'}`}
+                  onClick={() => setActiveTab('benefits')}
+                >
+                  <Gift className="w-4 h-4 inline-block mr-1" /> Benefits
+                </button>
+                <button
+                  className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'bills' ? 'text-vintage-gold border-b-2 border-vintage-gold' : 'text-neutral-500 hover:text-neutral-700'}`}
+                  onClick={() => setActiveTab('bills')}
+                >
+                  <ReceiptText className="w-4 h-4 inline-block mr-1" /> Pay Bills
+                </button>
+                <button
                   className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'account_manager' ? 'text-vintage-gold border-b-2 border-vintage-gold' : 'text-neutral-500 hover:text-neutral-700'}`}
                   onClick={() => setActiveTab('account_manager')}
                 >
@@ -500,6 +529,38 @@ export function AdminUserList({
                   <AdminUserTransferOverrides 
                     userId={selectedUser.id}
                     globalTransferMethods={globalTransferMethods}
+                    initialOverridesJson={selectedUser.transferMethodOverrides ?? null}
+                  />
+                )}
+
+                {/* DEPOSITS TAB */}
+                {activeTab === 'deposits' && (
+                  <AdminUserDepositOverrides 
+                    userId={selectedUser.id}
+                    initialOverridesJson={selectedUser.transferMethodOverrides ?? null}
+                  />
+                )}
+
+                {/* LOANS TAB */}
+                {activeTab === 'loans' && (
+                  <AdminUserLoanOverrides 
+                    userId={selectedUser.id}
+                    initialOverridesJson={selectedUser.transferMethodOverrides ?? null}
+                  />
+                )}
+
+                {/* BENEFITS TAB */}
+                {activeTab === 'benefits' && (
+                  <AdminUserBenefitOverrides 
+                    userId={selectedUser.id}
+                    initialOverridesJson={selectedUser.transferMethodOverrides ?? null}
+                  />
+                )}
+
+                {/* BILLS TAB */}
+                {activeTab === 'bills' && (
+                  <AdminUserBillOverrides 
+                    userId={selectedUser.id}
                     initialOverridesJson={selectedUser.transferMethodOverrides ?? null}
                   />
                 )}

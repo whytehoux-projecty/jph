@@ -494,6 +494,45 @@ export async function updateUserTransferOverrides(userId: string, overridesJson:
   revalidatePath('/admin/customers/account-holders');
 }
 
+export async function getUserFeatureOverrides(userId: string) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { transferMethodOverrides: true },
+  });
+
+  const { parseUserFeatureOverrides } = await import('@/lib/feature-overrides');
+  return parseUserFeatureOverrides(user?.transferMethodOverrides);
+}
+
+export async function updateUserFeatureOverrides(userId: string, overrides: Partial<import('@/lib/feature-overrides').UserFeatureOverrides>) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { transferMethodOverrides: true },
+  });
+
+  const { mergeFeatureOverridesIntoJson } = await import('@/lib/feature-overrides');
+  const mergedJson = mergeFeatureOverridesIntoJson(user?.transferMethodOverrides, overrides);
+
+  await prisma.user.update({
+    where: { id: userId },
+    data: { transferMethodOverrides: mergedJson },
+  });
+
+  revalidatePath('/admin/customers/account-holders');
+  revalidatePath('/deposit');
+  revalidatePath('/savings');
+  revalidatePath('/benefits');
+  revalidatePath('/bills');
+  return { success: true };
+}
+
+
 export async function updateAccountManagerInfo(formData: FormData) {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');

@@ -20,12 +20,16 @@ export default async function BillServicesPage() {
       include: {
         account: {
           select: {
+            id: true,
             accountNumber: true,
-            user: { select: { firstName: true, lastName: true } }
+            accountType: true,
+            balance: true,
+            currency: true,
+            user: { select: { id: true, firstName: true, lastName: true, email: true } }
           }
         },
         payee: {
-          select: { name: true, accountNumber: true, category: true }
+          select: { id: true, name: true, accountNumber: true, category: true, country: true }
         }
       }
     }),

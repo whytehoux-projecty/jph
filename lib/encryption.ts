@@ -18,15 +18,26 @@ export function encryptDeterministic(text: string): string {
 }
 
 export function decryptDeterministic(encryptedText: string): string {
-    if (!encryptedText) return encryptedText;
+    if (!encryptedText || typeof encryptedText !== 'string') return encryptedText;
+
+    // Fast check: A valid AES-256-CBC hex ciphertext must:
+    // 1. Be non-empty and at least one 16-byte block (32 hex characters)
+    // 2. Have a length that is a multiple of 32 hex characters
+    // 3. Contain only hexadecimal characters (0-9, a-f, A-F)
+    // Plain text values (e.g. "1234567", "12345", SSNs, phone numbers) fail this check and are returned directly.
+    if (encryptedText.length < 32 || encryptedText.length % 32 !== 0 || !/^[0-9a-fA-F]+$/.test(encryptedText)) {
+        return encryptedText;
+    }
+
     try {
         const iv = Buffer.alloc(IV_LENGTH, 0);
         const decipher = crypto.createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
         let decrypted = decipher.update(encryptedText, 'hex', 'utf8');
         decrypted += decipher.final('utf8');
         return decrypted;
-    } catch (e) {
-        console.error('Decryption error:', e);
-        return encryptedText; // return original if decryption fails (e.g. legacy unencrypted data)
+    } catch {
+        // Return original unencrypted/corrupt text gracefully without polluting logs
+        return encryptedText;
     }
 }
+

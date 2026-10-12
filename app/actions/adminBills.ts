@@ -9,45 +9,142 @@ export async function handleApproveBill(formData: FormData) {
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
   const id = formData.get('id') as string;
   
-  const bill = await prisma.bill.findUnique({ where: { id }, include: { account: true } });
+  const bill = await prisma.bill.findUnique({
+    where: { id },
+    include: { account: true, payee: true },
+  });
   if (!bill) return;
+  if (bill.status === 'PAID') return;
 
-  await prisma.account.update({
+  // Debit the customer account balance
+  const updatedAccount = await prisma.account.update({
     where: { id: bill.accountId },
-    data: { balance: bill.account.balance - bill.amount }
+    data: { balance: { decrement: bill.amount } }
   });
 
-  await prisma.transaction.create({
-    data: {
+  // Find the matching pending transaction created during submission
+  const pendingTx = await prisma.transaction.findFirst({
+    where: {
       accountId: bill.accountId,
-      type: 'DEBIT',
-      transactionType: 'LOCAL_TRANSFER',
-      amount: -bill.amount,
-      status: 'APPROVED',
-      description: `Bill Payment`,
-      reference: `BILL-${bill.id.substring(0, 8)}`,
-    }
+      status: 'PENDING',
+      OR: [
+        { metadata: { contains: bill.id } },
+        { description: { contains: bill.payee?.name || '' } }
+      ]
+    },
+    orderBy: { createdAt: 'desc' }
   });
 
+  if (pendingTx) {
+    await prisma.transaction.update({
+      where: { id: pendingTx.id },
+      data: {
+        status: 'APPROVED',
+        processedAt: new Date(),
+        runningBalance: updatedAccount.balance,
+      }
+    });
+  } else {
+    // If not found, create the settled debit transaction
+    await prisma.transaction.create({
+      data: {
+        accountId: bill.accountId,
+        type: 'DEBIT',
+        transactionType: 'BILL_PAYMENT',
+        amount: bill.amount,
+        status: 'APPROVED',
+        description: `Bill Payment · ${bill.payee?.name || 'Provider'}`,
+        reference: `BIL-${bill.id.substring(0, 8).toUpperCase()}`,
+        processedAt: new Date(),
+        runningBalance: updatedAccount.balance,
+        category: 'BILLS',
+        channel: 'PORTAL',
+        metadata: JSON.stringify({
+          billId: bill.id,
+          payeeName: bill.payee?.name,
+          accountNumber: bill.payee?.accountNumber,
+        })
+      }
+    });
+  }
+
+  // Mark bill as PAID with timestamp
   await prisma.bill.update({
     where: { id },
     data: { status: 'PAID', paidAt: new Date() }
   });
+
+  // Dispatch live notification to customer
+  await prisma.notification.create({
+    data: {
+      userId: bill.account.userId,
+      title: 'Bill Payment Cleared & Settled',
+      message: `Your payment of $${bill.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })} to ${bill.payee?.name || 'Provider'} has been settled from your ${bill.account.accountType} account.`,
+    }
+  });
   
   revalidatePath('/admin/ebank/bill-services');
+  revalidatePath('/admin/transactions');
+  revalidatePath('/bills');
+  revalidatePath('/dashboard');
+  revalidatePath('/transactions');
 }
 
 export async function handleRejectBill(formData: FormData) {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
   const id = formData.get('id') as string;
+  const reason = (formData.get('reason') as string) || 'Payment authorization declined by administrator during biller review.';
   
+  const bill = await prisma.bill.findUnique({
+    where: { id },
+    include: { account: true, payee: true },
+  });
+  if (!bill) return;
+
   await prisma.bill.update({
     where: { id },
     data: { status: 'REJECTED' }
   });
+
+  // Find and update matching pending transaction
+  const pendingTx = await prisma.transaction.findFirst({
+    where: {
+      accountId: bill.accountId,
+      status: 'PENDING',
+      OR: [
+        { metadata: { contains: bill.id } },
+        { description: { contains: bill.payee?.name || '' } }
+      ]
+    },
+    orderBy: { createdAt: 'desc' }
+  });
+
+  if (pendingTx) {
+    await prisma.transaction.update({
+      where: { id: pendingTx.id },
+      data: {
+        status: 'REJECTED',
+        rejectionReason: reason,
+        processedAt: new Date(),
+      }
+    });
+  }
+
+  // Notify customer
+  await prisma.notification.create({
+    data: {
+      userId: bill.account.userId,
+      title: 'Bill Payment Declined',
+      message: `Your scheduled payment of $${bill.amount.toLocaleString(undefined, { minimumFractionDigits: 2 })} to ${bill.payee?.name || 'Provider'} was rejected. Reason: ${reason}`,
+    }
+  });
   
   revalidatePath('/admin/ebank/bill-services');
+  revalidatePath('/admin/transactions');
+  revalidatePath('/bills');
+  revalidatePath('/dashboard');
+  revalidatePath('/transactions');
 }
 
 export async function handleCreatePayee(formData: FormData) {
@@ -64,8 +161,8 @@ export async function handleCreatePayee(formData: FormData) {
     throw new Error('Name and Account Number are required.');
   }
 
-  // If no userId provided, attach to the first available user in the system
-  if (!userId) {
+  // If no userId provided or explicitly 'GLOBAL', attach to the first available user in the system
+  if (!userId || userId === 'GLOBAL') {
     const firstUser = await prisma.user.findFirst();
     if (!firstUser) throw new Error('No user accounts exist to associate this payee with.');
     userId = firstUser.id;
@@ -82,6 +179,7 @@ export async function handleCreatePayee(formData: FormData) {
   });
 
   revalidatePath('/admin/ebank/bill-services');
+  revalidatePath('/bills');
 }
 
 export async function handleDeletePayee(formData: FormData) {
@@ -94,4 +192,5 @@ export async function handleDeletePayee(formData: FormData) {
   });
 
   revalidatePath('/admin/ebank/bill-services');
+  revalidatePath('/bills');
 }
