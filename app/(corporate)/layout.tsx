@@ -52,7 +52,10 @@ export const metadata: Metadata = {
     card: 'summary_large_image',
   },
   icons: {
-    icon: '/favicons/favicon-32x32.png',
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+      { url: '/favicons/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
     apple: '/favicons/apple-touch-icon.png',
   },
 };

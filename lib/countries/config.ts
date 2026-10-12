@@ -58,7 +58,11 @@ export const PERSONAL_ACCOUNT_TYPES = [
 const digitsOnly = (s: string) => s.replace(/\D/g, '');
 
 const fmtNA = (d: string) => {
-    const x = d.slice(0, 10);
+    let clean = d;
+    if (clean.startsWith('1') && clean.length > 1) {
+        clean = clean.slice(1);
+    }
+    const x = clean.slice(0, 10);
     if (x.length <= 3) return x;
     if (x.length <= 6) return `(${x.slice(0, 3)}) ${x.slice(3)}`;
     return `(${x.slice(0, 3)}) ${x.slice(3, 6)}-${x.slice(6)}`;
@@ -69,7 +73,7 @@ const US_STATES = ['Alabama','Alaska','Arizona','Arkansas','California','Colorad
 export const COUNTRY_CONFIGS: Record<string, CountryConfig> = {
     US: {
         code: 'US', name: 'United States', flag: '🇺🇸', dialCode: '+1',
-        phone: { nationalPattern: /^[2-9]\d{2}[2-9]\d{6}$/, placeholder: '(555) 234-5678', hint: 'US format: (XXX) XXX-XXXX', format: fmtNA },
+        phone: { nationalPattern: /^[2-9]\d{9}$/, placeholder: '(555) 234-5678', hint: 'US format: (XXX) XXX-XXXX', format: fmtNA },
         postal: { label: 'ZIP code', pattern: /^\d{5}(-\d{4})?$/, placeholder: '10001', hint: '5 digits, e.g. 10001', lookupCode: 'us' },
         regionLabel: 'State', regions: US_STATES,
         businessTaxIdLabel: 'Employer Identification Number (EIN)', businessTaxIdPattern: /^\d{2}-?\d{7}$/,
@@ -114,7 +118,7 @@ export const COUNTRY_CONFIGS: Record<string, CountryConfig> = {
     },
     CA: {
         code: 'CA', name: 'Canada', flag: '🇨🇦', dialCode: '+1',
-        phone: { nationalPattern: /^[2-9]\d{2}[2-9]\d{6}$/, placeholder: '(416) 555-0123', hint: 'Canadian format: (XXX) XXX-XXXX', format: fmtNA },
+        phone: { nationalPattern: /^[2-9]\d{9}$/, placeholder: '(416) 555-0123', hint: 'Canadian format: (XXX) XXX-XXXX', format: fmtNA },
         postal: { label: 'Postal code', pattern: /^[ABCEGHJ-NPRSTVXY]\d[ABCEGHJ-NPRSTV-Z][ -]?\d[ABCEGHJ-NPRSTV-Z]\d$/i, placeholder: 'M5V 2T6', hint: 'Format A1A 1A1', lookupCode: 'ca' },
         regionLabel: 'Province / Territory',
         regions: ['Alberta','British Columbia','Manitoba','New Brunswick','Newfoundland and Labrador','Northwest Territories','Nova Scotia','Nunavut','Ontario','Prince Edward Island','Quebec','Saskatchewan','Yukon'],
@@ -236,8 +240,12 @@ export function getCountryConfig(code: string | undefined | null): CountryConfig
 export function toNationalDigits(country: CountryConfig, input: string): string {
     let d = digitsOnly(input);
     const dial = digitsOnly(country.dialCode);
-    if (dial && d.startsWith(dial) && d.length > dial.length + 5 && country.code !== 'US' && country.code !== 'CA') d = d.slice(dial.length);
-    if (country.code !== 'US' && country.code !== 'CA' && d.startsWith('0')) d = d.replace(/^0+/, '');
+    if (country.code === 'US' || country.code === 'CA') {
+        if (d.startsWith('1') && d.length === 11) d = d.slice(1);
+        return d;
+    }
+    if (dial && d.startsWith(dial) && d.length > dial.length + 5) d = d.slice(dial.length);
+    if (d.startsWith('0')) d = d.replace(/^0+/, '');
     return d;
 }
 

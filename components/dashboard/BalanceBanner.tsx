@@ -28,7 +28,7 @@ export function BalanceBanner({ totalBalance, currency, language, accounts, init
   };
 
   return (
-    <div className="flex flex-col lg:flex-row gap-[1.5px] w-full items-stretch">
+    <div className="flex flex-col lg:flex-row gap-[2.3px] w-full items-stretch">
       {/* ── Left Side (40%): Total Balance & Actions ── */}
       <div className="w-full lg:w-[40%] bg-paper-50 rounded-sm border border-paper-200 p-6 md:p-7 shadow-sm flex flex-col justify-between">
         <div>

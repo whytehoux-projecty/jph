@@ -197,7 +197,7 @@ export default async function DashboardPage() {
   );
 
   return (
-    <Tabs defaultValue="overview" className="w-full max-w-7xl mx-auto space-y-[1.5px]">
+    <Tabs defaultValue="overview" className="w-full max-w-7xl mx-auto space-y-[2.3px]">
       {/* ── Total Balance Banner Widget ── */}
       <BalanceBanner
         totalBalance={totalBalance}
@@ -210,12 +210,12 @@ export default async function DashboardPage() {
 
         <TabsContent value="overview" className="m-0">
           {/* Main 12-Column Responsive Ledger Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-[1.5px] items-start">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-[2.3px] items-start">
             {/* Primary Ledger Column (8 of 12 columns) */}
-            <div className="lg:col-span-8 space-y-[1.5px]">
-              <div className="space-y-[1.5px]">
+            <div className="lg:col-span-8 space-y-[2.3px]">
+              <div className="space-y-[2.3px]">
                 {/* 4 Core Financial Stat Cards (Redesigned) */}
-                <div className="grid gap-[1.5px] grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
+                <div className="grid gap-[2.3px] grid-cols-1 sm:grid-cols-2 xl:grid-cols-4">
                   {/* Card 1: Primary Account (dynamic visual, h1 primary, h3 secondary, green/red status) */}
                   <PrimaryAccountCard
                     accounts={accounts}
@@ -261,7 +261,7 @@ export default async function DashboardPage() {
               </div>
 
               {/* Cash Flow Chart & Recent Transactions */}
-              <div className="grid gap-[1.5px] grid-cols-1 md:grid-cols-12">
+              <div className="grid gap-[2.3px] grid-cols-1 md:grid-cols-12">
                 <Card className="md:col-span-7 bg-paper-50 border-paper-200 shadow-none">
                   <CardHeader className="pb-2">
                     <CardTitle className="text-sm font-semibold text-ink-900">Liquidity & Cash Flow</CardTitle>

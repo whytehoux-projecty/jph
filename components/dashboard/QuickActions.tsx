@@ -144,7 +144,7 @@ export function QuickActions() {
   return (
     <section aria-label="Quick Actions" className="w-full">
       {/* ── 4 Action Buttons Grid ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[1.5px]">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[2.3px]">
         {quickActions.map((action) => {
           const IconComponent = action.icon;
           return (
