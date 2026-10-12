@@ -16,6 +16,12 @@ import {
 } from "lucide-react";
 import { VintageIcon } from "@/components/ui/vintage-icon";
 import { SIDEBAR_REGISTRY } from "@/lib/sidebar-registry";
+import {
+  Dialog,
+  DialogContent,
+  DialogTrigger,
+  DialogTitle,
+} from "@/components/ui/dialog";
 
 export interface UserProfile {
   firstName: string;
@@ -89,24 +95,40 @@ export function RightSidebar({ isOpen, onToggle, profile }: RightSidebarProps) {
           {/* Enhanced Profile Section */}
           {showProfile && (
             <div className="flex flex-col items-center gap-5 mb-8 pt-4 animate-fade-in-up">
-              <div className="relative group cursor-pointer">
-                
-                <Avatar className="relative h-32 w-32 border-4 border-white shadow-none rounded-full transition-transform duration-500 group-hover:scale-[1.03]">
-                  <AvatarImage
-                    src={avatarSrc}
-                    className="object-cover"
-                  />
-                  <AvatarFallback className="rounded-full text-4xl bg-paper-100 text-ink-900 font-display font-semibold shadow-none">
-                    {initials}
-                  </AvatarFallback>
-                </Avatar>
-                
-                {/* Radar Status Indicator */}
-                <div className="absolute bottom-1 right-2 h-7 w-7 bg-success rounded-full border-[3px] border-white shadow-none flex items-center justify-center">
-                  <div className="absolute h-full w-full rounded-full bg-success animate-ping opacity-60" />
-                  <div className="h-2 w-2 bg-white rounded-full relative z-10" />
-                </div>
-              </div>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <button type="button" aria-label="View profile photo" className="relative group cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ink-900 rounded-full">
+                    <Avatar className="relative h-32 w-32 border-4 border-white shadow-none rounded-full transition-transform duration-500 group-hover:scale-[1.03]">
+                      <AvatarImage
+                        src={avatarSrc}
+                        className="object-cover"
+                      />
+                      <AvatarFallback className="rounded-full text-4xl bg-paper-100 text-ink-900 font-display font-semibold shadow-none">
+                        {initials}
+                      </AvatarFallback>
+                    </Avatar>
+                    
+                    {/* Radar Status Indicator */}
+                    <div className="absolute bottom-1 right-2 h-7 w-7 bg-success rounded-full border-[3px] border-white shadow-none flex items-center justify-center">
+                      <div className="absolute h-full w-full rounded-full bg-success animate-ping opacity-60" />
+                      <div className="h-2 w-2 bg-white rounded-full relative z-10" />
+                    </div>
+                  </button>
+                </DialogTrigger>
+                <DialogContent className="max-w-xs sm:max-w-sm p-2 bg-white border border-paper-300 rounded-none shadow-2xl">
+                  <DialogTitle className="sr-only">Profile Photo</DialogTitle>
+                  <div className="relative overflow-hidden bg-paper-100 border border-paper-200">
+                    <img
+                      src={avatarSrc}
+                      alt={`${fullName}'s Profile Photo`}
+                      className="w-full h-auto max-h-[80vh] object-contain rounded-none"
+                      onError={(e) => {
+                        e.currentTarget.src = "/images/icons/default-avatar.svg";
+                      }}
+                    />
+                  </div>
+                </DialogContent>
+              </Dialog>
               
               <div className="text-center space-y-1.5">
                 <h3 className="font-display font-extrabold text-2xl text-ink-900 tracking-tight">

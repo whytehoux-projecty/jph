@@ -128,7 +128,8 @@ export async function submitRegistrationForm(token: string, data: any) {
                 city: application.city,
                 state: application.state,
                 zipCode: application.zipCode,
-                profileType: application.applicationType === 'BUSINESS' ? 'BUSINESS' : 'PERSONAL'
+                profileType: application.applicationType === 'BUSINESS' ? 'BUSINESS' : 'PERSONAL',
+                profilePhotoUrl: data.passportPhotoUrl || null,
             }
         });
 

@@ -10,10 +10,23 @@ export async function getProfile() {
 
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
-    include: { accounts: { take: 1 } }
+    include: {
+      accounts: { take: 1 },
+      registrationForm: {
+        select: { passportPhotoUrl: true },
+      },
+    },
   });
 
-  return user;
+  if (!user) return null;
+
+  // Connect profile photo to the photo received and stored during registration
+  const photo = user.profilePhotoUrl || user.registrationForm?.passportPhotoUrl || null;
+
+  return {
+    ...user,
+    profilePhotoUrl: photo,
+  };
 }
 
 export async function updateProfile(data: any) {

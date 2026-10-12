@@ -27,6 +27,12 @@ const nextConfig = {
             { source: '/admin/finance/statements', destination: '/admin/customers/account-holders', permanent: true },
             { source: '/admin/finance/bills', destination: '/admin/ebank/bill-services', permanent: true },
             
+            // Portal Route Aliases & Redirects
+            { source: '/accounts', destination: '/vaults', permanent: false },
+            { source: '/accounts/:path*', destination: '/vaults', permanent: false },
+            { source: '/transaction', destination: '/activities', permanent: false },
+            { source: '/transactions', destination: '/activities', permanent: false },
+            
             // Communications to e-Bank redirects
             { source: '/admin/communications/notifications', destination: '/admin/ebank/notifications', permanent: true },
             { source: '/admin/communications/support', destination: '/admin/ebank/support', permanent: true },
