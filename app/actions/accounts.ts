@@ -9,10 +9,25 @@ export async function getAccounts() {
 
   const accounts = await prisma.account.findMany({
     where: { userId: session.user.id },
-    orderBy: { createdAt: 'asc' },
+    orderBy: [
+      { isPrimary: 'desc' },
+      { createdAt: 'asc' }
+    ],
   });
 
   return accounts;
+}
+
+export async function getCryptoWallets() {
+  const session = await auth();
+  if (!session?.user?.id) return [];
+
+  const wallets = await prisma.cryptoWallet.findMany({
+    where: { userId: session.user.id },
+    orderBy: { createdAt: 'asc' },
+  });
+
+  return wallets;
 }
 
 export async function getAccountById(id: string) {

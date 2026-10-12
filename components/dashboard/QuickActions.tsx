@@ -1,161 +1,174 @@
 "use client";
 
 import Link from "next/link";
-import {
-  CreditCard,
-  Wallet,
-  PiggyBank,
-  Receipt,
-  ArrowUpRight,
-  ArrowRight,
-  LucideIcon,
-} from "lucide-react";
+import React from "react";
+
+function MakePaymentsIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* Top Right Arrow */}
+      <path d="M12 22h36" strokeWidth="4.5" />
+      <path d="M36 12l12 10-12 10" strokeWidth="4.5" />
+      {/* Bottom Left Arrow */}
+      <path d="M52 42H16" strokeWidth="4.5" />
+      <path d="M28 32L16 42l12 10" strokeWidth="4.5" />
+    </svg>
+  );
+}
+
+function VaultCardsIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* Outer Vault Body */}
+      <rect x="9" y="10" width="46" height="42" rx="4" strokeWidth="3.5" />
+      {/* Inner Recessed Door Frame */}
+      <rect x="15" y="16" width="34" height="30" rx="2" strokeWidth="2.5" />
+      {/* Corner Rivets */}
+      <circle cx="19" cy="20" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="45" cy="20" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="19" cy="42" r="1.2" fill="currentColor" stroke="none" />
+      <circle cx="45" cy="42" r="1.2" fill="currentColor" stroke="none" />
+      {/* Vault Feet */}
+      <path d="M15 52v3h6v-3M43 52v3h6v-3" strokeWidth="3" />
+      {/* Left Side Hinges */}
+      <rect x="7" y="18" width="2.5" height="5" rx="0.8" fill="currentColor" stroke="none" />
+      <rect x="7" y="37" width="2.5" height="5" rx="0.8" fill="currentColor" stroke="none" />
+      {/* Central Rotary Vault Dial */}
+      <circle cx="32" cy="31" r="8" strokeWidth="2.8" />
+      <circle cx="32" cy="31" r="2.8" fill="currentColor" stroke="none" />
+      {/* Dial Handles / Spokes */}
+      <path d="M26.5 25.5l-3.5-3.5M37.5 25.5l3.5-3.5M26.5 36.5l-3.5 3.5M37.5 36.5l3.5 3.5" strokeWidth="2.6" />
+    </svg>
+  );
+}
+
+function SavingsLoansIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* Banknote / Cash in Background */}
+      <rect x="23" y="14" width="33" height="22" rx="2" strokeWidth="2.6" />
+      <rect x="26" y="17" width="27" height="16" rx="1" strokeWidth="1.2" strokeDasharray="2.5 2" />
+      <circle cx="39.5" cy="25" r="4.2" strokeWidth="2" />
+      {/* Primary Coin Stack (4 layers) */}
+      <ellipse cx="20" cy="27" rx="11" ry="4" strokeWidth="2.8" />
+      <path d="M9 27v6c0 2.2 4.9 4 11 4s11-1.8 11-4v-6" strokeWidth="2.8" />
+      <path d="M9 33v6c0 2.2 4.9 4 11 4s11-1.8 11-4v-6" strokeWidth="2.8" />
+      <path d="M9 39v6c0 2.2 4.9 4 11 4s11-1.8 11-4v-6" strokeWidth="2.8" />
+      {/* Wealth Radiance Rays */}
+      <path d="M20 18v-5M13 19l-3-4M27 19l3-4" strokeWidth="2.4" />
+      {/* Secondary Coin Stack */}
+      <ellipse cx="37" cy="41" rx="8" ry="3" strokeWidth="2.5" />
+      <path d="M29 41v5c0 1.65 3.6 3 8 3s8-1.35 8-3v-5" strokeWidth="2.5" />
+    </svg>
+  );
+}
+
+function ActivitiesIcon({ className }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 64 64"
+      fill="none"
+      stroke="currentColor"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      {/* Clock Body Face */}
+      <circle cx="35" cy="33" r="14" strokeWidth="3.2" />
+      {/* Clock Hands (12:00 and 3:00) */}
+      <path d="M35 24v9h7" strokeWidth="3" />
+      <circle cx="35" cy="33" r="1.5" fill="currentColor" stroke="none" />
+      {/* Sweeping Counter-Clockwise History Arc */}
+      <path d="M44 19A 18 18 0 1 0 17 33" strokeWidth="3.6" />
+      {/* Arrowhead */}
+      <path d="M11 25.5l6 7.5 7.5-6" strokeWidth="3.6" />
+    </svg>
+  );
+}
 
 interface QuickAction {
   title: string;
-  description: string;
   href: string;
-  railCode: string;
-  actionPrompt: string;
-  image: string;
-  icon: LucideIcon;
+  icon: React.ComponentType<{ className?: string }>;
 }
 
 const quickActions: QuickAction[] = [
   {
-    title: "Make Payment",
-    description: "Domestic wires, ACH & instant rails",
+    title: "Make Payments",
     href: "/transfer",
-    railCode: "01",
-    actionPrompt: "Execute Rail",
-    image: "/images/dashboard/actions/make-payment.webp",
-    icon: CreditCard,
+    icon: MakePaymentsIcon,
   },
   {
-    title: "Vaults & Cards",
-    description: "Multi-currency reserves & debit cards",
+    title: "Vault & Cards",
     href: "/accounts",
-    railCode: "02",
-    actionPrompt: "Manage Vaults",
-    image: "/images/dashboard/actions/vaults-cards.webp",
-    icon: Wallet,
+    icon: VaultCardsIcon,
   },
   {
     title: "Savings & Loans",
-    description: "High-yield goals & credit facilities",
     href: "/savings",
-    railCode: "03",
-    actionPrompt: "Manage Yield",
-    image: "/images/dashboard/actions/savings-loans.webp",
-    icon: PiggyBank,
+    icon: SavingsLoansIcon,
   },
   {
     title: "Activities",
-    description: "Real-time ledger & settled records",
     href: "/transaction",
-    railCode: "04",
-    actionPrompt: "Inspect Ledger",
-    image: "/images/dashboard/actions/activities.webp",
-    icon: Receipt,
+    icon: ActivitiesIcon,
   },
 ];
 
 export function QuickActions() {
   return (
-    <section aria-labelledby="executive-actions-heading" className="w-full">
-      {/* ── Executive Header Bar ── */}
-      <div className="mb-3.5 flex flex-wrap items-center justify-between gap-2 border-b border-paper-200/80 pb-2.5">
-        <div className="flex items-center gap-2.5">
-          <span className="relative flex h-2 w-2" aria-hidden="true">
-            <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-600" />
-          </span>
-          <h3
-            id="executive-actions-heading"
-            className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-ink-900"
-          >
-            Executive Actions
-          </h3>
-          <span className="hidden sm:inline-block border border-paper-300 bg-paper-100 px-1.5 py-0.5 font-mono text-[10px] font-medium uppercase tracking-wider text-ink-700">
-            Direct Rails
-          </span>
-        </div>
-
-        <div className="flex items-center gap-2 font-mono text-[11px] text-ink-500">
-          <span className="hidden md:inline text-ink-400">INSTANT RAIL EXECUTION</span>
-          <span className="hidden md:inline text-paper-300">•</span>
-          <span className="font-semibold text-emerald-700">ONLINE</span>
-        </div>
-      </div>
-
-      {/* ── 4 Executive Action Cards Grid ── */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3.5">
+    <section aria-label="Quick Actions" className="w-full">
+      {/* ── 4 Action Buttons Grid ── */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-[1.5px]">
         {quickActions.map((action) => {
-          const Icon = action.icon;
+          const IconComponent = action.icon;
           return (
             <Link
               key={action.title}
               href={action.href}
-              className="group relative flex flex-col justify-between overflow-hidden rounded-none border border-paper-200 bg-white p-4.5 sm:p-5 transition-all duration-300 ease-out hover:-translate-y-1 hover:border-ink-900 hover:shadow-[0_12px_24px_-8px_rgba(20,24,31,0.09)] active:translate-y-0 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vermilion-600 focus-visible:ring-offset-2"
+              className="group relative flex flex-col justify-between overflow-hidden rounded-sm border border-paper-300 bg-paper-50 p-4 sm:p-5 min-h-[108px] transition-all duration-200 ease-out hover:-translate-y-0.5 hover:bg-ink-900 hover:border-ink-900 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vermilion-600 focus-visible:ring-offset-2"
             >
-              {/* Top Dynamic Accent Line */}
-              <div
-                className="absolute top-0 left-0 right-0 h-[2.5px] bg-paper-200 transition-colors duration-300 group-hover:bg-vermilion-600"
-                aria-hidden="true"
-              />
-
-              {/* Subtle Ambient Hover Gradient */}
-              <div
-                className="pointer-events-none absolute inset-0 bg-gradient-to-b from-paper-50/70 via-transparent to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100"
-                aria-hidden="true"
-              />
-
-              {/* Card Top: 3D Visual Render & Rail Index */}
-              <div className="relative z-10 flex w-full items-start justify-between">
-                {/* 3D Action Emblem Container with Icon Fallback */}
-                <div className="relative flex h-14 w-14 items-center justify-center rounded-none border border-paper-200 bg-paper-50/80 p-1 transition-all duration-300 group-hover:border-ink-900 group-hover:bg-white group-hover:scale-105 group-hover:shadow-md">
-                  <img
-                    src={action.image}
-                    alt={action.title}
-                    className="h-full w-full object-contain drop-shadow-sm transition-transform duration-300 group-hover:scale-110"
-                    onError={(e) => {
-                      (e.currentTarget as HTMLElement).style.display = 'none';
-                      const fallback = e.currentTarget.nextElementSibling as HTMLElement | null;
-                      if (fallback) fallback.style.display = 'flex';
-                    }}
-                  />
-                  <div className="hidden h-full w-full items-center justify-center text-ink-800">
-                    <Icon className="h-6 w-6" />
-                  </div>
-                </div>
-
-                {/* Rail Index Tag & Arrow */}
-                <div className="flex items-center gap-1.5">
-                  <span className="font-mono text-[10px] font-semibold tracking-widest text-ink-400 transition-colors duration-300 group-hover:text-ink-700">
-                    {action.railCode}
-                  </span>
-                  <div className="flex h-6 w-6 items-center justify-center border border-transparent transition-all duration-300 group-hover:border-paper-200 group-hover:bg-paper-50">
-                    <ArrowUpRight className="h-3.5 w-3.5 text-ink-400 transition-all duration-300 group-hover:-translate-y-0.5 group-hover:translate-x-0.5 group-hover:text-vermilion-600" />
-                  </div>
-                </div>
+              {/* Top Row: Enlarged Icon positioned almost touching the right side border */}
+              <div className="flex w-full items-start justify-end -mr-1.5 -mt-1 sm:-mr-2 sm:-mt-1.5">
+                <IconComponent className="h-12 w-12 sm:h-14 sm:w-14 text-ink-900 transition-all duration-200 group-hover:text-paper-50 group-hover:scale-105" />
               </div>
 
-              {/* Card Middle: Title & Description */}
-              <div className="relative z-10 mt-4">
-                <h4 className="font-display text-[15px] sm:text-base font-semibold tracking-tight text-ink-900 transition-colors duration-300 group-hover:text-vermilion-700">
+              {/* Bottom Row: Enlarged Title with Inverse Color on Hover */}
+              <div className="mt-3">
+                <h4
+                  style={{
+                    fontFamily:
+                      '"Arial Rounded MT Bold", "Arial Rounded MT", ui-rounded, sans-serif',
+                  }}
+                  className="text-lg sm:text-xl font-normal tracking-tight text-ink-900 transition-colors duration-200 group-hover:text-paper-50 leading-tight"
+                >
                   {action.title}
                 </h4>
-                <p className="mt-1 text-xs text-ink-500 line-clamp-1 transition-colors duration-300 group-hover:text-ink-700">
-                  {action.description}
-                </p>
-              </div>
-
-              {/* Card Footer: Micro Action Prompt */}
-              <div className="relative z-10 mt-4 border-t border-paper-100 pt-2.5 flex items-center justify-between text-[11px] font-mono text-ink-400 transition-colors duration-300 group-hover:border-paper-200 group-hover:text-ink-700">
-                <span className="text-[10px] font-semibold uppercase tracking-wider text-ink-400 transition-colors duration-300 group-hover:text-vermilion-700">
-                  {action.actionPrompt}
-                </span>
-                <ArrowRight className="h-3 w-3 text-ink-400 opacity-60 transition-all duration-300 group-hover:translate-x-1 group-hover:text-vermilion-600 group-hover:opacity-100" />
               </div>
             </Link>
           );
@@ -164,3 +177,5 @@ export function QuickActions() {
     </section>
   );
 }
+
+

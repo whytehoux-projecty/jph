@@ -59,6 +59,27 @@ export async function createAccount(formData: FormData) {
   revalidatePath('/admin/customers/account-holders');
 }
 
+export async function setPrimaryAccount(userId: string, accountId: string) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+
+  // Reset all other accounts for this user to isPrimary = false
+  await prisma.account.updateMany({
+    where: { userId },
+    data: { isPrimary: false }
+  });
+
+  // Set chosen account as primary
+  await prisma.account.update({
+    where: { id: accountId },
+    data: { isPrimary: true }
+  });
+
+  revalidatePath('/admin/customers/account-holders');
+  revalidatePath('/dashboard');
+  return { success: true };
+}
+
 export async function updateAccount(formData: FormData) {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
@@ -73,12 +94,27 @@ export async function updateAccount(formData: FormData) {
   if (status) updateData.status = status;
   if (accountType) updateData.accountType = accountType;
 
+  if (formData.has('isPrimary')) {
+    const isPrimary = formData.get('isPrimary') === 'true' || formData.get('isPrimary') === 'on';
+    if (isPrimary) {
+      const currentAcc = await prisma.account.findUnique({ where: { id } });
+      if (currentAcc) {
+        await prisma.account.updateMany({
+          where: { userId: currentAcc.userId },
+          data: { isPrimary: false }
+        });
+      }
+    }
+    updateData.isPrimary = isPrimary;
+  }
+
   await prisma.account.update({
     where: { id },
     data: updateData
   });
   
   revalidatePath('/admin/customers/account-holders');
+  revalidatePath('/dashboard');
 }
 
 export async function deleteAccount(formData: FormData) {

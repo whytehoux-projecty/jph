@@ -89,30 +89,31 @@ export function DashboardIntelligenceSidebar({ user }: DashboardIntelligenceSide
             <span className="text-xs font-mono uppercase tracking-wider text-ink-500 font-medium">
               Private Client Advisory
             </span>
-            <span className="inline-flex items-center gap-1 text-[10px] font-mono text-emerald-700">
-              <span className="h-1.5 w-1.5 rounded-full bg-emerald-600" />
-              Available
-            </span>
           </div>
           <div>
             <p className="text-sm font-semibold text-ink-900">{user?.accountManagerName || "Eleanor Vance, CFA"}</p>
             <p className="text-xs text-ink-500">{user?.accountManagerTitle || "VP, Private Client Advisory"}</p>
           </div>
-          <div className="flex items-center gap-2 pt-2 border-t border-paper-200/60">
-            <a
-              href={`tel:${user?.accountManagerPhone || "18004374824"}`}
-              className="inline-flex items-center gap-1 rounded-sm border border-paper-200 bg-paper-50 px-2.5 py-1.5 text-xs font-medium text-ink-700 hover:text-ink-900 hover:bg-paper-100 transition-colors"
-            >
-              <Phone className="h-3.5 w-3.5 text-ink-500" />
-              Direct Line
-            </a>
-            <a
-              href={`mailto:${user?.accountManagerEmail || "advisory@heritagetrust.com"}`}
-              className="inline-flex items-center gap-1 rounded-sm border border-paper-200 bg-paper-50 px-2.5 py-1.5 text-xs font-medium text-ink-700 hover:text-ink-900 hover:bg-paper-100 transition-colors"
-            >
-              <Mail className="h-3.5 w-3.5 text-ink-500" />
-              Secure Dispatch
-            </a>
+          {/* Advisory Phone & Email Contact Listing */}
+          <div className="space-y-2 pt-2.5 border-t border-paper-200/60 text-xs">
+            <div className="flex items-center gap-2">
+              <Phone className="h-3.5 w-3.5 text-ink-500 shrink-0" />
+              <a
+                href={`tel:${user?.accountManagerPhone || "+18004374824"}`}
+                className="font-mono text-ink-700 hover:text-ink-900 transition-colors font-medium"
+              >
+                {user?.accountManagerPhone || "+1 (800) 437-4824"}
+              </a>
+            </div>
+            <div className="flex items-center gap-2">
+              <Mail className="h-3.5 w-3.5 text-ink-500 shrink-0" />
+              <a
+                href={`mailto:${user?.accountManagerEmail || "advisory@heritagetrust.com"}`}
+                className="text-ink-700 hover:text-ink-900 transition-colors font-medium truncate"
+              >
+                {user?.accountManagerEmail || "advisory@heritagetrust.com"}
+              </a>
+            </div>
           </div>
         </div>
       </Card>

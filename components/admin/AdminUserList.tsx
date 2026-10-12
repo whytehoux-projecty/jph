@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { format } from "date-fns";
-import { Users, Search, Filter, ShieldAlert, ShieldCheck, UserCheck, UserX, Crown, User as UserIcon, Building2, CreditCard, FileText, Settings, Key, Trash2, LogIn, Download, Mail, Plus, Edit2, Check, X, Building, Link2, CreditCard as CardIcon, FileSpreadsheet, Lock } from "lucide-react";
+import { Users, Search, Filter, ShieldAlert, ShieldCheck, UserCheck, UserX, Crown, User as UserIcon, Building2, CreditCard, FileText, Settings, Key, Trash2, LogIn, Download, Mail, Plus, Edit2, Check, X, Building, Link2, CreditCard as CardIcon, FileSpreadsheet, Lock, Star } from "lucide-react";
 import { 
   Table, 
   TableBody, 
@@ -37,6 +37,7 @@ import {
   updateRegistrationForm, 
   createAccount, 
   updateAccount, 
+  setPrimaryAccount,
   deleteAccount, 
   issueCard, 
   updateCard, 
@@ -79,6 +80,7 @@ export type AdminUser = {
     accountType: string;
     balance: number;
     status: string;
+    isPrimary?: boolean;
   }[];
   cards: {
     id: string;
@@ -654,6 +656,33 @@ export function AdminUserList({
                                 </div>
                                 <div className="text-right relative z-10">
                                   <p className="font-display font-bold text-2xl">${acc.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}</p>
+                                </div>
+                                <div className="flex items-center justify-between mt-3 pt-3 border-t border-black/10 dark:border-white/10 relative z-10">
+                                  {acc.isPrimary ? (
+                                    <span className="inline-flex items-center gap-1 text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-500 border border-amber-500/30">
+                                      <Star className="w-3 h-3 fill-amber-500" /> Primary Account
+                                    </span>
+                                  ) : (
+                                    <button
+                                      type="button"
+                                      onClick={async (e) => {
+                                        e.stopPropagation();
+                                        await setPrimaryAccount(selectedUser.id, acc.id);
+                                        toast.success(`Set ${acc.accountType} as Primary Account`);
+                                        setSelectedUser(prev => prev ? ({
+                                          ...prev,
+                                          accounts: prev.accounts.map(a => ({
+                                            ...a,
+                                            isPrimary: a.id === acc.id
+                                          }))
+                                        }) : null);
+                                      }}
+                                      className="inline-flex items-center gap-1 text-[10px] font-medium opacity-80 hover:opacity-100 hover:underline px-2 py-0.5 rounded-sm transition-all"
+                                    >
+                                      <Star className="w-2.5 h-2.5" /> Make Primary
+                                    </button>
+                                  )}
+                                  <span className="text-[10px] opacity-60">Click to manage</span>
                                 </div>
                               </div>
                             );
@@ -1355,6 +1384,18 @@ export function AdminUserList({
               <form action={async (fd) => {
                  fd.append('id', accountPanel.id);
                  await updateAccount(fd);
+                 const wasPrimary = fd.get('isPrimary') === 'true';
+                 setSelectedUser(prev => prev ? ({
+                   ...prev,
+                   accounts: prev.accounts.map(a => ({
+                     ...a,
+                     ...(a.id === accountPanel.id ? {
+                       balance: parseFloat(fd.get('balance') as string) || a.balance,
+                       status: (fd.get('status') as string) || a.status,
+                       isPrimary: wasPrimary
+                     } : wasPrimary ? { isPrimary: false } : {})
+                   }))
+                 }) : null);
                  setAccountPanel(null);
                  toast.success('Account updated successfully');
               }} className="space-y-4">
@@ -1372,6 +1413,26 @@ export function AdminUserList({
                     </select>
                   </div>
                 </div>
+
+                <div className="p-3 bg-neutral-50 rounded-xl border border-neutral-200 flex items-center justify-between">
+                  <div>
+                    <p className="text-xs font-semibold text-ink-900 flex items-center gap-1.5">
+                      <Star className="w-3.5 h-3.5 text-amber-500" /> Primary Account Designation
+                    </p>
+                    <p className="text-[11px] text-muted-foreground">Controls which account is displayed on client's Primary Checking overview</p>
+                  </div>
+                  <label className="relative inline-flex items-center cursor-pointer">
+                    <input 
+                      type="checkbox" 
+                      name="isPrimary" 
+                      defaultChecked={accountPanel.isPrimary} 
+                      value="true"
+                      className="sr-only peer" 
+                    />
+                    <div className="w-9 h-5 bg-neutral-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-neutral-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-600"></div>
+                  </label>
+                </div>
+
                 <Button type="submit" className="w-full bg-(--ink-900) hover:bg-(--ink-900)/90 text-white">Save Changes</Button>
               </form>
               

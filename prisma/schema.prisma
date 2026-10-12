@@ -97,6 +97,7 @@ model Account {
   currency      String   @default("USD")
   balance       Float    @default(0.00) // Using Float for SQLite
   status        String   @default("ACTIVE")
+  isPrimary     Boolean  @default(false) @map("is_primary")
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 

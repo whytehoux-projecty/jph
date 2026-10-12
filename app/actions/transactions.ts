@@ -27,10 +27,20 @@ export async function getTransactionStats(period: 'week' | 'month' | 'year' = 'm
   const accounts = await prisma.account.findMany({ where: { userId: session.user.id } });
   const accountIds = accounts.map(a => a.id);
 
-  // Note: in a real app, calculate based on `period` date ranges.
-  // For demo, just sum up recent ones.
+  const now = new Date();
+  const since =
+    period === 'week'
+      ? new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000)
+      : period === 'year'
+      ? new Date(now.getFullYear(), 0, 1)
+      : new Date(now.getFullYear(), now.getMonth(), 1);
+
   const transactions = await prisma.transaction.findMany({
-    where: { accountId: { in: accountIds } }
+    where: {
+      accountId: { in: accountIds },
+      createdAt: { gte: since },
+      status: { not: 'REJECTED' },
+    },
   });
 
   const income = transactions.filter(t => t.type === 'CREDIT').reduce((sum, t) => sum + t.amount, 0);

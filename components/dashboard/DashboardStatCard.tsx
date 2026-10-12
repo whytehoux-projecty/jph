@@ -31,7 +31,7 @@ export function DashboardStatCard({
         className
       )}
     >
-      <div className="absolute top-0 left-0 right-0 h-[2px] bg-paper-200 group-hover:bg-vermilion-600 transition-colors" />
+      <div className="absolute top-0 left-0 right-0 h-[2px] bg-paper-200 group-hover:bg-ink-900/20 transition-colors" />
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 pt-5 px-5">
         <CardTitle className="text-xs font-mono font-medium uppercase tracking-wider text-ink-500">
           {title}

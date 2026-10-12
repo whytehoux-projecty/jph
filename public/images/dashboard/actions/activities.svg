@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none" stroke="#14181F" stroke-linecap="round" stroke-linejoin="round">
+  <!-- Arrowhead at top left pointing down/counter-clockwise -->
+  <polyline points="10,13 10,25 22,25" stroke-width="4.2" />
+  <!-- Sweeping Counter-Clockwise Circular Path -->
+  <path d="M10 25 A 21 21 0 1 1 32 53 A 21 21 0 0 1 16 43" stroke-width="4.2" />
+  <!-- Clock Hands in Center -->
+  <polyline points="32,20 32,32 41,37" stroke-width="4" />
+</svg>

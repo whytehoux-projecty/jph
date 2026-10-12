@@ -14,29 +14,31 @@ export default function TransferLanding() {
   }, [router]);
 
   return (
-    <div className="mx-auto w-full max-w-5xl space-y-8">
-      <header className="space-y-2">
+    <div className="mx-auto w-full max-w-5xl rounded-sm border border-paper-300 bg-white shadow-sm overflow-hidden">
+      <header className="border-b border-paper-300 bg-paper-100 p-6 sm:p-8 space-y-2">
         <h1 className="font-display text-h2 font-bold text-ink-900">Transfers & Pay Bills</h1>
         <p className="max-w-2xl text-body text-ink-700">What would you like to do today?</p>
       </header>
 
-      <div className="grid gap-4 md:grid-cols-2">
-        <SelectorCard
-          size="md"
-          layout="row"
-          icon={<SendIcon className="h-8 w-8" />}
-          title="Transfers"
-          description="Move money between accounts, wire or ACH to another bank, send stablecoins, or pay a friend."
-          onClick={() => router.push("/transfer/send")}
-        />
-        <SelectorCard
-          size="md"
-          layout="row"
-          icon={<BillsIcon className="h-8 w-8" />}
-          title="Pay Bills"
-          description="Pay utilities, cards and other providers from one of your accounts."
-          onClick={() => router.push("/bills")}
-        />
+      <div className="p-6 sm:p-8">
+        <div className="grid gap-4 md:grid-cols-2">
+          <SelectorCard
+            size="md"
+            layout="row"
+            icon={<SendIcon className="h-8 w-8" />}
+            title="Transfers"
+            description="Move money between accounts, wire or ACH to another bank, send stablecoins, or pay a friend."
+            onClick={() => router.push("/transfer/send")}
+          />
+          <SelectorCard
+            size="md"
+            layout="row"
+            icon={<BillsIcon className="h-8 w-8" />}
+            title="Pay Bills"
+            description="Pay utilities, cards and other providers from one of your accounts."
+            onClick={() => router.push("/bills")}
+          />
+        </div>
       </div>
     </div>
   );

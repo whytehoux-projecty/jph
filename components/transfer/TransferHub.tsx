@@ -95,8 +95,8 @@ export function TransferHub({ accounts, methodConfigs }: Props) {
   };
 
   return (
-    <div className="mx-auto w-full max-w-7xl space-y-8">
-      <header className="space-y-3">
+    <div className="mx-auto w-full max-w-7xl rounded-sm border border-paper-300 bg-white shadow-sm overflow-hidden">
+      <header className="space-y-3 border-b border-paper-300 bg-paper-100 p-6 sm:p-7">
         <Link
           href="/transfer"
           className="inline-flex items-center gap-1 text-small text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-900"
@@ -109,73 +109,75 @@ export function TransferHub({ accounts, methodConfigs }: Props) {
         </p>
       </header>
 
-      <div className="flex flex-col">
-        <div
-          role="tablist"
-        aria-label="Transfer types"
-        className="flex items-end gap-1 overflow-x-auto scrollbar-hide border-b border-paper-300"
-      >
-        {types.map((t, i) => {
-          const Icon = ICONS[t.illustration];
-          const selected = t.id === activeId;
-          return (
-            <button
-              key={t.id}
-              ref={(el) => {
-                tabRefs.current[i] = el;
-              }}
-              id={`tab-${t.id}`}
-              role="tab"
-              aria-controls="transfer-panel"
-              aria-expanded={selected}
-              className={cn(
-                "shrink-0 px-5 py-2.5 rounded-none text-[13px] transition-all duration-150 font-medium whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-900 focus-visible:ring-offset-1 flex items-center gap-2 -mb-[1px]",
-                selected
-                  ? "bg-white text-ink-900 border border-paper-300 border-b-white font-semibold"
-                  : "text-ink-500 hover:text-ink-900 hover:bg-paper-100 border border-transparent border-b-transparent"
+      <div className="p-6 sm:p-8 space-y-8 bg-white">
+        <div className="flex flex-col">
+          <div
+            role="tablist"
+            aria-label="Transfer types"
+            className="flex items-end gap-1 overflow-x-auto scrollbar-hide border-b border-paper-300"
+          >
+            {types.map((t, i) => {
+              const Icon = ICONS[t.illustration];
+              const selected = t.id === activeId;
+              return (
+                <button
+                  key={t.id}
+                  ref={(el) => {
+                    tabRefs.current[i] = el;
+                  }}
+                  id={`tab-${t.id}`}
+                  role="tab"
+                  aria-controls="transfer-panel"
+                  aria-expanded={selected}
+                  className={cn(
+                    "shrink-0 px-5 py-2.5 rounded-none text-[13px] transition-all duration-150 font-medium whitespace-nowrap focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-900 focus-visible:ring-offset-1 flex items-center gap-2 -mb-[1px]",
+                    selected
+                      ? "bg-white text-ink-900 border border-paper-300 border-b-white font-semibold"
+                      : "text-ink-500 hover:text-ink-900 hover:bg-paper-100 border border-transparent border-b-transparent"
+                  )}
+                  onClick={() => toggle(t.id)}
+                  onKeyDown={(e) => onKeyDown(e, i)}
+                >
+                  <Icon className={cn("h-4 w-4", selected ? "text-ink-900" : "text-ink-500")} />
+                  {t.title}
+                </button>
+              );
+            })}
+          </div>
+
+          <div id="transfer-panel" role="tabpanel" aria-labelledby={active ? `tab-${active.id}` : undefined}>
+            <AnimatePresence initial={false} mode="wait">
+              {active && (
+                <motion.div
+                  key={active.id}
+                  initial={{ height: 0, opacity: 0 }}
+                  animate={{ height: "auto", opacity: 1 }}
+                  exit={{ height: 0, opacity: 0 }}
+                  transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
+                  style={{ overflow: "hidden" }}
+                >
+                  <div className="grid overflow-hidden rounded-none border border-paper-300 border-t-0 bg-white lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] shadow-sm">
+                    <div className="p-5 sm:p-8 flex flex-col justify-between">
+                      <TransferFormEngine
+                        key={active.id}
+                        type={active}
+                        gate={gate}
+                        onGateChange={(g) => go(active.id, g, "replace")}
+                        accounts={accounts}
+                        limitOverrides={limitOverrides}
+                        onSubmitted={() => setRefreshKey((k) => k + 1)}
+                      />
+                    </div>
+                    <InfoPanel type={active} gate={gate} cfg={cfg} />
+                  </div>
+                </motion.div>
               )}
-              onClick={() => toggle(t.id)}
-              onKeyDown={(e) => onKeyDown(e, i)}
-            >
-              <Icon className={cn("h-4 w-4", selected ? "text-ink-900" : "text-ink-500")} />
-              {t.title}
-            </button>
-          );
-        })}
-      </div>
+            </AnimatePresence>
+          </div>
+        </div>
 
-      <div id="transfer-panel" role="tabpanel" aria-labelledby={active ? `tab-${active.id}` : undefined}>
-        <AnimatePresence initial={false} mode="wait">
-          {active && (
-            <motion.div
-              key={active.id}
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: "auto", opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              transition={{ duration: 0.3, ease: [0.22, 1, 0.36, 1] }}
-              style={{ overflow: "hidden" }}
-            >
-              <div className="grid overflow-hidden rounded-none border border-paper-300 border-t-0 bg-white lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] shadow-sm">
-                <div className="p-5 sm:p-8 flex flex-col justify-between">
-                  <TransferFormEngine
-                    key={active.id}
-                    type={active}
-                    gate={gate}
-                    onGateChange={(g) => go(active.id, g, "replace")}
-                    accounts={accounts}
-                    limitOverrides={limitOverrides}
-                    onSubmitted={() => setRefreshKey((k) => k + 1)}
-                  />
-                </div>
-                <InfoPanel type={active} gate={gate} cfg={cfg} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+        <RecentRequests refreshKey={refreshKey} />
       </div>
-      </div>
-
-      <RecentRequests refreshKey={refreshKey} />
     </div>
   );
 }
