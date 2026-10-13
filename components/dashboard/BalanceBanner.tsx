@@ -66,7 +66,7 @@ export function BalanceBanner({ totalBalance, currency, language, accounts, init
             href="/deposit"
             className="bg-vermilion-600 hover:bg-vermilion-700 text-white text-xs font-semibold px-4 py-2 rounded-sm transition-colors flex items-center gap-1.5 shadow-xs"
           >
-            <Plus className="h-3.5 w-3.5" /> Deposit
+            <Plus className="h-3.5 w-3.5" /> Deposit & Withdrawal
           </Link>
         </div>
       </div>

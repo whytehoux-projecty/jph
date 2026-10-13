@@ -11,7 +11,6 @@ interface InvoiceUploaderProps {
   isUploading: boolean;
   error: string | null;
   onClear: () => void;
-  onLoadSample?: () => void;
 }
 
 export function InvoiceUploader({
@@ -20,7 +19,6 @@ export function InvoiceUploader({
   isUploading,
   error,
   onClear,
-  onLoadSample,
 }: InvoiceUploaderProps) {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = React.useState(false);
@@ -102,22 +100,6 @@ export function InvoiceUploader({
               </div>
             )}
           </div>
-
-          {onLoadSample && (
-            <div className="mt-3 flex items-center justify-between text-xs text-ink-500 px-1">
-              <span className="flex items-center gap-1.5">
-                <Sparkles className="h-3.5 w-3.5 text-vintage-gold" />
-                Want to test the pipeline engine right away?
-              </span>
-              <button
-                type="button"
-                onClick={onLoadSample}
-                className="font-semibold text-ink-900 underline hover:text-vermilion-600 transition-colors cursor-pointer"
-              >
-                Load Sample E-Invoice Ticket
-              </button>
-            </div>
-          )}
         </div>
       ) : (
         <div className="border border-paper-300 rounded-none p-4 sm:p-5 bg-paper-50 flex items-center justify-between shadow-xs">

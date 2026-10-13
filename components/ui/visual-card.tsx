@@ -11,10 +11,11 @@ interface VisualCardProps {
     frozen?: boolean;
     className?: string;
     flipped?: boolean;
+    imageUrl?: string;
     onFlip?: () => void;
 }
 
-export function VisualCard({ name, number, expiry, cvc, type, scheme, frozen = false, className, flipped = false, onFlip }: VisualCardProps) {
+export function VisualCard({ name, number, expiry, cvc, type, scheme, frozen = false, className, flipped = false, imageUrl, onFlip }: VisualCardProps) {
 
     const getBackground = (type: string) => {
         switch (type) {
@@ -70,9 +71,16 @@ export function VisualCard({ name, number, expiry, cvc, type, scheme, frozen = f
                     getBackground(type),
                     getTextColor(type)
                 )}>
+                    {/* Custom Card Artwork */}
+                    {imageUrl && (
+                        <div
+                            className="absolute inset-0 bg-cover bg-center z-0"
+                            style={{ backgroundImage: `url(${imageUrl})` }}
+                        />
+                    )}
                     {/* Glossy Overlay Effect */}
-                    <div className="absolute top-0 left-0 w-full h-full bg-linear-to-br from-white/20 to-transparent opacity-50 pointer-events-none" />
-                    <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-3xl" />
+                    <div className="absolute top-0 left-0 w-full h-full bg-linear-to-br from-white/20 to-transparent opacity-50 pointer-events-none z-[1]" />
+                    <div className="absolute -bottom-10 -right-10 w-40 h-40 rounded-full bg-white/10 blur-3xl z-[1]" />
 
                     {/* Header: Chip and Contactless */}
                     <div className="relative z-10 flex justify-between items-start">

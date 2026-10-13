@@ -13,6 +13,7 @@ import {
   Wallet,
   Landmark,
   MoreVertical,
+  ArrowRightLeft,
 } from "lucide-react";
 import { Card, CardContent, CardHeader } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -34,12 +35,16 @@ export interface Account {
   balance: number;
   availableBalance: number;
   creditLimit?: number;
-  type: "checking" | "savings" | "credit" | "investment" | "loan" | "wallet";
+  type: "checking" | "current" | "savings" | "credit" | "investment" | "loan" | "wallet" | "dca" | "offshore" | string;
   interestRate: string;
   monthlyChange: number;
   openedDate: string;
   status: "active" | "inactive" | "closed" | "suspended";
   currency: string;
+  isPrimary?: boolean;
+  isExternal?: boolean;
+  institutionName?: string;
+  vaultType?: string;
 }
 
 interface Transaction {
@@ -53,6 +58,8 @@ interface Transaction {
 interface AccountCardProps {
   account: Account;
   onViewDetails: (account: Account, initialTab?: string) => void;
+  onSwapRequest?: (account: Account) => void;
+  onRequestPrimary?: (account: Account) => void;
   userPreferences: {
     language: string;
     currency: string;
@@ -62,6 +69,8 @@ interface AccountCardProps {
 export function AccountCard({
   account,
   onViewDetails,
+  onSwapRequest,
+  onRequestPrimary,
   userPreferences,
 }: AccountCardProps) {
   const [recentTransactions, setRecentTransactions] = useState<Transaction[]>(
@@ -136,43 +145,86 @@ export function AccountCard({
       ? (Math.abs(account.balance) / account.creditLimit) * 100
       : 0;
 
+  const canRequestPrimary =
+    (account.type === "checking" ||
+      account.type === "current" ||
+      account.type === "savings" ||
+      account.vaultType === "CURRENT" ||
+      account.vaultType === "SAVINGS") &&
+    !account.isPrimary &&
+    !account.isExternal;
+
   return (
     <Card className="rounded hover:shadow-none transition-all duration-300 group hover:-translate-y-1">
       {/* Header */}
-      <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2 border-b border-paper-200/40 bg-muted/10">
-        <div className="flex items-center gap-3">
-          <VintageIcon
-            icon={getAccountIcon(account.type)}
-            variant={getAccountColor(account.type) as any}
-            size="md"
-          />
-          <div>
-            <h3 className="font-semibold text-ink-900 text-base">
-              {account.name}
-            </h3>
-            <p className="text-xs text-muted-foreground font-mono">
-              {account.maskedNumber}
-            </p>
+      <CardHeader className="flex flex-col space-y-2 pb-2.5 border-b border-paper-200/40 bg-muted/10">
+        <div className="flex flex-row items-center justify-between w-full">
+          <div className="flex items-center gap-3">
+            <VintageIcon
+              icon={getAccountIcon(account.type)}
+              variant={getAccountColor(account.type) as any}
+              size="md"
+            />
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="font-semibold text-ink-900 text-base">
+                  {account.name}
+                </h3>
+              </div>
+              <p className="text-xs text-muted-foreground font-mono">
+                {account.maskedNumber}
+              </p>
+            </div>
           </div>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" size="icon" className="h-8 w-8">
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuItem onClick={() => onViewDetails(account)}>
+                <Eye className="mr-2 h-4 w-4" /> View Details
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => onViewDetails(account, "statements")}>
+                <FileText className="mr-2 h-4 w-4" /> Statements
+              </DropdownMenuItem>
+              {canRequestPrimary && onRequestPrimary && (
+                <DropdownMenuItem onClick={() => onRequestPrimary(account)}>
+                  <Building className="mr-2 h-4 w-4 text-vintage-gold" /> Request Primary Designation
+                </DropdownMenuItem>
+              )}
+              {onSwapRequest && (
+                <DropdownMenuItem onClick={() => onSwapRequest(account)}>
+                  <ArrowRightLeft className="mr-2 h-4 w-4 text-ink-700" /> Swap / Replace Vault
+                </DropdownMenuItem>
+              )}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="ghost" size="icon" className="h-8 w-8">
-              <MoreHorizontal className="h-4 w-4" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-            <DropdownMenuItem onClick={() => onViewDetails(account)}>
-              <Eye className="mr-2 h-4 w-4" /> View Details
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <FileText className="mr-2 h-4 w-4" /> Statements
-            </DropdownMenuItem>
-            <DropdownMenuItem>
-              <Building className="mr-2 h-4 w-4" /> Account Settings
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+
+        {/* Hierarchy & External Rail Badges */}
+        <div className="flex items-center gap-1.5 pt-1">
+          {account.isPrimary ? (
+            <span className="text-[10px] font-mono uppercase tracking-wider font-bold bg-amber-100 text-amber-900 border border-amber-300 px-2 py-0.5 rounded-none flex items-center gap-1">
+              Primary Vault
+            </span>
+          ) : (
+            <span className="text-[10px] font-mono uppercase tracking-wider text-ink-600 bg-paper-200 border border-paper-300 px-2 py-0.5 rounded-none">
+              Secondary Vault
+            </span>
+          )}
+
+          {account.isExternal ? (
+            <span className="text-[10px] font-mono text-indigo-900 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-none">
+              External · {account.institutionName || "Connected Bank"}
+            </span>
+          ) : (
+            <span className="text-[10px] font-mono text-emerald-800 bg-emerald-50 border border-emerald-200 px-2 py-0.5 rounded-none">
+              Internal Vault
+            </span>
+          )}
+        </div>
       </CardHeader>
 
       {/* Body */}

@@ -20,12 +20,13 @@ export default async function AdminLayout({ children }: { children: React.ReactN
   const pendingRequests = await prisma.onlineAccessRequest.count({ where: { status: 'PENDING' } });
   const pendingTxns = await prisma.transaction.count({ where: { status: 'PENDING' } });
   const openTickets = await prisma.supportTicket.count({ where: { status: 'OPEN' } });
+  const pendingCardRequests = await prisma.cardRequest.count({ where: { status: 'PENDING' } });
 
-  const totalNotifications = pendingApps + pendingRequests + pendingTxns + openTickets;
+  const totalNotifications = pendingApps + pendingRequests + pendingTxns + openTickets + pendingCardRequests;
 
   return (
     <div className="h-screen bg-neutral-100 flex overflow-hidden font-sans">
-      <AdminSidebar badgeCounts={{ pendingApps, pendingRequests, pendingTxns, openTickets }} />
+      <AdminSidebar badgeCounts={{ pendingApps, pendingRequests, pendingTxns, openTickets, pendingCardRequests }} />
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
         <header className="bg-white border-b border-neutral-200 h-16 flex items-center justify-between px-6 shrink-0 z-10">
           <div className="flex-1 flex items-center gap-6">

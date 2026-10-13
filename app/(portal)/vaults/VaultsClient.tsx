@@ -18,8 +18,12 @@ import {
   Search,
   RefreshCw,
   ExternalLink,
+  ArrowRightLeft,
+  ChevronLeft,
 } from "lucide-react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "@/lib/toast";
 
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -28,6 +32,7 @@ import { Badge } from "@/components/ui/badge";
 import { VintageIcon } from "@/components/ui/vintage-icon";
 import { Skeleton } from "@/components/ui/skeleton";
 import { getTransactions } from "@/app/actions/transactions";
+import { requestPrimaryVaultChange } from "@/app/actions/accounts";
 import { formatCurrency, languageToLocale } from "@/lib/utils";
 import {
   Select,
@@ -42,8 +47,11 @@ import { AccountAnalytics } from "./components/AccountAnalytics";
 import {
   OpenAccountDialog,
   LinkExternalAccountDialog,
+  AccountSwapDialog,
 } from "./components/AccountActionDialogs";
+import { VaultExplainerPanel } from "./components/VaultExplainerPanel";
 import { AccountCard, Account } from "./components/AccountCard";
+import { normalizeVaultType } from "@/lib/vault-rules";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { SearchInput } from "@/components/ui/SearchInput";
 import { SortSelect } from "@/components/ui/SortSelect";
@@ -64,9 +72,17 @@ interface AccountsClientProps {
   userPreferences: { language: string; currency: string };
   pendingActionsCount: number;
   promoMessage: string | null;
+  eligibilityData?: any;
 }
 
-export default function VaultsClient({ initialAccounts, userPreferences, pendingActionsCount, promoMessage }: AccountsClientProps) {
+export default function VaultsClient({
+  initialAccounts,
+  userPreferences,
+  pendingActionsCount,
+  promoMessage,
+  eligibilityData,
+}: AccountsClientProps) {
+  const router = useRouter();
   const [accounts, setAccounts] = useState<Account[]>(initialAccounts);
   const [selectedAccount, setSelectedAccount] = useState<Account | null>(null);
   const [detailsInitialTab, setDetailsInitialTab] =
@@ -78,9 +94,27 @@ export default function VaultsClient({ initialAccounts, userPreferences, pending
 
   const [isLinkOpen, setIsLinkOpen] = useState(false);
   const [isOpenAccountOpen, setIsOpenAccountOpen] = useState(false);
+  const [isSwapOpen, setIsSwapOpen] = useState(false);
+  const [preselectedSwapAccountId, setPreselectedSwapAccountId] = useState<string>("");
+
+  const handleRequestPrimary = async (acc: Account) => {
+    try {
+      const res = await requestPrimaryVaultChange(acc.id);
+      toast.success({
+        title: "Request Submitted",
+        description: res.message,
+      });
+      router.refresh();
+    } catch (err: any) {
+      toast.error({
+        title: "Request Failed",
+        description: err.message || "Failed to submit Primary designation request.",
+      });
+    }
+  };
 
   // Filter & Sort State
-  const [filterType, setFilterType] = useState<string>("bank accounts");
+  const [filterType, setFilterType] = useState<string>("all");
   const [sortOrder, setSortOrder] = useState<string>("balance-desc");
   const [searchQuery, setSearchQuery] = useState("");
   const [liveMessage, setLiveMessage] = useState("");
@@ -100,7 +134,13 @@ export default function VaultsClient({ initialAccounts, userPreferences, pending
       if (stored) {
         const parsed = JSON.parse(stored);
         if (parsed.filterType) {
-          setFilterType(parsed.filterType);
+          if (parsed.filterType === "bank accounts" || parsed.filterType === "checking") {
+            setFilterType("depository");
+          } else if (parsed.filterType === "wallets" || parsed.filterType === "credit cards") {
+            setFilterType("all");
+          } else {
+            setFilterType(parsed.filterType);
+          }
         }
         if (parsed.sortOrder) {
           setSortOrder(parsed.sortOrder);
@@ -198,26 +238,42 @@ export default function VaultsClient({ initialAccounts, userPreferences, pending
   const filteredAccounts = useMemo(() => {
     return accounts
       .filter((acc) => {
-        if (filterType === "bank accounts") {
-          if (acc.type !== "checking" && acc.type !== "savings") {
-            return false;
-          }
-        } else if (filterType === "credit cards") {
-          if (acc.type !== "credit") {
-            return false;
-          }
-        } else if (filterType === "wallets") {
-          if (acc.type !== "wallet") {
-            return false;
-          }
+        const vType = acc.vaultType || normalizeVaultType(acc.type || "");
+        if (filterType === "depository" || filterType === "bank accounts") {
+          return (
+            vType === "SAVINGS" ||
+            vType === "CURRENT" ||
+            acc.type === "checking" ||
+            acc.type === "current" ||
+            acc.type === "savings"
+          );
         }
-        if (
-          searchQuery &&
-          !acc.name.toLowerCase().includes(searchQuery.toLowerCase()) &&
-          !acc.accountNumber.includes(searchQuery)
-        )
-          return false;
+        if (filterType === "sub" || filterType === "wallets") {
+          return (
+            vType === "DCA" ||
+            vType === "INVESTMENT" ||
+            vType === "OFFSHORE" ||
+            acc.type === "dca" ||
+            acc.type === "investment" ||
+            acc.type === "offshore" ||
+            acc.type === "wallet"
+          );
+        }
+        if (filterType === "external") {
+          return Boolean(acc.isExternal);
+        }
+        // "all" shows every single vault
         return true;
+      })
+      .filter((acc) => {
+        if (!searchQuery) return true;
+        const q = searchQuery.toLowerCase();
+        return (
+          acc.name.toLowerCase().includes(q) ||
+          acc.accountNumber.includes(q) ||
+          (acc.vaultType && acc.vaultType.toLowerCase().includes(q)) ||
+          (acc.institutionName && acc.institutionName.toLowerCase().includes(q))
+        );
       })
       .sort((a, b) => {
         switch (sortOrder) {
@@ -264,14 +320,7 @@ export default function VaultsClient({ initialAccounts, userPreferences, pending
 
   const totalLiquidAssets = useMemo(
     () =>
-      accounts
-        .filter(
-          (acc) =>
-            acc.type === "checking" ||
-            acc.type === "savings" ||
-            acc.type === "investment",
-        )
-        .reduce((sum, acc) => sum + acc.balance, 0),
+      accounts.reduce((sum, acc) => sum + (Number(acc.balance) || 0), 0),
     [accounts],
   );
 
@@ -300,28 +349,40 @@ export default function VaultsClient({ initialAccounts, userPreferences, pending
   const hasAccounts = accounts.length > 0;
 
   const getAccountIcon = (type: string) => {
-    switch (type) {
+    switch (type.toLowerCase()) {
       case "checking":
-        return Wallet;
+      case "current":
+        return Landmark;
       case "savings":
         return PiggyBank;
       case "credit":
         return CreditCard;
       case "investment":
         return TrendingUp;
+      case "dca":
+      case "wallet":
+        return Wallet;
+      case "offshore":
+        return Landmark;
       default:
         return Landmark;
     }
   };
 
   const getAccountColor = (type: string) => {
-    switch (type) {
+    switch (type.toLowerCase()) {
       case "checking":
+      case "current":
         return "green";
       case "savings":
         return "gold";
       case "credit":
         return "ink-900";
+      case "investment":
+        return "gold";
+      case "dca":
+      case "wallet":
+        return "green";
       default:
         return "ink-900";
     }
@@ -341,13 +402,14 @@ export default function VaultsClient({ initialAccounts, userPreferences, pending
   const handleKpiDrilldown = (type: "liquid" | "active" | "pending") => {
     setSelectedAccount(null);
     if (type === "liquid") {
-      setFilterType("bank accounts");
+      setFilterType("all");
       setSortOrder("balance-desc");
       setSearchQuery("");
     } else if (type === "active") {
+      setFilterType("depository");
       setSearchQuery("");
     } else if (type === "pending") {
-      setFilterType("credit cards");
+      setFilterType("sub");
       setSortOrder("balance-desc");
       setSearchQuery("");
     }
@@ -382,23 +444,53 @@ export default function VaultsClient({ initialAccounts, userPreferences, pending
   );
 
   const renderEmptyState = () => (
-    <div className="text-center py-16 bg-muted/20 rounded-xl border border-dashed border-muted-foreground/20">
-      <div className="mx-auto w-16 h-16 bg-muted/50 rounded-full flex items-center justify-center mb-4">
-        <Landmark className="w-8 h-8 text-muted-foreground stroke-2" />
+    <div className="text-center py-16 bg-paper-100 border border-dashed border-paper-300 p-8 space-y-4">
+      <div className="mx-auto w-16 h-16 bg-paper-200 border border-paper-300 flex items-center justify-center text-ink-700">
+        <Landmark className="w-8 h-8 stroke-2" />
       </div>
-      <h3 className="text-xl font-medium text-ink-900 mb-2">
-        No Accounts Found
-      </h3>
-      <p className="text-muted-foreground max-w-md mx-auto mb-6">
-        {searchQuery
-          ? "No accounts match your search criteria. Try adjusting your filters."
-          : "You don't have any accounts yet. Open a new account to get started."}
-      </p>
-      {searchQuery && (
-        <Button variant="outline" onClick={() => setSearchQuery("")}>
-          Clear Search
-        </Button>
-      )}
+      <div>
+        <h3 className="font-display font-bold text-lg text-ink-900">
+          {searchQuery ? "No Matching Vaults" : "No Vaults Found"}
+        </h3>
+        <p className="text-xs sm:text-sm text-ink-600 max-w-md mx-auto mt-1">
+          {searchQuery
+            ? `No accounts match "${searchQuery}". Try clearing your search query or switching tabs.`
+            : filterType !== "all"
+            ? `You don't have any vaults in this category yet. Switch to "All Vaults" or open a new vault.`
+            : "You don't have any active vaults configured yet. Open a Primary savings or current vault to begin."}
+        </p>
+      </div>
+      <div className="flex flex-wrap items-center justify-center gap-3 pt-2">
+        {searchQuery ? (
+          <Button variant="outline" size="small" onClick={() => setSearchQuery("")}>
+            Clear Search
+          </Button>
+        ) : filterType !== "all" ? (
+          <Button variant="outline" size="small" onClick={() => setFilterType("all")}>
+            View All Vaults
+          </Button>
+        ) : (
+          <>
+            <Button
+              className="bg-ink-900 hover:bg-ink-800 text-white"
+              size="small"
+              icon={<Plus className="w-4 h-4" />}
+              onClick={() => setIsOpenAccountOpen(true)}
+            >
+              Open New Vault
+            </Button>
+            <Button
+              variant="outline"
+              size="small"
+              className="border-paper-300"
+              icon={<ExternalLink className="w-4 h-4" />}
+              onClick={() => setIsLinkOpen(true)}
+            >
+              Link External Vault
+            </Button>
+          </>
+        )}
+      </div>
     </div>
   );
 
@@ -430,87 +522,142 @@ export default function VaultsClient({ initialAccounts, userPreferences, pending
   );
 
   return (
-    <div className="space-y-6 max-w-7xl mx-auto p-4 animate-fade-in-up pb-20">
-      <div className="sr-only" aria-live="polite">
+    <>
+      <div className="mx-auto w-full max-w-7xl rounded-sm border border-paper-300 bg-white shadow-sm overflow-hidden mb-12">
+        <div className="sr-only" aria-live="polite">
         {liveMessage}
       </div>
 
-      {showPromo && promoMessage && (
-        <PromoBanner
-          title="Important Notice"
-          body={promoMessage}
-          ctaLabel="View Details"
-          onCtaClick={() => {
-            if (typeof window !== "undefined") {
-              window.location.href = "/support";
-            }
-          }}
-          onDismiss={handlePromoDismiss}
-        />
-      )}
-
-      {/* Page Header — not sticky, scrolls away */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 border-b border-border pb-6">
-        <div>
-          <h1 className="text-3xl font-display font-bold text-ink-900">
-            Vaults
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            View balances, activity, and manage every account from one place.
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => window.location.reload()}
-            disabled={isLoading}>
-            <RefreshCw className={`w-4 h-4 mr-2 stroke-2 ${isLoading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
-          <Button
-            className="bg-ink-900 hover:bg-ink-900/90 text-white"
-            onClick={() => setIsOpenAccountOpen(true)}>
-            <Plus className="w-4 h-4 mr-2 stroke-2" />
-            Open Account
-          </Button>
-        </div>
-      </div>
-
-      {hasAccounts && (
-      <>
-      {/* KPI Analytics — not sticky, scrolls away */}
-      <AccountAnalytics
-        currency={userPreferences.currency}
-        totalLiquidAssets={totalLiquidAssets}
-        activeAccountsCount={activeAccountsCount}
-        pendingActionsCount={pendingActionsCount}
-        onDrilldown={handleKpiDrilldown}
-      />
-
-      {/* Filter Bar — sticky, stays visible while scrolling the account grid */}
-      <div className="sticky top-[70px] z-30 bg-white/95 backdrop-blur-md border border-border shadow-sm rounded-xl px-4 py-3">
-        <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
-          <Tabs value={filterType} onValueChange={setFilterType} className="w-full md:w-auto">
-            <TabsList className="w-full md:w-auto inline-flex p-1 bg-slate-100 rounded-lg">
-              <TabsTrigger value="bank accounts" className="px-4 py-2 capitalize text-sm font-medium">Bank Accounts</TabsTrigger>
-              <TabsTrigger value="credit cards" className="px-4 py-2 capitalize text-sm font-medium">Credit Cards</TabsTrigger>
-              <TabsTrigger value="wallets" className="px-4 py-2 capitalize text-sm font-medium">Wallets</TabsTrigger>
-            </TabsList>
-            <div className="hidden">
-              <TabsContent value="bank accounts" />
-              <TabsContent value="credit cards" />
-              <TabsContent value="wallets" />
-            </div>
-          </Tabs>
-
-          <div className="flex items-center gap-2 w-full md:w-auto flex-1 md:flex-none justify-end">
-              <SearchInput value={searchQuery} onChange={setSearchQuery} placeholder="Search by nickname or last 4 digits..." />
-              <SortSelect value={sortOrder} onChange={setSortOrder} />
-            </div>
+      {/* Page Header — styled like Transfers & Pay Bills with breadcrumb back link */}
+      <header className="space-y-3 border-b border-paper-300 bg-paper-100 p-6 sm:p-7">
+        <Link
+          href="/vaults"
+          className="inline-flex items-center gap-1 text-small text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-900"
+        >
+          <ChevronLeft className="h-4 w-4" /> Vaults & Cards
+        </Link>
+        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <h1 className="font-display text-h2 font-bold text-ink-900">
+              Vaults
+            </h1>
+            <p className="max-w-2xl text-body text-ink-700">
+              Manage your personal savings, checking, digital assets, and custody vaults from a unified ledger.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
+            <Button
+              variant="outline"
+              size="small"
+              className="border-paper-300 bg-white hover:bg-paper-50"
+              onClick={() => window.location.reload()}
+              disabled={isLoading}>
+              <RefreshCw className={`w-4 h-4 mr-1.5 stroke-2 ${isLoading ? "animate-spin" : ""}`} />
+              Refresh
+            </Button>
+            <Button
+              variant="outline"
+              size="small"
+              className="border-paper-300 bg-white hover:bg-paper-50 text-ink-800"
+              onClick={() => setIsLinkOpen(true)}>
+              <ExternalLink className="w-4 h-4 mr-1.5 stroke-2 text-vintage-gold" />
+              Link External Vault
+            </Button>
+            <Button
+              variant="primary"
+              size="small"
+              onClick={() => setIsOpenAccountOpen(true)}>
+              <Plus className="w-4 h-4 mr-1.5 stroke-2" />
+              Open New Vault
+            </Button>
           </div>
         </div>
-      </>
-      )}
+      </header>
+
+      {/* Main Content Area */}
+      <div className="p-6 sm:p-8 space-y-8 bg-white">
+        {showPromo && promoMessage && (
+          <PromoBanner
+            title="Important Notice"
+            body={promoMessage}
+            ctaLabel="View Details"
+            onCtaClick={() => {
+              if (typeof window !== "undefined") {
+                window.location.href = "/support";
+              }
+            }}
+            onDismiss={handlePromoDismiss}
+          />
+        )}
+
+        {/* In-App Explanation Panel: Single Source of Truth Rules & Explainer Copy */}
+        <VaultExplainerPanel
+          heldTypes={eligibilityData?.heldTypes || accounts.map((a: any) => a.vaultType || a.type?.toUpperCase())}
+          onOpenNew={() => setIsOpenAccountOpen(true)}
+          onLinkExternal={() => setIsLinkOpen(true)}
+        />
+
+        {hasAccounts && (
+          <>
+            {/* KPI Analytics */}
+            <AccountAnalytics
+              currency={userPreferences.currency}
+              totalLiquidAssets={totalLiquidAssets}
+              activeAccountsCount={activeAccountsCount}
+              pendingActionsCount={pendingActionsCount}
+              onDrilldown={handleKpiDrilldown}
+            />
+
+            {/* Filter Bar */}
+            <div className="border border-paper-300 bg-paper-50/60 p-4">
+              <div className="flex flex-col md:flex-row gap-4 items-center justify-between">
+                <Tabs value={filterType} onValueChange={setFilterType} className="w-full md:w-auto">
+                  <TabsList className="w-full md:w-auto inline-flex p-1 bg-paper-100 border border-paper-300 rounded-none">
+                    <TabsTrigger
+                      value="all"
+                      className="px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-none data-[state=active]:bg-ink-900 data-[state=active]:text-white"
+                    >
+                      All Vaults ({accounts.length})
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="depository"
+                      className="px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-none data-[state=active]:bg-ink-900 data-[state=active]:text-white"
+                    >
+                      Core Depository
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="sub"
+                      className="px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-none data-[state=active]:bg-ink-900 data-[state=active]:text-white"
+                    >
+                      Sub-Accounts
+                    </TabsTrigger>
+                    <TabsTrigger
+                      value="external"
+                      className="px-4 py-2 text-xs font-semibold uppercase tracking-wider rounded-none data-[state=active]:bg-ink-900 data-[state=active]:text-white"
+                    >
+                      External Linked
+                    </TabsTrigger>
+                  </TabsList>
+                  <div className="hidden">
+                    <TabsContent value="all" />
+                    <TabsContent value="depository" />
+                    <TabsContent value="sub" />
+                    <TabsContent value="external" />
+                  </div>
+                </Tabs>
+
+                <div className="flex items-center gap-2 w-full md:w-auto flex-1 md:flex-none justify-end">
+                  <SearchInput
+                    value={searchQuery}
+                    onChange={setSearchQuery}
+                    placeholder="Search by name, vault type, or last 4..."
+                  />
+                  <SortSelect value={sortOrder} onChange={setSortOrder} />
+                </div>
+              </div>
+            </div>
+          </>
+        )}
 
       {/* Accounts Grid */}
       {error ? (
@@ -531,32 +678,51 @@ export default function VaultsClient({ initialAccounts, userPreferences, pending
                 setSelectedAccount(acc);
                 setDetailsInitialTab(tab || "overview");
               }}
+              onSwapRequest={(acc) => {
+                setPreselectedSwapAccountId(acc.id);
+                setIsSwapOpen(true);
+              }}
+              onRequestPrimary={handleRequestPrimary}
               userPreferences={userPreferences}
             />
           ))}
         </div>
       )}
-
-      {/* Detailed View Modal */}
-      <AccountDetailsDialog
-        isOpen={!!selectedAccount}
-        onClose={() => setSelectedAccount(null)}
-        account={selectedAccount}
-        transactions={transactions}
-        isLoadingTransactions={isLoadingTransactions}
-        userPreferences={userPreferences}
-        initialTab={detailsInitialTab}
-      />
-
-      <OpenAccountDialog
-        isOpen={isOpenAccountOpen}
-        onClose={() => setIsOpenAccountOpen(false)}
-      />
-
-      <LinkExternalAccountDialog
-        isOpen={isLinkOpen}
-        onClose={() => setIsLinkOpen(false)}
-      />
+      </div>
     </div>
-  );
+
+    {/* Detailed View Modal */}
+    <AccountDetailsDialog
+      isOpen={!!selectedAccount}
+      onClose={() => setSelectedAccount(null)}
+      account={selectedAccount}
+      transactions={transactions}
+      isLoadingTransactions={isLoadingTransactions}
+      userPreferences={userPreferences}
+      initialTab={detailsInitialTab}
+    />
+
+    <OpenAccountDialog
+      isOpen={isOpenAccountOpen}
+      onClose={() => setIsOpenAccountOpen(false)}
+      existingAccounts={accounts as any}
+      onSuccess={() => router.refresh()}
+    />
+
+    <LinkExternalAccountDialog
+      isOpen={isLinkOpen}
+      onClose={() => setIsLinkOpen(false)}
+      existingAccounts={accounts as any}
+      onSuccess={() => router.refresh()}
+    />
+
+    <AccountSwapDialog
+      isOpen={isSwapOpen}
+      onClose={() => setIsSwapOpen(false)}
+      existingAccounts={accounts as any}
+      preselectedAccountId={preselectedSwapAccountId}
+      onSuccess={() => router.refresh()}
+    />
+  </>
+);
 }

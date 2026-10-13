@@ -25,6 +25,11 @@ import {
   PiggyBank,
   Landmark,
   FileText,
+  Globe2,
+  Copy,
+  Check,
+  QrCode,
+  ShieldCheck,
 } from "lucide-react";
 import { formatCurrency, formatDate, languageToLocale } from "@/lib/utils";
 import { useState, useEffect } from "react";
@@ -41,7 +46,7 @@ interface Account {
   balance: number;
   availableBalance: number;
   creditLimit?: number;
-  type: "checking" | "savings" | "credit" | "investment" | "loan" | "wallet";
+  type: "checking" | "savings" | "credit" | "investment" | "loan" | "wallet" | "dca" | "offshore" | string;
   interestRate: string;
   monthlyChange: number;
   openedDate: string;
@@ -96,27 +101,41 @@ export function AccountDetailsDialog({
   const locale = languageToLocale(userPreferences.language);
 
   const getAccountIcon = (type: string) => {
-    switch (type) {
+    switch (type.toLowerCase()) {
       case "checking":
-        return Wallet;
+      case "current":
+        return Landmark;
       case "savings":
         return PiggyBank;
       case "credit":
         return CreditCard;
       case "investment":
         return TrendingUp;
+      case "dca":
+      case "wallet":
+        return Wallet;
+      case "offshore":
+        return Globe2;
       default:
         return Landmark;
     }
   };
 
   const getAccountColor = (type: string) => {
-    switch (type) {
+    switch (type.toLowerCase()) {
       case "checking":
+      case "current":
         return "green";
       case "savings":
         return "gold";
       case "credit":
+        return "ink-900";
+      case "investment":
+        return "gold";
+      case "dca":
+      case "wallet":
+        return "green";
+      case "offshore":
         return "ink-900";
       default:
         return "ink-900";
@@ -322,6 +341,121 @@ export function AccountDetailsDialog({
                           className="h-2"
                         />
                       </CardContent>
+                    </Card>
+                  )}
+
+                  {/* Specialized Sub-Account: Digital Currency (DCA) */}
+                  {(account.type.toLowerCase() === "dca" || account.type.toLowerCase() === "wallet") && (
+                    <Card className="rounded border-paper-300 bg-paper-50 space-y-3 p-4">
+                      <div className="flex items-center justify-between border-b border-paper-200 pb-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="p-1.5 bg-ink-900 text-white rounded-none">
+                            <Wallet className="w-4 h-4 text-emerald-400" />
+                          </span>
+                          <div>
+                            <h4 className="font-display text-sm font-bold text-ink-900">
+                              Digital Asset Custody (USDC / USDT)
+                            </h4>
+                            <span className="text-[11px] font-mono text-emerald-700">
+                              Multi-Chain Ledger · Ethereum · Solana · Polygon
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-mono uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 px-2 py-0.5">
+                          T+0 Instant
+                        </span>
+                      </div>
+
+                      <div className="space-y-2 text-xs">
+                        <div className="p-2.5 bg-white border border-paper-200 flex items-center justify-between">
+                          <span className="text-ink-600 font-mono text-[11px] truncate max-w-[280px]">
+                            0x71C...49A2 (Vault Whitelist)
+                          </span>
+                          <span className="text-emerald-700 font-bold font-mono text-[11px]">
+                            Institutional Cold Custody
+                          </span>
+                        </div>
+                        <div className="grid grid-cols-2 gap-2 text-[11px]">
+                          <div className="p-2 bg-white border border-paper-200">
+                            <span className="text-ink-500 block">Inbound Stablecoin Rail:</span>
+                            <strong className="text-ink-900">Zero Deposit Fee</strong>
+                          </div>
+                          <div className="p-2 bg-white border border-paper-200">
+                            <span className="text-ink-500 block">Outbound Settlement:</span>
+                            <strong className="text-ink-900">Direct Network Broadcast</strong>
+                          </div>
+                        </div>
+                      </div>
+                    </Card>
+                  )}
+
+                  {/* Specialized Sub-Account: Investment Vault */}
+                  {account.type.toLowerCase() === "investment" && (
+                    <Card className="rounded border-paper-300 bg-paper-50 space-y-3 p-4">
+                      <div className="flex items-center justify-between border-b border-paper-200 pb-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="p-1.5 bg-ink-900 text-white rounded-none">
+                            <TrendingUp className="w-4 h-4 text-vintage-gold" />
+                          </span>
+                          <div>
+                            <h4 className="font-display text-sm font-bold text-ink-900">
+                              Capital Markets & Custody Portfolio
+                            </h4>
+                            <span className="text-[11px] font-mono text-vintage-gold">
+                              Money Market Sweeps · Sovereign Notes · Equities
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-mono uppercase bg-paper-200 text-ink-800 border border-paper-300 px-2 py-0.5">
+                          T+1 Settlement
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="p-2.5 bg-white border border-paper-200 space-y-1">
+                          <span className="text-[11px] text-ink-500 block">Asset Allocation:</span>
+                          <strong className="text-ink-900">70% T-Bills / 30% Money Market</strong>
+                        </div>
+                        <div className="p-2.5 bg-white border border-paper-200 space-y-1">
+                          <span className="text-[11px] text-ink-500 block">Automated Liquidity:</span>
+                          <strong className="text-ink-900">Daily Balance Sweep to Current</strong>
+                        </div>
+                      </div>
+                    </Card>
+                  )}
+
+                  {/* Specialized Sub-Account: Offshore Vault */}
+                  {account.type.toLowerCase() === "offshore" && (
+                    <Card className="rounded border-paper-300 bg-paper-50 space-y-3 p-4">
+                      <div className="flex items-center justify-between border-b border-paper-200 pb-2.5">
+                        <div className="flex items-center gap-2">
+                          <span className="p-1.5 bg-ink-900 text-white rounded-none">
+                            <Globe2 className="w-4 h-4 text-indigo-400" />
+                          </span>
+                          <div>
+                            <h4 className="font-display text-sm font-bold text-ink-900">
+                              Offshore Booking Center & Sovereign Custody
+                            </h4>
+                            <span className="text-[11px] font-mono text-indigo-700">
+                              Zurich / London Booking Facilities · Multi-Currency
+                            </span>
+                          </div>
+                        </div>
+                        <span className="text-[10px] font-mono uppercase bg-indigo-50 text-indigo-800 border border-indigo-200 px-2 py-0.5">
+                          Cross-Border SWIFT
+                        </span>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div className="p-2.5 bg-white border border-paper-200 space-y-1">
+                          <span className="text-[11px] text-ink-500 block">Jurisdiction Booking:</span>
+                          <strong className="text-ink-900">Switzerland / UK Foreign Hub</strong>
+                        </div>
+                        <div className="p-2.5 bg-white border border-paper-200 space-y-1">
+                          <span className="text-[11px] text-ink-500 block">Supported Currencies:</span>
+                          <strong className="text-ink-900 font-mono">USD · EUR · GBP · CHF</strong>
+                        </div>
+                      </div>
                     </Card>
                   )}
 

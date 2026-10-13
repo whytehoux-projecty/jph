@@ -41,6 +41,7 @@ import {
   type DepositLocation,
   type UserDepositPermissions,
 } from "@/app/actions/deposits";
+import { WithdrawalSection } from "./components/WithdrawalSection";
 
 export interface AccountOption {
   id: string;
@@ -98,12 +99,15 @@ export default function DepositClient({
 
   // Available tabs order
   const tabsList: Array<{ id: DepositTab; label: string; icon: any }> = [
-    { id: "cash", label: "Direct Cash Deposit", icon: Banknote },
-    { id: "virtual", label: "Third Party / Virtual Deposit", icon: Building2 },
-    { id: "check", label: "Check / Cheque Deposit", icon: Camera },
-    { id: "card", label: "Credit / Debit Card Deposit", icon: CreditCard },
-    { id: "crypto", label: "USDC / USDT Deposit", icon: Wallet },
+    { id: "cash", label: "Direct Cash", icon: Banknote },
+    { id: "virtual", label: "Virtual Account", icon: Building2 },
+    { id: "check", label: "Cheque", icon: Camera },
+    { id: "card", label: "Credit / Debit Card", icon: CreditCard },
+    { id: "crypto", label: "USDC / USDT", icon: Wallet },
   ];
+
+  // Operation Mode: "deposit" vs "withdrawal"
+  const [operationMode, setOperationMode] = React.useState<"deposit" | "withdrawal">("deposit");
 
   // Active Tab defaults to first allowed tab
   const [activeTab, setActiveTab] = React.useState<DepositTab>(() => {
@@ -130,6 +134,23 @@ export default function DepositClient({
     setCopiedField(label);
     toast.success({ title: "Copied to clipboard", description: `${label}: ${text}` });
     setTimeout(() => setCopiedField(null), 2000);
+  };
+
+  // Virtual Account Dynamic Generator State
+  const [dynamicVirtualAccount, setDynamicVirtualAccount] = React.useState<string | null>(null);
+  const [isGeneratingVirtual, setIsGeneratingVirtual] = React.useState(false);
+
+  const handleGenerateVirtualAccount = () => {
+    setIsGeneratingVirtual(true);
+    setTimeout(() => {
+      const uniqueNumber = "88" + Math.floor(1000000000 + Math.random() * 9000000000);
+      setDynamicVirtualAccount(uniqueNumber);
+      setIsGeneratingVirtual(false);
+      toast.success({
+        title: "Virtual Account Generated",
+        description: `Unique receiving account ${uniqueNumber} generated for your transaction.`,
+      });
+    }, 250);
   };
 
   // ---------------------------------------------------------------------------
@@ -529,9 +550,9 @@ export default function DepositClient({
         >
           <ChevronLeft className="h-4 w-4" /> Transfers & Pay Bills
         </Link>
-        <h1 className="font-display text-h2 font-bold text-ink-900">Deposits</h1>
+        <h1 className="font-display text-h2 font-bold text-ink-900">Deposit & Withdrawal</h1>
         <p className="max-w-2xl text-body text-ink-700">
-          Fund your Heritage Trust vault accounts through verified physical cash drop-off, virtual ACH/wire routing, mobile check imaging, instant debit cards, or institutional stablecoins.
+          Manage depository vault funding and initiate cardless ATM paycodes, agency retail cash-out vouchers, ACH branch settlement, and certified bank draft withdrawals.
         </p>
       </header>
 
@@ -549,13 +570,79 @@ export default function DepositClient({
           </div>
         )}
 
-        <div className="flex flex-col">
-          {/* Sub-Sections Folder Tab Navigation matching TransferHub */}
+        <div className="flex flex-col space-y-6">
+          {/* Top-Level Mode Selector: Deposit Operations vs Cash Withdrawal Operations */}
           <div
             role="tablist"
-            aria-label="Deposit methods"
+            aria-label="Operations Switcher"
             className="flex items-end gap-1 overflow-x-auto scrollbar-hide border-b border-paper-300"
           >
+            <button
+              type="button"
+              role="tab"
+              aria-selected={operationMode === "deposit"}
+              onClick={() => setOperationMode("deposit")}
+              className={cn(
+                "shrink-0 px-5 sm:px-6 py-2.5 sm:py-3 rounded-none text-xs sm:text-sm transition-all duration-150 font-semibold flex items-center gap-2 -mb-[1px] cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ink-900",
+                operationMode === "deposit"
+                  ? "bg-white text-ink-900 border border-paper-300 border-b-white shadow-xs"
+                  : "text-ink-500 hover:text-ink-900 hover:bg-paper-100 border border-transparent border-b-transparent"
+              )}
+            >
+              <Download className={cn("h-4 w-4", operationMode === "deposit" ? "text-emerald-700" : "text-ink-500")} />
+              <span>Deposit</span>
+            </button>
+
+            <button
+              type="button"
+              role="tab"
+              aria-selected={operationMode === "withdrawal"}
+              onClick={() => setOperationMode("withdrawal")}
+              className={cn(
+                "shrink-0 px-5 sm:px-6 py-2.5 sm:py-3 rounded-none text-xs sm:text-sm transition-all duration-150 font-semibold flex items-center gap-2 -mb-[1px] cursor-pointer outline-none focus-visible:ring-2 focus-visible:ring-ink-900",
+                operationMode === "withdrawal"
+                  ? "bg-white text-ink-900 border border-paper-300 border-b-white shadow-xs"
+                  : "text-ink-500 hover:text-ink-900 hover:bg-paper-100 border border-transparent border-b-transparent"
+              )}
+            >
+              <Banknote className={cn("h-4 w-4", operationMode === "withdrawal" ? "text-vermilion-600" : "text-ink-500")} />
+              <span>Withdrawal</span>
+            </button>
+          </div>
+
+          {operationMode === "withdrawal" ? (
+            <WithdrawalSection
+              accounts={accounts}
+              selectedAccountId={selectedAccountId}
+              onSelectAccount={setSelectedAccountId}
+              onWithdrawalCreated={(res) => {
+                if (res.reference && res.amount) {
+                  setRecentDeposits((prev) => [
+                    {
+                      id: res.reference || Date.now().toString(),
+                      reference: res.reference || "WTH-REC",
+                      amount: res.amount || 0,
+                      currency: "USD",
+                      status: "PENDING",
+                      description: `Cash Withdrawal (${res.paycode ? "Paycode: " + res.paycode : "Outbound Cash"})`,
+                      methodId: "withdrawal",
+                      createdAt: new Date().toISOString(),
+                      accountType: selectedAccount?.accountType || "CHECKING",
+                      accountNumber: selectedAccount?.accountNumber || "1234",
+                    },
+                    ...prev,
+                  ]);
+                }
+              }}
+            />
+          ) : (
+            <div>
+              {/* Sub-Sections Folder Tab Navigation matching TransferHub */}
+              <div
+                role="tablist"
+                aria-label="Deposit methods"
+                className="flex items-end gap-1 overflow-x-auto scrollbar-hide border-b border-paper-300"
+              >
             {tabsList.map((tab) => {
               const Icon = tab.icon;
               const isSelected = activeTab === tab.id;
@@ -610,7 +697,7 @@ export default function DepositClient({
                         <div className="space-y-6">
                           <div>
                             <h2 className="font-display text-lg font-bold text-ink-900">
-                              Direct Cash Deposit Voucher
+                              Direct Cash Voucher
                             </h2>
                             <p className="text-small text-ink-600 mt-0.5">
                               Generate a verified digital cash deposit slip for drop-off at authorized Heritage branch vaults and partner Smart ATMs.
@@ -920,11 +1007,59 @@ export default function DepositClient({
                       <div className="space-y-6">
                         <div>
                           <h2 className="font-display text-lg font-bold text-ink-900">
-                            Third-Party & Virtual ACH / Wire Routing
+                            Virtual Account
                           </h2>
                           <p className="text-small text-ink-600 mt-0.5">
-                            Share these official banking coordinates with employers, payroll systems, corporate clients, or external financial institutions to receive funds directly into your account.
+                            System that generates a unique or temporary receiving account number for every single transaction, routing incoming funds directly to your primary vault.
                           </p>
+                        </div>
+
+                        {/* One-Time Dynamic Virtual Account Generator Card */}
+                        <div className="p-4 border border-paper-300 bg-paper-50 space-y-3">
+                          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-paper-200 pb-2.5">
+                            <div>
+                              <span className="text-[11px] font-mono uppercase tracking-wider text-ink-500 block">
+                                Transaction Receiving System
+                              </span>
+                              <h3 className="font-display text-sm font-bold text-ink-900">
+                                Dedicated One-Time Virtual Account Number
+                              </h3>
+                            </div>
+                            <Button
+                              variant="outline"
+                              size="small"
+                              onClick={handleGenerateVirtualAccount}
+                              disabled={isGeneratingVirtual}
+                              className="rounded-none text-xs"
+                            >
+                              <RefreshCw className={cn("w-3.5 h-3.5 mr-1.5", isGeneratingVirtual && "animate-spin")} />
+                              {dynamicVirtualAccount ? "Generate New Number" : "Generate Unique Account"}
+                            </Button>
+                          </div>
+                          <p className="text-xs text-ink-600">
+                            Generate a single-use receiving account number for any specific incoming payment. Inbound wire and ACH credits sent to this virtual account number route immediately into your selected vault.
+                          </p>
+                          {dynamicVirtualAccount && (
+                            <div className="p-3 bg-white border border-paper-300 flex items-center justify-between animate-in fade-in">
+                              <div>
+                                <span className="text-[10px] font-mono text-emerald-700 uppercase font-bold block">
+                                  ● Active One-Time Virtual Account (Temporary)
+                                </span>
+                                <span className="font-mono text-base font-bold text-ink-900">
+                                  {dynamicVirtualAccount}
+                                </span>
+                              </div>
+                              <Button
+                                variant="ghost"
+                                size="small"
+                                className="h-8 text-xs font-mono"
+                                onClick={() => copyToClipboard(dynamicVirtualAccount, "One-Time Virtual Account")}
+                              >
+                                {copiedField === "One-Time Virtual Account" ? <Check className="w-3.5 h-3.5 text-success mr-1" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
+                                Copy
+                              </Button>
+                            </div>
+                          )}
                         </div>
 
                         {/* Account Picker */}
@@ -1219,7 +1354,7 @@ export default function DepositClient({
                           <div className="flex justify-between items-start pb-2 border-b border-paper-200">
                             <div>
                               <h2 className="font-display text-lg font-bold text-ink-900">
-                                Mobile Check Capture & Deposit
+                                Cheque Mobile Capture & Deposit
                               </h2>
                               <p className="text-small text-ink-600 mt-0.5">
                                 Endorse the reverse of your physical check, capture high-contrast images of both sides, and submit for digital optical clearing.
@@ -2157,6 +2292,8 @@ export default function DepositClient({
               )}
             </AnimatePresence>
           </div>
+            </div>
+          )}
         </div>
 
         {/* ===================================================================== */}

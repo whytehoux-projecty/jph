@@ -300,3 +300,112 @@ export async function getDepositLocations(): Promise<DepositLocation[]> {
     },
   ];
 }
+
+export interface WithdrawalSubmissionData {
+  accountId: string;
+  method: 'atm_paycode' | 'agency_voucher' | 'linked_ach' | 'pre_staged_counter' | 'cashiers_check';
+  amount: number;
+  currency?: string;
+  pin?: string;
+  recipientName?: string;
+  targetBankDetails?: {
+    bankName?: string;
+    routingNumber?: string;
+    accountNumber?: string;
+    accountType?: string;
+  };
+  deliveryAddress?: string;
+  denominations?: string;
+  notes?: string;
+}
+
+export interface WithdrawalResult {
+  success: boolean;
+  reference?: string;
+  paycode?: string;
+  pin?: string;
+  expiresAt?: string;
+  amount?: number;
+  error?: string;
+}
+
+export async function submitWithdrawal(data: WithdrawalSubmissionData): Promise<WithdrawalResult> {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error('Unauthorized');
+
+  const { accountId, method, amount, pin, recipientName, targetBankDetails, deliveryAddress, denominations, notes } = data;
+
+  if (!amount || amount <= 0) {
+    return { success: false, error: 'Please enter a valid withdrawal amount greater than zero.' };
+  }
+
+  const account = await prisma.account.findUnique({
+    where: { id: accountId },
+  });
+
+  if (!account || account.userId !== session.user.id) {
+    return { success: false, error: 'Unauthorized account access.' };
+  }
+
+  if (account.balance < amount) {
+    return { success: false, error: 'Insufficient available account balance for this withdrawal.' };
+  }
+
+  const ref = 'WTH-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+  const paycode = method === 'atm_paycode' || method === 'agency_voucher'
+    ? `${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(1000 + Math.random() * 9000)}-${Math.floor(10 + Math.random() * 90)}`
+    : undefined;
+
+  const expiry = new Date();
+  expiry.setHours(expiry.getHours() + 2); // 2 hours validity
+
+  const methodLabels: Record<string, string> = {
+    atm_paycode: 'Cardless ATM Paycode Cash-Out',
+    agency_voucher: 'Retail Agency Cash-Out Voucher',
+    linked_ach: 'Linked Bank ACH (Branch Counter Pickup)',
+    pre_staged_counter: 'Pre-Staged Branch Teller Cash Order',
+    cashiers_check: "Official Cashier's Check Courier Delivery",
+  };
+
+  const label = methodLabels[method] || 'Cash Withdrawal';
+
+  // Create pending transaction in DB
+  await prisma.transaction.create({
+    data: {
+      accountId,
+      type: 'DEBIT',
+      transactionType: 'WITHDRAWAL',
+      amount,
+      status: 'PENDING',
+      description: `${label} · Ref: ${ref}`,
+      reference: ref,
+      category: 'CASH_WITHDRAWAL',
+      channel: 'PORTAL',
+      metadata: JSON.stringify({
+        method,
+        paycode,
+        pin: pin || '****',
+        recipientName,
+        targetBankDetails,
+        deliveryAddress,
+        denominations,
+        expiresAt: expiry.toISOString(),
+        notes,
+      }),
+    },
+  });
+
+  revalidatePath('/deposit');
+  revalidatePath('/dashboard');
+  revalidatePath('/transactions');
+  revalidatePath('/admin/transactions');
+
+  return {
+    success: true,
+    reference: ref,
+    paycode,
+    pin,
+    expiresAt: expiry.toISOString(),
+    amount,
+  };
+}

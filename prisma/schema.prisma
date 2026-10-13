@@ -98,6 +98,9 @@ model Account {
   balance       Float    @default(0.00) // Using Float for SQLite
   status        String   @default("ACTIVE")
   isPrimary     Boolean  @default(false) @map("is_primary")
+  isExternal    Boolean  @default(false) @map("is_external")
+  institutionName String? @map("institution_name")
+  metadata      String?
   createdAt     DateTime @default(now()) @map("created_at")
   updatedAt     DateTime @updatedAt @map("updated_at")
 
@@ -404,16 +407,54 @@ model Card {
   id         String   @id @default(cuid())
   accountId  String   @map("account_id")
   cardNumber String   @unique @map("card_number")
-  cardType   String   @map("card_type") // DEBIT, CREDIT
-  network    String   @default("VISA")
-  expiryDate DateTime @map("expiry_date")
-  cvv        String
-  status     String   @default("ACTIVE")
-  createdAt  DateTime @default(now()) @map("created_at")
+  cardType     String   @map("card_type") // DEBIT, CREDIT
+  network      String   @default("VISA")
+  expiryDate   DateTime @map("expiry_date")
+  cvv          String
+  status       String   @default("ACTIVE")
+  cardImageUrl String?  @map("card_image_url")
+  cardTier     String?  @default("STANDARD") @map("card_tier")
+  dailyLimit   Float?   @map("daily_limit")
+  createdAt    DateTime @default(now()) @map("created_at")
 
   account Account @relation(fields: [accountId], references: [id], onDelete: Cascade)
 
   @@map("cards")
+}
+
+model CardRequest {
+  id              String   @id @default(cuid())
+  userId          String   @map("user_id")
+  accountId       String?  @map("account_id")
+  cardType        String   @map("card_type")
+  cardTier        String?  @default("STANDARD") @map("card_tier")
+  cardholderName  String?  @map("cardholder_name")
+  billingAddress  String?  @map("billing_address")
+  requestedLimit  Float?   @map("requested_limit")
+  status          String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  rejectionReason String?  @map("rejection_reason")
+  cardImageUrl    String?  @map("card_image_url")
+  createdAt       DateTime @default(now()) @map("created_at")
+  updatedAt       DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("card_requests")
+}
+
+model AccountSwapRequest {
+  id                String   @id @default(cuid())
+  userId            String   @map("user_id")
+  existingAccountId String   @map("existing_account_id")
+  targetAccountType String   @map("target_account_type")
+  institutionName   String?  @map("institution_name")
+  accountNumber     String?  @map("account_number")
+  routingOrSwift    String?  @map("routing_or_swift")
+  reason            String?
+  status            String   @default("PENDING") // PENDING, APPROVED, REJECTED
+  rejectionReason   String?  @map("rejection_reason")
+  createdAt         DateTime @default(now()) @map("created_at")
+  updatedAt         DateTime @default(now()) @updatedAt @map("updated_at")
+
+  @@map("account_swap_requests")
 }
 
 model Cheque {

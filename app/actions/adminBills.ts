@@ -147,34 +147,40 @@ export async function handleRejectBill(formData: FormData) {
   revalidatePath('/transactions');
 }
 
+import { normalizeBillCategory, normalizeBillCountry } from '@/lib/bill-constants';
+
 export async function handleCreatePayee(formData: FormData) {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
 
   const name = formData.get('name') as string;
   const accountNumber = formData.get('accountNumber') as string;
-  const category = (formData.get('category') as string) || 'UTILITIES';
-  const country = (formData.get('country') as string) || 'usa';
+  const rawCategory = (formData.get('category') as string) || 'UTILITIES';
+  const rawCountry = (formData.get('country') as string) || 'usa';
   let userId = formData.get('userId') as string;
 
   if (!name || !accountNumber) {
     throw new Error('Name and Account Number are required.');
   }
 
-  // If no userId provided or explicitly 'GLOBAL', attach to the first available user in the system
+  // If no userId provided or explicitly 'GLOBAL', attach to admin user or first available user
   if (!userId || userId === 'GLOBAL') {
-    const firstUser = await prisma.user.findFirst();
-    if (!firstUser) throw new Error('No user accounts exist to associate this payee with.');
-    userId = firstUser.id;
+    if (session?.user?.id) {
+      userId = session.user.id;
+    } else {
+      const firstUser = await prisma.user.findFirst();
+      if (!firstUser) throw new Error('No user accounts exist to associate this payee with.');
+      userId = firstUser.id;
+    }
   }
 
   await prisma.payee.create({
     data: {
       userId,
-      name,
-      accountNumber,
-      category,
-      country
+      name: name.trim(),
+      accountNumber: accountNumber.trim(),
+      category: normalizeBillCategory(rawCategory),
+      country: normalizeBillCountry(rawCountry),
     }
   });
 

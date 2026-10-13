@@ -18,11 +18,21 @@ import {
   Home, 
   CreditCard, 
   Layers,
+  Droplets,
+  Tv,
+  GraduationCap,
+  Landmark,
   Check,
   Clock,
   DollarSign,
   AlertTriangle
 } from "lucide-react";
+import { 
+  BILL_CATEGORIES, 
+  BILL_REGIONS, 
+  normalizeBillCategory, 
+  normalizeBillCountry 
+} from "@/lib/bill-constants";
 import { 
   Table, 
   TableBody, 
@@ -131,7 +141,9 @@ export function AdminBillServices({
       p.user.firstName.toLowerCase().includes(payeeSearch.toLowerCase()) ||
       p.user.lastName.toLowerCase().includes(payeeSearch.toLowerCase()) ||
       p.user.email.toLowerCase().includes(payeeSearch.toLowerCase());
-    const matchesCategory = payeeCategoryFilter === "ALL" || p.category.toUpperCase() === payeeCategoryFilter;
+    const matchesCategory = 
+      payeeCategoryFilter === "ALL" || 
+      normalizeBillCategory(p.category) === normalizeBillCategory(payeeCategoryFilter);
     return matchesSearch && matchesCategory;
   });
 
@@ -147,19 +159,26 @@ export function AdminBillServices({
   });
 
   const getCategoryIcon = (category: string) => {
-    switch (category.toUpperCase()) {
+    const norm = normalizeBillCategory(category);
+    switch (norm) {
       case 'UTILITIES':
         return <Zap className="w-3.5 h-3.5 text-amber-600" />;
       case 'TELECOM':
-      case 'INTERNET':
         return <Phone className="w-3.5 h-3.5 text-blue-600" />;
+      case 'WATER':
+        return <Droplets className="w-3.5 h-3.5 text-cyan-600" />;
+      case 'TV':
+        return <Tv className="w-3.5 h-3.5 text-violet-600" />;
       case 'INSURANCE':
         return <Shield className="w-3.5 h-3.5 text-emerald-600" />;
-      case 'RENT':
-        return <Home className="w-3.5 h-3.5 text-purple-600" />;
-      case 'CREDIT_CARD':
       case 'CREDIT':
         return <CreditCard className="w-3.5 h-3.5 text-rose-600" />;
+      case 'RENT':
+        return <Home className="w-3.5 h-3.5 text-purple-600" />;
+      case 'EDUCATION':
+        return <GraduationCap className="w-3.5 h-3.5 text-indigo-600" />;
+      case 'COUNCIL':
+        return <Landmark className="w-3.5 h-3.5 text-amber-700" />;
       default:
         return <Layers className="w-3.5 h-3.5 text-neutral-600" />;
     }
@@ -336,12 +355,11 @@ export function AdminBillServices({
                   onChange={(e) => setPayeeCategoryFilter(e.target.value)}
                 >
                   <option value="ALL">All Categories</option>
-                  <option value="UTILITIES">Utilities</option>
-                  <option value="TELECOM">Telecom & Internet</option>
-                  <option value="INSURANCE">Insurance</option>
-                  <option value="RENT">Rent & Housing</option>
-                  <option value="CREDIT_CARD">Credit Card</option>
-                  <option value="OTHER">Other</option>
+                  {BILL_CATEGORIES.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.label}
+                    </option>
+                  ))}
                 </select>
               </div>
               <Button
@@ -619,32 +637,36 @@ export function AdminBillServices({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <label className="text-xs font-semibold text-ink-900 block mb-1">
-                  Category
+                  Category *
                 </label>
                 <select
                   name="category"
                   defaultValue="UTILITIES"
                   className="w-full px-3 py-2 text-sm bg-neutral-50 border border-neutral-200 rounded-md focus:outline-none focus:ring-1 focus:ring-vintage-gold/50"
                 >
-                  <option value="UTILITIES">Utilities</option>
-                  <option value="TELECOM">Telecom & Internet</option>
-                  <option value="INSURANCE">Insurance</option>
-                  <option value="RENT">Rent & Housing</option>
-                  <option value="CREDIT_CARD">Credit Card</option>
-                  <option value="OTHER">Other</option>
+                  {BILL_CATEGORIES.map((cat) => (
+                    <option key={cat.id} value={cat.id}>
+                      {cat.label}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <div>
                 <label className="text-xs font-semibold text-ink-900 block mb-1">
-                  Country
+                  Jurisdiction / Country *
                 </label>
-                <input
-                  type="text"
+                <select
                   name="country"
                   defaultValue="usa"
-                  className="w-full px-3 py-2 text-sm uppercase bg-neutral-50 border border-neutral-200 rounded-md focus:outline-none focus:ring-1 focus:ring-vintage-gold/50"
-                />
+                  className="w-full px-3 py-2 text-sm bg-neutral-50 border border-neutral-200 rounded-md focus:outline-none focus:ring-1 focus:ring-vintage-gold/50"
+                >
+                  {BILL_REGIONS.filter((r) => r.value !== "all").map((region) => (
+                    <option key={region.value} value={region.value}>
+                      {region.label}
+                    </option>
+                  ))}
+                </select>
               </div>
             </div>
 

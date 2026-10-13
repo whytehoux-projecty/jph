@@ -16,9 +16,16 @@ import {
   Plane,
   ChevronDown,
   ChevronUp,
+  ChevronLeft,
   ShieldAlert,
   Zap,
+  Clock,
+  CheckCircle2,
+  XCircle,
+  FileText,
+  Sparkles,
 } from "lucide-react";
+import Link from "next/link";
 
 import {
   Card,
@@ -44,8 +51,9 @@ import { CardDetailsDialog } from "./components/CardDetailsDialog";
 import { CardTransactionHistory } from "./components/CardTransactionHistory";
 import { CardLimitsControl } from "./components/CardLimitsControl";
 import { VirtualCardGenerator } from "./components/VirtualCardGenerator";
+import { RequestCardDialog } from "@/components/cards/RequestCardDialog";
 
-interface CardData {
+export interface CardData {
   id: string;
   name?: string;
   number?: string;
@@ -58,11 +66,39 @@ interface CardData {
   limit?: number;
   status: string;
   frozen?: boolean;
+  imageUrl?: string | null;
   settings?: {
     onlinePayments: boolean;
     internationalUsage: boolean;
     contactless: boolean;
   };
+}
+
+export interface CardRequestRecord {
+  id: string;
+  userId?: string;
+  accountId?: string | null;
+  cardType: string;
+  cardTier?: string | null;
+  cardholderName?: string | null;
+  status: string;
+  requestedLimit?: number | null;
+  billingAddress?: string | null;
+  rejectionReason?: string | null;
+  cardImageUrl?: string | null;
+  createdAt: string | Date;
+}
+
+interface CardsClientProps {
+  initialCards: CardData[];
+  cardRequests?: CardRequestRecord[];
+  accounts?: Array<{
+    id: string;
+    name: string;
+    accountNumber: string;
+    balance: number;
+    accountType: string;
+  }>;
 }
 
 function formatCardNumber(raw: string): string {
@@ -119,6 +155,7 @@ function normalizeCard(raw: any): CardData {
     limit: Number(raw.limit ?? raw.dailyLimit ?? 0),
     status: raw.status || "ACTIVE",
     frozen: raw.frozen ?? raw.status === "FROZEN",
+    imageUrl: raw.cardImageUrl || raw.imageUrl || null,
     settings: raw.settings ?? {
       onlinePayments: true,
       internationalUsage: true,
@@ -138,21 +175,22 @@ function CardMini({ card, active }: { card: CardData; active: boolean }) {
 
   return (
     <div
-      className={`w-14 h-9 rounded-md bg-linear-to-br ${gradientClass} shadow flex items-end justify-end p-1 relative overflow-hidden shrink-0`}
+      className={`w-14 h-9 rounded-md bg-linear-to-br ${gradientClass} shadow flex items-end justify-end p-1 relative overflow-hidden shrink-0 bg-cover bg-center`}
+      style={card.imageUrl ? { backgroundImage: `url(${card.imageUrl})` } : undefined}
     >
       {/* gloss */}
       <div className="absolute inset-0 bg-linear-to-br from-white/20 to-transparent pointer-events-none" />
       {/* scheme mark */}
       {isMastercard ? (
-        <div className="flex items-center -space-x-1.5">
+        <div className="flex items-center -space-x-1.5 relative z-10">
           <div className="w-3 h-3 rounded-full bg-red-500 opacity-90" />
           <div className="w-3 h-3 rounded-full bg-orange-400 opacity-90" />
         </div>
       ) : (
-        <span className="text-[7px] font-bold italic text-white/80">VISA</span>
+        <span className="text-[7px] font-bold italic text-white/80 relative z-10">VISA</span>
       )}
       {active && (
-        <div className="absolute top-1 left-1 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow" />
+        <div className="absolute top-1 left-1 w-1.5 h-1.5 rounded-full bg-emerald-400 shadow z-10" />
       )}
     </div>
   );
@@ -168,12 +206,17 @@ function CardSkeleton() {
   );
 }
 
-export default function CardsClient({ initialCards }: { initialCards: CardData[] }) {
+export default function CardsClient({
+  initialCards,
+  cardRequests = [],
+  accounts = [],
+}: CardsClientProps) {
   const router = useRouter();
   const [cards, setCards] = useState<CardData[]>(initialCards);
   const [selectedCardId, setSelectedCardId] = useState<string | null>(initialCards[0]?.id ?? null);
   const [showPan, setShowPan] = useState(false);
   const [isFlipped, setIsFlipped] = useState(false);
+  const [isRequestOpen, setIsRequestOpen] = useState(false);
   const [travelExpanded, setTravelExpanded] = useState(false);
   const [travelDates, setTravelDates] = useState({ from: "", to: "", region: "" });
 
@@ -235,49 +278,185 @@ export default function CardsClient({ initialCards }: { initialCards: CardData[]
     setTravelExpanded(false);
   };
 
-
-
-
-
   if (cards.length === 0) {
     return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh] gap-4 border-2 border-dashed border-border rounded-xl p-12 bg-muted/10">
-        <div className="h-14 w-14 rounded-full bg-muted flex items-center justify-center">
-          <CreditCard className="h-7 w-7 text-muted-foreground" />
+      <>
+        <div className="mx-auto w-full max-w-7xl rounded-sm border border-paper-300 bg-white shadow-sm overflow-hidden mb-12">
+          <header className="space-y-3 border-b border-paper-300 bg-paper-100 p-6 sm:p-7">
+            <Link
+              href="/vaults"
+              className="inline-flex items-center gap-1 text-small text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-900"
+            >
+              <ChevronLeft className="h-4 w-4" /> Vaults & Cards
+            </Link>
+            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+              <div>
+                <h1 className="font-display text-h2 font-bold text-ink-900">Cards Center</h1>
+                <p className="max-w-2xl text-body text-ink-700">
+                  Manage your institutional debit and credit cards, adjust spending limits, and security controls.
+                </p>
+              </div>
+              <div className="flex flex-wrap items-center gap-2">
+                <Button
+                  variant="primary"
+                  size="small"
+                  icon={<Plus className="w-4 h-4" />}
+                  onClick={() => setIsRequestOpen(true)}
+                >
+                  Apply for Card
+                </Button>
+                <Button
+                  variant="outline"
+                  size="small"
+                  className="border-paper-300 bg-white hover:bg-paper-50"
+                  icon={<ShieldAlert className="w-4 h-4" />}
+                  onClick={() => router.push("/support")}
+                >
+                  Report Issue
+                </Button>
+              </div>
+            </div>
+          </header>
+
+          <div className="p-6 sm:p-8 space-y-8 bg-white">
+            <div className="flex flex-col items-center justify-center min-h-[32vh] gap-4 border border-dashed border-paper-300 rounded-none p-10 bg-paper-100">
+              <div className="h-14 w-14 rounded-none bg-paper-200 border border-paper-300 flex items-center justify-center text-ink-700">
+                <CreditCard className="h-7 w-7" />
+              </div>
+              <div className="text-center space-y-1">
+                <p className="font-display font-bold text-lg text-ink-900">No Active Cards Issued Yet</p>
+                <p className="text-xs sm:text-sm text-ink-600 max-w-md">
+                  You do not have any active cards attached to your accounts. Submit an application below to receive an institutional debit or revolving credit card.
+                </p>
+              </div>
+              <Button variant="primary" size="small" icon={<Plus className="w-4 h-4" />} onClick={() => setIsRequestOpen(true)}>
+                Apply for New Card
+              </Button>
+            </div>
+
+            {cardRequests.length > 0 && (
+              <div className="border border-paper-300 bg-white p-6 space-y-4">
+                <div className="border-b border-paper-300 pb-3">
+                  <h3 className="text-base font-display font-bold text-ink-900 flex items-center gap-2">
+                    <Clock className="w-4 h-4 text-vintage-gold" />
+                    Submitted Card Applications
+                  </h3>
+                  <p className="text-xs text-ink-600 mt-0.5">
+                    Track underwriting decisions and virtual card credentials.
+                  </p>
+                </div>
+                <div className="space-y-3">
+                  {cardRequests.map((req) => (
+                    <div
+                      key={req.id}
+                      className="p-4 border border-paper-300 bg-paper-50/50 rounded-none flex flex-col md:flex-row md:items-center justify-between gap-3"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="p-2.5 bg-paper-100 border border-paper-300 text-ink-900 rounded-none shrink-0">
+                          <CreditCard className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-bold text-sm text-ink-900">
+                              {req.cardTier ? req.cardTier.replace("_", " ") : "Heritage"} {req.cardType} Card
+                            </h4>
+                            <span className="text-[11px] font-mono text-ink-500">
+                              Ref: #{req.id.slice(-6).toUpperCase()}
+                            </span>
+                          </div>
+                          <p className="text-xs text-ink-600 mt-0.5">
+                            Cardholder: <span className="font-mono font-medium text-ink-900">{req.cardholderName}</span>
+                            {req.requestedLimit ? ` · Limit: $${req.requestedLimit.toLocaleString()} USD` : ""}
+                            {" · "}Submitted {new Date(req.createdAt).toLocaleDateString()}
+                          </p>
+                          {req.rejectionReason && req.status === "REJECTED" && (
+                            <p className="text-xs text-rose-700 bg-rose-50 border border-rose-200 px-2 py-1 mt-2">
+                              <strong>Declined reason:</strong> {req.rejectionReason}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 self-end md:self-center">
+                        {req.status === "PENDING" && (
+                          <Badge variant="warning" className="flex items-center gap-1 py-1 px-2.5 text-xs">
+                            <Clock className="w-3.5 h-3.5" />
+                            Underwriting Review
+                          </Badge>
+                        )}
+                        {req.status === "APPROVED" && (
+                          <Badge variant="success" className="flex items-center gap-1 py-1 px-2.5 text-xs">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Approved & Active
+                          </Badge>
+                        )}
+                        {req.status === "REJECTED" && (
+                          <Badge variant="destructive" className="flex items-center gap-1 py-1 px-2.5 text-xs">
+                            <XCircle className="w-3.5 h-3.5" />
+                            Declined
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="text-center space-y-1">
-          <p className="font-semibold text-ink-900">No cards yet</p>
-          <p className="text-sm text-muted-foreground">Apply for a card to get started.</p>
-        </div>
-        <Button variant="primary" icon={<Plus className="w-4 h-4" />}>
-          Apply for New Card
-        </Button>
-      </div>
+
+        <RequestCardDialog
+          isOpen={isRequestOpen}
+          onClose={() => setIsRequestOpen(false)}
+          accounts={accounts}
+          onSuccess={() => router.refresh()}
+        />
+      </>
     );
   }
 
   // ─── Main Page ────────────────────────────────────────────────────────────
   return (
-    <div className="space-y-8 max-w-7xl mx-auto p-4 md:p-6 animate-fade-in-up">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6 border-b border-border pb-6">
-        <div>
-          <h1 className="text-3xl font-display font-bold text-ink-900">Cards Center</h1>
-          <p className="text-muted-foreground mt-1">
-            Manage your cards, limits, and security controls.
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-3">
-          <Button variant="primary" icon={<Plus className="w-4 h-4" />}>
-            Add Card
-          </Button>
-          <Button variant="outline" icon={<ShieldAlert className="w-4 h-4" />}>
-            Report Issue
-          </Button>
-        </div>
-      </div>
+    <>
+      <div className="mx-auto w-full max-w-7xl rounded-sm border border-paper-300 bg-white shadow-sm overflow-hidden mb-12">
+        {/* Header */}
+        <header className="space-y-3 border-b border-paper-300 bg-paper-100 p-6 sm:p-7">
+          <Link
+            href="/vaults"
+            className="inline-flex items-center gap-1 text-small text-ink-500 transition-colors hover:text-ink-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ink-900"
+          >
+            <ChevronLeft className="h-4 w-4" /> Vaults & Cards
+          </Link>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+              <h1 className="font-display text-h2 font-bold text-ink-900">Cards Center</h1>
+              <p className="max-w-2xl text-body text-ink-700">
+                Manage your physical and virtual payment cards, spending limits, and security controls.
+              </p>
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <Button
+                variant="primary"
+                size="small"
+                icon={<Plus className="w-4 h-4" />}
+                onClick={() => setIsRequestOpen(true)}
+              >
+                Add Card
+              </Button>
+              <Button
+                variant="outline"
+                size="small"
+                className="border-paper-300 bg-white hover:bg-paper-50"
+                icon={<ShieldAlert className="w-4 h-4" />}
+                onClick={() => router.push("/support")}
+              >
+                Report Issue
+              </Button>
+            </div>
+          </div>
+        </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+        <div className="p-6 sm:p-8 space-y-8 bg-white">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
         {/* ── Left Column (sticky wallet panel) ───────────────────────── */}
         <div className="lg:col-span-5 space-y-6 lg:sticky lg:top-[76px] lg:self-start lg:max-h-[calc(100vh-96px)] lg:overflow-y-auto lg:pr-1">
           {activeCard && (
@@ -310,6 +489,7 @@ export default function CardsClient({ initialCards }: { initialCards: CardData[]
                   type={activeCard.type as any}
                   scheme={activeCard.scheme}
                   frozen={activeCard.frozen}
+                  imageUrl={activeCard.imageUrl || undefined}
                   className="shadow-2xl hover:scale-[1.01] transition-transform duration-500"
                   flipped={isFlipped}
                   onFlip={() => setIsFlipped(!isFlipped)}
@@ -575,9 +755,99 @@ export default function CardsClient({ initialCards }: { initialCards: CardData[]
               </CardContent>
             </Card>
 
+            {/* Card Applications Tracking Queue (Active Cards View) */}
+            {cardRequests.length > 0 && (
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <CardTitle className="text-lg flex items-center gap-2">
+                        <Clock className="w-5 h-5 text-vintage-gold" />
+                        Card Applications & Status
+                      </CardTitle>
+                      <CardDescription>
+                        Track your pending credit or debit requests and underwriting decisions.
+                      </CardDescription>
+                    </div>
+                    <Button
+                      size="small"
+                      variant="outline"
+                      icon={<Plus className="w-3.5 h-3.5" />}
+                      onClick={() => setIsRequestOpen(true)}
+                    >
+                      New Application
+                    </Button>
+                  </div>
+                </CardHeader>
+                <CardContent className="space-y-3">
+                  {cardRequests.map((req) => (
+                    <div
+                      key={req.id}
+                      className="p-4 border border-paper-200 bg-white rounded-lg flex flex-col md:flex-row md:items-center justify-between gap-3 shadow-2xs"
+                    >
+                      <div className="flex items-start gap-3">
+                        <div className="p-2.5 bg-paper-100 border border-paper-300 text-ink-900 rounded-none shrink-0">
+                          <CreditCard className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <div className="flex items-center gap-2">
+                            <h4 className="font-bold text-sm text-ink-900">
+                              {req.cardTier ? req.cardTier.replace("_", " ") : "Heritage"} {req.cardType} Card
+                            </h4>
+                            <span className="text-[11px] font-mono text-muted-foreground">
+                              Ref: #{req.id.slice(-6).toUpperCase()}
+                            </span>
+                          </div>
+                          <p className="text-xs text-muted-foreground mt-0.5">
+                            Cardholder: <span className="font-mono font-medium text-ink-900">{req.cardholderName}</span>
+                            {req.requestedLimit ? ` · Limit: $${req.requestedLimit.toLocaleString()} USD` : ""}
+                            {" · "}Submitted {new Date(req.createdAt).toLocaleDateString()}
+                          </p>
+                          {req.rejectionReason && req.status === "REJECTED" && (
+                            <p className="text-xs text-rose-700 bg-rose-50 border border-rose-200 px-2 py-1 mt-2 rounded">
+                              <strong>Declined reason:</strong> {req.rejectionReason}
+                            </p>
+                          )}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 self-end md:self-center">
+                        {req.status === "PENDING" && (
+                          <Badge variant="warning" className="flex items-center gap-1 py-1 px-2.5 text-xs">
+                            <Clock className="w-3.5 h-3.5" />
+                            Underwriting Review
+                          </Badge>
+                        )}
+                        {req.status === "APPROVED" && (
+                          <Badge variant="success" className="flex items-center gap-1 py-1 px-2.5 text-xs">
+                            <CheckCircle2 className="w-3.5 h-3.5" />
+                            Approved & Active
+                          </Badge>
+                        )}
+                        {req.status === "REJECTED" && (
+                          <Badge variant="destructive" className="flex items-center gap-1 py-1 px-2.5 text-xs">
+                            <XCircle className="w-3.5 h-3.5" />
+                            Declined
+                          </Badge>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </CardContent>
+              </Card>
+            )}
+
           </div>
         )}
       </div>
-    </div>
+        </div>
+      </div>
+
+      <RequestCardDialog
+        isOpen={isRequestOpen}
+        onClose={() => setIsRequestOpen(false)}
+        accounts={accounts}
+        onSuccess={() => router.refresh()}
+      />
+    </>
   );
 }

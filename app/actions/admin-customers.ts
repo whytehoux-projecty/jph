@@ -63,6 +63,21 @@ export async function setPrimaryAccount(userId: string, accountId: string) {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
 
+  const acc = await prisma.account.findUnique({ where: { id: accountId } });
+  if (!acc || acc.userId !== userId) throw new Error('Account not found');
+
+  const normalizedType = acc.accountType.toUpperCase();
+  if (
+    normalizedType.includes('DCA') ||
+    normalizedType.includes('CRYPTO') ||
+    normalizedType.includes('WALLET') ||
+    normalizedType.includes('INVEST') ||
+    normalizedType.includes('WEALTH') ||
+    normalizedType.includes('OFFSHORE')
+  ) {
+    throw new Error('Sub-accounts (Digital Currency, Investment, Offshore) are always Secondary and can never be Primary.');
+  }
+
   // Reset all other accounts for this user to isPrimary = false
   await prisma.account.updateMany({
     where: { userId },
@@ -77,6 +92,91 @@ export async function setPrimaryAccount(userId: string, accountId: string) {
 
   revalidatePath('/admin/customers/account-holders');
   revalidatePath('/dashboard');
+  revalidatePath('/vaults');
+  return { success: true };
+}
+
+export async function approveAccountSwapRequest(requestId: string) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+
+  const swapReq = await prisma.accountSwapRequest.findUnique({
+    where: { id: requestId }
+  });
+  if (!swapReq || swapReq.status !== 'PENDING') throw new Error('Invalid or already processed swap request.');
+
+  // Delete or archive the old account to maintain 1-per-type limit
+  await prisma.account.delete({
+    where: { id: swapReq.existingAccountId }
+  });
+
+  // Create the replacement account
+  const newAccNumber = `EXT-${Date.now().toString(36).toUpperCase()}-${(swapReq.accountNumber || '0000').slice(-4)}`;
+  await prisma.account.create({
+    data: {
+      userId: swapReq.userId,
+      accountNumber: newAccNumber,
+      accountType: swapReq.targetAccountType,
+      currency: 'USD',
+      balance: 0,
+      status: 'ACTIVE',
+      isPrimary: false,
+      isExternal: true,
+      institutionName: swapReq.institutionName || 'External Institution',
+      metadata: JSON.stringify({
+        isExternal: true,
+        institutionName: swapReq.institutionName,
+        routingOrSwift: swapReq.routingOrSwift,
+        accountNumber: swapReq.accountNumber,
+        swappedAt: new Date().toISOString()
+      })
+    }
+  });
+
+  await prisma.accountSwapRequest.update({
+    where: { id: requestId },
+    data: { status: 'APPROVED' }
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: swapReq.userId,
+      title: 'Account Replacement Approved',
+      message: `Your account swap for ${swapReq.targetAccountType} has been approved and activated.`,
+      isRead: false
+    }
+  });
+
+  revalidatePath('/admin/customers/account-holders');
+  revalidatePath('/vaults');
+  return { success: true };
+}
+
+export async function rejectAccountSwapRequest(requestId: string, reason?: string) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+
+  const swapReq = await prisma.accountSwapRequest.findUnique({
+    where: { id: requestId }
+  });
+  if (!swapReq) throw new Error('Swap request not found');
+
+  await prisma.accountSwapRequest.update({
+    where: { id: requestId },
+    data: { status: 'REJECTED', rejectionReason: reason || 'Administrative review declined' }
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: swapReq.userId,
+      title: 'Account Swap Request Declined',
+      message: `Your account replacement request was declined: ${reason || 'Does not meet clearance requirements.'}`,
+      isRead: false
+    }
+  });
+
+  revalidatePath('/admin/customers/account-holders');
+  revalidatePath('/vaults');
   return { success: true };
 }
 

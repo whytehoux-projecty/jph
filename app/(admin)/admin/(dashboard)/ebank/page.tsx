@@ -10,12 +10,13 @@ import {
   BadgeDollarSign,
   Gift,
   ArrowRightLeft,
+  CreditCard,
 } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
 export default async function EbankManagementHub() {
-  const [unreadNotifications, openTickets, totalPayees, pendingBills, pendingDeposits, pendingLoans, totalRedemptions] =
+  const [unreadNotifications, openTickets, totalPayees, pendingBills, pendingDeposits, pendingLoans, totalRedemptions, pendingCardRequests] =
     await Promise.all([
       prisma.notification.count({ where: { isRead: false } }),
       prisma.supportTicket.count({ where: { status: 'OPEN' } }),
@@ -45,9 +46,22 @@ export default async function EbankManagementHub() {
           OR: [{ category: 'REWARDS' }, { transactionType: 'REWARD_REDEMPTION' }],
         },
       }),
+      prisma.cardRequest.count({
+        where: { status: 'PENDING' },
+      }),
     ]);
 
   const cards = [
+    {
+      title: 'Cards Management',
+      description: 'Underwrite card applications, issue debit & credit cards, assign custom artwork, and freeze cards.',
+      statLabel: 'Pending Requests',
+      statValue: pendingCardRequests,
+      statVariant: pendingCardRequests > 0 ? 'amber' : 'emerald',
+      href: '/admin/ebank/cards',
+      icon: CreditCard,
+      color: 'indigo',
+    },
     {
       title: 'Deposits & Treasury',
       description: 'Manage routing, crypto addresses, and clear customer deposits.',

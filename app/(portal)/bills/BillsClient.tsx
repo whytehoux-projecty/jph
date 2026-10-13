@@ -108,6 +108,7 @@ export default function BillsClient({
   const [isUploading, setIsUploading] = React.useState(false);
   const [scanProgress, setScanProgress] = React.useState(0);
   const [extractedInvoice, setExtractedInvoice] = React.useState<{
+    payeeId?: string;
     merchantName: string;
     invoiceNumber: string;
     amount: string;
@@ -163,10 +164,12 @@ export default function BillsClient({
 
     setIsSubmittingProvider(true);
     try {
+      const targetProvider = initialProviders.find(p => p.name === selectedProviderName);
       const res = await payBill({
         accountId: selectedAccountId,
+        payeeId: targetProvider?.id,
         name: selectedProviderName,
-        accountNumber: customerId || "ACC-" + Math.floor(100000 + Math.random() * 900000),
+        accountNumber: customerId || targetProvider?.accountNumber || "ACC-DIRECT",
         amount,
         category: selectedCategory,
         country: selectedCountry,
@@ -174,7 +177,7 @@ export default function BillsClient({
         source: "DIRECTORY_PROVIDER",
       });
 
-      const ref = res?.reference || "BIL-" + Math.random().toString(36).substring(2, 9).toUpperCase();
+      const ref = res?.reference || ("BIL-" + Date.now().toString(36).toUpperCase());
       setProviderReceipt({
         reference: ref,
         amount,
@@ -186,13 +189,13 @@ export default function BillsClient({
       // Optimistically update recent history
       setHistory((prev) => [
         {
-          id: res?.bill?.id || Math.random().toString(),
+          id: res?.bill?.id || ("BIL-" + Date.now().toString()),
           amount: parseFloat(amount),
           status: "PENDING",
           createdAt: new Date().toISOString(),
           payee: {
             name: selectedProviderName,
-            accountNumber: customerId || "ACC-DIRECT",
+            accountNumber: customerId || targetProvider?.accountNumber || "ACC-DIRECT",
             category: selectedCategory,
           },
           account: {
@@ -233,48 +236,49 @@ export default function BillsClient({
     setInvoiceFile(file);
     setIsUploading(true);
     setInvoiceStep("scanning");
-    setScanProgress(15);
+    setScanProgress(25);
 
     try {
-      await new Promise((r) => setTimeout(r, 600));
-      setScanProgress(45);
-      await new Promise((r) => setTimeout(r, 700));
-      setScanProgress(80);
-      await new Promise((r) => setTimeout(r, 500));
+      await new Promise((r) => setTimeout(r, 350));
+      setScanProgress(70);
+      await new Promise((r) => setTimeout(r, 350));
       setScanProgress(100);
 
-      // Deterministic realistic data extracted from invoice
-      const sampleNames = [
-        "Metropolitan Power & Gas Corp.",
-        "National Water Authority Ltd.",
-        "Pacific Broadband & Fiber Co.",
-        "Consolidated Telecom International",
-        "Alliance Enterprise Services",
-      ];
-      const randomMerchant =
-        sampleNames[Math.floor(Math.random() * sampleNames.length)];
-      const invNumber = "INV-" + new Date().getFullYear() + "-" + Math.floor(10000 + Math.random() * 90000);
-      const parsedAmount = (Math.floor(80 + Math.random() * 450) + 0.5).toFixed(2);
-      const dueDate = new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toLocaleDateString(undefined, {
+      // Match against live DB providers configured by admin
+      const lowerFileName = file.name.toLowerCase();
+      const matched = initialProviders.find(
+        (p) =>
+          lowerFileName.includes(p.name.toLowerCase()) ||
+          (p.code && lowerFileName.includes(p.code.toLowerCase()))
+      ) || initialProviders[0];
+
+      // Cleaned document identifier from real filename
+      const baseName = file.name.replace(/\.[^/.]+$/, "").replace(/[^a-zA-Z0-9_-]/g, "-");
+      const invNumber = baseName.length > 3 ? baseName.slice(0, 24).toUpperCase() : `INV-${new Date().getFullYear()}`;
+
+      const due = new Date();
+      due.setDate(due.getDate() + 14);
+      const dueDate = due.toLocaleDateString(undefined, {
         month: "short",
         day: "numeric",
         year: "numeric",
       });
 
       setExtractedInvoice({
-        merchantName: randomMerchant,
+        payeeId: matched?.id,
+        merchantName: matched?.name || "Corporate Bill Service",
         invoiceNumber: invNumber,
-        amount: parsedAmount,
+        amount: "", // User inputs their real statement balance
         dueDate,
-        category: "UTILITIES",
+        category: matched?.category || "UTILITIES",
         fileSize: (file.size / 1024 / 1024).toFixed(2) + " MB",
         fileName: file.name,
       });
 
       setInvoiceStep("pipeline");
       toast.success({
-        title: "E-Invoice Ticket Scanned",
-        description: "Payment pipeline generated automatically from PDF ticket.",
+        title: "E-Invoice Document Loaded",
+        description: `Verified "${file.name}". Please confirm provider details and statement amount.`,
       });
     } catch (err) {
       console.error(err);
@@ -286,13 +290,6 @@ export default function BillsClient({
     } finally {
       setIsUploading(false);
     }
-  };
-
-  const handleLoadSampleTicket = () => {
-    // Fabricate a sample PDF file object
-    const sampleBlob = new Blob(["%PDF-1.4 sample invoice content"], { type: "application/pdf" });
-    const sampleFile = new File([sampleBlob], "e-invoice-statement-2026.pdf", { type: "application/pdf" });
-    handleProcessInvoice(sampleFile);
   };
 
   // SECTION 2: Execute Invoice Payment Pipeline
@@ -307,10 +304,20 @@ export default function BillsClient({
 
     if (!extractedInvoice || !selectedAccountId) return;
 
+    const numAmount = parseFloat(extractedInvoice.amount);
+    if (isNaN(numAmount) || numAmount <= 0) {
+      toast.error({
+        title: "Amount Required",
+        description: "Please specify a valid invoice statement total greater than zero.",
+      });
+      return;
+    }
+
     setIsSubmittingInvoice(true);
     try {
       const res = await payBill({
         accountId: selectedAccountId,
+        payeeId: extractedInvoice.payeeId,
         name: extractedInvoice.merchantName,
         accountNumber: extractedInvoice.invoiceNumber,
         amount: extractedInvoice.amount,
@@ -319,7 +326,7 @@ export default function BillsClient({
         source: "EINVOICE_PIPELINE",
       });
 
-      const ref = res?.reference || "BIL-" + Math.random().toString(36).substring(2, 9).toUpperCase();
+      const ref = res?.reference || ("BIL-" + Date.now().toString(36).toUpperCase());
       setInvoiceReceipt({
         reference: ref,
         amount: extractedInvoice.amount,
@@ -332,8 +339,8 @@ export default function BillsClient({
       // Optimistically update recent history
       setHistory((prev) => [
         {
-          id: res?.bill?.id || Math.random().toString(),
-          amount: parseFloat(extractedInvoice.amount),
+          id: res?.bill?.id || ("BIL-" + Date.now().toString()),
+          amount: numAmount,
           status: "PENDING",
           createdAt: new Date().toISOString(),
           payee: {
@@ -1077,7 +1084,6 @@ export default function BillsClient({
                             isUploading={isUploading}
                             error={null}
                             onClear={() => setInvoiceFile(null)}
-                            onLoadSample={handleLoadSampleTicket}
                           />
 
                           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-2">
@@ -1160,18 +1166,42 @@ export default function BillsClient({
 
                             <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-small">
                               <div>
-                                <span className="text-[11px] text-ink-500 uppercase block">Detected Biller</span>
-                                <input
-                                  type="text"
-                                  value={extractedInvoice.merchantName}
-                                  onChange={(e) =>
-                                    setExtractedInvoice({
-                                      ...extractedInvoice,
-                                      merchantName: e.target.value,
-                                    })
-                                  }
-                                  className="w-full font-semibold text-ink-900 bg-white border border-paper-300 px-2 py-1 text-xs rounded-none"
-                                />
+                                <span className="text-[11px] text-ink-500 uppercase block">Selected Biller (DB)</span>
+                                {initialProviders.length > 0 ? (
+                                  <select
+                                    value={extractedInvoice.payeeId || ""}
+                                    onChange={(e) => {
+                                      const p = initialProviders.find((item) => item.id === e.target.value);
+                                      if (p) {
+                                        setExtractedInvoice({
+                                          ...extractedInvoice,
+                                          payeeId: p.id,
+                                          merchantName: p.name,
+                                          category: p.category,
+                                        });
+                                      }
+                                    }}
+                                    className="w-full font-semibold text-ink-900 bg-white border border-paper-300 px-2 py-1 text-xs rounded-none"
+                                  >
+                                    {initialProviders.map((p) => (
+                                      <option key={p.id} value={p.id}>
+                                        {p.name}
+                                      </option>
+                                    ))}
+                                  </select>
+                                ) : (
+                                  <input
+                                    type="text"
+                                    value={extractedInvoice.merchantName}
+                                    onChange={(e) =>
+                                      setExtractedInvoice({
+                                        ...extractedInvoice,
+                                        merchantName: e.target.value,
+                                      })
+                                    }
+                                    className="w-full font-semibold text-ink-900 bg-white border border-paper-300 px-2 py-1 text-xs rounded-none"
+                                  />
+                                )}
                               </div>
                               <div>
                                 <span className="text-[11px] text-ink-500 uppercase block">Invoice ID</span>
@@ -1251,6 +1281,8 @@ export default function BillsClient({
                               <input
                                 type="number"
                                 step="0.01"
+                                placeholder="0.00"
+                                required
                                 value={extractedInvoice.amount}
                                 onChange={(e) =>
                                   setExtractedInvoice({
@@ -1276,14 +1308,14 @@ export default function BillsClient({
                             <Button
                               className="rounded-none flex-1 bg-vermilion-600 text-white hover:bg-vermilion-700 h-11"
                               onClick={handleExecuteInvoicePipeline}
-                              disabled={isSubmittingInvoice || !extractedInvoice.amount}
+                              disabled={isSubmittingInvoice || !extractedInvoice.amount || parseFloat(extractedInvoice.amount) <= 0}
                             >
                               {isSubmittingInvoice ? (
                                 <span className="flex items-center gap-2">
                                   <RefreshCw className="h-4 w-4 animate-spin" /> Executing Pipeline...
                                 </span>
                               ) : (
-                                `Authorize & Execute Pipeline ($${parseFloat(extractedInvoice.amount).toFixed(2)})`
+                                `Authorize & Execute Pipeline (${extractedInvoice.amount ? '$' + parseFloat(extractedInvoice.amount).toFixed(2) : 'Enter Amount'})`
                               )}
                             </Button>
                           </div>

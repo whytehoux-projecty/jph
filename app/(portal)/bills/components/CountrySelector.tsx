@@ -18,17 +18,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
+import { BILL_REGIONS } from "@/lib/bill-constants";
 
-export const REGIONS = [
-  { value: "usa", label: "United States (US)" },
-  { value: "canada", label: "Canada (CA)" },
-  { value: "uk", label: "United Kingdom (UK)" },
-  { value: "germany", label: "Germany (DE)" },
-  { value: "france", label: "France (FR)" },
-  { value: "central-europe", label: "Central Europe (EU)" },
-  { value: "east-asia", label: "East Asia (JP, KR, CN)" },
-  { value: "west-africa", label: "West Africa (NG, GH)" },
-];
+export const REGIONS = BILL_REGIONS.filter(r => r.value !== "all");
 
 interface CountrySelectorProps {
   value: string;
