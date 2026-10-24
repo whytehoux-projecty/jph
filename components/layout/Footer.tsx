@@ -4,6 +4,7 @@ import { Lock, ShieldCheck } from 'lucide-react';
 import { ROUTES } from '@/lib/constants';
 import { BRAND, PUBLIC_CONTACT } from '@/src/content/facts';
 import { CookieSettingsLink } from '@/components/commercial/ConsentBanner';
+import { SignOutButton } from '@/components/auth/SignOutDialog';
 
 // ─── Marketing footer columns — one URL per product, shared with the header ───
 const siteSections = [
@@ -129,7 +130,7 @@ export function Footer({ isAbsolute, isSlim }: { isAbsolute?: boolean; isSlim?: 
                         <div className="flex items-center gap-3 text-[11px] text-ink-600">
                             <button className="hover:underline">En Español</button>
                             <span className="text-paper-300">|</span>
-                            <button onClick={() => import('@/app/actions/auth').then(m => m.logoutAction())} className="hover:underline">Log out</button>
+                            <SignOutButton className="hover:underline">Log out</SignOutButton>
                         </div>
                     </div>
 

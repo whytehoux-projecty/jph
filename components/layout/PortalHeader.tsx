@@ -5,6 +5,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { User, Globe, Menu, Shield, LogOut, Settings, Headset, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { SignOutDialog } from "@/components/auth/SignOutDialog";
 import { cn } from "@/lib/utils";
 import {
   Select,
@@ -38,6 +39,7 @@ export function PortalHeader({
   profile,
 }: HeaderProps) {
   const userName = profile ? `${profile.firstName} ${profile.lastName}` : "Loading...";
+  const [signOutOpen, setSignOutOpen] = useState(false);
   const [timeStr, setTimeStr] = useState<string>("");
   const [locationStr, setLocationStr] = useState<string>("Detecting location...");
 
@@ -156,19 +158,18 @@ export function PortalHeader({
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="bg-paper-200 my-1 h-px" />
-              <DropdownMenuItem 
-                onClick={() => {
-                  import('@/app/actions/auth').then(m => m.logoutAction());
-                }}
+              <DropdownMenuItem
+                onSelect={() => setSignOutOpen(true)}
                 className="cursor-pointer text-error hover:bg-error-bg hover:text-error focus:bg-error-bg focus:text-error p-2 rounded-sm text-sm"
               >
                 <div className="flex items-center w-full">
                   <LogOut className="mr-2 h-4 w-4 opacity-70" />
-                  Logout
+                  Sign out
                 </div>
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
+          <SignOutDialog open={signOutOpen} onOpenChange={setSignOutOpen} />
         </div>
       </div>
     </header>
