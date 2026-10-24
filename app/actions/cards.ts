@@ -52,6 +52,20 @@ export async function getCardById(id: string) {
   return card;
 }
 
+/**
+ * Full card details, fetched only when the customer chooses to reveal them
+ * (the cards page itself only ever receives the last four digits).
+ */
+export async function revealCardDetails(id: string) {
+  const card = await getCardById(id); // ownership check
+  const exp = card.expiryDate;
+  return {
+    number: card.cardNumber,
+    expiry: `${String(exp.getUTCMonth() + 1).padStart(2, '0')}/${String(exp.getUTCFullYear()).slice(-2)}`,
+    cvv: card.cvv,
+  };
+}
+
 export async function freezeCard(id: string) {
   const session = await auth();
   if (!session?.user?.id) throw new Error('Unauthorized');
@@ -117,18 +131,18 @@ export async function requestCard(input: RequestCardInput) {
   const userId = session.user.id;
 
   if (!input.cardholderName?.trim()) {
-    throw new Error('Cardholder embossed name is required.');
+    throw new Error('Enter your name as it should appear on the card.');
   }
 
   if (input.cardType === 'DEBIT' && !input.accountId) {
-    throw new Error('Debit cards must be linked to an active depository vault.');
+    throw new Error('Choose the account your debit card will spend from.');
   }
 
   // If Debit, verify user owns account
   if (input.accountId) {
     const acc = await prisma.account.findUnique({ where: { id: input.accountId } });
     if (!acc || acc.userId !== userId) {
-      throw new Error('Selected depository vault was not found.');
+      throw new Error("We couldn't find the account you chose.");
     }
   }
 
@@ -159,7 +173,7 @@ export async function requestCard(input: RequestCardInput) {
     data: {
       userId,
       title: 'Card Request Received',
-      message: `Your application for a Heritage ${input.cardTier || ''} ${input.cardType} Card has been submitted for underwriting review (Ref: #${cardRequest.id.slice(-6).toUpperCase()}).`,
+      message: `We've received your request for a ${input.cardType === 'CREDIT' ? 'credit' : 'debit'} card (reference ${cardRequest.id.slice(-6).toUpperCase()}). We'll let you know the outcome.`,
       isRead: false
     }
   });
@@ -168,7 +182,7 @@ export async function requestCard(input: RequestCardInput) {
   return {
     success: true,
     request: cardRequest,
-    message: 'Card application submitted successfully.'
+    message: "We've received your card request."
   };
 }
 

@@ -1,40 +1,18 @@
 "use client";
 
 import * as React from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-} from "@/components/ui/dialog";
+import Link from "next/link";
+import { ArrowLeft, CreditCard, Landmark } from "lucide-react";
 import { Button } from "@/components/ui/Button";
+import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
-import {
-  CreditCard,
-  CheckCircle2,
-  AlertCircle,
-  Loader2,
-  ArrowRight,
-  ArrowLeft,
-  ShieldCheck,
-  Lock,
-  Sparkles,
-  Zap,
-  Truck,
-  Building2,
-  Crown,
-} from "lucide-react";
+import { Textarea } from "@/components/ui/textarea";
+import { NativeSelect } from "@/components/ui/native-select";
+import { Alert } from "@/components/ui/alert";
+import { FlowDialog, FlowDone, ReviewList } from "@/components/ui/flow-dialog";
 import { requestCard } from "@/app/actions/cards";
-import { toast } from "@/lib/toast";
+import { formatAmount } from "@/lib/format";
+import { userFacingError } from "@/lib/errors";
 import { cn } from "@/lib/utils";
 
 interface RequestCardDialogProps {
@@ -44,461 +22,218 @@ interface RequestCardDialogProps {
   onSuccess?: () => void;
 }
 
-export function RequestCardDialog({
-  isOpen,
-  onClose,
-  accounts = [],
-  onSuccess,
-}: RequestCardDialogProps) {
-  const [step, setStep] = React.useState<1 | 2 | 3 | 4>(1);
+const STEPS = ["Card type", "Details", "Review", "Sent"];
+
+const TYPES = [
+  {
+    value: "DEBIT" as const,
+    icon: Landmark,
+    title: "Debit card",
+    description: "Spends money directly from one of your accounts.",
+  },
+  {
+    value: "CREDIT" as const,
+    icon: CreditCard,
+    title: "Credit card",
+    description: "Heritage Rewards Visa®. Subject to approval.",
+  },
+];
+
+const DESIGNS = [
+  { value: "STANDARD", label: "Standard" },
+  { value: "GOLD_RESERVE", label: "Gold Reserve" },
+  { value: "ONYX_PLATINUM", label: "Onyx Platinum" },
+];
+
+export function RequestCardDialog({ isOpen, onClose, accounts = [], onSuccess }: RequestCardDialogProps) {
+  const [step, setStep] = React.useState(0);
   const [cardType, setCardType] = React.useState<"DEBIT" | "CREDIT">("DEBIT");
-  const [cardTier, setCardTier] = React.useState<string>("STANDARD");
-  const [accountId, setAccountId] = React.useState<string>("");
-  const [requestedLimit, setRequestedLimit] = React.useState<string>("10000");
+  const [cardTier, setCardTier] = React.useState("STANDARD");
+  const [accountId, setAccountId] = React.useState("");
+  const [requestedLimit, setRequestedLimit] = React.useState("");
   const [cardholderName, setCardholderName] = React.useState("");
   const [billingAddress, setBillingAddress] = React.useState("");
-  const [deliveryMethod, setDeliveryMethod] = React.useState("STANDARD_MAIL");
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
   const [loading, setLoading] = React.useState(false);
-  const [submittedResult, setSubmittedResult] = React.useState<any>(null);
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [result, setResult] = React.useState<any>(null);
 
   React.useEffect(() => {
-    if (accounts.length > 0 && !accountId) {
-      setAccountId(accounts[0].id);
-    }
+    if (accounts.length > 0 && !accountId) setAccountId(accounts[0].id);
   }, [accounts, accountId]);
 
-  const handleReset = () => {
-    setStep(1);
+  const account = accounts.find((a) => a.id === accountId);
+  const limitNum = Number.parseFloat(requestedLimit);
+
+  const close = () => {
+    setStep(0);
     setCardType("DEBIT");
     setCardTier("STANDARD");
-    setRequestedLimit("10000");
+    setRequestedLimit("");
     setCardholderName("");
     setBillingAddress("");
-    setDeliveryMethod("STANDARD_MAIL");
-    setLoading(false);
-    setSubmittedResult(null);
-  };
-
-  const handleClose = () => {
-    handleReset();
+    setErrors({});
+    setSubmitError(null);
+    setResult(null);
     onClose();
   };
 
-  const handleProceedToDetails = () => {
-    setStep(2);
+  const toReview = () => {
+    const next: Record<string, string> = {};
+    if (!cardholderName.trim()) next.name = "Enter your name as it should appear on the card.";
+    else if (cardholderName.trim().length > 26) next.name = "Use 26 characters or fewer.";
+    if (cardType === "DEBIT" && !accountId) next.account = "Choose the account this card will spend from.";
+    if (cardType === "CREDIT" && requestedLimit && !(limitNum > 0)) next.limit = "Enter an amount greater than zero, or leave it empty.";
+    setErrors(next);
+    if (Object.keys(next).length === 0) setStep(2);
   };
 
-  const handleProceedToReview = () => {
-    if (!cardholderName.trim()) {
-      toast.error({ title: "Name Required", description: "Please enter your name as it should appear on the card." });
-      return;
-    }
-    if (cardType === "DEBIT" && !accountId) {
-      toast.error({ title: "Vault Required", description: "Please select an account to link your debit card to." });
-      return;
-    }
-    setStep(3);
-  };
-
-  const handleSubmit = async () => {
+  const submit = async () => {
     setLoading(true);
+    setSubmitError(null);
     try {
       const res = await requestCard({
         cardType,
         accountId: cardType === "DEBIT" ? accountId : undefined,
         cardTier,
-        cardholderName,
-        billingAddress: billingAddress || "Primary Address on File",
-        requestedLimit: cardType === "CREDIT" ? parseFloat(requestedLimit) || 10000 : undefined,
+        cardholderName: cardholderName.trim(),
+        billingAddress: billingAddress.trim() || "Primary Address on File",
+        requestedLimit: cardType === "CREDIT" ? (limitNum > 0 ? limitNum : 10000) : undefined,
       });
-
-      setSubmittedResult(res);
-      setStep(4);
-      toast.success({
-        title: "Application Received",
-        description: res.message,
-      });
-      if (onSuccess) onSuccess();
-    } catch (err: any) {
-      toast.error({
-        title: "Request Error",
-        description: err.message || "Failed to submit card application.",
-      });
+      setResult(res);
+      setStep(3);
+      onSuccess?.();
+    } catch (err) {
+      setSubmitError(userFacingError(err, "We couldn't send your request. Please try again."));
     } finally {
       setLoading(false);
     }
   };
 
+  const footer =
+    step === 0 ? (
+      <>
+        <Button variant="tertiary" onClick={close}>Cancel</Button>
+        <Button onClick={() => setStep(1)} disabled={cardType === "DEBIT" && accounts.length === 0}>Continue</Button>
+      </>
+    ) : step === 1 ? (
+      <>
+        <Button variant="tertiary" icon={<ArrowLeft aria-hidden="true" />} onClick={() => setStep(0)}>Back</Button>
+        <Button onClick={toReview}>Review</Button>
+      </>
+    ) : step === 2 ? (
+      <>
+        <Button variant="tertiary" icon={<ArrowLeft aria-hidden="true" />} onClick={() => setStep(1)} disabled={loading}>Back</Button>
+        <Button onClick={submit} loading={loading} loadingLabel="Sending request">Send request</Button>
+      </>
+    ) : (
+      <Button fullWidth onClick={close}>Done</Button>
+    );
+
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && handleClose()}>
-      <DialogContent className="max-w-3xl sm:rounded-none p-0 overflow-hidden border border-paper-300">
-        {/* Header */}
-        <div className="bg-paper-100 p-6 border-b border-paper-300">
-          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-ink-600 mb-1">
-            <CreditCard className="w-3.5 h-3.5 text-vintage-gold" />
-            Heritage Trust · Card Issuance Protocol
-          </div>
-          <DialogTitle className="text-2xl font-display font-bold text-ink-900">
-            Apply for Heritage Trust Card
-          </DialogTitle>
-          <DialogDescription className="text-ink-700 text-xs sm:text-sm mt-0.5">
-            Select your card type, configure spending tiers, and submit for underwriting review.
-          </DialogDescription>
-
-          <div className="flex items-center gap-2 mt-4">
-            {[1, 2, 3, 4].map((s) => (
-              <div
-                key={s}
-                className={cn(
-                  "h-1.5 flex-1 transition-all duration-200",
-                  step === s ? "bg-ink-900" : step > s ? "bg-emerald-600" : "bg-paper-300"
-                )}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Content Body */}
-        <div className="p-6 max-h-[72vh] overflow-y-auto space-y-6">
-          {/* STEP 1: CARD TYPE SELECTION */}
-          {step === 1 && (
-            <div className="space-y-5">
-              <div className="space-y-1">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-ink-900">
-                  Step 1: Choose Card Facility
-                </h3>
-                <p className="text-xs text-ink-600">
-                  Select between a direct depository debit card or an institutional revolving credit facility.
-                </p>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* DEBIT CARD OPTION */}
-                <div
-                  onClick={() => setCardType("DEBIT")}
+    <FlowDialog
+      open={isOpen}
+      onClose={close}
+      title="Request a card"
+      description="We review every request and let you know the outcome."
+      steps={STEPS}
+      step={step}
+      footer={footer}
+      busy={loading}
+    >
+      {step === 0 && (
+        <>
+          <fieldset>
+            <legend className="mb-3 text-small font-semibold text-fg">Which card do you need?</legend>
+            <div className="grid gap-3 sm:grid-cols-2">
+              {TYPES.map(({ value, icon: Icon, title, description }) => (
+                <label
+                  key={value}
                   className={cn(
-                    "p-5 border text-left cursor-pointer transition-all duration-150 select-none space-y-3",
-                    cardType === "DEBIT"
-                      ? "border-ink-900 bg-paper-50 ring-2 ring-ink-900 shadow-xs"
-                      : "border-paper-300 bg-white hover:border-ink-700"
+                    "flex cursor-pointer gap-3 rounded-surface border border-line bg-surface p-4 transition-colors hover:border-line-strong",
+                    "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-focus",
+                    "has-[:checked]:border-action has-[:checked]:bg-action-subtle",
                   )}
                 >
-                  <div className="flex justify-between items-start">
-                    <span className="p-2.5 bg-pine-700 text-white rounded-none">
-                      <CreditCard className="w-5 h-5" />
-                    </span>
-                    <Badge variant="success" className="text-[10px]">
-                      Instant Ledger Debit
-                    </Badge>
-                  </div>
-                  <div>
-                    <h4 className="font-display font-bold text-base text-ink-900">
-                      Heritage Debit Card
-                    </h4>
-                    <p className="text-xs text-ink-600 mt-1 leading-relaxed">
-                      Linked directly to your primary liquid vault with 0.00% APR and instant ledger settlement.
-                    </p>
-                  </div>
-
-                  <div className="pt-2 border-t border-paper-200 text-xs space-y-1.5 text-ink-700">
-                    <div className="flex justify-between">
-                      <span className="text-ink-500">Daily ATM Cap:</span>
-                      <strong className="font-mono text-ink-900">$2,500 / day</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-ink-500">POS Daily Purchase:</span>
-                      <strong className="font-mono text-ink-900">$10,000 / day</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-ink-500">Foreign Exchange:</span>
-                      <strong className="text-emerald-700">Zero FX Markup</strong>
-                    </div>
-                  </div>
-                </div>
-
-                {/* CREDIT CARD OPTION */}
-                <div
-                  onClick={() => setCardType("CREDIT")}
-                  className={cn(
-                    "p-5 border text-left cursor-pointer transition-all duration-150 select-none space-y-3",
-                    cardType === "CREDIT"
-                      ? "border-ink-900 bg-paper-50 ring-2 ring-ink-900 shadow-xs"
-                      : "border-paper-300 bg-white hover:border-ink-700"
-                  )}
-                >
-                  <div className="flex justify-between items-start">
-                    <span className="p-2.5 bg-ink-900 text-white rounded-none">
-                      <Crown className="w-5 h-5 text-vintage-gold" />
-                    </span>
-                    <Badge variant="secondary" className="text-[10px]">
-                      Revolving Credit Line
-                    </Badge>
-                  </div>
-                  <div>
-                    <h4 className="font-display font-bold text-base text-ink-900">
-                      Heritage Platinum Credit Card
-                    </h4>
-                    <p className="text-xs text-ink-600 mt-1 leading-relaxed">
-                      Unsecured institutional credit facility with premium travel protections and rewards cashback.
-                    </p>
-                  </div>
-
-                  <div className="pt-2 border-t border-paper-200 text-xs space-y-1.5 text-ink-700">
-                    <div className="flex justify-between">
-                      <span className="text-ink-500">Credit Line Range:</span>
-                      <strong className="font-mono text-ink-900">$5,000 – $25,000</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-ink-500">Variable APR:</span>
-                      <strong className="font-mono text-ink-900">21.99% variable</strong>
-                    </div>
-                    <div className="flex justify-between">
-                      <span className="text-ink-500">Rewards Program:</span>
-                      <strong className="text-vintage-gold">1.5% – 3% Cashback</strong>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 2: CONFIGURATION */}
-          {step === 2 && (
-            <div className="space-y-5">
-              <div className="space-y-1">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-ink-900">
-                  Step 2: Cardholder & Limit Configuration
-                </h3>
-                <p className="text-xs text-ink-600">
-                  Specify cardholder embossing and linkage parameters.
-                </p>
-              </div>
-
-              <div className="space-y-4">
-                {/* Linked Account (Debit only) */}
-                {cardType === "DEBIT" && (
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-ink-700 block">
-                      Debit Funding Vault *
-                    </label>
-                    <Select value={accountId} onValueChange={setAccountId}>
-                      <SelectTrigger className="rounded-none border-paper-300">
-                        <SelectValue placeholder="Select an active account" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {accounts.map((acc) => (
-                          <SelectItem key={acc.id} value={acc.id}>
-                            {acc.name || acc.accountType} (••••{acc.accountNumber.slice(-4)}) — Available: ${acc.balance.toFixed(2)}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {/* Requested Limit (Credit only) */}
-                {cardType === "CREDIT" && (
-                  <div className="space-y-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wider text-ink-700 block">
-                      Requested Revolving Credit Limit *
-                    </label>
-                    <Select value={requestedLimit} onValueChange={setRequestedLimit}>
-                      <SelectTrigger className="rounded-none border-paper-300">
-                        <SelectValue placeholder="Select limit" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="5000">$5,000 USD (Starter Credit Line)</SelectItem>
-                        <SelectItem value="10000">$10,000 USD (Standard Executive)</SelectItem>
-                        <SelectItem value="15000">$15,000 USD (Premier Reserve)</SelectItem>
-                        <SelectItem value="25000">$25,000 USD (Institutional High-Limit)</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-
-                {/* Card Tier Selection */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-ink-700 block">
-                    Card Edition & Tier
-                  </label>
-                  <Select value={cardTier} onValueChange={setCardTier}>
-                    <SelectTrigger className="rounded-none border-paper-300">
-                      <SelectValue placeholder="Select tier" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="STANDARD">Standard Edition (Classic Pine / Navy)</SelectItem>
-                      <SelectItem value="GOLD_RESERVE">Gold Reserve Edition (Champagne Gold)</SelectItem>
-                      <SelectItem value="ONYX_PLATINUM">Onyx Platinum Edition (Black Brushed Steel)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-
-                {/* Cardholder Name */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-ink-700 block">
-                    Cardholder Name (Embossed on Card) *
-                  </label>
-                  <Input
-                    placeholder="Full Legal Name as shown on ID"
-                    className="rounded-none border-paper-300 text-sm uppercase font-mono"
-                    value={cardholderName}
-                    onChange={(e) => setCardholderName(e.target.value.toUpperCase())}
-                  />
-                </div>
-
-                {/* Dispatch Method */}
-                <div className="space-y-1.5">
-                  <label className="text-xs font-semibold uppercase tracking-wider text-ink-700 block">
-                    Physical Delivery Option
-                  </label>
-                  <Select value={deliveryMethod} onValueChange={setDeliveryMethod}>
-                    <SelectTrigger className="rounded-none border-paper-300">
-                      <SelectValue placeholder="Delivery method" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="STANDARD_MAIL">Standard Secure Postal (Free · 5-7 business days)</SelectItem>
-                      <SelectItem value="EXPRESS_COURIER">Express Courier Dispatch (Complimentary for Platinum · 1-2 business days)</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 3: REVIEW & SUBMIT */}
-          {step === 3 && (
-            <div className="space-y-6">
-              <div className="space-y-1">
-                <h3 className="text-sm font-bold uppercase tracking-wider text-ink-900">
-                  Step 3: Review Application Parameters
-                </h3>
-                <p className="text-xs text-ink-600">
-                  Confirm your application details before underwriting submission.
-                </p>
-              </div>
-
-              <div className="p-5 border border-paper-300 bg-white space-y-3">
-                <div className="grid grid-cols-2 gap-4 text-xs pb-3 border-b border-paper-200">
-                  <div>
-                    <span className="text-ink-500 block">Facility:</span>
-                    <strong className="text-ink-900 text-sm">{cardType} CARD</strong>
-                  </div>
-                  <div>
-                    <span className="text-ink-500 block">Card Tier:</span>
-                    <strong className="text-ink-900 text-sm">{cardTier.replace("_", " ")}</strong>
-                  </div>
-                  <div>
-                    <span className="text-ink-500 block">Cardholder Name:</span>
-                    <strong className="text-ink-900 font-mono text-sm">{cardholderName}</strong>
-                  </div>
-                  <div>
-                    <span className="text-ink-500 block">
-                      {cardType === "DEBIT" ? "Linked Vault:" : "Requested Limit:"}
-                    </span>
-                    <strong className="text-ink-900 font-mono text-sm">
-                      {cardType === "DEBIT" ? `••••${accountId.slice(-4)}` : `$${parseFloat(requestedLimit).toLocaleString()} USD`}
-                    </strong>
-                  </div>
-                </div>
-
-                <div className="pt-2 text-xs text-ink-700 space-y-2">
-                  <div className="flex items-center gap-2">
-                    <ShieldCheck className="w-4 h-4 text-emerald-700 shrink-0" />
-                    <span>Includes Zero Liability fraud protection and real-time transaction alerts.</span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Lock className="w-4 h-4 text-ink-900 shrink-0" />
-                    <span>Virtual card credentials become available immediately upon administrative approval.</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          )}
-
-          {/* STEP 4: SUCCESS CONFIRMATION */}
-          {step === 4 && (
-            <div className="text-center py-6 space-y-4 animate-fade-in-up">
-              <div className="mx-auto w-14 h-14 bg-emerald-100 border border-emerald-300 flex items-center justify-center">
-                <CheckCircle2 className="w-8 h-8 text-emerald-700" />
-              </div>
-
-              <div>
-                <h3 className="font-display text-xl font-bold text-ink-900">
-                  Card Application Submitted
-                </h3>
-                <p className="text-xs text-ink-600 mt-1">
-                  Reference: #{submittedResult?.request?.id?.slice(-6).toUpperCase() || "HERITAGE"}
-                </p>
-              </div>
-
-              <div className="max-w-md mx-auto p-4 bg-paper-100 border border-paper-300 text-left space-y-2 text-xs">
-                <div className="flex justify-between border-b border-paper-200 pb-2">
-                  <span className="text-ink-500">Status:</span>
-                  <span className="font-mono text-amber-700 font-bold bg-amber-50 px-2 py-0.5 border border-amber-200">
-                    UNDER ADMIN REVIEW
+                  <input type="radio" name="card-type" value={value} checked={cardType === value} onChange={() => setCardType(value)} className="sr-only" />
+                  <Icon className="mt-0.5 size-5 shrink-0 text-fg-action" aria-hidden="true" />
+                  <span>
+                    <span className="block text-body font-semibold text-fg">{title}</span>
+                    <span className="mt-0.5 block text-small text-fg-muted">{description}</span>
                   </span>
-                </div>
-                <div className="flex justify-between border-b border-paper-200 pb-2">
-                  <span className="text-ink-500">Cardholder:</span>
-                  <span className="font-bold text-ink-900">{cardholderName}</span>
-                </div>
-                <div className="flex justify-between">
-                  <span className="text-ink-500">Review SLA:</span>
-                  <span className="text-ink-700 font-semibold">1-2 Business Hours</span>
-                </div>
-              </div>
+                </label>
+              ))}
             </div>
+          </fieldset>
+          {cardType === "CREDIT" && (
+            <p className="text-small text-fg-muted">
+              Rates, fees and rewards are set out on the{" "}
+              <Link href="/personal-banking/credit-cards" className="font-semibold text-fg-action underline underline-offset-[3px]">
+                Heritage Rewards Visa®
+              </Link>{" "}
+              page.
+            </p>
           )}
-        </div>
+          {cardType === "DEBIT" && accounts.length === 0 && (
+            <Alert variant="info">You need an active account before you can request a debit card.</Alert>
+          )}
+        </>
+      )}
 
-        {/* Footer */}
-        <div className="bg-paper-100 p-4 border-t border-paper-300 flex items-center justify-between">
-          {step === 1 && (
-            <>
-              <Button variant="ghost" onClick={handleClose}>
-                Cancel
-              </Button>
-              <Button onClick={handleProceedToDetails} icon={<ArrowRight className="w-4 h-4" />}>
-                Configure Cardholder Details
-              </Button>
-            </>
+      {step === 1 && (
+        <>
+          <FormField label="Name on the card" hint="Up to 26 characters, as you'd like it printed." error={errors.name} required>
+            <Input autoComplete="name" maxLength={26} value={cardholderName} onChange={(e) => setCardholderName(e.target.value)} />
+          </FormField>
+          {cardType === "DEBIT" ? (
+            <FormField label="Account to spend from" error={errors.account} required>
+              <NativeSelect value={accountId} onChange={(e) => setAccountId(e.target.value)}>
+                {accounts.map((a) => (
+                  <option key={a.id} value={a.id}>{a.name}</option>
+                ))}
+              </NativeSelect>
+            </FormField>
+          ) : (
+            <FormField label="Credit limit you'd like" optional hint="In US dollars. We'll tell you the limit we can offer." error={errors.limit}>
+              <Input inputMode="decimal" autoComplete="off" value={requestedLimit} onChange={(e) => setRequestedLimit(e.target.value.replace(/[^\d.]/g, ""))} className="tabular-nums" />
+            </FormField>
           )}
+          <FormField label="Card design">
+            <NativeSelect value={cardTier} onChange={(e) => setCardTier(e.target.value)}>
+              {DESIGNS.map((d) => (
+                <option key={d.value} value={d.value}>{d.label}</option>
+              ))}
+            </NativeSelect>
+          </FormField>
+          <FormField label="Delivery address" optional hint="Leave empty to use the address we have on file.">
+            <Textarea rows={3} autoComplete="street-address" value={billingAddress} onChange={(e) => setBillingAddress(e.target.value)} />
+          </FormField>
+        </>
+      )}
 
-          {step === 2 && (
-            <>
-              <Button variant="ghost" onClick={() => setStep(1)} icon={<ArrowLeft className="w-4 h-4" />}>
-                Back
-              </Button>
-              <Button onClick={handleProceedToReview} icon={<ArrowRight className="w-4 h-4" />}>
-                Review Terms
-              </Button>
-            </>
-          )}
+      {step === 2 && (
+        <>
+          <p className="text-body text-fg-muted">Check the details below, then send your request.</p>
+          <ReviewList
+            rows={[
+              ["Card", cardType === "DEBIT" ? "Debit card" : "Heritage Rewards Visa® credit card"],
+              ["Name on the card", cardholderName.trim().toUpperCase()],
+              ...(cardType === "DEBIT"
+                ? ([["Spends from", account?.name ?? "—"]] as Array<[string, React.ReactNode]>)
+                : ([["Credit limit requested", limitNum > 0 ? formatAmount(limitNum, { currency: "USD" }) : "Our decision"]] as Array<[string, React.ReactNode]>)),
+              ["Design", DESIGNS.find((d) => d.value === cardTier)?.label ?? cardTier],
+              ["Delivery address", billingAddress.trim() || "Address on file"],
+            ]}
+          />
+          {submitError && <Alert variant="danger" title="Your request wasn't sent">{submitError}</Alert>}
+        </>
+      )}
 
-          {step === 3 && (
-            <>
-              <Button variant="ghost" onClick={() => setStep(2)} icon={<ArrowLeft className="w-4 h-4" />} disabled={loading}>
-                Back
-              </Button>
-              <Button onClick={handleSubmit} disabled={loading}>
-                {loading ? (
-                  <>
-                    <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Submitting Application...
-                  </>
-                ) : (
-                  "Submit Card Application"
-                )}
-              </Button>
-            </>
-          )}
-
-          {step === 4 && (
-            <Button className="w-full" onClick={handleClose}>
-              Return to Cards Center
-            </Button>
-          )}
-        </div>
-      </DialogContent>
-    </Dialog>
+      {step === 3 && result && (
+        <FlowDone title="Request sent">
+          <p className="text-body text-fg-muted">We'll review it and let you know the outcome. You can follow its progress on this page.</p>
+        </FlowDone>
+      )}
+    </FlowDialog>
   );
 }

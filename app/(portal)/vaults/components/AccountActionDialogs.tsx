@@ -1,14 +1,13 @@
 "use client";
 
 import * as React from "react";
-import { ArrowLeft, CheckCircle2, Globe2, Landmark, PiggyBank, TrendingUp, Wallet } from "lucide-react";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { ArrowLeft, Globe2, Landmark, PiggyBank, TrendingUp, Wallet } from "lucide-react";
+import { FlowDialog, FlowDone, ReviewList } from "@/components/ui/flow-dialog";
 import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { NativeSelect } from "@/components/ui/native-select";
-import { Stepper } from "@/components/ui/stepper";
 import { Alert } from "@/components/ui/alert";
 import { cn } from "@/lib/utils";
 import { formatAmount, maskAccountNumber } from "@/lib/format";
@@ -48,48 +47,6 @@ function accountLabel(a: DialogAccount) {
 }
 
 const errorMessage = userFacingError;
-
-// ─── Shared pieces ──────────────────────────────────────────────────────────
-
-function FlowDialog({
-  open,
-  onClose,
-  title,
-  description,
-  steps,
-  step,
-  footer,
-  children,
-  busy = false,
-}: {
-  open: boolean;
-  onClose: () => void;
-  title: string;
-  description: string;
-  steps: string[];
-  step: number;
-  footer: React.ReactNode;
-  children: React.ReactNode;
-  busy?: boolean;
-}) {
-  return (
-    <Dialog open={open} onOpenChange={(o) => !o && !busy && onClose()}>
-      <DialogContent className="gap-0 p-0 sm:max-w-2xl">
-        <DialogHeader className="border-b border-line p-6 pb-5">
-          <DialogTitle>{title}</DialogTitle>
-          <DialogDescription>{description}</DialogDescription>
-          <Stepper steps={steps} current={step} className="pt-3" />
-        </DialogHeader>
-        <div className="flex flex-col gap-5 p-6" aria-busy={busy}>
-          {children}
-        </div>
-        <div className="flex flex-col-reverse gap-2 border-t border-line p-4 sm:flex-row sm:items-center sm:justify-between sm:px-6">
-          {footer}
-        </div>
-      </DialogContent>
-    </Dialog>
-  );
-}
 
 /** Account-type picker: native radios drawn as cards. Held types are disabled. */
 function TypePicker({
@@ -143,33 +100,6 @@ function TypePicker({
         })}
       </div>
     </fieldset>
-  );
-}
-
-function ReviewList({ rows }: { rows: Array<[string, React.ReactNode]> }) {
-  return (
-    <dl className="divide-y divide-line rounded-surface border border-line">
-      {rows.map(([term, value]) => (
-        <div key={term} className="flex flex-col gap-0.5 px-4 py-3 sm:flex-row sm:justify-between sm:gap-6">
-          <dt className="text-small text-fg-muted">{term}</dt>
-          <dd className="text-body text-fg sm:text-right">{value}</dd>
-        </div>
-      ))}
-    </dl>
-  );
-}
-
-function Done({ title, children }: { title: string; children?: React.ReactNode }) {
-  const ref = React.useRef<HTMLHeadingElement>(null);
-  React.useEffect(() => ref.current?.focus(), []);
-  return (
-    <div className="flex flex-col items-center gap-3 text-center">
-      <CheckCircle2 className="size-10 text-success" aria-hidden="true" />
-      <h3 ref={ref} tabIndex={-1} className="font-sans text-h3 text-fg focus:outline-none">
-        {title}
-      </h3>
-      {children}
-    </div>
   );
 }
 
@@ -347,7 +277,7 @@ export function OpenAccountDialog({ isOpen, onClose, existingAccounts = [], onSu
       )}
 
       {step === 3 && created && (
-        <Done title="Your account is open">
+        <FlowDone title="Your account is open">
           <ReviewList
             rows={[
               ["Account number", maskAccountNumber(created.account?.accountNumber)],
@@ -356,7 +286,7 @@ export function OpenAccountDialog({ isOpen, onClose, existingAccounts = [], onSu
             ]}
           />
           {created.message && <p className="text-small text-fg-muted">{created.message}</p>}
-        </Done>
+        </FlowDone>
       )}
     </FlowDialog>
   );
@@ -514,9 +444,9 @@ export function LinkExternalAccountDialog({ isOpen, onClose, existingAccounts = 
       )}
 
       {step === 3 && result && (
-        <Done title="Account linked">
+        <FlowDone title="Account linked">
           {result.message && <p className="text-body text-fg-muted">{result.message}</p>}
-        </Done>
+        </FlowDone>
       )}
     </FlowDialog>
   );
@@ -667,11 +597,11 @@ export function AccountSwapDialog({ isOpen, onClose, existingAccounts, preselect
       )}
 
       {step === 2 && result && (
-        <Done title="Request sent">
+        <FlowDone title="Request sent">
           <p className="text-body text-fg-muted">
             {result.message || "We'll review your request and let you know the outcome. Your current account stays open until then."}
           </p>
-        </Done>
+        </FlowDone>
       )}
     </FlowDialog>
   );
