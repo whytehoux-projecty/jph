@@ -2,12 +2,13 @@
  * Config-driven schema for the Transfers page.
  *
  * Everything the UI renders (transfer types, first question, gated fields,
- * validation, info panel copy, demo fees) is described here as data, so the
- * admin portal can later add/edit/remove methods and fields by serving an
- * object of the same shape (e.g. from TransferMethodConfig.formConfig)
- * without touching any JSX.
+ * validation, help copy) is described here as data, so the admin portal can
+ * later add/edit/remove methods and fields by serving an object of the same
+ * shape (e.g. from TransferMethodConfig.formConfig) without touching JSX.
  *
- * All limits, fees and processing times are DEMO values.
+ * Limits and processing times are NOT defined here: they come from
+ * TransferMethodConfig in the database (see app/(portal)/transfer/page.tsx).
+ * No fees are defined: submitTransfer does not charge any.
  */
 import type { MaskName, ValidatorName } from "./validators";
 
@@ -106,13 +107,11 @@ export interface TransferTypeDef {
 
 /* ---------------------------- shared pieces ---------------------------- */
 
-const money = (n: number) => `$${n.toLocaleString("en-US")}`;
-
 const fromAccount = (label = "From account"): FieldDef => ({
   name: "fromAccountId",
   label,
   type: "account-select",
-  help: "Choose the account the funds leave from.",
+  help: "The account the money is taken from.",
 });
 
 const amountField = (extra: Partial<FieldDef> = {}): FieldDef => ({
@@ -143,7 +142,7 @@ const timingFields = (): FieldDef[] => [
     type: "date",
     validate: "futureDate",
     showIf: { field: "timing", equals: "scheduled" },
-    help: "Scheduled requests are queued for approval on this date (demo).",
+    help: "Our payments team will send it on or after this date.",
   },
 ];
 
@@ -196,21 +195,10 @@ const COUNTRY_OPTIONS: Option[] = [
   { value: "NG", label: "Nigeria" },
 ];
 
-/** Indicative demo FX rates (USD base). */
-export const DEMO_RATES: Record<string, number> = {
-  USD: 1,
-  EUR: 0.92,
-  GBP: 0.79,
-  CAD: 1.36,
-  AUD: 1.52,
-  CHF: 0.88,
-  JPY: 151.4,
-  SGD: 1.34,
-  AED: 3.67,
-  INR: 83.2,
-};
-
-const CURRENCY_OPTIONS: Option[] = Object.keys(DEMO_RATES).map((c) => ({ value: c, label: c }));
+const CURRENCY_OPTIONS: Option[] = ["USD", "EUR", "GBP", "CAD", "AUD", "CHF", "JPY", "SGD", "AED", "INR"].map((c) => ({
+  value: c,
+  label: c,
+}));
 
 const internationalFields: FieldDef[] = [
   {
@@ -271,14 +259,14 @@ const internationalFields: FieldDef[] = [
     help: "Only fill this if the beneficiary bank asked for one.",
   },
   fromAccount(),
-  amountField({ help: "Amount debited from your account, in USD." }),
+  amountField({ help: "The amount taken from your account, in US dollars." }),
   {
     name: "currency",
     label: "Beneficiary receives in",
     type: "select",
     options: CURRENCY_OPTIONS,
     defaultValue: "USD",
-    help: "Indicative demo rate shown on review. Final rate is set at approval.",
+    help: "The currency the beneficiary's account is held in.",
   },
   {
     name: "purpose",
@@ -312,22 +300,6 @@ const internationalFields: FieldDef[] = [
 
 /* ------------------------------ digital wallet ------------------------------ */
 
-export const NETWORK_FEES: Record<string, number> = {
-  erc20: 4.5,
-  trc20: 1,
-  polygon: 0.1,
-  solana: 0.05,
-  base: 0.1,
-};
-
-const DEMO_DEPOSIT_ADDRESSES: Record<string, string> = {
-  erc20: "0xDEM0000000000000000000000000000000AUR001",
-  trc20: "TDemoAurumVaultDepositAddr0000000001",
-  polygon: "0xDEM0000000000000000000000000000000AUR002",
-  solana: "DemoAurumVau1tDepositAddressSo1ana0000001",
-  base: "0xDEM0000000000000000000000000000000AUR003",
-};
-
 const NETWORK_LABEL: Record<string, string> = {
   erc20: "Ethereum (ERC-20)",
   trc20: "Tron (TRC-20)",
@@ -338,33 +310,18 @@ const NETWORK_LABEL: Record<string, string> = {
 
 const walletFields = (networks: string[]): FieldDef[] => [
   {
-    name: "direction",
-    label: "Which direction?",
-    type: "radio",
-    gate: true,
-    options: [
-      { value: "to_wallet", label: "Bank to wallet", description: "Send stablecoins from your account to a wallet." },
-      { value: "to_bank", label: "Wallet to bank", description: "Fund your account by sending stablecoins in." },
-    ],
-  },
-  {
     name: "network",
     label: "Network",
     type: "radio",
     gate: true,
-    help: "The wallet must support the same network, or funds can be lost.",
-    options: networks.map((n) => ({
-      value: n,
-      label: NETWORK_LABEL[n],
-      description: `Network fee about ${money(NETWORK_FEES[n])} (demo).`,
-    })),
+    help: "The receiving wallet must support this network, or the money can be lost.",
+    options: networks.map((n) => ({ value: n, label: NETWORK_LABEL[n] })),
   },
   fromAccount("Bank account"),
   {
     name: "walletOwnership",
     label: "Whose wallet is this?",
     type: "radio",
-    showIf: { field: "direction", equals: "to_wallet" },
     options: [
       { value: "own", label: "My own wallet" },
       { value: "third", label: "Someone else's wallet" },
@@ -375,7 +332,7 @@ const walletFields = (networks: string[]): FieldDef[] => [
     label: "Wallet owner's full name",
     type: "text",
     validate: "name",
-    help: "Required for third-party wallets (Travel Rule).",
+    help: "Required by law for payments to someone else's wallet.",
     showIf: { field: "walletOwnership", equals: "third" },
   },
   {
@@ -384,93 +341,37 @@ const walletFields = (networks: string[]): FieldDef[] => [
     type: "text",
     validate: "wallet",
     sensitive: true,
-    showIf: { field: "direction", equals: "to_wallet" },
   },
   {
     name: "walletAddressConfirm",
     label: "Re-enter wallet address",
     type: "text",
     confirmOf: "walletAddress",
-    showIf: { field: "direction", equals: "to_wallet" },
-    help: "Type it again (do not paste) to confirm there are no mistakes.",
+    help: "Type it again rather than pasting, so any mistake is caught.",
   },
-  {
-    name: "depositNoticeErc20",
-    label: "Your deposit address",
-    type: "notice",
-    content: `Send only on the selected network to this DEMO address: ${DEMO_DEPOSIT_ADDRESSES.erc20}`,
-    showIf: { field: "network", equals: "erc20" },
-  },
-  {
-    name: "depositNoticeTrc20",
-    label: "Your deposit address",
-    type: "notice",
-    content: `Send only on the selected network to this DEMO address: ${DEMO_DEPOSIT_ADDRESSES.trc20}`,
-    showIf: { field: "network", equals: "trc20" },
-  },
-  {
-    name: "depositNoticePolygon",
-    label: "Your deposit address",
-    type: "notice",
-    content: `Send only on the selected network to this DEMO address: ${DEMO_DEPOSIT_ADDRESSES.polygon}`,
-    showIf: { field: "network", equals: "polygon" },
-  },
-  {
-    name: "depositNoticeSolana",
-    label: "Your deposit address",
-    type: "notice",
-    content: `Send only on the selected network to this DEMO address: ${DEMO_DEPOSIT_ADDRESSES.solana}`,
-    showIf: { field: "network", equals: "solana" },
-  },
-  {
-    name: "depositNoticeBase",
-    label: "Your deposit address",
-    type: "notice",
-    content: `Send only on the selected network to this DEMO address: ${DEMO_DEPOSIT_ADDRESSES.base}`,
-    showIf: { field: "network", equals: "base" },
-  },
-  amountField({ stableEstimate: true, label: "Amount (USD value)" }),
+  amountField({ label: "Amount (US dollars)" }),
   {
     name: "exchangeRef",
-    label: "Exchange deposit reference (optional)",
+    label: "Exchange deposit reference",
     type: "text",
     required: false,
     maxLength: 64,
-    help: "Only needed if the receiving exchange requires a reference for deposits.",
-    showIf: { field: "direction", equals: "to_wallet" },
+    help: "Only needed if the receiving exchange asks for one.",
   },
-  {
-    name: "txHash",
-    label: "Transaction hash (optional)",
-    type: "text",
-    required: false,
-    maxLength: 90,
-    showIf: { field: "direction", equals: "to_bank" },
-  },
-  {
-    ...ackField("ackAddress", "I have verified the wallet address and network. I understand crypto transfers are irreversible."),
-    showIf: { field: "direction", equals: "to_wallet" },
-  },
-  {
-    ...ackField("ackNetwork", "I will send only this stablecoin on the selected network. Other assets or networks may be lost."),
-    showIf: { field: "direction", equals: "to_bank" },
-  },
+  ackField("ackAddress", "I have checked the wallet address and network. I understand a crypto transfer can't be reversed once sent."),
 ];
 
 const walletVariant = (asset: string, networks: string[]): VariantDef => ({
   label: asset,
   methodId: "crypto",
-  transactionType: {
-    field: "direction",
-    map: { to_wallet: "CRYPTO_WITHDRAWAL", to_bank: "CRYPTO_DEPOSIT" },
-  },
-  perTransferLimit: 10000,
-  fee: { flat: 0, pct: 0.005, flatBy: { field: "network", map: NETWORK_FEES } },
+  transactionType: "CRYPTO_WITHDRAWAL",
+  perTransferLimit: 0,
+  fee: { flat: 0, pct: 0 },
   info: {
-    processing: "Usually within minutes after approval",
-    limits: `Up to ${money(10000)} per transfer`,
-    fees: "0.5% service fee + network fee",
-    note: `${asset} is pegged 1:1 to the US dollar. Estimates are demo values.`,
+    processing: "",
+    limits: "",
+    fees: "",
+    note: `${asset} transfers can't be reversed once sent.`,
   },
   fields: walletFields(networks),
 });
@@ -493,13 +394,13 @@ const achFields = (extra: FieldDef[] = [], instant = false): FieldDef[] => [
 export const TRANSFER_TYPES: TransferTypeDef[] = [
   {
     id: "internal",
-    title: "Internal Transfers",
+    title: "Within Heritage Trust",
     description: "Between your accounts or to another customer",
     illustration: "internal",
     gate: {
       name: "destination",
       label: "Where is the money going?",
-      help: "Start by choosing the destination.",
+      help: "Choose where the money is going.",
       options: [
         { value: "own", label: "My own accounts", description: "Move money between your accounts." },
         { value: "other", label: "Another customer", description: "Pay someone who banks with us." },
@@ -515,9 +416,9 @@ export const TRANSFER_TYPES: TransferTypeDef[] = [
         label: "Own accounts",
         methodId: "internal",
         transactionType: "LOCAL_TRANSFER",
-        perTransferLimit: 50000,
+        perTransferLimit: 0,
         fee: { flat: 0, pct: 0 },
-        info: { processing: "Instant after approval", limits: `Up to ${money(50000)} per transfer`, fees: "No fee" },
+        info: { processing: "", limits: "", fees: "" },
         fields: [
           fromAccount(),
           { name: "toAccountId", label: "To account", type: "account-select", excludeFrom: "fromAccountId", help: "Must be different from the source account." },
@@ -530,9 +431,9 @@ export const TRANSFER_TYPES: TransferTypeDef[] = [
         label: "Another customer",
         methodId: "internal",
         transactionType: "LOCAL_TRANSFER",
-        perTransferLimit: 50000,
+        perTransferLimit: 0,
         fee: { flat: 0, pct: 0 },
-        info: { processing: "Instant after approval", limits: `Up to ${money(50000)} per transfer`, fees: "No fee" },
+        info: { processing: "", limits: "", fees: "" },
         fields: [
           fromAccount(),
           { name: "toAccountNumber", label: "Recipient account number", type: "account-lookup", validate: "account", mask: "digits17", help: "We will show the account holder's masked name." },
@@ -545,18 +446,18 @@ export const TRANSFER_TYPES: TransferTypeDef[] = [
   },
   {
     id: "wire",
-    title: "Wire / ACH Transfers",
-    description: "ACH, domestic wire, international SWIFT, FedNow",
+    title: "To another bank",
+    description: "ACH, domestic wire, international wire or FedNow",
     illustration: "wire",
     gate: {
       name: "method",
       label: "Which transfer method?",
-      help: "Pick the rail first. Each one asks for different details.",
+      help: "Each method asks for different details.",
       options: [
-        { value: "ach", label: "ACH", description: "Low-cost US bank transfer, 1 to 3 days." },
-        { value: "wire_domestic", label: "Domestic wire", description: "Same-day US wire, irreversible." },
-        { value: "wire_international", label: "International wire (SWIFT)", description: "Send abroad through SWIFT." },
-        { value: "fednow", label: "FedNow", description: "Instant US payment, 24/7." },
+        { value: "ach", label: "ACH", description: "US bank transfer, usually 1 to 3 business days." },
+        { value: "wire_domestic", label: "Domestic wire", description: "US wire, usually the same business day. Can't be recalled." },
+        { value: "wire_international", label: "International wire (SWIFT)", description: "To a bank account outside the US." },
+        { value: "fednow", label: "FedNow", description: "Instant US payment, any day, any time." },
       ],
     },
     about: {
@@ -569,9 +470,9 @@ export const TRANSFER_TYPES: TransferTypeDef[] = [
         label: "ACH",
         methodId: "ach",
         transactionType: "INT_WIRE",
-        perTransferLimit: 50000,
+        perTransferLimit: 0,
         fee: { flat: 0, pct: 0 },
-        info: { processing: "1 to 3 business days (same-day available)", limits: `Up to ${money(50000)} per transfer`, fees: "Free standard, $5 same-day", note: "Same-day ACH has a lower per-payment demo limit." },
+        info: { processing: "", limits: "", fees: "" },
         fields: [
           ...achFields([
             { name: "entryClass", label: "Payment type", type: "radio", defaultValue: "PPD", options: [
@@ -579,8 +480,8 @@ export const TRANSFER_TYPES: TransferTypeDef[] = [
               { value: "CCD", label: "Business (CCD)" },
             ] },
             { name: "speed", label: "Speed", type: "radio", defaultValue: "standard", options: [
-              { value: "standard", label: "Standard", description: "1 to 3 business days, free." },
-              { value: "same_day", label: "Same-day", description: "Cut-off 2:45 PM ET, $5 fee." },
+              { value: "standard", label: "Standard", description: "Usually 1 to 3 business days." },
+              { value: "same_day", label: "Same day", description: "Arrives the same business day if sent before the daily cut-off." },
             ] },
           ]),
         ],
@@ -589,9 +490,9 @@ export const TRANSFER_TYPES: TransferTypeDef[] = [
         label: "Domestic wire",
         methodId: "wire_domestic",
         transactionType: "INT_WIRE",
-        perTransferLimit: 100000,
-        fee: { flat: 25, pct: 0 },
-        info: { processing: "Same business day if before 4:00 PM ET", limits: `Up to ${money(100000)} per transfer`, fees: "$25 per wire", note: "Wires cannot be recalled once sent." },
+        perTransferLimit: 0,
+        fee: { flat: 0, pct: 0 },
+        info: { processing: "", limits: "", fees: "", note: "A wire can't be recalled once it has been sent." },
         fields: [
           { name: "recipientName", label: "Beneficiary full name", type: "text", validate: "name", maxLength: 70 },
           { name: "addressStreet", label: "Beneficiary street address", type: "text", maxLength: 70 },
@@ -619,18 +520,18 @@ export const TRANSFER_TYPES: TransferTypeDef[] = [
         label: "International wire",
         methodId: "wire_international",
         transactionType: "INT_WIRE",
-        perTransferLimit: 100000,
-        fee: { flat: 45, pct: 0 },
-        info: { processing: "1 to 5 business days", limits: `Up to ${money(100000)} per transfer`, fees: "From $45, plus correspondent charges", note: "Indicative FX rates only. Payments are screened for compliance." },
+        perTransferLimit: 0,
+        fee: { flat: 0, pct: 0 },
+        info: { processing: "", limits: "", fees: "", note: "International payments are screened for compliance and can take longer." },
         fields: internationalFields,
       },
       fednow: {
         label: "FedNow",
         methodId: "fednow",
         transactionType: "INT_WIRE",
-        perTransferLimit: 25000,
-        fee: { flat: 0.5, pct: 0 },
-        info: { processing: "Instant, 24/7/365", limits: `Up to ${money(25000)} per payment (demo)`, fees: "$0.50 per payment", note: "Instant payments cannot be cancelled or recalled." },
+        perTransferLimit: 0,
+        fee: { flat: 0, pct: 0 },
+        info: { processing: "", limits: "", fees: "", note: "Instant payments can't be cancelled or recalled." },
         fields: [
           ...achFields([], true),
           ackField("ackInstant", "I understand FedNow payments are instant and final once sent."),
@@ -640,22 +541,22 @@ export const TRANSFER_TYPES: TransferTypeDef[] = [
   },
   {
     id: "wallet",
-    title: "Digital Wallet Transfers",
-    description: "USDT and USDC stablecoin transfers",
+    title: "To a crypto wallet",
+    description: "Send USDT or USDC to a wallet",
     illustration: "wallet",
     gate: {
       name: "asset",
       label: "Which stablecoin?",
-      help: "Both are pegged 1:1 to the US dollar.",
+      help: "Both are designed to hold a value of one US dollar.",
       options: [
         { value: "usdt", label: "USDT", description: "Tether USD" },
         { value: "usdc", label: "USDC", description: "USD Coin" },
       ],
     },
     about: {
-      what: "Move value between your account and a stablecoin wallet. Stablecoins hold a steady dollar value on public blockchains.",
-      how: "Pick the coin, direction and network. The address is checked against that network's format and must be entered twice.",
-      steps: ["Choose the stablecoin", "Choose direction and network", "Verify address and amount", "Confirm with your PIN"],
+      what: "Send US dollar stablecoins from your account to a wallet you or someone else controls.",
+      how: "Choose the coin and network. The address is checked against that network's format and must be entered twice.",
+      steps: ["Choose the stablecoin", "Choose the network", "Check the address and amount", "Confirm with your PIN"],
     },
     variants: {
       usdt: walletVariant("USDT", ["erc20", "trc20", "polygon", "solana"]),
@@ -664,8 +565,8 @@ export const TRANSFER_TYPES: TransferTypeDef[] = [
   },
   {
     id: "p2p",
-    title: "P2P Services",
-    description: "Zelle, Cash App and Venmo",
+    title: "Zelle, Cash App or Venmo",
+    description: "Pay friends and family",
     illustration: "p2p",
     gate: {
       name: "service",
@@ -686,9 +587,9 @@ export const TRANSFER_TYPES: TransferTypeDef[] = [
         label: "Zelle",
         methodId: "zelle",
         transactionType: "INT_WIRE",
-        perTransferLimit: 2500,
+        perTransferLimit: 0,
         fee: { flat: 0, pct: 0 },
-        info: { processing: "Minutes after approval", limits: `Up to ${money(2500)} per payment`, fees: "No fee", note: "Only pay people you know and trust." },
+        info: { processing: "", limits: "", fees: "", note: "Only pay people you know and trust." },
         fields: [
           { name: "zelleIdentifier", label: "Recipient email or mobile number", type: "text", validate: "emailOrPhone", placeholder: "name@email.com or 555 123 4567" },
           { name: "recipientName", label: "Recipient name", type: "text", validate: "name", help: "As it appears on their Zelle profile." },
@@ -701,9 +602,9 @@ export const TRANSFER_TYPES: TransferTypeDef[] = [
         label: "Cash App",
         methodId: "cashapp",
         transactionType: "INT_WIRE",
-        perTransferLimit: 1000,
+        perTransferLimit: 0,
         fee: { flat: 0, pct: 0 },
-        info: { processing: "Minutes after approval", limits: `Up to ${money(1000)} per payment`, fees: "No fee", note: "Simulated service for demonstration." },
+        info: { processing: "", limits: "", fees: "", note: "Only pay people you know and trust." },
         fields: [
           { name: "cashtag", label: "Recipient $Cashtag", type: "text", validate: "cashtag", placeholder: "$username" },
           { name: "recipientName", label: "Recipient name", type: "text", validate: "name" },
@@ -716,9 +617,9 @@ export const TRANSFER_TYPES: TransferTypeDef[] = [
         label: "Venmo",
         methodId: "venmo",
         transactionType: "INT_WIRE",
-        perTransferLimit: 1000,
+        perTransferLimit: 0,
         fee: { flat: 0, pct: 0 },
-        info: { processing: "Minutes after approval", limits: `Up to ${money(1000)} per payment`, fees: "No fee", note: "Simulated service for demonstration." },
+        info: { processing: "", limits: "", fees: "", note: "Only pay people you know and trust." },
         fields: [
           { name: "venmoUsername", label: "Recipient @username", type: "text", validate: "venmo", placeholder: "@username" },
           { name: "recipientName", label: "Recipient name", type: "text", validate: "name" },
@@ -760,10 +661,3 @@ export const resolveTransactionType = (v: VariantDef, values: Record<string, str
   typeof v.transactionType === "string"
     ? v.transactionType
     : v.transactionType.map[values[v.transactionType.field]] ?? "INT_WIRE";
-
-export function estimateFee(v: VariantDef, values: Record<string, string>, amount: number) {
-  let fee = v.fee.flat + amount * v.fee.pct;
-  if (v.fee.flatBy) fee += v.fee.flatBy.map[values[v.fee.flatBy.field]] ?? 0;
-  if (values.speed === "same_day") fee += 5;
-  return Math.round(fee * 100) / 100;
-}

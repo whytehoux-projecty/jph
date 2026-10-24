@@ -1,31 +1,30 @@
 "use client";
 
 import * as React from "react";
+import Link from "next/link";
+import { Card } from "@/components/ui/Card";
+import { StatusPill, type Status } from "@/components/ui/badge";
+import { Skeleton } from "@/components/ui/skeleton";
 import { getRecentTransferRequests, getTransferStatuses } from "@/app/actions/transfer";
-import { cn } from "@/lib/utils";
-import { fmtMoney } from "@/lib/transfer-forms/validators";
+import { formatAmount } from "@/lib/format";
+import { LocalDate } from "@/components/dashboard/LocalDate";
 
 const POLL_MS = 10_000;
 
-const STATUS_STYLES: Record<string, { label: string; cls: string }> = {
-  PENDING: { label: "Pending approval", cls: "bg-warning-bg text-warning" },
-  APPROVED: { label: "Approved", cls: "bg-success-bg text-success" },
-  COMPLETED: { label: "Completed", cls: "bg-success-bg text-success" },
-  REJECTED: { label: "Rejected", cls: "bg-error-bg text-error" },
-  CANCELLED: { label: "Cancelled", cls: "bg-paper-200 text-ink-700" },
+const STATUS: Record<string, { label: string; status: Status }> = {
+  PENDING: { label: "Being checked", status: "warning" },
+  APPROVED: { label: "Approved", status: "success" },
+  COMPLETED: { label: "Completed", status: "success" },
+  REJECTED: { label: "Declined", status: "danger" },
+  CANCELLED: { label: "Cancelled", status: "neutral" },
 };
 
-export function StatusBadge({ status }: { status: string }) {
-  const s = STATUS_STYLES[status] ?? { label: status, cls: "bg-paper-200 text-ink-700" };
-  return (
-    <span className={cn("inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold", s.cls)}>
-      {status === "PENDING" && <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-current" />}
-      {s.label}
-    </span>
-  );
+function TransferStatus({ status }: { status: string }) {
+  const s = STATUS[status] ?? { label: status.charAt(0) + status.slice(1).toLowerCase(), status: "neutral" as Status };
+  return <StatusPill status={s.status}>{s.label}</StatusPill>;
 }
 
-/** Polls the server every 10s while a request is still pending. */
+/** Polls the server every 10 s while a request is still pending. */
 export function LiveStatusBadge({ reference, initialStatus }: { reference: string; initialStatus: string }) {
   const [status, setStatus] = React.useState(initialStatus);
 
@@ -44,7 +43,7 @@ export function LiveStatusBadge({ reference, initialStatus }: { reference: strin
 
   return (
     <span aria-live="polite">
-      <StatusBadge status={status} />
+      <TransferStatus status={status} />
     </span>
   );
 }
@@ -61,25 +60,28 @@ interface Recent {
 }
 
 const METHOD_LABELS: Record<string, string> = {
-  internal: "Internal",
+  internal: "Within Heritage Trust",
   ach: "ACH",
   wire_domestic: "Domestic wire",
   wire_international: "International wire",
   fednow: "FedNow",
-  crypto: "Digital wallet",
+  crypto: "Crypto wallet",
   zelle: "Zelle",
   cashapp: "Cash App",
   venmo: "Venmo",
 };
 
-/** Recent transfer requests; refreshes itself while any are pending. */
+/** The customer's latest transfer requests; refreshes itself while any are pending. */
 export function RecentRequests({ refreshKey = 0 }: { refreshKey?: number }) {
   const [items, setItems] = React.useState<Recent[] | null>(null);
+  const [failed, setFailed] = React.useState(false);
 
   const load = React.useCallback(async () => {
     try {
       setItems(await getRecentTransferRequests(5));
+      setFailed(false);
     } catch {
+      setFailed(true);
       setItems((prev) => prev ?? []);
     }
   }, []);
@@ -95,34 +97,58 @@ export function RecentRequests({ refreshKey = 0 }: { refreshKey?: number }) {
     return () => clearInterval(id);
   }, [hasPending, load]);
 
-  if (!items || items.length === 0) return null;
+  if (items === null) {
+    return (
+      <Card aria-busy="true" className="p-5">
+        <Skeleton className="h-5 w-48" />
+        <Skeleton className="mt-4 h-4 w-full" />
+        <Skeleton className="mt-3 h-4 w-full" />
+      </Card>
+    );
+  }
+  if (items.length === 0 && !failed) return null;
 
   return (
-    <section aria-labelledby="recent-requests" className="rounded border border-paper-300 bg-paper-50">
-      <div className="flex items-center justify-between border-b border-paper-200 px-5 py-3">
-        <h2 id="recent-requests" className="font-display text-base font-semibold text-ink-900">
-          Recent requests
+    <section aria-labelledby="recent-requests">
+      <div className="mb-3 flex items-center justify-between gap-4">
+        <h2 id="recent-requests" className="font-sans text-h4 text-fg">
+          Your recent transfers
         </h2>
-        {hasPending && <span className="text-xs text-ink-500">Updating live</span>}
+        {hasPending && <span className="text-small text-fg-muted">Status updates automatically</span>}
       </div>
-      <ul className="divide-y divide-paper-200" aria-live="polite">
-        {items.map((i) => (
-          <li key={i.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 text-small">
-            <div className="min-w-0">
-              <p className="truncate font-medium text-ink-900">
-                {METHOD_LABELS[i.methodId ?? ""] ?? "Transfer"} · {i.description}
-              </p>
-              <p className="text-xs text-ink-500">
-                <span className="font-mono">{i.reference}</span> · {new Date(i.createdAt).toLocaleString()}
-              </p>
-            </div>
-            <div className="flex items-center gap-3">
-              <span className="font-mono tabular-nums text-ink-900">{fmtMoney(i.amount, i.currency || "USD")}</span>
-              <StatusBadge status={i.status} />
-            </div>
-          </li>
-        ))}
-      </ul>
+      <Card>
+        {failed ? (
+          <p className="p-5 text-small text-fg-muted">
+            We couldn't load your recent transfers. You can find them in{" "}
+            <Link href="/activities" className="font-semibold text-fg-action underline underline-offset-[3px]">
+              Activity
+            </Link>
+            .
+          </p>
+        ) : (
+          <ul className="divide-y divide-line" aria-live="polite">
+            {items.map((i) => (
+              <li key={i.id} className="flex flex-wrap items-center justify-between gap-3 px-5 py-4">
+                <div className="min-w-0">
+                  <p className="truncate text-body text-fg">
+                    {i.description || (i.methodId && METHOD_LABELS[i.methodId]) || "Transfer"}
+                  </p>
+                  <p className="text-caption text-fg-muted">
+                    {i.methodId && METHOD_LABELS[i.methodId] ? `${METHOD_LABELS[i.methodId]} · ` : ""}
+                    <LocalDate iso={i.createdAt} />
+                    {" · "}
+                    <span className="font-code">{i.reference}</span>
+                  </p>
+                </div>
+                <div className="flex items-center gap-3">
+                  <span className="tabular-nums text-fg">{formatAmount(i.amount, { currency: i.currency || "USD" })}</span>
+                  <TransferStatus status={i.status} />
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
     </section>
   );
 }
