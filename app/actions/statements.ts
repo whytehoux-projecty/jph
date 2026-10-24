@@ -50,7 +50,7 @@ export async function getStatementDetails(id: string) {
   const account = await prisma.account.findUnique({ where: { id: statement.accountId } });
   if (!account || account.userId !== session.user.id) throw new Error('Unauthorized');
 
-  // In a real app, this might generate a PDF or fetch pre-generated PDF blob from S3.
-  // For demo, we just return the metadata to the client which can render it.
+  // The statement view (app/(portal)/statements/[id]) renders the period's
+  // posted transactions; no stored PDF is involved.
   return statement;
 }

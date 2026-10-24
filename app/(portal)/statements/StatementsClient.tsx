@@ -1,195 +1,156 @@
-'use client';
+"use client";
 
+import { useMemo, useState } from "react";
+import Link from "next/link";
+import { FilePlus2, FileText } from "lucide-react";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Card } from "@/components/ui/Card";
+import { Button } from "@/components/ui/Button";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FormField } from "@/components/ui/form-field";
+import { NativeSelect } from "@/components/ui/native-select";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { CreateStatementDialog } from "./CreateStatementDialog";
 
-import { useState, useEffect } from 'react';
-import { toast } from '@/lib/toast';
-import {
-    Download,
-    FileText,
-    Calendar,
-    Filter,
-    RefreshCw,
-    Search
-} from 'lucide-react';
-
-import { Button } from '@/components/ui/Button';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/Card';
-import {
-    Table,
-    TableBody,
-    TableCell,
-    TableHead,
-    TableHeader,
-    TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
-import { VintageIcon } from '@/components/ui/vintage-icon';
-
-export default function StatementsClient({ initialStatements, initialAccounts }: { initialStatements: any[], initialAccounts: any[] }) {
-    const [statements, setStatements] = useState<any[]>(initialStatements);
-    const [accounts, setAccounts] = useState<any[]>(initialAccounts);
-    const [loading, setLoading] = useState(false);
-    const [generating, setGenerating] = useState(false);
-
-    useEffect(() => {
-        // Data is loaded via Server Component props
-    }, []);
-
-    const fetchStatements = async () => {
-        // Handle mock fetching if needed
-    };
-
-    const handleDownload = async (id: string, filename: string) => {
-        // Mock download if API might fail
-        try {
-            await new Promise(resolve => setTimeout(resolve, 500));
-            const blob = new Blob(["Simulated PDF Content"], { type: "application/pdf" });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            document.body.appendChild(a);
-            a.click();
-            window.URL.revokeObjectURL(url);
-            document.body.removeChild(a);
-        } catch (error) {
-            console.error('Download failed', error);
-            toast.error({ title: 'Download failed', description: 'Please try again.' });
-        }
-    };
-
-    const handleGenerate = async () => {
-        setGenerating(true);
-        try {
-            if (accounts.length === 0) {
-                toast.warn({ title: 'No accounts found', description: 'Open an account before generating statements.' });
-                return;
-            }
-
-            toast.info({ title: 'Statement generation is being upgraded.', description: 'Please try again shortly.' });
-            // fetchStatements(); // Refresh list
-        } finally {
-            setGenerating(false);
-        }
-    };
-
-    if (loading) {
-        return (
-            <div className="flex flex-col items-center justify-center min-h-[50vh] space-y-4">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-pine-700"></div>
-                <div className="text-muted-foreground animate-pulse">Retrieving archived statements...</div>
-            </div>
-        );
-    }
-
-    return (
-        <div className="space-y-8 max-w-6xl mx-auto p-4 animate-fade-in-up">
-
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
-                <div>
-                    <h1 className="text-3xl font-display font-bold text-ink-900">Account Statements</h1>
-                    <p className="text-muted-foreground mt-1">Access your monthly financial records securely.</p>
-                </div>
-                <Button
-                    onClick={handleGenerate}
-                    disabled={generating}
-                    variant="primary"
-                    icon={generating ? <RefreshCw className="w-4 h-4 animate-spin" /> : <FileText className="w-4 h-4" />}
-                >
-                    {generating ? 'Processing...' : 'Generate New Statement'}
-                </Button>
-            </div>
-
-            <Card className="border-paper-200 shadow-none">
-                <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-4">
-                    <div className="space-y-1">
-                        <CardTitle className="text-base font-medium">Document History</CardTitle>
-                        <CardDescription>All generated statements for the past 12 months</CardDescription>
-                    </div>
-                </CardHeader>
-                <CardContent className="p-0">
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead className="pl-6">Period</TableHead>
-                                <TableHead>Account</TableHead>
-                                <TableHead>Generated Date</TableHead>
-                                <TableHead>Type</TableHead>
-                                <TableHead className="text-right pr-6">Action</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {statements.length === 0 ? (
-                                <TableRow>
-                                    <TableCell colSpan={5} className="h-48 text-center text-muted-foreground">
-                                        <div className="flex flex-col items-center gap-2">
-                                            <FileText className="w-8 h-8 opacity-20" />
-                                            <span>No statements available.</span>
-                                        </div>
-                                    </TableCell>
-                                </TableRow>
-                            ) : (
-                                statements.map((statement) => (
-                                    <TableRow key={statement.id} className="group">
-                                        <TableCell className="pl-6 font-medium">
-                                            <div className="flex items-center gap-3">
-                                                <VintageIcon variant="green" size="sm" icon={FileText} className="opacity-80" />
-                                                <span>
-                                                    {new Date(statement.periodStart).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-                                                </span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex flex-col">
-                                                <span className="text-sm font-semibold text-ink-900">{statement.account.accountType}</span>
-                                                <span className="text-xs text-muted-foreground font-mono">****{statement.account.accountNumber.slice(-4)}</span>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground">
-                                            {new Date(statement.generatedAt).toLocaleDateString()}
-                                        </TableCell>
-                                        <TableCell>
-                                            <Badge variant={statement.statementType === 'MONTHLY' ? 'default' : 'secondary'} className="text-[10px]">
-                                                {statement.statementType}
-                                            </Badge>
-                                        </TableCell>
-                                        <TableCell className="text-right pr-6">
-                                            <Button
-                                                variant="ghost"
-                                                size="small"
-                                                onClick={() => handleDownload(statement.id, `Statement-${new Date(statement.periodStart).toISOString().slice(0, 7)}.pdf`)}
-                                                className="text-muted-foreground hover:text-pine-700 h-8 w-8 p-0"
-                                            >
-                                                <Download className="w-4 h-4" />
-                                            </Button>
-                                        </TableCell>
-                                    </TableRow>
-                                ))
-                            )}
-                        </TableBody>
-                    </Table>
-                </CardContent>
-            </Card>
-        </div>
-    );
+export interface StatementRow {
+  id: string;
+  period: string; // YYYY-MM
+  periodLabel: string;
+  issuedLabel: string;
+  accountId: string;
+  accountLabel: string;
 }
 
-function PlusIcon() {
-    return (
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            className="w-4 h-4"
-        >
-            <path d="M5 12h14" />
-            <path d="M12 5v14" />
-        </svg>
-    )
+export default function StatementsClient({
+  statements,
+  accounts,
+  allAccounts,
+  locale,
+}: {
+  statements: StatementRow[];
+  /** Accounts that have statements (for the filter). */
+  accounts: Array<{ id: string; label: string }>;
+  /** All the customer's own accounts (for creating a statement). */
+  allAccounts: Array<{ id: string; label: string }>;
+  locale: string;
+}) {
+  const [accountId, setAccountId] = useState("");
+  const [createOpen, setCreateOpen] = useState(false);
+  const visible = useMemo(
+    () => (accountId ? statements.filter((s) => s.accountId === accountId) : statements),
+    [statements, accountId],
+  );
+
+  return (
+    <>
+      <PageHeader
+        title="Statements"
+        description="Monthly statements for your accounts. Open one to view, print or save it as a PDF."
+        actions={
+          allAccounts.length > 0 ? (
+            <Button icon={<FilePlus2 aria-hidden="true" />} onClick={() => setCreateOpen(true)}>
+              Create a statement
+            </Button>
+          ) : undefined
+        }
+      />
+
+      {statements.length === 0 ? (
+        <Card>
+          <EmptyState
+            icon={FileText}
+            title="No statements yet"
+            description="Create a statement for any of the last 12 months, or download your transactions for any dates from Activity."
+            action={
+              <>
+                {allAccounts.length > 0 && <Button onClick={() => setCreateOpen(true)}>Create a statement</Button>}
+                <Button asChild variant="secondary">
+                  <Link href="/activities">Go to Activity</Link>
+                </Button>
+              </>
+            }
+          />
+        </Card>
+      ) : (
+        <>
+          {accounts.length > 1 && (
+            <div className="mb-4 max-w-sm">
+              <FormField label="Account">
+                <NativeSelect value={accountId} onChange={(e) => setAccountId(e.target.value)}>
+                  <option value="">All accounts</option>
+                  {accounts.map((a) => (
+                    <option key={a.id} value={a.id}>{a.label}</option>
+                  ))}
+                </NativeSelect>
+              </FormField>
+            </div>
+          )}
+
+          {visible.length === 0 ? (
+            <Card>
+              <EmptyState
+                compact
+                icon={FileText}
+                title="No statements for this account yet"
+                action={<Button variant="secondary" onClick={() => setAccountId("")}>Show all accounts</Button>}
+              />
+            </Card>
+          ) : (
+            <Card>
+              <Table stackOnMobile>
+                <TableHeader>
+                  <TableRow className="hover:bg-transparent">
+                    <TableHead>Period</TableHead>
+                    <TableHead>Account</TableHead>
+                    <TableHead>Issued</TableHead>
+                    <TableHead className="w-0">
+                      <span className="sr-only">Actions</span>
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {visible.map((s) => (
+                    <TableRow key={s.id}>
+                      <TableCell>
+                        <span className="flex items-center gap-2 text-body font-semibold text-fg">
+                          <FileText className="size-4 shrink-0 text-fg-muted" aria-hidden="true" />
+                          {s.periodLabel}
+                        </span>
+                      </TableCell>
+                      <TableCell label="Account">{s.accountLabel}</TableCell>
+                      <TableCell label="Issued" className="text-fg-muted">{s.issuedLabel}</TableCell>
+                      <TableCell className="text-right">
+                        <Button asChild size="sm" variant="secondary">
+                          <Link href={`/statements/${s.id}`} aria-label={`View ${s.periodLabel} statement for ${s.accountLabel}`}>
+                            View statement
+                          </Link>
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
+          )}
+          <p className="mt-4 text-small text-fg-muted">
+            Need a record for a different period? Download your transactions for any dates from{" "}
+            <Link href="/activities" className="font-semibold text-fg-action underline underline-offset-[3px]">
+              Activity
+            </Link>
+            .
+          </p>
+        </>
+      )}
+
+      {createOpen && (
+        <CreateStatementDialog
+          open={createOpen}
+          onOpenChange={setCreateOpen}
+          accounts={allAccounts}
+          existing={statements.map((s) => ({ id: s.id, accountId: s.accountId, period: s.period }))}
+          locale={locale}
+        />
+      )}
+    </>
+  );
 }
