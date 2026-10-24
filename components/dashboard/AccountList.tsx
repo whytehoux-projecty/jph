@@ -91,7 +91,7 @@ export function AccountList({
                     <div className="min-w-0">
                       <h3 className="font-sans text-h5 text-fg">
                         <Link
-                          href="/vaults/accounts"
+                          href={`/vaults/${a.id}`}
                           className="after:absolute after:inset-0 focus-visible:outline-none focus-visible:after:outline-2 focus-visible:after:outline-offset-2 focus-visible:after:outline-focus"
                         >
                           {name}

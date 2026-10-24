@@ -26,16 +26,28 @@ const STATUS: Record<string, { label: string; status: Status }> = {
   DISPUTED: { label: "Disputed", status: "info" },
 };
 
-export function RecentTransactions({ transactions, locale }: { transactions: DashboardTransaction[]; locale: string }) {
+export function RecentTransactions({
+  transactions,
+  locale,
+  title = "Recent activity",
+  viewAllHref = "/activities",
+  emptyDescription = "Deposits, transfers and payments will be listed here as soon as they happen.",
+}: {
+  transactions: DashboardTransaction[];
+  locale: string;
+  title?: string;
+  viewAllHref?: string | null;
+  emptyDescription?: string;
+}) {
   return (
     <section aria-labelledby="recent-heading">
       <div className="mb-3 flex items-center justify-between gap-4">
         <h2 id="recent-heading" className="font-sans text-h4 text-fg">
-          Recent activity
+          {title}
         </h2>
-        {transactions.length > 0 && (
+        {transactions.length > 0 && viewAllHref && (
           <Link
-            href="/activities"
+            href={viewAllHref}
             className="inline-flex min-h-11 items-center gap-1 text-small font-semibold text-fg-action underline-offset-[3px] hover:underline"
           >
             View all activity
@@ -49,7 +61,7 @@ export function RecentTransactions({ transactions, locale }: { transactions: Das
           <EmptyState
             icon={Receipt}
             title="No transactions yet"
-            description="Deposits, transfers and payments will be listed here as soon as they happen."
+            description={emptyDescription}
             action={
               <Button asChild variant="secondary">
                 <Link href="/deposit">Make a deposit</Link>

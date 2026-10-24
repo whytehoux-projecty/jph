@@ -187,9 +187,9 @@ export async function openNewVault(input: OpenNewVaultInput) {
   // If funding from another account, verify balance
   if (initialDeposit > 0 && input.fundingAccountId) {
     const fundingAcc = existingAccounts.find(a => a.id === input.fundingAccountId);
-    if (!fundingAcc) throw new Error('Selected funding account was not found.');
+    if (!fundingAcc) throw new Error("We couldn't find the account you chose for the deposit.");
     if (fundingAcc.balance < initialDeposit) {
-      throw new Error(`Insufficient funds in source account (Available: $${fundingAcc.balance.toFixed(2)}).`);
+      throw new Error("There isn't enough money in the account you chose for this deposit.");
     }
   }
 
@@ -290,7 +290,7 @@ export async function openNewVault(input: OpenNewVaultInput) {
   return {
     success: true,
     account: newAccount,
-    message: `${typeDef.label} has been provisioned successfully.`
+    message: `Your ${typeDef.label} is open.`
   };
 }
 
@@ -320,7 +320,7 @@ export async function linkExternalVault(input: LinkExternalVaultInput) {
   }
 
   if (!input.institutionName?.trim()) {
-    throw new Error('Financial institution name is required.');
+    throw new Error('Enter the name of the bank where the account is held.');
   }
   if (!input.accountNumber?.trim()) {
     throw new Error('Account number is required.');
@@ -381,7 +381,7 @@ export async function linkExternalVault(input: LinkExternalVaultInput) {
   return {
     success: true,
     account: linkedAccount,
-    message: `External ${typeDef.label} at ${input.institutionName} linked successfully.`
+    message: `Your account at ${input.institutionName} is now linked.`
   };
 }
 
@@ -404,11 +404,11 @@ export async function requestPrimaryVaultChange(accountId: string, reason?: stri
   const typeDef = VAULT_TYPES[normalizedType];
 
   if (!typeDef.canBePrimary) {
-    throw new Error(`Sub-accounts (${typeDef.label}) are strictly Secondary and cannot be designated as Primary.`);
+    throw new Error(`A ${typeDef.label} can't be your primary account.`);
   }
 
   if (account.isPrimary) {
-    throw new Error('This account is already designated as your Primary vault.');
+    throw new Error('This is already your primary account.');
   }
 
   // Create an administrative support ticket / request record
@@ -434,7 +434,7 @@ export async function requestPrimaryVaultChange(accountId: string, reason?: stri
   revalidatePath('/vaults');
   return {
     success: true,
-    message: 'Your request for Primary vault designation has been submitted for administrative review.'
+    message: "We've received your request to make this your primary account. We'll let you know when it's done."
   };
 }
 
@@ -503,6 +503,6 @@ export async function requestAccountSwap(input: RequestAccountSwapInput) {
   return {
     success: true,
     requestId: swapRequest.id,
-    message: `Account swap request submitted. An administrator will review and verify before finalizing the replacement.`
+    message: "We've received your request. We'll review it and let you know the outcome; your current account stays open until then."
   };
 }

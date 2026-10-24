@@ -9,7 +9,11 @@ export async function getTransactions(filters?: any) {
 
   const limit = filters?.limit || 100;
   const accounts = await prisma.account.findMany({ where: { userId: session.user.id } });
-  const accountIds = accounts.map(a => a.id);
+  let accountIds = accounts.map(a => a.id);
+  // Optional single-account filter, restricted to the customer's own accounts.
+  if (typeof filters?.accountId === 'string') {
+    accountIds = accountIds.filter(id => id === filters.accountId);
+  }
 
   const transactions = await prisma.transaction.findMany({
     where: { accountId: { in: accountIds } },
