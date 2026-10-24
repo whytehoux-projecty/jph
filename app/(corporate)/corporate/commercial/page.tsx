@@ -9,22 +9,22 @@ import { BRAND } from '@/src/content/facts';
 import { Button } from '@/components/commercial-ui/Button';
 
 export const metadata: Metadata = {
-    title: 'Commercial Banking | Corporations & Institutions',
-    description: `Strategic financing and advisory for mid-sized companies with ${BRAND.legalName} Commercial Banking.`,
+    title: 'Commercial banking | Corporations and institutions',
+    description: `Strategic financing and advisory for mid-sized companies with ${BRAND.shortName} Commercial Banking.`,
 };
 
 export default function CommercialBankingPage() {
     return (
-        <main>
+        <div>
             {/* HERO */}
             <section className="relative bg-ink-900 text-paper-50 pt-24 pb-32 overflow-hidden">
                 <div className="absolute inset-0 z-0 opacity-40">
-                    <Image src="/images/products/commercial.jpg" alt="Commercial Banking" fill className="object-cover" priority />
-                    <div className="absolute inset-0 bg-gradient-to-r from-ink-900 via-ink-900/90 to-transparent" />
+                    <Image src="/images/ht/door-corporate-1600.webp" alt="" fill className="object-cover" priority />
+                    <div className="absolute inset-0 bg-ink-900/60" />
                 </div>
                 <div className="container mx-auto px-6 max-w-7xl relative z-10">
                     <div className="max-w-2xl animate-fade-in-up">
-                        <p className="label-mono text-vermilion-500 mb-4">Commercial Banking</p>
+                        <p className="label-mono text-sea-glass mb-4">Commercial Banking</p>
                         <h1 className="font-display text-display-lg leading-tight mb-6">
                             Fueling middle-market growth
                         </h1>
@@ -50,7 +50,7 @@ export default function CommercialBankingPage() {
 
                     <div className="grid md:grid-cols-3 gap-8">
                         <div className="bg-paper-100 rounded-xl p-8 border border-paper-200 flex flex-col shadow-sm">
-                            <div className="w-12 h-12 rounded-full bg-vermilion-100 flex items-center justify-center mb-6">
+                            <div className="w-12 h-12 border border-paper-200 flex items-center justify-center mb-6">
                                 <Briefcase className="w-6 h-6 text-vermilion-600" />
                             </div>
                             <div className="mb-6">
@@ -64,8 +64,8 @@ export default function CommercialBankingPage() {
                         </div>
 
                         <div className="bg-paper-100 rounded-xl p-8 border border-paper-200 flex flex-col shadow-sm">
-                            <div className="w-12 h-12 rounded-full bg-pine-100 flex items-center justify-center mb-6">
-                                <Building2 className="w-6 h-6 text-pine-600" />
+                            <div className="w-12 h-12 border border-paper-200 flex items-center justify-center mb-6">
+                                <Building2 className="w-6 h-6 text-petrol" />
                             </div>
                             <div className="mb-6">
                                 <h3 className="font-display text-h3 text-ink-900 mb-2">Industry Expertise</h3>
@@ -78,7 +78,7 @@ export default function CommercialBankingPage() {
                         </div>
 
                         <div className="bg-paper-100 rounded-xl p-8 border border-paper-200 flex flex-col shadow-sm">
-                            <div className="w-12 h-12 rounded-full bg-ink-200 flex items-center justify-center mb-6">
+                            <div className="w-12 h-12 border border-paper-200 flex items-center justify-center mb-6">
                                 <Users className="w-6 h-6 text-ink-900" />
                             </div>
                             <div className="mb-6">
@@ -93,6 +93,6 @@ export default function CommercialBankingPage() {
                     </div>
                 </div>
             </section>
-        </main>
+        </div>
     );
 }

@@ -1,5 +1,5 @@
 /**
- * Heritage Trust Bank, N.A. — Facts Module
+ * Heritage Trust — Facts Module
  * ─────────────────────────────────────────
  * Single source of truth for every number, brand string, rate and claim
  * shown to site visitors. Do not hard-code any of these values in JSX.
@@ -32,13 +32,32 @@ export const BRAND = {
   /** Head-office address */
   address: '1 Heritage Plaza, New York, NY 10005',
   /** Year of founding */
-  founded: 1888,
+  founded: 1988,
   /** Routing number (fictional, for display/realism) */
   routing: '021000089',
   /** FDIC fine print */
   fdic: 'Heritage Trust Bank, N.A. Member FDIC. Equal Housing Lender.',
+  /** FDIC line for the marketing site (brand name without the legal suffix) */
+  fdicShort: 'Heritage Trust. Member FDIC. Equal Housing Lender.',
   /** Fictional national charter line */
-  charter: 'National Bank Charter No. 4274, issued 1888.',
+  charter: 'National Bank Charter No. 4274, issued 1988.',
+  /**
+   * Legal-entity line for the marketing site (UI/UX review, section 7).
+   * Stays a bracketed placeholder until the client confirms the entity.
+   */
+  legalEntity: '[Legal entity name]',
+} as const;
+
+/**
+ * Public contact details shown on the marketing site.
+ * The review asks for placeholders until real, verified details are supplied;
+ * BRAND.phone / BRAND.email stay in place for the portal and outgoing email.
+ */
+export const PUBLIC_CONTACT = {
+  phone: '[Phone]',
+  email: '[Email]',
+  address: '[Address]',
+  fraudPhone: '[Fraud line]',
 } as const;
 
 /**
@@ -49,8 +68,16 @@ export const yearsOfService = (): number =>
   new Date().getFullYear() - BRAND.founded;
 
 export const FACTS = {
-  /** Total assets under management */
+  /**
+   * Total assets on the balance sheet. Not the same as assets under
+   * management — never label this figure as AUM.
+   */
   assets: '$48B+',
+  /** Assets under management (wealth) — placeholder until sourced */
+  aum: '[$00B]',
+  /** As-of date and source shown next to every Ledger strip figure */
+  asOf: '[Month DD, YYYY]',
+  source: '[Annual report]',
   /** Total client count */
   clients: '2.4M+',
   /** States with presence */
@@ -70,7 +97,7 @@ export const FACTS = {
 
 export const RATES = {
   /** Date rates were last updated — show on every page that mentions a rate */
-  asOf: '1 October 2026',
+  asOf: 'October 1, 2026',
   /** Heritage Checking APY */
   checkingApy: '0.30%',
   /** Heritage Savings APY */

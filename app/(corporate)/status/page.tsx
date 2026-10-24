@@ -63,7 +63,7 @@ export default function StatusPage() {
     };
 
     return (
-        <main className="min-h-screen bg-paper-100 flex flex-col items-center justify-center p-6 py-24">
+        <div className="min-h-screen bg-paper-100 flex flex-col items-center justify-center p-6 py-24">
             <div className="w-full max-w-xl">
                 <div className="text-center mb-10">
                     <FileSearch className="w-10 h-10 text-vermilion-600 mx-auto mb-4" aria-hidden="true" />
@@ -150,11 +150,11 @@ export default function StatusPage() {
                 </div>
 
                 <div className="text-center mt-8">
-                    <Link href="/contact" className="text-small text-ink-500 hover:text-ink-900 transition-colors underline underline-offset-2">
+                    <Link href="/contact" className="inline-flex items-center text-small text-ink-500 hover:text-ink-900 transition-colors underline underline-offset-2">
                         Need help with your application?
                     </Link>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

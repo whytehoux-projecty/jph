@@ -1,52 +1,57 @@
 import type { Metadata, Viewport } from 'next';
-import { Familjen_Grotesk, Public_Sans, IBM_Plex_Mono } from 'next/font/google';
+import { Source_Serif_4, Source_Sans_3, Source_Code_Pro } from 'next/font/google';
 import './globals.css';
+import './isobath.css';
 import { Header } from '@/components/layout/Header';
 import { Footer } from '@/components/layout/Footer';
-import { CookieModal } from '@/components/commercial/CookieModal';
+import { ConsentBanner } from '@/components/commercial/ConsentBanner';
 import { auth } from '@/auth';
 
 /**
- * Ledger fonts — loaded via next/font/google (auto-self-hosted at build time,
- * zero runtime request to Google). These CSS variables are applied to the
- * marketing layout wrapper below.
+ * Isobath prototype faces — loaded via next/font/google (self-hosted at build
+ * time, no runtime request to Google). Production swaps these for licensed
+ * Suisse Works / Suisse Int'l files through next/font/local.
+ * Familjen Grotesk and IBM Plex Mono are retired (UI/UX review, typography).
  */
-const familjenGrotesk = Familjen_Grotesk({
-  subsets: ['latin'],
-  variable: '--font-display',
-  weight: ['500', '600', '700'],
+const sourceSerif = Source_Serif_4({
+  subsets: ['latin', 'latin-ext'],
+  axes: ['opsz'],
+  style: ['normal', 'italic'],
+  variable: '--font-source-serif',
   display: 'swap',
 });
 
-const publicSans = Public_Sans({
-  subsets: ['latin'],
-  variable: '--font-body',
-  weight: ['400', '500', '600', '700'],
+const sourceSans = Source_Sans_3({
+  subsets: ['latin', 'latin-ext'],
+  variable: '--font-source-sans',
   display: 'swap',
 });
 
-const ibmPlexMono = IBM_Plex_Mono({
+const sourceCode = Source_Code_Pro({
   subsets: ['latin'],
-  variable: '--font-mono',
-  weight: ['400', '500', '600'],
+  weight: ['400'],
+  variable: '--font-source-code',
   display: 'swap',
+  preload: false,
 });
 
 export const metadata: Metadata = {
   title: {
-    default: 'Heritage Trust Bank — Trusted Since 1888',
-    template: '%s | Heritage Trust Bank',
+    default: 'Heritage Trust — banking since 1988',
+    template: '%s | Heritage Trust',
   },
   description:
-    'Heritage Trust Bank has served families, businesses, and institutions since 1888. ' +
-    'Member FDIC. Personal banking, business banking, wealth management, and Heritage Vault digital banking.',
-  keywords: ['Heritage Trust Bank', 'Heritage Vault', 'personal banking', 'business banking', 'wealth management', 'FDIC insured', 'New York bank'],
+    'Heritage Trust has served families, businesses and institutions since 1988. ' +
+    'Member FDIC. Personal banking, business banking, wealth management and Heritage Vault digital banking.',
+  keywords: ['Heritage Trust', 'Heritage Vault', 'personal banking', 'business banking', 'wealth management', 'FDIC insured'],
   metadataBase: new URL('https://heritagetrust.com'),
-  robots: { index: false, follow: false }, // private while site is in review
+  // Deliberate: the prototype stays out of search while it is under review
+  // (UI/UX review, accessibility and UX patterns — "Indexing").
+  robots: { index: false, follow: false },
   openGraph: {
-    siteName: 'Heritage Trust Bank',
+    siteName: 'Heritage Trust',
     type: 'website',
-    images: [{ url: '/images/og-default.png', width: 1200, height: 630, alt: 'Heritage Trust Bank' }],
+    images: [{ url: '/images/og-default.png', width: 1200, height: 630, alt: 'Heritage Trust' }],
   },
   twitter: {
     card: 'summary_large_image',
@@ -61,7 +66,7 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  themeColor: '#FBF9F4', // Ledger paper-50
+  themeColor: '#FFFFFF', // Isobath white
   width: 'device-width',
   initialScale: 1,
 };
@@ -76,10 +81,10 @@ export default async function CorporateLayout({
   return (
     <div
       className={`
-        ${familjenGrotesk.variable}
-        ${publicSans.variable}
-        ${ibmPlexMono.variable}
-        h-full scroll-smooth antialiased flex flex-col min-h-screen
+        ${sourceSerif.variable}
+        ${sourceSans.variable}
+        ${sourceCode.variable}
+        ht-site h-full scroll-smooth antialiased flex flex-col min-h-screen
         bg-paper-50 text-ink-900 font-sans
       `}
     >
@@ -88,8 +93,8 @@ export default async function CorporateLayout({
         href="#main-content"
         className="
           sr-only focus:not-sr-only focus:absolute focus:top-4 focus:left-4 focus:z-100
-          focus:px-4 focus:py-2 focus:bg-paper-50 focus:text-ink-900
-          focus:border focus:border-ink-900 focus:text-sm focus:font-medium
+          focus:px-4 focus:py-3 focus:bg-paper-50 focus:text-ink-900
+          focus:border focus:border-petrol focus:text-small focus:font-semibold
         "
       >
         Skip to main content
@@ -101,7 +106,7 @@ export default async function CorporateLayout({
       </main>
 
       <Footer />
-      <CookieModal />
+      <ConsentBanner />
     </div>
   );
 }

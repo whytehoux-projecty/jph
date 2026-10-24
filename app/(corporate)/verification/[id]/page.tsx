@@ -15,7 +15,7 @@ export default async function VerificationPage({ params }: { params: Promise<{ i
     }
 
     return (
-        <main className="min-h-screen bg-paper-100 py-24 px-6">
+        <div className="min-h-screen bg-paper-100 py-24 px-6">
             <div className="container mx-auto max-w-xl">
                 <div className="mb-12 text-center">
                     <ShieldCheck className="w-10 h-10 text-vermilion-600 mx-auto mb-4" aria-hidden="true" />
@@ -32,6 +32,6 @@ export default async function VerificationPage({ params }: { params: Promise<{ i
                     }}
                 />
             </div>
-        </main>
+        </div>
     );
 }

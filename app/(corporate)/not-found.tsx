@@ -4,14 +4,13 @@ import { BRAND } from '@/src/content/facts';
 import { ROUTES } from '@/lib/constants';
 
 export const metadata: Metadata = {
-  title: 'Page Not Found | Heritage Trust Bank',
+  title: 'Page not found',
   robots: { index: false },
 };
 
 export default function NotFound() {
   return (
-    <main
-      id="main-content"
+    <div
       className="min-h-[60vh] flex flex-col items-center justify-center px-6 py-24 text-center"
     >
       <p className="label-mono text-vermilion-600 mb-4">404</p>
@@ -59,9 +58,9 @@ export default function NotFound() {
             focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ink-900
           "
         >
-          Help centre
+          Help center
         </Link>
       </nav>
-    </main>
+    </div>
   );
 }

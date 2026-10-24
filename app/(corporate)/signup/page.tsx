@@ -126,7 +126,7 @@ export default function SignupPage() {
 
     if (success) {
         return (
-            <main className="min-h-screen bg-paper-100 flex items-center justify-center p-6 py-24">
+            <div className="min-h-screen bg-paper-100 flex items-center justify-center p-6 py-24">
                 <div className="max-w-xl w-full bg-paper-50 p-10 rounded border border-paper-200 text-center shadow-sm animate-fade-in-up">
                     <div className="w-16 h-16 bg-paper-100 rounded-full flex items-center justify-center mx-auto mb-6">
                         <CheckCircle className="w-8 h-8 text-pine-700" aria-hidden="true" />
@@ -143,12 +143,12 @@ export default function SignupPage() {
                         Return to Homepage
                     </Button>
                 </div>
-            </main>
+            </div>
         );
     }
 
     return (
-        <main className="min-h-screen bg-paper-100 flex flex-col items-center justify-center p-6 py-24">
+        <div className="min-h-screen bg-paper-100 flex flex-col items-center justify-center p-6 py-24">
             <div className="w-full max-w-xl">
                 <div className="text-center mb-10">
                     <ShieldCheck className="w-10 h-10 text-vermilion-600 mx-auto mb-4" aria-hidden="true" />
@@ -175,7 +175,7 @@ export default function SignupPage() {
                             <div className="space-y-4 animate-fade-in">
                                 <div>
                                     <h2 className="font-display text-h4 text-ink-900 mb-1">Account Verification</h2>
-                                    <p className="text-small text-ink-500 mb-6">Enter your {BRAND.legalName} account details.</p>
+                                    <p className="text-small text-ink-500 mb-6">Enter your {BRAND.shortName} account details.</p>
                                 </div>
                                 <div className="space-y-1.5">
                                     <label htmlFor="accountNumber" className="block text-small font-medium text-ink-900">Account number</label>
@@ -184,9 +184,9 @@ export default function SignupPage() {
                                         type="text"
                                         value={formData.accountNumber}
                                         onChange={(e) => updateField('accountNumber', e.target.value)}
-                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.accountNumber ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.accountNumber ? 'border-alert' : 'border-paper-300'}`}
                                     />
-                                    {errors.accountNumber && <p className="text-xs text-vermilion-600">{errors.accountNumber}</p>}
+                                    {errors.accountNumber && <p className="text-xs text-alert">{errors.accountNumber}</p>}
                                 </div>
                                 <div className="space-y-1.5">
                                     <label htmlFor="ssn" className="block text-small font-medium text-ink-900">Last 4 digits of SSN</label>
@@ -196,9 +196,9 @@ export default function SignupPage() {
                                         maxLength={4}
                                         value={formData.ssn}
                                         onChange={(e) => updateField('ssn', e.target.value)}
-                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.ssn ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.ssn ? 'border-alert' : 'border-paper-300'}`}
                                     />
-                                    {errors.ssn && <p className="text-xs text-vermilion-600">{errors.ssn}</p>}
+                                    {errors.ssn && <p className="text-xs text-alert">{errors.ssn}</p>}
                                 </div>
                                 <div className="space-y-1.5">
                                     <label htmlFor="dateOfBirth" className="block text-small font-medium text-ink-900">Date of Birth</label>
@@ -207,9 +207,9 @@ export default function SignupPage() {
                                         type="date"
                                         value={formData.dateOfBirth}
                                         onChange={(e) => updateField('dateOfBirth', e.target.value)}
-                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.dateOfBirth ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.dateOfBirth ? 'border-alert' : 'border-paper-300'}`}
                                     />
-                                    {errors.dateOfBirth && <p className="text-xs text-vermilion-600">{errors.dateOfBirth}</p>}
+                                    {errors.dateOfBirth && <p className="text-xs text-alert">{errors.dateOfBirth}</p>}
                                 </div>
                                 <div className="pt-4 flex justify-end">
                                     <Button onClick={handleNext} variant="primary">
@@ -233,9 +233,9 @@ export default function SignupPage() {
                                             type="text"
                                             value={formData.firstName}
                                             onChange={(e) => updateField('firstName', e.target.value)}
-                                            className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.firstName ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                            className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.firstName ? 'border-alert' : 'border-paper-300'}`}
                                         />
-                                        {errors.firstName && <p className="text-xs text-vermilion-600">{errors.firstName}</p>}
+                                        {errors.firstName && <p className="text-xs text-alert">{errors.firstName}</p>}
                                     </div>
                                     <div className="space-y-1.5">
                                         <label htmlFor="lastName" className="block text-small font-medium text-ink-900">Last name</label>
@@ -244,9 +244,9 @@ export default function SignupPage() {
                                             type="text"
                                             value={formData.lastName}
                                             onChange={(e) => updateField('lastName', e.target.value)}
-                                            className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.lastName ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                            className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.lastName ? 'border-alert' : 'border-paper-300'}`}
                                         />
-                                        {errors.lastName && <p className="text-xs text-vermilion-600">{errors.lastName}</p>}
+                                        {errors.lastName && <p className="text-xs text-alert">{errors.lastName}</p>}
                                     </div>
                                 </div>
                                 <div className="space-y-1.5">
@@ -256,9 +256,9 @@ export default function SignupPage() {
                                         type="email"
                                         value={formData.email}
                                         onChange={(e) => updateField('email', e.target.value)}
-                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.email ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.email ? 'border-alert' : 'border-paper-300'}`}
                                     />
-                                    {errors.email && <p className="text-xs text-vermilion-600">{errors.email}</p>}
+                                    {errors.email && <p className="text-xs text-alert">{errors.email}</p>}
                                 </div>
                                 <div className="space-y-1.5">
                                     <label htmlFor="phone" className="block text-small font-medium text-ink-900">Phone number</label>
@@ -267,9 +267,9 @@ export default function SignupPage() {
                                         type="tel"
                                         value={formData.phone}
                                         onChange={(e) => updateField('phone', e.target.value)}
-                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.phone ? 'border-vermilion-600' : 'border-paper-300'}`}
+                                        className={`w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow ${errors.phone ? 'border-alert' : 'border-paper-300'}`}
                                     />
-                                    {errors.phone && <p className="text-xs text-vermilion-600">{errors.phone}</p>}
+                                    {errors.phone && <p className="text-xs text-alert">{errors.phone}</p>}
                                 </div>
                                 <div className="pt-4 flex justify-between">
                                     <Button onClick={() => setCurrentStep(1)} variant="secondary">Back</Button>
@@ -297,13 +297,13 @@ export default function SignupPage() {
                                             type="checkbox"
                                             checked={formData.agreeToTerms}
                                             onChange={(e) => updateField('agreeToTerms', e.target.checked)}
-                                            className={`w-5 h-5 rounded mt-0.5 cursor-pointer ${errors.agreeToTerms ? 'border-vermilion-600 focus:ring-vermilion-600 text-vermilion-600' : 'border-paper-300 focus:ring-ink-900 text-ink-900'}`}
+                                            className={`w-5 h-5 rounded mt-0.5 cursor-pointer ${errors.agreeToTerms ? 'border-alert focus:ring-alert text-alert' : 'border-paper-300 focus:ring-ink-900 text-ink-900'}`}
                                         />
                                         <div>
                                             <span className="text-small text-ink-700 group-hover:text-ink-900 transition-colors block">
                                                 I have read and agree to the <Link href="/terms" target="_blank" className="text-ink-900 underline hover:text-vermilion-600">Terms of Service</Link> and Digital Banking Agreement.
                                             </span>
-                                            {errors.agreeToTerms && <p className="text-xs text-vermilion-600 mt-1">{errors.agreeToTerms}</p>}
+                                            {errors.agreeToTerms && <p className="text-xs text-alert mt-1">{errors.agreeToTerms}</p>}
                                         </div>
                                     </label>
                                     <label className="flex items-start gap-3 cursor-pointer group">
@@ -311,13 +311,13 @@ export default function SignupPage() {
                                             type="checkbox"
                                             checked={formData.agreeToPrivacy}
                                             onChange={(e) => updateField('agreeToPrivacy', e.target.checked)}
-                                            className={`w-5 h-5 rounded mt-0.5 cursor-pointer ${errors.agreeToPrivacy ? 'border-vermilion-600 focus:ring-vermilion-600 text-vermilion-600' : 'border-paper-300 focus:ring-ink-900 text-ink-900'}`}
+                                            className={`w-5 h-5 rounded mt-0.5 cursor-pointer ${errors.agreeToPrivacy ? 'border-alert focus:ring-alert text-alert' : 'border-paper-300 focus:ring-ink-900 text-ink-900'}`}
                                         />
                                         <div>
                                             <span className="text-small text-ink-700 group-hover:text-ink-900 transition-colors block">
                                                 I have read and agree to the <Link href="/privacy" target="_blank" className="text-ink-900 underline hover:text-vermilion-600">Privacy Policy</Link> and authorize the processing of my data.
                                             </span>
-                                            {errors.agreeToPrivacy && <p className="text-xs text-vermilion-600 mt-1">{errors.agreeToPrivacy}</p>}
+                                            {errors.agreeToPrivacy && <p className="text-xs text-alert mt-1">{errors.agreeToPrivacy}</p>}
                                         </div>
                                     </label>
                                 </div>
@@ -333,6 +333,6 @@ export default function SignupPage() {
                     </form>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

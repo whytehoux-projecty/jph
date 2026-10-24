@@ -1,14 +1,23 @@
-# Branches & ATMs
+# Branches and ATMs
 
-{{BRAND.shortName}} operates branches throughout our region to serve your needs.
+{{BRAND.shortName}} operates branches throughout our region. Hours below are local time.
 
-## Headquarters
-{{BRAND.legalName}}
+## Head office
+
+{{BRAND.shortName}}
 {{BRAND.address}}
 
-## Operating Hours
-Monday - Friday: 9:00 AM - 5:00 PM
-Saturday: 9:00 AM - 1:00 PM
-Sunday: Closed
+## Branch hours
 
-*ATM access is available 24/7 at all branch locations.*
+| Day | Hours |
+|-----|-------|
+| Monday to Friday | 9:00 AM – 5:00 PM |
+| Saturday | 9:00 AM – 1:00 PM |
+| Sunday | Closed |
+
+ATMs at our branches are open 24 hours a day.
+
+## Before you visit
+
+- Bring a government-issued photo ID for any account service.
+- To meet a banker, [book a call](/contact) first so the right person is available.

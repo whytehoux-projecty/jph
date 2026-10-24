@@ -9,22 +9,22 @@ import { BRAND } from '@/src/content/facts';
 import { Button } from '@/components/commercial-ui/Button';
 
 export const metadata: Metadata = {
-    title: 'Business Credit Cards | Business Banking',
-    description: `Fuel your business growth with ${BRAND.legalName} Business Rewards credit cards. Enjoy cash back, flexible spending, and robust management tools.`,
+    title: 'Business credit cards | Business banking',
+    description: `Fuel your business growth with ${BRAND.shortName} Business Rewards credit cards. Enjoy cash back, flexible spending, and robust management tools.`,
 };
 
 export default function BusinessCreditCardsPage() {
     return (
-        <main>
+        <div>
             {/* HERO */}
             <section className="relative bg-ink-900 text-paper-50 pt-24 pb-32 overflow-hidden">
                 <div className="absolute inset-0 z-0 opacity-40">
-                    <Image src="/images/products/business-card.jpg" alt="Business Credit Cards" fill className="object-cover" priority />
-                    <div className="absolute inset-0 bg-gradient-to-r from-ink-900 via-ink-900/90 to-transparent" />
+                    <Image src="/images/ht/business-card-1600.webp" alt="" fill className="object-cover" priority />
+                    <div className="absolute inset-0 bg-ink-900/60" />
                 </div>
                 <div className="container mx-auto px-6 max-w-7xl relative z-10">
                     <div className="max-w-2xl animate-fade-in-up">
-                        <p className="label-mono text-vermilion-500 mb-4">Business Credit Cards</p>
+                        <p className="label-mono text-sea-glass mb-4">Business Credit Cards</p>
                         <h1 className="font-display text-display-lg leading-tight mb-6">
                             Fuel your growth with purchasing power
                         </h1>
@@ -51,7 +51,7 @@ export default function BusinessCreditCardsPage() {
                     <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                         {/* Cash Rewards */}
                         <div className="bg-paper-100 rounded-xl p-8 border border-paper-200 flex flex-col shadow-sm">
-                            <div className="w-12 h-12 rounded-full bg-vermilion-100 flex items-center justify-center mb-6">
+                            <div className="w-12 h-12 border border-paper-200 flex items-center justify-center mb-6">
                                 <DollarSign className="w-6 h-6 text-vermilion-600" />
                             </div>
                             <div className="mb-6">
@@ -59,7 +59,7 @@ export default function BusinessCreditCardsPage() {
                                 <p className="text-body text-ink-700 h-16">Earn cash back on your heaviest spending categories like office supplies, gas, or software.</p>
                             </div>
                             <div className="mb-8">
-                                <p className="text-display-sm text-ink-900 font-medium">$0</p>
+                                <p className="text-data font-light text-ink-900 tabular">$0</p>
                                 <p className="text-small text-ink-500">Annual Fee</p>
                             </div>
                             <ul className="space-y-4 mb-8 grow">
@@ -72,15 +72,15 @@ export default function BusinessCreditCardsPage() {
 
                         {/* Unlimited Rewards */}
                         <div className="bg-paper-100 rounded-xl p-8 border border-paper-200 flex flex-col shadow-sm">
-                            <div className="w-12 h-12 rounded-full bg-pine-100 flex items-center justify-center mb-6">
-                                <CreditCard className="w-6 h-6 text-pine-600" />
+                            <div className="w-12 h-12 border border-paper-200 flex items-center justify-center mb-6">
+                                <CreditCard className="w-6 h-6 text-petrol" />
                             </div>
                             <div className="mb-6">
                                 <h3 className="font-display text-h3 text-ink-900 mb-2">Business Advantage Unlimited</h3>
                                 <p className="text-body text-ink-700 h-16">Keep it simple with a flat, unlimited cash back rate on every purchase you make.</p>
                             </div>
                             <div className="mb-8">
-                                <p className="text-display-sm text-ink-900 font-medium">$0</p>
+                                <p className="text-data font-light text-ink-900 tabular">$0</p>
                                 <p className="text-small text-ink-500">Annual Fee</p>
                             </div>
                             <ul className="space-y-4 mb-8 grow">
@@ -93,6 +93,6 @@ export default function BusinessCreditCardsPage() {
                     </div>
                 </div>
             </section>
-        </main>
+        </div>
     );
 }

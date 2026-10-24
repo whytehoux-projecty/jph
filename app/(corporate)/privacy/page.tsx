@@ -4,16 +4,16 @@ import { ROUTES } from '@/lib/constants';
 import { BRAND } from '@/src/content/facts';
 
 export const metadata: Metadata = {
-    title: `Privacy Policy | ${BRAND.shortName}`,
-    description: `Privacy Policy for ${BRAND.legalName} — how we collect, use, and protect your personal information under GLBA and state laws.`,
+    title: 'Privacy notice',
+    description: `Privacy Policy for ${BRAND.legalEntity} — how we collect, use, and protect your personal information under GLBA and state laws.`,
 };
 
 export default function PrivacyPage() {
     return (
-        <main className="min-h-screen bg-paper-100 py-24 px-6">
+        <div className="min-h-screen bg-paper-100 py-24 px-6">
             <div className="container mx-auto max-w-3xl">
                 <p className="label-mono text-vermilion-600 mb-4">Legal</p>
-                <h1 className="font-display text-display-sm text-ink-900 mb-2 text-balance">Privacy Policy</h1>
+                <h1 className="font-display text-display-sm text-ink-900 mb-2 text-balance">Privacy policy</h1>
                 <p className="text-small text-ink-500 mb-12">Last updated: October 1, 2026</p>
 
                 <div className="space-y-8 text-body text-ink-700 leading-relaxed">
@@ -36,7 +36,7 @@ export default function PrivacyPage() {
 
                     <section>
                         <h2 className="font-display text-h4 text-ink-900 mb-3">2. How We Use Your Information</h2>
-                        <p>{BRAND.legalName} uses the information we collect to:</p>
+                        <p>{BRAND.legalEntity} uses the information we collect to:</p>
                         <ul className="list-disc list-outside ml-5 mt-2 space-y-1">
                             <li>Provide, operate, and maintain our banking services</li>
                             <li>Process transactions and send related information</li>
@@ -78,10 +78,10 @@ export default function PrivacyPage() {
 
                     <section>
                         <h2 className="font-display text-h4 text-ink-900 mb-3">8. Contact Us</h2>
-                        <p>For privacy-related inquiries, or to exercise your privacy rights, please contact our Privacy Office at <a href="mailto:privacy@heritagetrust.bank" className="text-vermilion-600 hover:underline">privacy@heritagetrust.bank</a> or visit our <Link href={ROUTES.contact} className="text-vermilion-600 hover:underline">Contact page</Link>.</p>
+                        <p>For privacy-related inquiries, or to exercise your privacy rights, please contact our Privacy Office at [Privacy email] or visit our <Link href={ROUTES.contact} className="text-vermilion-600 hover:underline">Contact page</Link>.</p>
                     </section>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

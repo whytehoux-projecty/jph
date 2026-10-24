@@ -57,6 +57,38 @@
   --color-info: #1F5FA6;
   --color-info-bg: #E8F0FA;
   
+  /* Isobath system, adapted to Heritage Trust (commercial site).
+     New names only, so the portal and admin keep their palette. The marketing
+     layout also remaps paper / ink / vermilion inside .ht-site — see
+     app/(corporate)/globals.css. */
+  --color-white: #FFFFFF;
+  --color-chalk: #F4F6F5;
+  --color-heritage-ink: #14181C;
+  --color-petrol: #0E4A55;
+  --color-petrol-700: #0A3840;
+  --color-shallows: #E2EEEC;
+  --color-fog: #56636A;
+  --color-shoal: #D5DBDA;
+  --color-sea-glass: #7CC4B8;
+  --color-alert: #B3261E;
+  --color-logo-orange: #E8532B;
+
+  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-code: "Source Code Pro", ui-monospace, SFMono-Regular, monospace;
+
+  --text-display-sm: 2.75rem;
+  --text-display-sm--line-height: 1.136;
+  --text-display-sm--letter-spacing: -0.005em;
+  --text-display-sm--font-weight: 400;
+
+  --text-lead: 1.3125rem;
+  --text-lead--line-height: 1.524;
+
+  --text-figure: 3.25rem;
+  --text-figure--line-height: 1.077;
+  --text-figure--letter-spacing: -0.01em;
+  --text-figure--font-weight: 300;
+
   --font-display: "Familjen Grotesk", ui-sans-serif, system-ui, sans-serif;
   --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;

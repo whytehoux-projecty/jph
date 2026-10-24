@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from './cn';
 
 interface FigureProps {
   /** The numeric or data value (e.g. "4.85%", "$48B+", "138") */
@@ -18,8 +18,8 @@ interface FigureProps {
 /**
  * Figure — Ledger numeric/data display primitive.
  *
- * Renders all values in IBM Plex Mono (tabular-nums) to ensure columns
- * align and to signal that the number is a precise financial data point.
+ * Isobath setting rule: every figure is the text face with tabular lining
+ * numerals (never monospace). Large figures use the Key figure style.
  */
 export function Figure({
   value,
@@ -32,14 +32,12 @@ export function Figure({
   return (
     <div className={cn('flex flex-col', className)}>
       <span
-        className={cn(
-          'font-mono tabular font-medium text-ink-900 leading-none',
-          size === 'large' ? 'text-data-lg' : 'text-data',
-        )}
+        // Template string, not cn(): tailwind-merge would read text-figure as a colour
+        className={`ht-figure tabular text-ink-900 ${size === 'large' ? 'text-figure font-light' : 'text-data font-normal'}`}
       >
         {value}
         {footnoteRef !== undefined && (
-          <sup className="text-[0.6em] ml-0.5 font-normal">{footnoteRef}</sup>
+          <sup className="text-[max(0.5em,13px)] ml-0.5 font-normal">{footnoteRef}</sup>
         )}
       </span>
 

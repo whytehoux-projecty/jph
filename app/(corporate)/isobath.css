@@ -1,0 +1,322 @@
+/* ═══ Isobath system, adapted to Heritage Trust ═══════════════════════════════
+   Applied by the `.ht-site` wrapper in app/(corporate)/layout.tsx only, so the
+   Heritage Vault portal and the admin keep their own look.
+
+   - Palette (UI/UX review, "Palette, built around the logo"): white ground,
+     chalk alternates, Heritage ink, petrol as the only action colour. Logo
+     orange lives in the logo only.
+   - The legacy token names used across the marketing pages (paper-*, ink-*,
+     vermilion-*, pine-*) are remapped here so every page picks up the system.
+     New code should use the Isobath names (petrol, chalk, shoal, fog …).
+   - Type: Source Serif 4 for display, Source Sans 3 for text and every
+     figure (tabular), Source Code Pro for codes only. Monospace labels retired.
+   - Shape: one 2 px radius, 1 px rules, no shadows.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.ht-site {
+  /* Grounds */
+  --color-paper: #F4F6F5;
+  --color-paper-50: #FFFFFF;
+  --color-paper-100: #F4F6F5;   /* chalk */
+  --color-paper-200: #D5DBDA;   /* shoal: rules and borders */
+  --color-paper-300: #7E8C8F;   /* input borders, 3.4:1 on white */
+
+  /* Ink — one dark, the logo's own */
+  --color-ink: #14181C;
+  --color-ink-900: #14181C;
+  --color-ink-700: #2C353A;
+  --color-ink-500: #56636A;     /* fog */
+
+  /* Action — petrol replaces both oranges */
+  --color-vermilion: #0E4A55;
+  --color-vermilion-100: #E2EEEC;
+  --color-vermilion-400: #7CC4B8; /* on dark grounds only (sea-glass) */
+  --color-vermilion-600: #0E4A55;
+  --color-vermilion-700: #0A3840;
+  --color-pine: #0E4A55;
+  --color-pine-700: #0E4A55;
+
+  --color-error: #B3261E;
+  --color-success: #0E4A55;
+  --color-success-bg: #E2EEEC;
+
+  /* Surface variables used by inline styles */
+  --bg: #FFFFFF;
+  --surface: #F4F6F5;
+  --line: #D5DBDA;
+  --text: #14181C;
+  --text-muted: #56636A;
+  --action: #0E4A55;
+  --action-hover: #0A3840;
+  --focus: #0E4A55;
+
+  /* Type families */
+  --font-display: var(--font-source-serif), "Source Serif 4", Georgia, serif;
+  --font-serif: var(--font-source-serif), "Source Serif 4", Georgia, serif;
+  --font-sans: var(--font-source-sans), "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-source-sans), "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  /* Retired: numbers are never set in monospace. font-mono now means the
+     text face with tabular figures; codes use font-code. */
+  --font-mono: var(--font-source-sans), "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  --font-code: var(--font-source-code), "Source Code Pro", ui-monospace, monospace;
+
+  /* The nine Isobath styles — mobile sizes here, desktop below */
+  --text-display-xl: 3rem;          /* Display XL 48 / 52 */
+  --text-display-xl--line-height: 1.0833;
+  --text-display-xl--letter-spacing: -0.015em;
+  --text-display-xl--font-weight: 300;
+  --text-display-lg: 2.5rem;        /* Display L 40 / 44 */
+  --text-display-lg--line-height: 1.1;
+  --text-display-lg--letter-spacing: -0.01em;
+  --text-display-lg--font-weight: 300;
+  --text-display-sm: 2rem;          /* Heading 2 32 / 38 */
+  --text-display-sm--line-height: 1.1875;
+  --text-display-sm--letter-spacing: -0.005em;
+  --text-display-sm--font-weight: 400;
+  --text-h1: 2rem;
+  --text-h1--line-height: 1.1875;
+  --text-h1--letter-spacing: -0.005em;
+  --text-h1--font-weight: 400;
+  --text-h2: 2rem;
+  --text-h2--line-height: 1.1875;
+  --text-h2--letter-spacing: -0.005em;
+  --text-h2--font-weight: 400;
+  --text-h3: 1.3125rem;             /* Heading 3 21 / 28 */
+  --text-h3--line-height: 1.3333;
+  --text-h3--letter-spacing: 0;
+  --text-h3--font-weight: 600;
+  --text-h4: 1.3125rem;
+  --text-h4--line-height: 1.3333;
+  --text-h4--font-weight: 600;
+  --text-lead: 1.1875rem;           /* Lead 19 / 29 */
+  --text-lead--line-height: 1.526;
+  --text-body-lg: 1.1875rem;
+  --text-body-lg--line-height: 1.526;
+  --text-body: 1rem;                /* Body 16 / 25 */
+  --text-body--line-height: 1.5625;
+  --text-small: 0.875rem;           /* Small 14 / 21 */
+  --text-small--line-height: 1.5;
+  --text-xs: 0.8125rem;             /* legal floor 13 px */
+  --text-xs--line-height: 1.4;
+  --text-label: 0.8125rem;          /* Label 13 / 16 caps */
+  --text-label--line-height: 1.2308;
+  --text-label--letter-spacing: 0.06em;
+  --text-label--font-weight: 600;
+  --text-figure: 2.25rem;           /* Key figure 36 / 40 */
+  --text-figure--line-height: 1.1111;
+  --text-data-lg: 2.25rem;
+  --text-data-lg--line-height: 1.1111;
+  --text-data-lg--letter-spacing: -0.01em;
+  --text-data-lg--font-weight: 300;
+  --text-data: 1.5rem;              /* rate on a product card 24 / 32 */
+  --text-data--line-height: 1.3333;
+
+  /* One radius */
+  --radius: 2px;
+  --radius-xs: 2px;
+  --radius-sm: 2px;
+  --radius-md: 2px;
+  --radius-lg: 2px;
+  --radius-xl: 2px;
+  --radius-2xl: 2px;
+  --radius-3xl: 2px;
+  --radius-4xl: 2px;
+
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 1rem;
+  line-height: 1.5625;
+}
+
+@media (min-width: 1024px) {
+  .ht-site {
+    --text-display-xl: 5.5rem;      /* 88 / 92 */
+    --text-display-xl--line-height: 1.0455;
+    --text-display-lg: 4rem;        /* 64 / 68 */
+    --text-display-lg--line-height: 1.0625;
+    --text-display-sm: 2.75rem;     /* 44 / 50 */
+    --text-display-sm--line-height: 1.1364;
+    --text-h1: 2.75rem;
+    --text-h1--line-height: 1.1364;
+    --text-h2: 2.75rem;
+    --text-h2--line-height: 1.1364;
+    --text-h3: 1.5rem;              /* 24 / 32 */
+    --text-h3--line-height: 1.3333;
+    --text-lead: 1.3125rem;         /* 21 / 32 */
+    --text-lead--line-height: 1.5238;
+    --text-body-lg: 1.3125rem;
+    --text-body-lg--line-height: 1.5238;
+    --text-body: 1.0625rem;         /* 17 / 27 */
+    --text-body--line-height: 1.5882;
+    --text-figure: 3.25rem;         /* 52 / 56 */
+    --text-figure--line-height: 1.0769;
+    --text-data-lg: 3.25rem;
+    --text-data-lg--line-height: 1.0769;
+  }
+}
+
+/* Dark sections */
+.ht-site .theme-ink,
+.ht-site .ht-dark {
+  --bg: #14181C;
+  --surface: #1B2126;
+  --line: #333D43;
+  --text: #FFFFFF;
+  --text-muted: #AEB8BC;
+  --action: #7CC4B8;
+  --action-hover: #9AD3CA;
+  --focus: #FFFFFF;
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Element defaults sit in the base layer so page utilities still win. */
+@layer base {
+/* Headings: serif for display and Heading 2; Heading 3 and below are sans */
+.ht-site :is(h1, h2) {
+  font-family: var(--font-display);
+  font-weight: 400;
+  text-wrap: balance;
+}
+.ht-site :is(h3, h4, h5, h6) {
+  font-family: var(--font-sans);
+}
+.ht-site .ht-em {
+  font-family: var(--font-display);
+  font-style: italic;
+}
+
+/* Every figure is tabular and lining */
+.ht-site .font-mono,
+.ht-site .tabular,
+.ht-site table,
+.ht-site .ht-figure {
+  font-variant-numeric: tabular-nums lining-nums;
+}
+.ht-site .font-code {
+  font-family: var(--font-code);
+  font-size: 0.875rem;
+  font-variant-numeric: normal;
+}
+
+/* Focus: petrol on light, white on dark */
+.ht-site :focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Touch targets: every standalone link, button and field is at least 44 px.
+   Inline links inside running text are unaffected (min-height does not apply
+   to inline boxes). */
+.ht-site :is(button, select, summary, [role="button"],
+             input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"])),
+.ht-site a:is(.block, .flex, .inline-flex, .inline-block, .grid) {
+  min-height: 44px;
+}
+.ht-site a.inline-flex:not([class*="items-"]) {
+  align-items: center;
+}
+
+}
+
+/* Heading 3 and Heading 4 are always the sans, even where a page asks for
+   the display face. */
+.ht-site .font-display:is(.text-h3, .text-h4) {
+  font-family: var(--font-sans);
+}
+
+/* Display headings are light; Heading 2 is regular — never semibold. */
+.ht-site :is(h1, h2):is(.font-semibold, .font-bold, .font-medium) {
+  font-weight: 400;
+}
+.ht-site :is(.text-display-xl, .text-display-lg) {
+  font-weight: 300;
+}
+
+/* Labels: sans caps, 13 px, +6 % — four words or fewer */
+.ht-site .label-mono,
+.ht-site .ht-label {
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  line-height: 1rem;
+  font-weight: 600;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}
+
+/* No shadows, no glass */
+.ht-site [class*="shadow"] {
+  box-shadow: none !important;
+}
+.ht-site [class*="backdrop-blur"] {
+  backdrop-filter: none !important;
+}
+
+/* Text links */
+.ht-site .ht-link {
+  color: var(--action);
+  text-decoration: underline;
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+  font-weight: 600;
+}
+.ht-site .ht-link:hover {
+  text-decoration-thickness: 2px;
+}
+
+.ht-site .ht-measure { max-width: 68ch; }
+
+/* Ledger rules — the Heritage Trust motif: fine ruled lines */
+.ht-site .ht-ruled {
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0,
+    transparent 31px,
+    var(--line) 31px,
+    var(--line) 32px
+  );
+}
+
+/* Section reveal — 500–700 ms, once, motion-safe */
+@media (prefers-reduced-motion: no-preference) {
+  .ht-site .animate-fade-in-up {
+    animation: ht-rise 0.6s cubic-bezier(.2, .7, .1, 1) both;
+  }
+}
+@keyframes ht-rise {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* Markdown pages */
+.ht-site .ht-prose { color: var(--text); font-size: var(--text-body); line-height: 1.6; }
+.ht-site .ht-prose > * + * { margin-top: 1.1em; }
+.ht-site .ht-prose > h1:first-child { display: none; }
+.ht-site .ht-prose-show-title > h1:first-child {
+  display: block;
+  font-size: var(--text-display-lg);
+  line-height: var(--text-display-lg--line-height);
+  font-weight: 300;
+  letter-spacing: -0.01em;
+  margin-bottom: 0.5em;
+}
+.ht-site .ht-prose h2 { font-size: 1.75rem; line-height: 1.25; margin-top: 2.2em; padding-top: 1.1em; border-top: 1px solid var(--line); }
+.ht-site .ht-prose h3 { font-size: 1.3125rem; line-height: 1.33; font-weight: 600; margin-top: 1.8em; }
+.ht-site .ht-prose a { color: var(--action); text-decoration: underline; text-underline-offset: 3px; }
+.ht-site .ht-prose ul { list-style: none; padding: 0; }
+.ht-site .ht-prose ul > li { position: relative; padding-left: 1.25rem; }
+.ht-site .ht-prose ul > li + li { margin-top: 0.4em; }
+.ht-site .ht-prose ul > li::before { content: ""; position: absolute; left: 0; top: 0.8em; width: 0.5rem; height: 1px; background: var(--action); }
+.ht-site .ht-prose ol { padding-left: 1.25rem; list-style: decimal; }
+.ht-site .ht-prose strong { font-weight: 600; }
+.ht-site .ht-prose em { color: var(--text-muted); }
+.ht-site .ht-prose table { width: 100%; border-collapse: collapse; font-size: 1rem; }
+.ht-site .ht-prose th { text-align: left; font-size: 0.8125rem; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); border-bottom: 1px solid var(--text); padding: 0.5rem 0.75rem 0.5rem 0; }
+.ht-site .ht-prose td { border-bottom: 1px solid var(--line); padding: 0.75rem 0.75rem 0.75rem 0; vertical-align: top; }
+
+@media print {
+  .ht-site > header,
+  .ht-site > footer,
+  .ht-site .ht-no-print { display: none !important; }
+}

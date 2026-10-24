@@ -4,22 +4,22 @@ import { ROUTES } from '@/lib/constants';
 import { BRAND } from '@/src/content/facts';
 
 export const metadata: Metadata = {
-    title: `Terms and Conditions | ${BRAND.shortName}`,
-    description: `Terms and Conditions for ${BRAND.legalName} E-Banking and ${BRAND.vault} digital services.`,
+    title: 'Terms of use',
+    description: `Terms and Conditions for ${BRAND.legalEntity} E-Banking and ${BRAND.vault} digital services.`,
 };
 
 export default function TermsPage() {
     return (
-        <main className="min-h-screen bg-paper-100 py-24 px-6">
+        <div className="min-h-screen bg-paper-100 py-24 px-6">
             <div className="container mx-auto max-w-3xl">
                 <p className="label-mono text-vermilion-600 mb-4">Legal</p>
-                <h1 className="font-display text-display-sm text-ink-900 mb-2 text-balance">Terms and Conditions</h1>
+                <h1 className="font-display text-display-sm text-ink-900 mb-2 text-balance">Terms of use</h1>
                 <p className="text-small text-ink-500 mb-12">Digital Banking Agreement — Effective October 1, 2026</p>
 
                 <div className="space-y-8 text-body text-ink-700 leading-relaxed">
                     <section>
                         <h2 className="font-display text-h4 text-ink-900 mb-3">1. Acceptance of Terms</h2>
-                        <p>By registering for and using {BRAND.legalName} digital services, including {BRAND.vault}, you agree to be bound by these Terms and Conditions. If you do not agree to these terms, you may not use our online banking services.</p>
+                        <p>By registering for and using {BRAND.legalEntity} digital services, including {BRAND.vault}, you agree to be bound by these Terms and Conditions. If you do not agree to these terms, you may not use our online banking services.</p>
                     </section>
 
                     <section>
@@ -35,12 +35,12 @@ export default function TermsPage() {
 
                     <section>
                         <h2 className="font-display text-h4 text-ink-900 mb-3">4. FDIC Insurance</h2>
-                        <p>Deposits held at {BRAND.legalName} are insured by the Federal Deposit Insurance Corporation (FDIC) up to $250,000 per depositor, per insured bank, for each account ownership category. Investment products are not FDIC insured, not bank guaranteed, and may lose value.</p>
+                        <p>Deposits held at {BRAND.legalEntity} are insured by the Federal Deposit Insurance Corporation (FDIC) up to $250,000 per depositor, per insured bank, for each account ownership category. Investment products are not FDIC insured, not bank guaranteed, and may lose value.</p>
                     </section>
 
                     <section>
                         <h2 className="font-display text-h4 text-ink-900 mb-3">5. Limitation of Liability</h2>
-                        <p>{BRAND.legalName} shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of digital banking services, including but not limited to loss of profits, data, or goodwill.</p>
+                        <p>{BRAND.legalEntity} shall not be liable for any indirect, incidental, special, consequential, or punitive damages arising from your use of digital banking services, including but not limited to loss of profits, data, or goodwill.</p>
                     </section>
 
                     <section>
@@ -50,7 +50,7 @@ export default function TermsPage() {
 
                     <section>
                         <h2 className="font-display text-h4 text-ink-900 mb-3">7. Governing Law</h2>
-                        <p>These Terms and Conditions shall be governed by and construed in accordance with the laws of the State of New York, without regard to its conflict of law provisions.</p>
+                        <p>These Terms and Conditions shall be governed by and construed in accordance with the laws of [Governing state], without regard to its conflict of law provisions.</p>
                     </section>
 
                     <section>
@@ -59,6 +59,6 @@ export default function TermsPage() {
                     </section>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

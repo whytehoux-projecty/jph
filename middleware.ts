@@ -37,6 +37,9 @@ const PUBLIC_PATHS = [
     '/investors',
     // Product pages — the existing startsWith logic covers /products/* slugs
     '/products',
+    // Isobath upgrade: Account Finder and the Transparency page
+    '/account-finder',
+    '/transparency',
 ];
 
 // Prefixes that are always public

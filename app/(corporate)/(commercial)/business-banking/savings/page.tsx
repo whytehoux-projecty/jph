@@ -9,22 +9,22 @@ import { BRAND } from '@/src/content/facts';
 import { Button } from '@/components/commercial-ui/Button';
 
 export const metadata: Metadata = {
-    title: 'Business Savings & CDs | Business Banking',
-    description: `Put your excess cash to work securely with ${BRAND.legalName} Business Savings and Certificates of Deposit.`,
+    title: 'Business savings and CDs | Business banking',
+    description: `Put your excess cash to work securely with ${BRAND.shortName} Business Savings and Certificates of Deposit.`,
 };
 
 export default function BusinessSavingsPage() {
     return (
-        <main>
+        <div>
             {/* HERO */}
             <section className="relative bg-ink-900 text-paper-50 pt-24 pb-32 overflow-hidden">
                 <div className="absolute inset-0 z-0 opacity-40">
-                    <Image src="/images/products/business-savings.jpg" alt="Business Savings" fill className="object-cover" priority />
-                    <div className="absolute inset-0 bg-gradient-to-r from-ink-900 via-ink-900/90 to-transparent" />
+                    <Image src="/images/ht/business-savings-1600.webp" alt="" fill className="object-cover" priority />
+                    <div className="absolute inset-0 bg-ink-900/60" />
                 </div>
                 <div className="container mx-auto px-6 max-w-7xl relative z-10">
                     <div className="max-w-2xl animate-fade-in-up">
-                        <p className="label-mono text-vermilion-500 mb-4">Savings & CDs</p>
+                        <p className="label-mono text-sea-glass mb-4">Savings & CDs</p>
                         <h1 className="font-display text-display-lg leading-tight mb-6">
                             Put your excess cash to work
                         </h1>
@@ -56,7 +56,7 @@ export default function BusinessSavingsPage() {
                                 <p className="text-body text-ink-700 h-12">Flexible access to your funds with competitive interest rates.</p>
                             </div>
                             <div className="mb-8">
-                                <p className="text-display-sm text-ink-900 font-medium">$10.00</p>
+                                <p className="text-data font-light text-ink-900 tabular">$10.00</p>
                                 <p className="text-small text-ink-500">Monthly maintenance fee</p>
                             </div>
                             <ul className="space-y-4 mb-8 grow">
@@ -74,7 +74,7 @@ export default function BusinessSavingsPage() {
                                 <p className="text-body text-ink-700 h-12">Lock in a guaranteed fixed interest rate for a specific term to maximize returns.</p>
                             </div>
                             <div className="mb-8">
-                                <p className="text-display-sm text-ink-900 font-medium">Fixed</p>
+                                <p className="text-data font-light text-ink-900 tabular">Fixed</p>
                                 <p className="text-small text-ink-500">Guaranteed Return</p>
                             </div>
                             <ul className="space-y-4 mb-8 grow">
@@ -87,6 +87,6 @@ export default function BusinessSavingsPage() {
                     </div>
                 </div>
             </section>
-        </main>
+        </div>
     );
 }

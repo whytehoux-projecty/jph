@@ -3,14 +3,16 @@ import fs from 'fs';
 import path from 'path';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { BRAND } from '@/src/content/facts';
+import { BRAND, PUBLIC_CONTACT } from '@/src/content/facts';
+import { ROUTES } from '@/lib/constants';
+import { PageHero } from '@/components/commercial-ui/Isobath';
 
 // List of allowed slugs to prevent directory traversal
+// 'security' and 'rates-and-fees' now have their own pages (app/(corporate)/security,
+// app/(corporate)/rates-and-fees) built from the Isobath components.
 const ALLOWED_SLUGS = [
-    'security',
     'help',
     'locations',
-    'rates-and-fees',
     'accessibility',
     'careers',
     'press',
@@ -34,41 +36,57 @@ export default async function ContentPage({ params }: { params: Promise<{ slug: 
 
     try {
         content = fs.readFileSync(filePath, 'utf8');
+        // The page hero carries the one h1, so drop the markdown's own title line
+        content = content.replace(/^#\s+.*(\r?\n)+/, '');
         // Replace dynamic brand variables in markdown
-        content = content.replace(/{{BRAND\.legalName}}/g, BRAND.legalName);
+        content = content.replace(/{{BRAND\.legalName}}/g, BRAND.shortName);
         content = content.replace(/{{BRAND\.shortName}}/g, BRAND.shortName);
         content = content.replace(/{{BRAND\.domain}}/g, BRAND.domain);
-        content = content.replace(/{{BRAND\.phone}}/g, BRAND.phoneDisplay);
+        content = content.replace(/{{BRAND\.phone}}/g, PUBLIC_CONTACT.phone);
+        content = content.replace(/{{BRAND\.address}}/g, PUBLIC_CONTACT.address);
     } catch (error) {
         console.error(`Missing markdown file for slug: ${pageSlug}`);
         notFound();
     }
 
     const titleMap: Record<string, string> = {
-        'security': 'Security Center',
-        'help': 'Help & Support',
-        'locations': 'Branches & ATMs',
-        'rates-and-fees': 'Rates & Fees',
-        'accessibility': 'Accessibility Statement',
+        'help': 'Help and support',
+        'locations': 'Branches and ATMs',
+        'accessibility': 'Accessibility statement',
         'careers': 'Careers',
-        'press': 'Press Room',
-        'investors': 'Investor Relations'
+        'press': 'Press room',
+        'investors': 'Investor relations'
     };
 
-    return (
-        <main className="min-h-screen bg-paper-100 py-16 sm:py-24">
-            <div className="max-w-3xl mx-auto px-6">
-                <div className="mb-12">
-                    <h1 className="font-display text-display-sm text-ink-900 mb-4">{titleMap[pageSlug] || 'Information'}</h1>
-                    <div className="h-1 w-12 bg-vermilion-600 rounded"></div>
-                </div>
+    const leadMap: Record<string, string> = {
+        'help': 'Answers to the questions we are asked most, and how to reach a person.',
+        'locations': 'Where to find us, and when we are open.',
+        'accessibility': 'How we make this site and Heritage Vault usable for everyone, and how to tell us when we fall short.',
+        'careers': 'Working at Heritage Trust.',
+        'press': 'News and statements from Heritage Trust.',
+        'investors': 'Reports and information for investors.',
+    };
 
-                <div className="prose prose-ink max-w-none prose-headings:font-display prose-headings:text-ink-900 prose-p:text-body prose-p:text-ink-700 prose-a:text-vermilion-600 prose-a:no-underline hover:prose-a:underline">
+    const title = titleMap[pageSlug] || 'Information';
+
+    return (
+        <>
+            <PageHero
+                label={title}
+                title={title}
+                lead={leadMap[pageSlug] ?? ''}
+                breadcrumb={[
+                    { href: ROUTES.home, label: 'Home' },
+                    { href: `/${pageSlug}`, label: title },
+                ]}
+            />
+            <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
+                <div className="ht-prose max-w-3xl">
                     <ReactMarkdown remarkPlugins={[remarkGfm]}>
                         {content}
                     </ReactMarkdown>
                 </div>
             </div>
-        </main>
+        </>
     );
 }

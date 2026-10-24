@@ -14,7 +14,7 @@ export const BANK_INFO = {
     name: BRAND.legalName,
     shortName: BRAND.shortName,
     portalName: BRAND.vault,
-    tagline: 'Trusted Since 1888. Built for Tomorrow.',
+    tagline: 'Trusted since 1988. Built for tomorrow.',
     founded: BRAND.founded,
     phone: BRAND.phoneTel,
     phoneDisplay: BRAND.phoneDisplay,

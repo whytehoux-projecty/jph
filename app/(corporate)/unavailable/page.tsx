@@ -27,7 +27,7 @@ export default function ServiceUnavailablePage() {
     useEffect(() => {}, []);
 
     return (
-        <main className="flex-1 flex items-center justify-center py-16 px-4">
+        <div className="flex-1 flex items-center justify-center py-16 px-4">
             <div className="container mx-auto max-w-2xl">
                 {/* Service Unavailable Card */}
                 <div className="bg-white rounded-xl shadow-2xl border border-gray-200 p-8 md:p-12 text-center">
@@ -119,6 +119,6 @@ export default function ServiceUnavailablePage() {
                     </div>
                 </div>
             </div>
-        </main>
+        </div>
     );
 }

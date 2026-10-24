@@ -22,7 +22,7 @@ export const LedgerSelect = React.forwardRef<HTMLSelectElement, LedgerSelectProp
                     ref={ref}
                     className={cn(
                         "w-full h-12 rounded border bg-paper-50 px-3 text-body outline-none focus-visible:border-ink-900 focus-visible:ring-1 focus-visible:ring-ink-900 transition-shadow appearance-none",
-                        error ? "border-vermilion-600" : "border-paper-300"
+                        error ? "border-alert" : "border-paper-300"
                     )}
                     {...props}
                 >
@@ -30,7 +30,7 @@ export const LedgerSelect = React.forwardRef<HTMLSelectElement, LedgerSelectProp
                         <option key={opt.value} value={opt.value}>{opt.label}</option>
                     )) : children}
                 </select>
-                {error && <p className="text-xs text-vermilion-600" role="alert">{error}</p>}
+                {error && <p className="text-xs text-alert" role="alert">{error}</p>}
                 {helperText && !error && <p className="text-xs text-ink-500">{helperText}</p>}
             </div>
         );

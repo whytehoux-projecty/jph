@@ -27,7 +27,7 @@ function Field({ id, label, error, hint, children }: { id: string; label: string
         <div className="space-y-1.5">
             <label htmlFor={id} className="block text-small font-medium text-ink-900">{label}</label>
             {children}
-            {error ? <p className="text-xs text-vermilion-600" role="alert">{error}</p> : hint ? <p className="text-xs text-ink-500">{hint}</p> : null}
+            {error ? <p className="text-xs text-alert" role="alert">{error}</p> : hint ? <p className="text-xs text-ink-500">{hint}</p> : null}
         </div>
     );
 }
@@ -182,7 +182,7 @@ export function ApplicationWizard() {
                         </div>
                         <h2 className="font-display text-h2 text-ink-900 mb-2">Application Received</h2>
                         <p className="text-body-lg text-ink-700 mb-8">
-                            Thank you for applying to {BRAND.legalName}. Your request has been securely routed to our onboarding team.
+                            Thank you for applying to {BRAND.shortName}. Your request has been securely routed to our onboarding team.
                         </p>
                         <div className="bg-paper-100 p-6 rounded border border-paper-200 mb-8 text-left">
                             <p className="label-mono text-ink-500 mb-1">Reference ID</p>
@@ -295,7 +295,7 @@ export function ApplicationWizard() {
                                                 </fieldset>
                                             );
                                         })}
-                                        {errors.idTypesHeld && <p className="text-xs text-vermilion-600" role="alert">{errors.idTypesHeld}</p>}
+                                        {errors.idTypesHeld && <p className="text-xs text-alert" role="alert">{errors.idTypesHeld}</p>}
                                     </div>
                                 )}
 
@@ -314,7 +314,7 @@ export function ApplicationWizard() {
                                                 );
                                             })}
                                         </div>
-                                        {errors.desiredAccountType && <p className="text-xs text-vermilion-600" role="alert">{errors.desiredAccountType}</p>}
+                                        {errors.desiredAccountType && <p className="text-xs text-alert" role="alert">{errors.desiredAccountType}</p>}
                                     </div>
                                 )}
 
@@ -414,7 +414,7 @@ export function ApplicationWizard() {
                                 </div>
 
                                 {errors.submit && (
-                                    <div className="p-4 bg-vermilion-600/10 text-vermilion-700 text-small rounded border border-vermilion-600/20" role="alert">{errors.submit}</div>
+                                    <div className="p-4 bg-alert/10 text-alert text-small rounded border border-alert/20" role="alert">{errors.submit}</div>
                                 )}
 
                                 <Field id="phone" label="Phone number" error={errors.phone} hint={country.phone.hint}>
@@ -438,15 +438,15 @@ export function ApplicationWizard() {
                                 <div className="space-y-4 pt-4 border-t border-paper-200">
                                     {([
                                         ['consentTerms', <>I have read and agree to the <Link href="/terms" target="_blank" className="underline text-ink-900">Terms and Conditions</Link>.</>],
-                                        ['consentPrivacy', <>I have read and agree to the <Link href="/privacy" target="_blank" className="underline text-ink-900">Privacy Policy</Link> and authorize {BRAND.legalName} to retain my information for preliminary screening.</>],
-                                        ['consentComms', <>I consent to {BRAND.legalName} verifying my identity and contacting me about my application by email and phone.</>],
+                                        ['consentPrivacy', <>I have read and agree to the <Link href="/privacy" target="_blank" className="underline text-ink-900">Privacy Policy</Link> and authorize {BRAND.shortName} to retain my information for preliminary screening.</>],
+                                        ['consentComms', <>I consent to {BRAND.shortName} verifying my identity and contacting me about my application by email and phone.</>],
                                     ] as [keyof typeof formData, React.ReactNode][]).map(([key, text]) => (
                                         <label key={key} className="flex items-start gap-3 cursor-pointer group">
                                             <input type="checkbox" checked={formData[key] as boolean} onChange={(e) => updateField(key, e.target.checked)}
                                                 className={`w-5 h-5 rounded mt-0.5 cursor-pointer accent-ink-900 ${errors[key] ? 'border-[#C8401A]' : 'border-[#CFC8B8]'}`} />
                                             <div>
                                                 <span className="text-small text-ink-700 block">{text}</span>
-                                                {errors[key] && <p className="text-xs text-vermilion-600 mt-1" role="alert">{errors[key]}</p>}
+                                                {errors[key] && <p className="text-xs text-alert mt-1" role="alert">{errors[key]}</p>}
                                             </div>
                                         </label>
                                     ))}

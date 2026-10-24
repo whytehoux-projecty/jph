@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from './cn';
 
 interface FootnoteItem {
   ref: number;
@@ -31,7 +31,7 @@ export function Footnote({ items, className }: FootnoteProps) {
       {items.map((item) => (
         <li key={item.ref} className="flex gap-2">
           <span
-            className="font-mono text-[0.7rem] leading-none mt-0.5 shrink-0 text-ink-500"
+            className="tabular text-xs leading-5 shrink-0 text-ink-500 min-w-[1ch]"
             aria-label={`Footnote ${item.ref}`}
           >
             {item.ref}
@@ -52,7 +52,7 @@ export function DisclosureBlock({
 }: FootnoteProps) {
   return (
     <div className={cn('border-t border-paper-200 pt-6 mt-12', className)}>
-      <p className="label-mono text-ink-500 mb-3">Disclosures</p>
+      <p className="ht-label text-ink-500 mb-3">Disclosures</p>
       <Footnote items={items} />
     </div>
   );

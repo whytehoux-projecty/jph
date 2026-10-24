@@ -9,27 +9,27 @@ import { BRAND } from '@/src/content/facts';
 import { Button } from '@/components/commercial-ui/Button';
 
 export const metadata: Metadata = {
-    title: 'Checking Accounts | Personal Banking',
-    description: `Explore ${BRAND.legalName} checking accounts. Find the right checking account for your everyday needs with mobile banking, zero overdraft fee options, and enhanced security.`,
+    title: 'Checking | Personal banking',
+    description: `Explore ${BRAND.shortName} checking accounts. Find the right checking account for your everyday needs with mobile banking, zero overdraft fee options, and enhanced security.`,
 };
 
 export default function CheckingPage() {
     return (
-        <main>
+        <div>
             {/* HERO */}
             <section className="relative bg-ink-900 text-paper-50 pt-24 pb-32 overflow-hidden">
                 <div className="absolute inset-0 z-0 opacity-40">
-                    <Image src="/images/products/personal-hero.webp" alt="Heritage Checking" fill className="object-cover" priority />
-                    <div className="absolute inset-0 bg-gradient-to-r from-ink-900 via-ink-900/90 to-transparent" />
+                    <Image src="/images/ht/home-family-1600.webp" alt="" fill className="object-cover" priority />
+                    <div className="absolute inset-0 bg-ink-900/60" />
                 </div>
                 <div className="container mx-auto px-6 max-w-7xl relative z-10">
                     <div className="max-w-2xl animate-fade-in-up">
-                        <p className="label-mono text-vermilion-500 mb-4">Personal Checking</p>
+                        <p className="label-mono text-sea-glass mb-4">Personal Checking</p>
                         <h1 className="font-display text-display-lg leading-tight mb-6">
                             Heritage Advantage Checking
                         </h1>
                         <p className="text-body-lg text-paper-200 mb-8">
-                            Three settings, one account. Choose the checking setting that works best for you and your family. Enjoy access to our award-winning Heritage Vault app, Fraud Shield™, and a vast network of ATMs.
+                            Three settings, one account. Choose the checking setting that works best for you and your family. Enjoy access to the Heritage Vault app, Fraud Shield™, and a vast network of ATMs.
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4">
                             <Button as="a" href={ROUTES.apply} variant="primary" size="lg">
@@ -59,7 +59,7 @@ export default function CheckingPage() {
                                 <p className="text-body text-ink-700 h-12">Help stay within your balance and avoid overdraft fees.</p>
                             </div>
                             <div className="mb-8">
-                                <p className="text-display-sm text-ink-900 font-medium">$4.95</p>
+                                <p className="text-data font-light text-ink-900 tabular">$4.95</p>
                                 <p className="text-small text-ink-500">Monthly maintenance fee</p>
                             </div>
                             <ul className="space-y-4 mb-8 grow">
@@ -71,14 +71,14 @@ export default function CheckingPage() {
                         </div>
 
                         {/* Plus */}
-                        <div className="bg-paper-50 rounded-xl p-8 border-2 border-vermilion-600 flex flex-col shadow-md relative transform md:-translate-y-4">
-                            <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-vermilion-600 text-paper-50 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider">Most Popular</div>
+                        <div className="bg-paper-50 rounded-xl p-8 border border-petrol flex flex-col shadow-md relative">
+                            <div className="absolute top-0 left-8 -translate-y-1/2 bg-petrol text-white px-2 py-1 ht-label">Most chosen</div>
                             <div className="mb-6">
                                 <h3 className="font-display text-h3 text-ink-900 mb-2">Advantage Plus</h3>
                                 <p className="text-body text-ink-700 h-12">For your everyday banking needs with easy ways to waive the fee.</p>
                             </div>
                             <div className="mb-8">
-                                <p className="text-display-sm text-ink-900 font-medium">$12.00</p>
+                                <p className="text-data font-light text-ink-900 tabular">$12.00</p>
                                 <p className="text-small text-ink-500">Monthly maintenance fee</p>
                             </div>
                             <ul className="space-y-4 mb-8 grow">
@@ -96,7 +96,7 @@ export default function CheckingPage() {
                                 <p className="text-body text-ink-700 h-12">Earn interest and get fee waivers on extra services.</p>
                             </div>
                             <div className="mb-8">
-                                <p className="text-display-sm text-ink-900 font-medium">$25.00</p>
+                                <p className="text-data font-light text-ink-900 tabular">$25.00</p>
                                 <p className="text-small text-ink-500">Monthly maintenance fee</p>
                             </div>
                             <ul className="space-y-4 mb-8 grow">
@@ -116,21 +116,21 @@ export default function CheckingPage() {
                     <h2 className="font-display text-h2 text-ink-900 mb-12 text-center">Included with every setting</h2>
                     <div className="grid md:grid-cols-3 gap-12">
                         <div className="text-center">
-                            <div className="w-16 h-16 mx-auto bg-paper-200 rounded-full flex items-center justify-center mb-6">
+                            <div className="w-16 h-16 mx-auto border border-paper-200 flex items-center justify-center mb-6">
                                 <Smartphone className="w-8 h-8 text-ink-900" />
                             </div>
                             <h3 className="font-display text-h4 text-ink-900 mb-3">Heritage Vault App</h3>
                             <p className="text-body text-ink-700">Deposit checks, manage alerts, and lock your debit card instantly from anywhere.</p>
                         </div>
                         <div className="text-center">
-                            <div className="w-16 h-16 mx-auto bg-paper-200 rounded-full flex items-center justify-center mb-6">
+                            <div className="w-16 h-16 mx-auto border border-paper-200 flex items-center justify-center mb-6">
                                 <ShieldCheck className="w-8 h-8 text-ink-900" />
                             </div>
                             <h3 className="font-display text-h4 text-ink-900 mb-3">$0 Liability Guarantee</h3>
                             <p className="text-body text-ink-700">You are not responsible for unauthorized transactions made with your debit card.</p>
                         </div>
                         <div className="text-center">
-                            <div className="w-16 h-16 mx-auto bg-paper-200 rounded-full flex items-center justify-center mb-6">
+                            <div className="w-16 h-16 mx-auto border border-paper-200 flex items-center justify-center mb-6">
                                 <Zap className="w-8 h-8 text-ink-900" />
                             </div>
                             <h3 className="font-display text-h4 text-ink-900 mb-3">Early Direct Deposit</h3>
@@ -139,6 +139,6 @@ export default function CheckingPage() {
                     </div>
                 </div>
             </section>
-        </main>
+        </div>
     );
 }

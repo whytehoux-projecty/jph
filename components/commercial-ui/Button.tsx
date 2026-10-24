@@ -1,5 +1,5 @@
 import React from 'react';
-import { cn } from '@/lib/utils';
+import { cn } from './cn';
 
 // 'outline' is kept for backward compatibility with portal components — maps to 'secondary'
 type ButtonVariant = 'primary' | 'secondary' | 'text' | 'outline';

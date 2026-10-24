@@ -114,7 +114,21 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
     pathname?.startsWith("/apply") ||
     pathname?.startsWith("/privacy") ||
     pathname?.startsWith("/terms") ||
-    pathname?.startsWith("/unavailable");
+    pathname?.startsWith("/unavailable") ||
+    // Marketing pages that use the corporate layout's own header and footer
+    pathname?.startsWith("/account-finder") ||
+    pathname?.startsWith("/transparency") ||
+    pathname?.startsWith("/security") ||
+    pathname?.startsWith("/rates-and-fees") ||
+    pathname?.startsWith("/help") ||
+    pathname?.startsWith("/locations") ||
+    pathname?.startsWith("/accessibility") ||
+    pathname?.startsWith("/careers") ||
+    pathname?.startsWith("/press") ||
+    pathname?.startsWith("/investors") ||
+    pathname?.startsWith("/products") ||
+    pathname?.startsWith("/status") ||
+    pathname?.startsWith("/verification");
 
   useEffect(() => {
     if (!isPassThrough) {

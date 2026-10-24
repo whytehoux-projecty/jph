@@ -9,22 +9,22 @@ import { BRAND } from '@/src/content/facts';
 import { Button } from '@/components/commercial-ui/Button';
 
 export const metadata: Metadata = {
-    title: 'Corporations & Institutions',
-    description: `Global banking and market solutions for mid-sized companies, large corporations, and institutional investors with ${BRAND.legalName}.`,
+    title: 'Corporations and institutions',
+    description: `Global banking and market solutions for mid-sized companies, large corporations, and institutional investors with ${BRAND.shortName}.`,
 };
 
 export default function CorporateInstitutionsPage() {
     return (
-        <main>
+        <div>
             {/* HERO */}
             <section className="relative bg-ink-900 text-paper-50 pt-24 pb-32 overflow-hidden">
                 <div className="absolute inset-0 z-0 opacity-40">
-                    <Image src="/images/products/corporate-hero.jpg" alt="Corporate Banking" fill className="object-cover" priority />
-                    <div className="absolute inset-0 bg-gradient-to-r from-ink-900 via-ink-900/90 to-transparent" />
+                    <Image src="/images/ht/building-dusk-1600.webp" alt="" fill className="object-cover" priority />
+                    <div className="absolute inset-0 bg-ink-900/60" />
                 </div>
                 <div className="container mx-auto px-6 max-w-7xl relative z-10">
                     <div className="max-w-2xl animate-fade-in-up">
-                        <p className="label-mono text-vermilion-500 mb-4">Corporations & Institutions</p>
+                        <p className="label-mono text-sea-glass mb-4">Corporations & Institutions</p>
                         <h1 className="font-display text-display-lg leading-tight mb-6">
                             Global reach. Local expertise.
                         </h1>
@@ -51,7 +51,7 @@ export default function CorporateInstitutionsPage() {
                     <div className="grid md:grid-cols-2 gap-8 max-w-5xl mx-auto">
                         {/* Commercial Banking */}
                         <div className="bg-paper-100 rounded-xl p-8 border border-paper-200 flex flex-col shadow-sm hover:border-ink-900 transition-colors">
-                            <div className="w-12 h-12 rounded-full bg-vermilion-100 flex items-center justify-center mb-6">
+                            <div className="w-12 h-12 border border-paper-200 flex items-center justify-center mb-6">
                                 <Building2 className="w-6 h-6 text-vermilion-600" />
                             </div>
                             <div className="mb-6">
@@ -63,8 +63,8 @@ export default function CorporateInstitutionsPage() {
 
                         {/* Global Corporate */}
                         <div className="bg-paper-100 rounded-xl p-8 border border-paper-200 flex flex-col shadow-sm hover:border-ink-900 transition-colors">
-                            <div className="w-12 h-12 rounded-full bg-pine-100 flex items-center justify-center mb-6">
-                                <Globe2 className="w-6 h-6 text-pine-600" />
+                            <div className="w-12 h-12 border border-paper-200 flex items-center justify-center mb-6">
+                                <Globe2 className="w-6 h-6 text-petrol" />
                             </div>
                             <div className="mb-6">
                                 <h3 className="font-display text-h3 text-ink-900 mb-2">Global Corporate Banking</h3>
@@ -75,7 +75,7 @@ export default function CorporateInstitutionsPage() {
 
                         {/* Treasury Services */}
                         <div className="bg-paper-100 rounded-xl p-8 border border-paper-200 flex flex-col shadow-sm hover:border-ink-900 transition-colors">
-                            <div className="w-12 h-12 rounded-full bg-ink-200 flex items-center justify-center mb-6">
+                            <div className="w-12 h-12 border border-paper-200 flex items-center justify-center mb-6">
                                 <BarChart4 className="w-6 h-6 text-ink-900" />
                             </div>
                             <div className="mb-6">
@@ -87,7 +87,7 @@ export default function CorporateInstitutionsPage() {
 
                         {/* Capital Markets */}
                         <div className="bg-paper-100 rounded-xl p-8 border border-paper-200 flex flex-col shadow-sm hover:border-ink-900 transition-colors">
-                            <div className="w-12 h-12 rounded-full bg-vermilion-100 flex items-center justify-center mb-6">
+                            <div className="w-12 h-12 border border-paper-200 flex items-center justify-center mb-6">
                                 <PieChart className="w-6 h-6 text-vermilion-600" />
                             </div>
                             <div className="mb-6">
@@ -99,6 +99,6 @@ export default function CorporateInstitutionsPage() {
                     </div>
                 </div>
             </section>
-        </main>
+        </div>
     );
 }
