@@ -4,7 +4,9 @@ export const authConfig = {
   pages: {
     signIn: '/login',
   },
-  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET || "fallback_secret_do_not_use_in_prod_1234567890",
+  // No fallback: without a configured secret Auth.js refuses to start rather
+  // than signing sessions with a value published in source.
+  secret: process.env.AUTH_SECRET || process.env.NEXTAUTH_SECRET,
   session: {
     strategy: "jwt",
     maxAge: 15 * 60, // 15 minutes for banking security (avoids clock skew issues)

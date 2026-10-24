@@ -2,7 +2,7 @@ import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from './lib/prisma';
-import bcrypt from 'bcryptjs';
+import { verifyPassword } from './lib/password';
 import { CredentialsSignin } from 'next-auth';
 
 class CustomAuthError extends CredentialsSignin {
@@ -49,9 +49,12 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
         if (isAdminLogin) {
           const admin = await prisma.adminUser.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } });
           if (!admin) return null;
-          // For demo: if password matches directly or bcrypt matches
-          const passwordsMatch = await bcrypt.compare(password, admin.password).catch(() => false);
-          if (passwordsMatch || password === admin.password) {
+          // Admin rows created before hashing are upgraded to bcrypt on first sign-in.
+          const passwordsMatch = await verifyPassword(password, admin.password, {
+            legacyPlaintext: true,
+            onUpgrade: (hash) => prisma.adminUser.update({ where: { id: admin.id }, data: { password: hash } }),
+          });
+          if (passwordsMatch) {
             return { id: admin.id, email: admin.email, name: admin.firstName, role: 'ADMIN' };
           }
         } else {
@@ -64,20 +67,11 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
               user = await prisma.user.findUnique({ where: { id: account.userId } });
             }
           }
-          if (!user) {
-            if (email.includes('@')) {
-              const adminFallback = await prisma.adminUser.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } });
-              if (adminFallback) {
-                const passwordsMatch = await bcrypt.compare(password, adminFallback.password).catch(() => false);
-                if (passwordsMatch || password === adminFallback.password) {
-                  return { id: adminFallback.id, email: adminFallback.email, name: adminFallback.firstName, role: 'ADMIN' };
-                }
-              }
-            }
-            return null;
-          }
-          const passwordsMatch = await bcrypt.compare(password, user.password).catch(() => false);
-          if (passwordsMatch || password === user.password) {
+          // Customer sign-in only ever authenticates customers; administrators
+          // sign in at /admin/login.
+          if (!user) return null;
+          const passwordsMatch = await verifyPassword(password, user.password);
+          if (passwordsMatch) {
             if (!user.hasOnlineAccess || user.eportalStatus !== 'ACTIVE') {
               throw new CustomAuthError(user.eportalNotificationMessage || "Your Account Access has been suspended, kindly contact CCU.");
             }
