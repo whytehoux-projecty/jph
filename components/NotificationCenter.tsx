@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
+import Link from 'next/link';
 import { Bell, CheckCheck, RotateCw } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -127,7 +128,7 @@ export function NotificationCenter() {
 
           {state === 'ready' && notifications.length > 0 && (
             <ul className="divide-y divide-line">
-              {notifications.map((n) => (
+              {notifications.slice(0, 8).map((n) => (
                 <li key={n.id}>
                   <button
                     type="button"
@@ -158,6 +159,15 @@ export function NotificationCenter() {
               ))}
             </ul>
           )}
+        </div>
+        <div className="border-t border-line px-4 py-2">
+          <Link
+            href="/notifications"
+            onClick={() => setIsOpen(false)}
+            className="inline-flex min-h-11 items-center text-small font-semibold text-fg-action underline-offset-[3px] hover:underline"
+          >
+            View all notifications
+          </Link>
         </div>
       </PopoverContent>
     </Popover>
