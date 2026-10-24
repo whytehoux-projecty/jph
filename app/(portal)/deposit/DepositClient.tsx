@@ -34,6 +34,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
 import { fmtMoney } from "@/lib/transfer-forms/validators";
 import { toast } from "@/lib/toast";
+import { Alert } from "@/components/ui/alert";
 import {
   submitDeposit,
   type BankRoutingDetails,
@@ -297,17 +298,6 @@ export default function DepositClient({
     account: string;
     date: string;
   } | null>(null);
-
-  const handleLoadSampleCheck = () => {
-    const blob1 = new Blob(["sample check front"], { type: "image/jpeg" });
-    const blob2 = new Blob(["sample check back endorsed"], { type: "image/jpeg" });
-    setFrontImage(new File([blob1], "check-front-official.jpg", { type: "image/jpeg" }));
-    setBackImage(new File([blob2], "check-back-endorsed.jpg", { type: "image/jpeg" }));
-    setCheckAmount("850.00");
-    setCheckNumber("1084");
-    setCheckIssuer("Apex Corporate Solutions Inc.");
-    toast.success({ title: "Sample Check Loaded", description: "Front, back, and routing populated." });
-  };
 
   const handleSubmitCheckDeposit = async () => {
     if (!checkAmount || parseFloat(checkAmount) <= 0 || !frontImage || !backImage) {
@@ -1360,15 +1350,6 @@ export default function DepositClient({
                                 Endorse the reverse of your physical check, capture high-contrast images of both sides, and submit for digital optical clearing.
                               </p>
                             </div>
-                            <Button
-                              variant="outline"
-                              size="small"
-                              onClick={handleLoadSampleCheck}
-                              className="rounded-none text-xs text-ink-700 hover:text-ink-900"
-                            >
-                              <Sparkles className="w-3.5 h-3.5 mr-1 text-vintage-gold" />
-                              Load Demo Check
-                            </Button>
                           </div>
 
                           {/* Account Picker */}
@@ -2002,7 +1983,17 @@ export default function DepositClient({
               {/* ================================================================= */}
               {/* TAB 5: USDC / USDT Stablecoin Deposit                             */}
               {/* ================================================================= */}
-              {activeTab === "crypto" && (
+              {activeTab === "crypto" && cryptoConfigs.length === 0 && (
+                <div className="border border-t-0 border-line bg-surface p-5 sm:p-8">
+                  <Alert variant="info" title="Crypto deposits are arranged with our team">
+                    To deposit USDC or USDT, contact us and we'll give you deposit instructions for your account.{" "}
+                    <Link href="/support" className="font-semibold text-fg-action underline underline-offset-[3px]">
+                      Contact support
+                    </Link>
+                  </Alert>
+                </div>
+              )}
+              {activeTab === "crypto" && cryptoConfigs.length > 0 && (
                 <motion.div
                   key="tab-crypto"
                   initial={{ opacity: 0, y: 4 }}
@@ -2149,7 +2140,7 @@ export default function DepositClient({
 
                               <div className="space-y-2 w-full min-w-0">
                                 <span className="text-[11px] font-mono uppercase tracking-wider text-ink-500 block">
-                                  Your Dedicated {selectedToken} Deposit Address ({activeCryptoConfig.networkLabel})
+                                  {selectedToken} deposit address ({activeCryptoConfig.networkLabel})
                                 </span>
                                 <div className="p-2.5 bg-white border border-paper-300 font-mono text-xs text-ink-900 break-all select-all">
                                   {activeCryptoConfig.address}

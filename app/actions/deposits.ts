@@ -192,57 +192,24 @@ export interface CryptoDepositConfig {
   minimumDeposit: number;
 }
 
+/**
+ * Stablecoin deposit addresses. These must be wallets the bank controls, so
+ * they are never hard-coded: set CRYPTO_DEPOSIT_CONFIGS to a JSON array of
+ * CryptoDepositConfig. With nothing configured, no address is shown and the
+ * portal directs customers to support.
+ */
 export async function getCryptoDepositConfigs(): Promise<CryptoDepositConfig[]> {
-  return [
-    {
-      token: 'USDC',
-      network: 'ERC20',
-      networkLabel: 'Ethereum (ERC-20)',
-      address: '0x71C8A6992E5B3c86B37b987514a38F3c3A03B426',
-      confirmationsRequired: 12,
-      minimumDeposit: 10,
-    },
-    {
-      token: 'USDC',
-      network: 'SOL',
-      networkLabel: 'Solana (SPL)',
-      address: '8X3BzpC98v4N7J7Vq4oX5d8x8dY8a7W2xK8d9X2V3L4',
-      confirmationsRequired: 32,
-      minimumDeposit: 5,
-    },
-    {
-      token: 'USDC',
-      network: 'POLYGON',
-      networkLabel: 'Polygon PoS',
-      address: '0x71C8A6992E5B3c86B37b987514a38F3c3A03B426',
-      confirmationsRequired: 64,
-      minimumDeposit: 5,
-    },
-    {
-      token: 'USDT',
-      network: 'TRC20',
-      networkLabel: 'Tron (TRC-20)',
-      address: 'TN3W4H6rK2Z5V8x3b8Y9q4N7oX5d8x8dY8',
-      confirmationsRequired: 20,
-      minimumDeposit: 10,
-    },
-    {
-      token: 'USDT',
-      network: 'ERC20',
-      networkLabel: 'Ethereum (ERC-20)',
-      address: '0x71C8A6992E5B3c86B37b987514a38F3c3A03B426',
-      confirmationsRequired: 12,
-      minimumDeposit: 10,
-    },
-    {
-      token: 'USDT',
-      network: 'POLYGON',
-      networkLabel: 'Polygon PoS',
-      address: '0x71C8A6992E5B3c86B37b987514a38F3c3A03B426',
-      confirmationsRequired: 64,
-      minimumDeposit: 5,
-    },
-  ];
+  const raw = process.env.CRYPTO_DEPOSIT_CONFIGS;
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed)
+      ? parsed.filter((c) => c && typeof c.address === 'string' && c.address && (c.token === 'USDC' || c.token === 'USDT'))
+      : [];
+  } catch {
+    console.error('[deposits] CRYPTO_DEPOSIT_CONFIGS is not valid JSON; no deposit addresses shown.');
+    return [];
+  }
 }
 
 export interface DepositLocation {
