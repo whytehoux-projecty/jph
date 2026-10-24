@@ -44,11 +44,35 @@ export function formatAmount(
   if (amount === null || amount === undefined || amount === "") return null;
   const n = typeof amount === "string" ? Number.parseFloat(amount) : amount;
   if (!Number.isFinite(n)) return null;
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-    signDisplay,
-    minimumFractionDigits,
-    maximumFractionDigits,
-  }).format(n);
+  try {
+    return new Intl.NumberFormat(locale, {
+      style: "currency",
+      currency,
+      signDisplay,
+      minimumFractionDigits,
+      maximumFractionDigits,
+    }).format(n);
+  } catch {
+    // Not an ISO 4217 code (e.g. the stablecoins USDC / USDT): format the
+    // number and append the code, so it is never mistaken for dollars.
+    const number = new Intl.NumberFormat(locale, {
+      signDisplay,
+      minimumFractionDigits: minimumFractionDigits ?? 2,
+      maximumFractionDigits: maximumFractionDigits ?? 2,
+    }).format(n);
+    return `${number} ${currency}`;
+  }
+}
+
+/** Sums balances per currency — amounts in different currencies are never added together. */
+export function totalsByCurrency<T extends { balance: number | string; currency?: string | null }>(
+  items: T[],
+  fallbackCurrency = "USD",
+): Array<{ currency: string; total: number }> {
+  const totals = new Map<string, number>();
+  for (const item of items) {
+    const code = item.currency || fallbackCurrency;
+    totals.set(code, (totals.get(code) ?? 0) + Number(item.balance || 0));
+  }
+  return [...totals].map(([currency, total]) => ({ currency, total }));
 }

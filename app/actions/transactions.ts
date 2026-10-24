@@ -49,6 +49,16 @@ export async function getTransactionStats(period: 'week' | 'month' | 'year' = 'm
   return { income, expenses };
 }
 
+/** Number of the customer's transactions still awaiting processing. */
+export async function countPendingTransactions() {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error('Unauthorized');
+
+  return prisma.transaction.count({
+    where: { account: { userId: session.user.id }, status: 'PENDING' },
+  });
+}
+
 export async function getRecentTransactions(limit: number = 5) {
   return getTransactions({ limit });
 }

@@ -12,8 +12,37 @@ class CustomAuthError extends CredentialsSignin {
   }
 }
 
-export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
+export const { auth, signIn, signOut, unstable_update, handlers: { GET, POST } } = NextAuth({
   ...authConfig,
+  callbacks: {
+    ...authConfig.callbacks,
+    async jwt(params) {
+      const token = await authConfig.callbacks.jwt(params);
+      // Staff view start/end (app/actions/staff-view.ts → unstable_update).
+      // Only a token that signed in as ADMIN can carry one; the customer is
+      // looked up here so a forged payload can't name a non-existent user.
+      if (params.trigger === 'update' && token.role === 'ADMIN' && params.session && 'staffView' in params.session) {
+        const requested = (params.session as any).staffView;
+        if (requested === null) {
+          delete (token as any).staffView;
+        } else if (typeof requested?.userId === 'string') {
+          const customer = await prisma.user.findUnique({
+            where: { id: requested.userId },
+            select: { id: true, email: true, firstName: true, lastName: true },
+          });
+          if (customer) {
+            (token as any).staffView = {
+              userId: customer.id,
+              email: customer.email,
+              name: `${customer.firstName} ${customer.lastName}`.trim(),
+              startedAt: new Date().toISOString(),
+            };
+          }
+        }
+      }
+      return token;
+    },
+  },
   providers: [
     CredentialsProvider({
       name: 'Credentials',
@@ -21,25 +50,8 @@ export const { auth, signIn, signOut, handlers: { GET, POST } } = NextAuth({
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
         is_admin: { label: "Admin Login", type: "text" },
-        impersonationToken: { label: "Token", type: "text" }
       },
       async authorize(credentials) {
-        if (credentials?.impersonationToken) {
-          const tokenRecord = await prisma.impersonationToken.findUnique({
-            where: { token: credentials.impersonationToken as string }
-          });
-          
-          if (!tokenRecord || tokenRecord.expiresAt < new Date()) {
-            return null;
-          }
-          
-          const user = await prisma.user.findUnique({ where: { id: tokenRecord.userId } });
-          if (!user) return null;
-          
-          await prisma.impersonationToken.delete({ where: { id: tokenRecord.id } });
-          return { id: user.id, email: user.email, name: user.firstName, role: 'USER' };
-        }
-
         if (!credentials?.email || !credentials?.password) return null;
 
         const email = (credentials.email as string).trim();

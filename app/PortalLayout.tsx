@@ -2,21 +2,24 @@
 
 import { ReactNode, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import { cn } from "@/lib/utils";
-import { PortalHeader } from "@/components/layout/PortalHeader";
-import { PortalSubHeader } from "@/components/layout/PortalSubHeader";
-import type { UserProfile } from "@/components/layout/RightSidebar";
-import { Footer } from "@/components/layout/Footer";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { AppTopBar } from "@/components/layout/AppTopBar";
+import { MobileNavDrawer } from "@/components/layout/MobileNavDrawer";
+import { PortalFooter } from "@/components/layout/PortalFooter";
+import type { PortalProfile } from "@/components/layout/types";
 import { MobileInstallPrompt } from "@/components/layout/MobileInstallPrompt";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { PinSetupModal } from "@/components/portal/PinSetupModal";
 import { AutoLogoutProvider } from "@/components/layout/AutoLogoutProvider";
 import { getProfile } from "@/app/actions/profile";
 import { ToastViewport } from "@/components/ui/toast";
+import { getStaffViewState, type StaffViewState } from "@/app/actions/staff-view";
 
 export default function PortalLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profile, setProfile] = useState<PortalProfile | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [staffView, setStaffView] = useState<StaffViewState | null>(null);
 
   // Skip portal layout for auth, corporate marketing, and admin pages
   const isPassThrough =
@@ -66,9 +69,7 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
               profilePhotoUrl: user.profilePhotoUrl,
               hideBalance: user.hideBalance,
               email: user.email,
-              phone: user.phone,
-              profileType: (user as any).profileType || "PERSONAL",
-              accountNumber: (user as any).accounts?.[0]?.accountNumber,
+              profileType: user.profileType || "PERSONAL",
             });
           }
         })
@@ -76,6 +77,9 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
           // Unauthenticated or error
           setProfile(null);
         });
+      getStaffViewState()
+        .then(setStaffView)
+        .catch(() => setStaffView(null));
     }
   }, [isPassThrough, pathname]);
 
@@ -85,30 +89,35 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
 
   return (
     <AutoLogoutProvider>
-      <div className="flex min-h-screen bg-paper-200 relative isolate">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-(--z-skip-link) focus:bg-surface focus:px-4 focus:py-3 focus:text-small focus:font-semibold focus:text-fg focus:outline-2 focus:outline-focus"
+      >
+        Skip to main content
+      </a>
+      <div className="min-h-dvh bg-surface-muted">
+        <AppSidebar />
+        <div className="flex min-h-dvh flex-col lg:pl-64">
+          <AppTopBar profile={profile} staffView={staffView} onOpenMenu={() => setMenuOpen(true)} />
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="mx-auto w-full max-w-(--container-page) flex-1 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-6 focus:outline-none md:px-6 lg:px-8 lg:pb-12 lg:pt-8"
+          >
+            {children}
+          </main>
+          <div className="pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
+            <PortalFooter />
+          </div>
+        </div>
+        <MobileBottomNav onOpenMenu={() => setMenuOpen(true)} />
+        <MobileNavDrawer open={menuOpen} onOpenChange={setMenuOpen} />
         <MobileInstallPrompt />
-
-      <div className="flex-1 flex flex-col min-w-0 relative z-10 transition-all duration-300 ease-in-out">
-        <PortalHeader
-          profile={profile}
-        />
-        <PortalSubHeader profile={profile} accountNumber={profile?.accountNumber} />
-        <main
-          className={cn(
-            "flex-1 px-4 md:px-6 lg:px-8 pt-5 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-6",
-            "transition-all duration-300 ease-in-out",
-          )}>
-          {children}
-        </main>
-        <Footer isSlim={true} />
       </div>
 
-      {/* Global Toast Notification Container */}
       <ToastViewport />
-      {profile && !profile.pinSetupComplete && <PinSetupModal />}
-      
-      <MobileBottomNav />
-    </div>
+      {/* Only the customer may set their own transaction PIN — never in staff view. */}
+      {profile && !staffView && !profile.pinSetupComplete && <PinSetupModal />}
     </AutoLogoutProvider>
   );
 }

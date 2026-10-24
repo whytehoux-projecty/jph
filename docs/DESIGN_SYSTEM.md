@@ -484,6 +484,47 @@ Every monetary value goes through `Amount`.
 
 ---
 
+## App shell and page header
+
+`app/PortalLayout.tsx` with `components/layout/*`
+
+- **Navigation source:** one definition, `lib/portal-nav.ts`, feeds the desktop sidebar, the mobile drawer and the mobile tab bar. Add routes there, never in a component.
+- **Desktop (`lg` and up):** a fixed 256 px sidebar holds the logo and grouped navigation (Banking, Move money, Grow, then Support and Settings). The active item gets a petrol rule, a `surface-selected` fill and `aria-current="page"`. A sticky top bar holds Help, notifications and the user menu.
+- **Mobile:** a top bar with a menu button and the logo. A bottom tab bar has Home, Accounts, Pay, Activity and Menu, all within thumb reach. Menu opens the full navigation in a drawer.
+- **User menu:** customer name and email, then Profile and settings, Help and support, and Sign out (which asks for confirmation). In a staff view, Sign out is replaced by Return to admin.
+- **Staff view:** when an administrator opens a customer's online banking from the admin portal, a dark banner inside the sticky header names the customer and offers Return to admin.
+- **Content:** width is capped at `--container-page`. The footer carries only the commercial site's legal line and links.
+
+### Page header
+
+`components/layout/PageHeader.tsx`
+
+Every signed-in page starts with a `PageHeader`:
+
+- **Title:** the page's only h1, in the serif.
+- **Description:** optional, one sentence.
+- **Breadcrumb:** only for pages two or more levels deep.
+- **Actions:** at most one primary action, placed last.
+
+```tsx
+<PageHeader
+  title="Statements"
+  description="Monthly statements for all your accounts."
+  breadcrumb={[{ label: "Accounts", href: "/vaults" }, { label: "Statements" }]}
+  actions={<Button>Download all</Button>}
+/>
+```
+
+### Page states
+
+Every data page gets `loading.tsx` and `error.tsx` next to its `page.tsx`:
+
+- **Loading:** a skeleton that mirrors the page's layout.
+- **Error:** an `EmptyState` with a Try again button (`reset()`) and a link to support.
+- **Empty sections:** use `EmptyState` with a next step.
+
+A page never shows a blank area, and it never fills one with placeholder figures.
+
 ## Accessibility checklist (WCAG 2.1 AA)
 
 - **Contrast:** text is 4.5:1 or more (every text token above passes on its intended surface). Non-text UI such as input borders and focus rings is 3:1 or more.

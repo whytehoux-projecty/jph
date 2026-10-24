@@ -26,6 +26,25 @@ export const authConfig = {
       if (token?.isFirstLogin !== undefined) {
         (session.user as any).isFirstLogin = token.isFirstLogin;
       }
+      // Staff view: an administrator is viewing a customer's online banking.
+      // The portal sees the customer (so every existing data action scopes to
+      // them); the admin is kept as `staffView.staff`. Admin-only actions see
+      // role USER and refuse, and middleware keeps /admin closed until the
+      // staff view ends. Set only by auth.ts (jwt, trigger "update").
+      const staffView = (token as any)?.staffView;
+      if (staffView?.userId && token?.role === 'ADMIN') {
+        session.user.id = staffView.userId;
+        session.user.email = staffView.email;
+        session.user.name = staffView.name;
+        (session.user as any).role = 'USER';
+        delete (session.user as any).isFirstLogin;
+        (session as any).staffView = {
+          customerName: staffView.name,
+          staffId: token.sub,
+          staffName: (token as any).name ?? null,
+          startedAt: staffView.startedAt,
+        };
+      }
       return session;
     },
     async jwt({ token, user }) {
