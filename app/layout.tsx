@@ -2,6 +2,7 @@ import "./globals.css";
 import type { Metadata, Viewport } from "next";
 import PortalLayout from "./PortalLayout";
 import { Toaster } from "sonner";
+import { fontVariables } from "./fonts";
 
 export const metadata: Metadata = {
   title: {
@@ -34,8 +35,8 @@ export const metadata: Metadata = {
 };
 
 export const viewport: Viewport = {
-  // Heritage Trust brand colour on Ledger identity
-  themeColor: '#FBF9F4',
+  // Surface token (white ground)
+  themeColor: '#FFFFFF',
   width: 'device-width',
   initialScale: 1,
   // maximumScale removed — blocking pinch-zoom is a WCAG failure (A6 fix)
@@ -47,7 +48,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en">
+    <html lang="en" className={fontVariables}>
       <body suppressHydrationWarning>
         <PortalLayout>{children}</PortalLayout>
         <Toaster position="top-right" richColors />

@@ -16,32 +16,32 @@ export function VintageIcon({
 }: VintageIconProps) {
 
     const variants = {
-        gold: "bg-vermilion-600/20 text-vermilion-700 border-vermilion-600/30",
-        green: "bg-pine-700/20 text-pine-800 border-pine-700/30",
-        "ink-900": "bg-ink-900/10 text-ink-900 border-ink-900/20",
-        cream: "bg-paper-50/20 text-paper-50 border-paper-50/30",
+        gold: "bg-action-subtle text-fg-action border-transparent",
+        green: "bg-success-subtle text-success border-transparent",
+        "ink-900": "bg-surface-muted text-fg border-line",
+        cream: "bg-transparent text-fg-inverse border-line-inverse",
     };
 
     const sizes = {
-        sm: "p-2 rounded-lg",
-        md: "p-3 rounded-xl",
-        lg: "p-4 rounded-2xl",
+        sm: "p-2 rounded-control",
+        md: "p-2.5 rounded-control",
+        lg: "p-3 rounded-surface",
     };
 
     const iconSizes = {
-        sm: "w-4 h-4",
-        md: "w-6 h-6",
-        lg: "w-8 h-8",
+        sm: "size-4",
+        md: "size-5",
+        lg: "size-6",
     };
 
     return (
         <div className={cn(
-            "flex items-center justify-center border backdrop-blur-sm transition-all duration-300 group-hover:scale-110",
+            "flex shrink-0 items-center justify-center border",
             variants[variant],
             sizes[size],
             className
         )}>
-            <Icon className={cn(iconSizes[size], "stroke-[1.5]")} />
+            <Icon className={iconSizes[size]} strokeWidth={1.5} aria-hidden="true" />
         </div>
     );
 }

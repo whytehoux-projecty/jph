@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { X, Smartphone, Download, CheckCircle, Loader2 } from "lucide-react";
+import { X, Smartphone, Download, CheckCircle, Loader2, Share, SquarePlus } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import {
   Dialog,
@@ -205,19 +205,11 @@ export function MobileInstallPrompt() {
               </p>
               <div className="flex items-center gap-2">
                 <span>1. Tap the Share button</span>
-                <Image
-                  src="/images/icons/ios-share.svg"
-                  width={16}
-                  height={16}
-                  alt="Share"
-                  className="inline-block"
-                />
+                <Share className="inline-block size-4" aria-label="Share" />
               </div>
               <div className="flex items-center gap-2">
                 <span>2. Select "Add to Home Screen"</span>
-                <div className="h-4 w-4 border border-gray-400 rounded-sm flex items-center justify-center text-[10px]">
-                  +
-                </div>
+                <SquarePlus className="size-4" aria-hidden="true" />
               </div>
             </div>
           )}

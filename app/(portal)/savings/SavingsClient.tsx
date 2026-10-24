@@ -32,6 +32,7 @@ import {
   Wallet,
   AlertCircle,
   Copy,
+  X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/Button";
@@ -1077,9 +1078,10 @@ export default function SavingsClient({
                           </h3>
                           <button
                             onClick={() => setDepositModalGoal(null)}
-                            className="text-ink-500 hover:text-ink-900 text-sm font-bold"
+                            aria-label="Close"
+                            className="text-ink-500 hover:text-ink-900"
                           >
-                            ✕
+                            <X className="size-4" aria-hidden="true" />
                           </button>
                         </div>
 

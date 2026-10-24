@@ -1,28 +1,33 @@
 
 @import "tailwindcss";
+@import "./styles/tokens.css";
 @plugin "@tailwindcss/typography";
 
 @theme {
-  --color-border: hsl(var(--border));
-  --color-input: hsl(var(--input));
-  --color-ring: hsl(var(--ring));
-  --color-background: hsl(var(--background));
-  --color-foreground: hsl(var(--foreground));
-  --color-primary: hsl(var(--primary));
-  --color-primary-foreground: hsl(var(--primary-foreground));
-  --color-secondary: hsl(var(--secondary));
-  --color-secondary-foreground: hsl(var(--secondary-foreground));
-  --color-destructive: hsl(var(--destructive));
-  --color-destructive-foreground: hsl(var(--destructive-foreground));
-  --color-muted: hsl(var(--muted));
-  --color-muted-foreground: hsl(var(--muted-foreground));
-  --color-accent: hsl(var(--accent));
-  --color-accent-foreground: hsl(var(--accent-foreground));
-  --color-popover: hsl(var(--popover));
-  --color-popover-foreground: hsl(var(--popover-foreground));
-  --color-card: hsl(var(--card));
-  --color-card-foreground: hsl(var(--card-foreground));
+  /* shadcn role names, pointed at the design tokens in styles/tokens.css */
+  --color-border: var(--color-line);
+  --color-input: var(--color-line-strong);
+  --color-ring: var(--color-focus);
+  --color-background: var(--color-surface);
+  --color-foreground: var(--color-fg);
+  --color-primary: var(--color-action);
+  --color-primary-foreground: var(--color-fg-on-action);
+  --color-secondary: var(--color-surface-muted);
+  --color-secondary-foreground: var(--color-fg);
+  --color-destructive: var(--color-danger);
+  --color-destructive-foreground: var(--color-fg-on-action);
+  --color-muted: var(--color-surface-muted);
+  --color-muted-foreground: var(--color-fg-muted);
+  --color-accent: var(--color-surface-muted);
+  --color-accent-foreground: var(--color-fg);
+  --color-popover: var(--color-surface);
+  --color-popover-foreground: var(--color-fg);
+  --color-card: var(--color-surface);
+  --color-card-foreground: var(--color-fg);
 
+  /* ── Deprecated legacy palette ───────────────────────────────────────────
+     Kept so existing screens render unchanged until they are migrated to
+     the role tokens. Do not use in new code (docs/DESIGN_SYSTEM.md). */
   --color-paper: #F6F1E7;
   --color-paper-50: #FBF9F4;
   --color-paper-100: #F6F1E7; /* Updated to brand paper */
@@ -47,52 +52,22 @@
   --color-stone-400: #A8A498;
   --color-stone-500: #8A8577;
   --color-stone-600: #6B675C;
-  
-  --color-success: #1B7A4B;
-  --color-success-bg: #E6F3EC;
-  --color-warning: #8A5300;
-  --color-warning-bg: #FFF3D6;
-  --color-error: #B42318;
-  --color-error-bg: #FDECEA;
-  --color-info: #1F5FA6;
-  --color-info-bg: #E8F0FA;
-  
-  /* Isobath system, adapted to Heritage Trust (commercial site).
-     New names only, so the portal and admin keep their palette. The marketing
-     layout also remaps paper / ink / vermilion inside .ht-site — see
-     app/(corporate)/globals.css. */
+
+  /* Isobath names used by the marketing pages — aliases of the brand
+     primitives in styles/tokens.css. */
   --color-white: #FFFFFF;
-  --color-chalk: #F4F6F5;
-  --color-heritage-ink: #14181C;
-  --color-petrol: #0E4A55;
-  --color-petrol-700: #0A3840;
-  --color-shallows: #E2EEEC;
-  --color-fog: #56636A;
-  --color-shoal: #D5DBDA;
-  --color-sea-glass: #7CC4B8;
-  --color-alert: #B3261E;
-  --color-logo-orange: #E8532B;
+  --color-chalk: var(--color-brand-chalk);
+  --color-heritage-ink: var(--color-brand-ink);
+  --color-petrol: var(--color-brand-petrol);
+  --color-petrol-700: var(--color-brand-petrol-deep);
+  --color-shallows: var(--color-brand-shallows);
+  --color-fog: var(--color-brand-fog);
+  --color-shoal: var(--color-brand-shoal);
+  --color-sea-glass: var(--color-brand-sea-glass);
+  --color-alert: var(--color-danger);
+  --color-logo-orange: var(--color-brand-orange);
 
-  --font-serif: "Source Serif 4", Georgia, "Times New Roman", serif;
-  --font-code: "Source Code Pro", ui-monospace, SFMono-Regular, monospace;
-
-  --text-display-sm: 2.75rem;
-  --text-display-sm--line-height: 1.136;
-  --text-display-sm--letter-spacing: -0.005em;
-  --text-display-sm--font-weight: 400;
-
-  --text-lead: 1.3125rem;
-  --text-lead--line-height: 1.524;
-
-  --text-figure: 3.25rem;
-  --text-figure--line-height: 1.077;
-  --text-figure--letter-spacing: -0.01em;
-  --text-figure--font-weight: 300;
-
-  --font-display: "Familjen Grotesk", ui-sans-serif, system-ui, sans-serif;
-  --font-sans: "Public Sans", ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "IBM Plex Mono", ui-monospace, SFMono-Regular, monospace;
-  
+  /* Marketing display sizes (overridden inside .ht-site by isobath.css) */
   --text-display-xl: clamp(3rem,6vw + 1rem,5.5rem);
   --text-display-xl--line-height: 0.98;
   --text-display-xl--letter-spacing: -0.03em;
@@ -103,54 +78,19 @@
   --text-display-lg--letter-spacing: -0.025em;
   --text-display-lg--font-weight: 600;
 
-  --text-h1: 2.5rem;
-  --text-h1--line-height: 1.1;
-  --text-h1--letter-spacing: -0.02em;
-  --text-h1--font-weight: 600;
+  --text-display-sm: 2.75rem;
+  --text-display-sm--line-height: 1.136;
+  --text-display-sm--letter-spacing: -0.005em;
+  --text-display-sm--font-weight: 400;
 
-  --text-h2: 2rem;
-  --text-h2--line-height: 1.15;
-  --text-h2--letter-spacing: -0.015em;
-  --text-h2--font-weight: 600;
+  --text-lead: 1.3125rem;
+  --text-lead--line-height: 1.524;
 
-  --text-h3: 1.5rem;
-  --text-h3--line-height: 1.25;
-  --text-h3--letter-spacing: -0.01em;
-  --text-h3--font-weight: 600;
-
-  --text-h4: 1.25rem;
-  --text-h4--line-height: 1.3;
-  --text-h4--font-weight: 600;
-
-  --text-body-lg: 1.125rem;
-  --text-body-lg--line-height: 1.6;
-
-  --text-body: 1rem;
-  --text-body--line-height: 1.6;
-
-  --text-small: 0.875rem;
-  --text-small--line-height: 1.5;
-
-  --text-label: 0.75rem;
-  --text-label--line-height: 1.4;
-  --text-label--letter-spacing: 0.08em;
-  --text-label--font-weight: 500;
-
-  --text-data-lg: 2.5rem;
-  --text-data-lg--line-height: 1;
-  --text-data-lg--letter-spacing: -0.02em;
-  --text-data-lg--font-weight: 500;
-
-  --text-data: 1rem;
-  --text-data--line-height: 1.4;
-  
   --radius-sm: 2px;
   --radius-md: 4px;
   --radius-lg: 8px;
   --radius-xl: 1rem;
   --radius-2xl: 1.5rem;
-  
-  --container-measure: 62ch;
   
   --spacing-18: 4.5rem;
   --spacing-88: 22rem;
@@ -162,70 +102,6 @@
   --shadow-vintage-xl: 0 16px 48px rgba(13,37,69,0.20);
   --shadow-navy-glow: 0 0 0 3px rgba(13,37,69,0.15);
   --shadow-gold-glow: 0 4px 20px rgba(184,150,12,0.25);
-}
-
-@layer base {
-  :root {
-    --background: 0 0% 98%;
-    --foreground: 0 0% 24%;
-
-    --card: 216 50% 96%;
-    --card-foreground: 0 0% 24%;
-
-    --popover: 216 50% 96%;
-    --popover-foreground: 0 0% 24%;
-
-    --primary: 214 68% 16%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 48 88% 38%;
-    --secondary-foreground: 0 0% 100%;
-
-    --muted: 216 50% 96%;
-    --muted-foreground: 0 0% 45%;
-
-    --accent: 48 88% 38%;
-    --accent-foreground: 0 0% 100%;
-
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 214 68% 16%;
-
-    --radius: 0.5rem;
-  }
-
-  .dark {
-    --background: 0 0% 10%;
-    --foreground: 0 0% 98%;
-
-    --card: 0 0% 13%;
-    --card-foreground: 0 0% 98%;
-
-    --popover: 0 0% 13%;
-    --popover-foreground: 0 0% 98%;
-
-    --primary: 214 68% 40%;
-    --primary-foreground: 0 0% 100%;
-
-    --secondary: 48 88% 45%;
-    --secondary-foreground: 0 0% 10%;
-
-    --muted: 0 0% 20%;
-    --muted-foreground: 0 0% 63.9%;
-
-    --accent: 0 0% 20%;
-    --accent-foreground: 0 0% 98%;
-
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 0 0% 98%;
-
-    --border: 0 0% 30%;
-    --input: 0 0% 30%;
-    --ring: 214 68% 40%;
-  }
 }
 
 @layer base {

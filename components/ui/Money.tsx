@@ -1,5 +1,11 @@
-import { cn, formatCurrency } from "@/lib/utils";
+import { cn } from "@/lib/utils";
+import { formatAmount } from "@/lib/format";
 
+/**
+ * Plain currency text with tabular figures. Kept for existing call sites;
+ * new code uses <Amount> (components/ui/amount.tsx), which adds credit/debit
+ * tone and masking.
+ */
 interface MoneyProps {
   amount: number | string;
   currency?: string;
@@ -15,21 +21,14 @@ export function Money({
   className,
   signDisplay = "auto",
 }: MoneyProps) {
-  const numericAmount = typeof amount === "string" ? parseFloat(amount) : amount;
-  const isNaN = Number.isNaN(numericAmount);
-  
-  if (isNaN) {
-    return <span className={cn("font-mono tabular-nums lining-nums text-muted-foreground", className)}>-</span>;
+  const formatted = formatAmount(amount, { currency, locale, signDisplay });
+
+  if (formatted === null) {
+    return <span className={cn("font-sans tabular-nums lining-nums text-fg-muted", className)}>-</span>;
   }
 
-  const formatted = new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-    signDisplay,
-  }).format(numericAmount);
-
   return (
-    <span className={cn("font-mono tabular-nums lining-nums", className)}>
+    <span className={cn("font-sans tabular-nums lining-nums", className)}>
       {formatted}
     </span>
   );

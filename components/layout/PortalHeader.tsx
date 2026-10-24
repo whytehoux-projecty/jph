@@ -3,8 +3,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import Image from "next/image";
-import { User, Globe, Menu, Shield, LogOut, Settings } from "lucide-react";
+import { User, Globe, Menu, Shield, LogOut, Settings, Headset, SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { cn } from "@/lib/utils";
 import {
@@ -126,14 +125,7 @@ export function PortalHeader({
             title="Live Support"
             className="flex items-center w-auto gap-1.5 sm:gap-2 bg-transparent border border-paper-200 text-ink-900 hover:bg-paper-50 px-2 sm:px-2.5 h-8 rounded transition-colors text-sm"
           >
-            <div className="relative h-4 w-4 overflow-hidden opacity-80 saturate-0 contrast-125 shrink-0">
-              <Image 
-                src="/images/icons/service.png" 
-                alt="Support" 
-                fill
-                className="object-contain"
-              />
-            </div>
+            <Headset className="size-4 shrink-0" strokeWidth={1.75} aria-hidden="true" />
             <span className="hidden sm:inline">Live Support</span>
           </Link>
 
@@ -147,14 +139,7 @@ export function PortalHeader({
                 title="Account Settings"
                 className="flex h-8 w-8 items-center justify-center rounded text-ink-900 transition-colors hover:bg-paper-100/50 outline-none focus-visible:ring-2 focus-visible:ring-paper-300"
               >
-                <div className="relative h-4 w-4 overflow-hidden opacity-80 hover:opacity-100 transition-opacity saturate-0 contrast-125 pointer-events-none">
-                  <Image 
-                    src="/images/icons/control.png" 
-                    alt="Settings" 
-                    fill
-                    className="object-contain"
-                  />
-                </div>
+                <SlidersHorizontal className="size-4" strokeWidth={1.75} aria-hidden="true" />
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48 bg-paper-50 border border-paper-200 text-ink-900 shadow-xl rounded-md p-1">
