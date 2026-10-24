@@ -4,6 +4,8 @@ import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { sendEmail } from '@/lib/email';
+import bcrypt from 'bcryptjs';
+import { generateTemporaryPassword } from '@/lib/temporary-password';
 
 export async function handleApprove(formData: FormData) {
   const session = await auth();
@@ -123,12 +125,40 @@ export async function handleEportalApprove(formData: FormData) {
     data: { status: 'APPROVED', reviewedAt: new Date() }
   });
 
-  // Activate user online access
+  // Activate user online access with a unique temporary password. The
+  // customer must replace it at first sign-in (isFirstLogin → /onboarding).
   const user = await prisma.user.findUnique({where: {email: req.email}});
   if (user) {
+    const tempPassword = generateTemporaryPassword();
     await prisma.user.update({
       where: { id: user.id },
-      data: { hasOnlineAccess: true, eportalStatus: 'ACTIVE' }
+      data: {
+        hasOnlineAccess: true,
+        eportalStatus: 'ACTIVE',
+        isFirstLogin: true,
+        password: await bcrypt.hash(tempPassword, 12),
+        // Shown to staff in the admin customer view until first sign-in,
+        // as for credentials set there (cleared by onboarding).
+        temporaryPassword: tempPassword,
+      }
+    });
+
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    await sendEmail({
+      to: user.email,
+      subject: 'Your Heritage Vault online banking access',
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #14181C;">
+          <h2>Online banking is ready</h2>
+          <p>Dear ${user.firstName},</p>
+          <p>Your request for online banking access has been approved. Sign in with your email address and this temporary password:</p>
+          <p><strong>Temporary password:</strong> ${tempPassword}</p>
+          <p>When you first sign in you will be asked to choose your own password and a transaction PIN. The temporary password stops working once you have done that.</p>
+          <a href="${baseUrl}/login" style="display: inline-block; padding: 12px 20px; background-color: #0E4A55; color: #fff; text-decoration: none; border-radius: 2px; margin: 20px 0;">Sign in to Heritage Vault</a>
+          <p>We will never ask you for this password by phone, text or email.</p>
+          <p>Heritage Trust</p>
+        </div>
+      `
     });
   }
 

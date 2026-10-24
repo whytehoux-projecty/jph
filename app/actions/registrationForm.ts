@@ -2,7 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
-import bcrypt from 'bcryptjs';
+import { unusablePasswordHash } from '@/lib/temporary-password';
 import { encryptDeterministic } from '@/lib/encryption';
 
 export async function submitRegistrationForm(token: string, data: any) {
@@ -14,7 +14,8 @@ export async function submitRegistrationForm(token: string, data: any) {
         throw new Error('Invalid or expired registration token');
     }
 
-    const tempPassword = await bcrypt.hash('Welcome123!', 10);
+    // No usable password yet: credentials are issued when online access is approved.
+    const tempPassword = await unusablePasswordHash();
 
     const result = await prisma.$transaction(async (tx) => {
         const settings = await tx.systemSettings.findFirst();

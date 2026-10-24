@@ -5,11 +5,9 @@ const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KE
 
 export async function sendEmail({ to, subject, html }: { to: string, subject: string, html: string }) {
   if (!resend) {
-    console.log(`\n================= MOCK EMAIL =================`);
-    console.log(`To: ${to}`);
-    console.log(`Subject: ${subject}`);
-    console.log(`Content:\n${html}`);
-    console.log(`==============================================\n`);
+    // Email isn't configured. Never log the recipient or body: messages carry
+    // credentials and personal data.
+    console.warn(`[email] RESEND_API_KEY is not set; "${subject}" was not sent.`);
     return { success: true, mock: true };
   }
 
