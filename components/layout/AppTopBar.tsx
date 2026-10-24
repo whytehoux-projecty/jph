@@ -22,7 +22,7 @@ export function AppTopBar({
   onOpenMenu: () => void;
 }) {
   return (
-    <header className="sticky top-0 z-(--z-header) border-b border-line bg-surface">
+    <header className="sticky top-0 z-(--z-header) border-b border-line bg-surface print:hidden">
       {staffView && <StaffViewBanner state={staffView} />}
       <div className="flex h-16 items-center gap-2 px-2 sm:px-4 lg:px-8">
         <button

@@ -14,7 +14,7 @@ const LINKS = [
 /** Signed-in footer: the commercial site's legal line and links, nothing else. */
 export function PortalFooter() {
   return (
-    <footer className="border-t border-line bg-surface">
+    <footer className="border-t border-line bg-surface print:hidden">
       <div className="mx-auto flex max-w-(--container-page) flex-col gap-3 px-4 py-6 md:px-6 lg:px-8">
         <p className="flex items-center gap-2 text-caption font-semibold text-fg-muted">
           <Lock className="size-3.5" aria-hidden="true" />

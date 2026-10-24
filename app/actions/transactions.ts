@@ -53,6 +53,93 @@ export async function getTransactionStats(period: 'week' | 'month' | 'year' = 'm
   return { income, expenses };
 }
 
+export interface TransactionQuery {
+  accountId?: string;
+  /** Inclusive dates, YYYY-MM-DD, in the customer's calendar. */
+  from?: string;
+  to?: string;
+  direction?: 'in' | 'out';
+  status?: 'pending' | 'completed' | 'declined' | 'cancelled' | 'disputed';
+  search?: string;
+  minAmount?: number;
+  maxAmount?: number;
+  page?: number;
+  pageSize?: number;
+}
+
+const STATUS_GROUPS: Record<NonNullable<TransactionQuery['status']>, string[]> = {
+  pending: ['PENDING', 'ON_HOLD', 'PROCESSING'],
+  completed: ['APPROVED', 'COMPLETED'],
+  declined: ['REJECTED', 'FAILED'],
+  cancelled: ['CANCELLED'],
+  disputed: ['DISPUTED'],
+};
+
+async function transactionWhere(userId: string, q: TransactionQuery) {
+  const accounts = await prisma.account.findMany({ where: { userId }, select: { id: true } });
+  let accountIds = accounts.map(a => a.id);
+  if (q.accountId) accountIds = accountIds.filter(id => id === q.accountId);
+
+  const where: any = { accountId: { in: accountIds } };
+  if (q.from || q.to) {
+    where.createdAt = {};
+    if (q.from) where.createdAt.gte = new Date(`${q.from}T00:00:00`);
+    if (q.to) where.createdAt.lte = new Date(`${q.to}T23:59:59.999`);
+  }
+  if (q.direction) where.type = q.direction === 'in' ? 'CREDIT' : 'DEBIT';
+  if (q.status) where.status = { in: STATUS_GROUPS[q.status] };
+  if (q.minAmount !== undefined || q.maxAmount !== undefined) {
+    where.amount = {};
+    if (q.minAmount !== undefined) where.amount.gte = q.minAmount;
+    if (q.maxAmount !== undefined) where.amount.lte = q.maxAmount;
+  }
+  const s = q.search?.trim();
+  if (s) {
+    where.OR = [
+      { description: { contains: s, mode: 'insensitive' } },
+      { reference: { contains: s, mode: 'insensitive' } },
+      { counterparty: { contains: s, mode: 'insensitive' } },
+    ];
+  }
+  return where;
+}
+
+/** One page of the customer's transactions, newest first, with the total count. */
+export async function queryTransactions(q: TransactionQuery = {}) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error('Unauthorized');
+
+  const pageSize = Math.min(Math.max(q.pageSize ?? 25, 1), 100);
+  const page = Math.max(q.page ?? 1, 1);
+  const where = await transactionWhere(session.user.id, q);
+
+  const [rows, total] = await Promise.all([
+    prisma.transaction.findMany({
+      where,
+      orderBy: { createdAt: 'desc' },
+      skip: (page - 1) * pageSize,
+      take: pageSize,
+      include: { account: { select: { accountNumber: true, accountType: true, currency: true } } },
+    }),
+    prisma.transaction.count({ where }),
+  ]);
+  return { rows, total, page, pageSize };
+}
+
+/** Every transaction matching the filters (capped) for a CSV download. */
+export async function exportTransactions(q: TransactionQuery = {}) {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error('Unauthorized');
+
+  const where = await transactionWhere(session.user.id, q);
+  return prisma.transaction.findMany({
+    where,
+    orderBy: { createdAt: 'desc' },
+    take: 5000,
+    include: { account: { select: { accountNumber: true, accountType: true } } },
+  });
+}
+
 /** Number of the customer's transactions still awaiting processing. */
 export async function countPendingTransactions() {
   const session = await auth();

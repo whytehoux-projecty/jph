@@ -16,7 +16,7 @@ export function MobileBottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
   return (
     <nav
       aria-label="Shortcuts"
-      className="fixed inset-x-0 bottom-0 z-(--z-header) border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="fixed inset-x-0 bottom-0 z-(--z-header) border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden print:hidden"
     >
       <ul className="flex h-16 items-stretch">
         {MOBILE_TABS.map((item) => {

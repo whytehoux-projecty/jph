@@ -97,7 +97,7 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
       </a>
       <div className="min-h-dvh bg-surface-muted">
         <AppSidebar />
-        <div className="flex min-h-dvh flex-col lg:pl-64">
+        <div className="flex min-h-dvh flex-col lg:pl-64 print:pl-0">
           <AppTopBar profile={profile} staffView={staffView} onOpenMenu={() => setMenuOpen(true)} />
           <main
             id="main-content"
