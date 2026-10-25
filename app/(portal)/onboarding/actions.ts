@@ -1,72 +1,39 @@
 'use server';
 
-import { auth } from '@/auth';
-import { prisma } from '@/lib/prisma';
 import bcrypt from 'bcryptjs';
+import { auth, unstable_update } from '@/auth';
+import { prisma } from '@/lib/prisma';
+import { meetsPasswordPolicy, pinProblem } from '@/lib/password-policy';
 
-export async function completeOnboarding(data: {
-    password: string;
-    transactionPin: string;
-    cryptoWalletEnabled: boolean;
-}) {
-    const session = await auth();
-    if (!session?.user) throw new Error("Unauthorized");
+/**
+ * First sign-in: replaces the temporary password and sets the transaction
+ * PIN, in one write with both already hashed. Then refreshes the session's
+ * first-login flag from the database, so the customer isn't sent back here.
+ */
+export async function completeOnboarding(data: { password: string; transactionPin: string }) {
+  const session = await auth();
+  if (!session?.user?.id || (session as any).staffView) throw new Error('Unauthorized');
+  const userId = session.user.id;
 
-    const userId = session.user.id as string;
-    const user = await prisma.user.findUnique({ where: { id: userId } });
-    if (!user) throw new Error("User not found");
+  const user = await prisma.user.findUnique({ where: { id: userId }, select: { isFirstLogin: true } });
+  if (!user) throw new Error('Unauthorized');
+  if (!user.isFirstLogin) return { success: true as const };
 
-    if (!user.isFirstLogin) {
-        throw new Error("User has already completed onboarding");
-    }
+  if (!meetsPasswordPolicy(data.password)) {
+    return { success: false as const, field: 'password' as const, error: 'Choose a password that meets every rule in the list.' };
+  }
+  const pinError = pinProblem(data.transactionPin);
+  if (pinError) return { success: false as const, field: 'pin' as const, error: pinError };
 
-    const hashedPassword = await bcrypt.hash(data.password, 10);
+  const [password, transactionPin] = await Promise.all([bcrypt.hash(data.password, 12), bcrypt.hash(data.transactionPin, 12)]);
 
-    // Update user profile
-    await prisma.user.update({
-        where: { id: userId },
-        data: {
-            password: hashedPassword,
-            transactionPin: data.transactionPin, // Should hash PIN in real-world, leaving plain for ease if needed or hash it. Actually, better hash it.
-            pinSetupComplete: true,
-            isFirstLogin: false,
-            temporaryPassword: null,
-            cryptoWalletEnabled: data.cryptoWalletEnabled,
-        }
-    });
+  await prisma.user.update({
+    where: { id: userId },
+    data: { password, transactionPin, pinSetupComplete: true, isFirstLogin: false, temporaryPassword: null },
+  });
 
-    // Hash the PIN
-    const hashedPin = await bcrypt.hash(data.transactionPin, 10);
-    await prisma.user.update({
-        where: { id: userId },
-        data: {
-            transactionPin: hashedPin,
-        }
-    });
-
-    // Create CryptoWallets if opted in
-    if (data.cryptoWalletEnabled) {
-        // Only create if they don't already have them
-        const existingWallets = await prisma.cryptoWallet.findMany({ where: { userId } });
-        if (existingWallets.length === 0) {
-            await prisma.cryptoWallet.createMany({
-                data: [
-                    {
-                        userId,
-                        currency: 'USDC',
-                        balance: 0.00,
-                        address: `0xUSDC${Math.random().toString(36).substring(2, 12).toUpperCase()}`
-                    },
-                    {
-                        userId,
-                        currency: 'USDT',
-                        balance: 0.00,
-                        address: `0xUSDT${Math.random().toString(36).substring(2, 12).toUpperCase()}`
-                    }
-                ]
-            });
-        }
-    }
-
-    return { success: true };
+  // The flag value is read from the database in the jwt callback; the
+  // payload only asks for the refresh.
+  await unstable_update({ refreshFirstLogin: true } as any);
+  return { success: true as const };
 }

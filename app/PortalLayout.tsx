@@ -26,6 +26,8 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
     pathname?.includes("/auth/") ||
     pathname === "/login" ||
     pathname === "/signup" ||
+    // First sign-in setup: focused, like sign-in (every other page redirects here until it's done)
+    pathname === "/onboarding" ||
     pathname?.startsWith("/register") ||
     pathname?.startsWith("/admin") ||
     // Corporate marketing routes (all routes not under /dashboard, /accounts, etc.)
