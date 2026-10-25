@@ -19,7 +19,7 @@ import { totalsByCurrency } from "@/lib/format";
 import { requestPrimaryVaultChange } from "@/app/actions/accounts";
 import type { VaultType } from "@/lib/vault-rules";
 import { AccountCard } from "./components/AccountCard";
-import { AccountSwapDialog, LinkExternalAccountDialog, OpenAccountDialog } from "./components/AccountActionDialogs";
+import { LinkExternalAccountDialog, OpenAccountDialog } from "./components/AccountActionDialogs";
 
 export interface AccountView {
   id: string;
@@ -64,7 +64,6 @@ export default function AccountsClient({
   const [query, setQuery] = useState("");
   const [openOpen, setOpenOpen] = useState(false);
   const [linkOpen, setLinkOpen] = useState(false);
-  const [swapFor, setSwapFor] = useState<string | null>(null);
 
   const ownAccounts = accounts.filter((a) => !a.isExternal);
   const totals = totalsByCurrency(ownAccounts);
@@ -233,7 +232,6 @@ export default function AccountsClient({
                     account={a}
                     locale={locale}
                     onRequestPrimary={() => requestPrimary(a)}
-                    onRequestSwap={() => setSwapFor(a.id)}
                   />
                 </li>
               ))}
@@ -260,13 +258,6 @@ export default function AccountsClient({
         isOpen={linkOpen}
         onClose={() => setLinkOpen(false)}
         existingAccounts={dialogAccounts}
-        onSuccess={() => router.refresh()}
-      />
-      <AccountSwapDialog
-        isOpen={swapFor !== null}
-        onClose={() => setSwapFor(null)}
-        existingAccounts={dialogAccounts}
-        preselectedAccountId={swapFor ?? undefined}
         onSuccess={() => router.refresh()}
       />
     </BalanceVisibilityProvider>

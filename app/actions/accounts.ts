@@ -109,26 +109,14 @@ export async function getVaultEligibilityMap() {
     if (isHeld) {
       eligibility[type].canOpen = false;
       eligibility[type].canLink = false;
-      eligibility[type].reason = `You already have an active ${VAULT_TYPES[type].label}. Remove or replace it to open or link another.`;
+      eligibility[type].reason = `You already have an active ${VAULT_TYPES[type].label}. Contact us if you'd like to replace it.`;
     }
   });
-
-  // Fetch any pending swap requests for this user
-  let pendingSwapRequests: any[] = [];
-  try {
-    pendingSwapRequests = await prisma.accountSwapRequest.findMany({
-      where: { userId: session.user.id, status: 'PENDING' },
-      orderBy: { createdAt: 'desc' }
-    });
-  } catch (err) {
-    console.warn('Could not query account_swap_requests:', err);
-  }
 
   return {
     accounts: existingAccounts,
     heldTypes: normalizedHeld,
     eligibility,
-    pendingSwapRequests,
   };
 }
 
@@ -435,74 +423,5 @@ export async function requestPrimaryVaultChange(accountId: string, reason?: stri
   return {
     success: true,
     message: "We've received your request to make this your primary account. We'll let you know when it's done."
-  };
-}
-
-export interface RequestAccountSwapInput {
-  existingAccountId: string;
-  targetAccountType: VaultType;
-  institutionName: string;
-  accountNumber: string;
-  routingOrSwift: string;
-  reason?: string;
-}
-
-/**
- * Server action to request replacing/swapping an existing held vault with a new account.
- * Goes through admin approval so the one-per-type rule is never broken mid-change.
- */
-export async function requestAccountSwap(input: RequestAccountSwapInput) {
-  const session = await auth();
-  if (!session?.user?.id) throw new Error('Unauthorized');
-
-  const userId = session.user.id;
-  const existing = await prisma.account.findUnique({
-    where: { id: input.existingAccountId }
-  });
-
-  if (!existing || existing.userId !== userId) {
-    throw new Error('Existing account not found.');
-  }
-
-  const normalizedType = normalizeVaultType(input.targetAccountType);
-  const typeDef = VAULT_TYPES[normalizedType];
-
-  const swapRequest = await prisma.accountSwapRequest.create({
-    data: {
-      userId,
-      existingAccountId: input.existingAccountId,
-      targetAccountType: normalizedType,
-      institutionName: input.institutionName,
-      accountNumber: input.accountNumber,
-      routingOrSwift: input.routingOrSwift,
-      reason: input.reason || `Replace existing ${existing.accountType} vault`,
-      status: 'PENDING'
-    }
-  });
-
-  // Admin support ticket / notification
-  await prisma.supportTicket.create({
-    data: {
-      userId,
-      subject: `Account Swap Approval Request — ${typeDef.label}`,
-      message: `Customer requested swapping existing vault ${existing.accountNumber} with new ${input.institutionName} account. Request ID: ${swapRequest.id}.`,
-      status: 'OPEN'
-    }
-  });
-
-  await prisma.notification.create({
-    data: {
-      userId,
-      title: 'Vault Replacement Request Received',
-      message: `Your request to replace your ${typeDef.label} has been recorded under reference #${swapRequest.id.slice(-6).toUpperCase()} and is awaiting administrative approval.`,
-      isRead: false
-    }
-  });
-
-  revalidatePath('/vaults');
-  return {
-    success: true,
-    requestId: swapRequest.id,
-    message: "We've received your request. We'll review it and let you know the outcome; your current account stays open until then."
   };
 }

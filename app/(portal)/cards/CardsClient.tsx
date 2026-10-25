@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { CreditCard, Eye, EyeOff, Plus } from "lucide-react";
+import { CreditCard, Eye, EyeOff } from "lucide-react";
 import { PageHeader } from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -13,7 +13,6 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Alert } from "@/components/ui/alert";
 import { CardFace } from "@/components/cards/CardFace";
-import { RequestCardDialog } from "@/components/cards/RequestCardDialog";
 import { freezeCard, revealCardDetails, unfreezeCard } from "@/app/actions/cards";
 import { toast } from "@/lib/toast";
 import { userFacingError } from "@/lib/errors";
@@ -36,14 +35,6 @@ export interface CardView {
   holderName: string;
 }
 
-export interface CardRequestView {
-  id: string;
-  label: string;
-  status: string;
-  reason: string | null;
-  requestedOn: string;
-}
-
 const CARD_STATUS: Record<string, { label: string; status: Status }> = {
   ACTIVE: { label: "Active", status: "success" },
   FROZEN: { label: "Frozen", status: "info" },
@@ -51,30 +42,14 @@ const CARD_STATUS: Record<string, { label: string; status: Status }> = {
   EXPIRED: { label: "Expired", status: "neutral" },
   CANCELLED: { label: "Cancelled", status: "neutral" },
 };
-const REQUEST_STATUS: Record<string, { label: string; status: Status }> = {
-  PENDING: { label: "Being reviewed", status: "warning" },
-  APPROVED: { label: "Approved", status: "success" },
-  REJECTED: { label: "Declined", status: "danger" },
-};
 
 const REVEAL_MS = 30_000;
 
-export default function CardsClient({
-  cards,
-  requests,
-  accounts,
-  locale,
-}: {
-  cards: CardView[];
-  requests: CardRequestView[];
-  accounts: Array<{ id: string; name: string; accountNumber: string; balance: number; accountType: string }>;
-  locale: string;
-}) {
+export default function CardsClient({ cards }: { cards: CardView[] }) {
   const router = useRouter();
   const [selectedId, setSelectedId] = useState(cards[0]?.id ?? null);
   const [frozenOverride, setFrozenOverride] = useState<Record<string, boolean>>({});
   const [freezing, setFreezing] = useState(false);
-  const [requestOpen, setRequestOpen] = useState(false);
   const [revealed, setRevealed] = useState<{ id: string; number: string; expiry: string; cvv: string } | null>(null);
   const [revealing, setRevealing] = useState(false);
 
@@ -131,12 +106,7 @@ export default function CardsClient({
     <>
       <PageHeader
         title="Cards"
-        description="Your debit and credit cards: details, freezing, limits and new card requests."
-        actions={
-          <Button icon={<Plus aria-hidden="true" />} onClick={() => setRequestOpen(true)}>
-            Request a card
-          </Button>
-        }
+        description="Your debit and credit cards: details, freezing and limits."
       />
 
       {cards.length === 0 ? (
@@ -144,8 +114,12 @@ export default function CardsClient({
           <EmptyState
             icon={CreditCard}
             title="You don't have a card yet"
-            description="Request a debit card linked to one of your accounts, or apply for a credit card."
-            action={<Button onClick={() => setRequestOpen(true)}>Request a card</Button>}
+            description="Contact us and we'll help you get a debit or credit card linked to one of your accounts."
+            action={
+              <Button asChild>
+                <Link href="/support">Contact us</Link>
+              </Button>
+            }
           />
         </Card>
       ) : (
@@ -280,32 +254,6 @@ export default function CardsClient({
         </div>
       )}
 
-      {requests.length > 0 && (
-        <section aria-labelledby="card-requests" className="mt-8">
-          <h2 id="card-requests" className="mb-3 font-sans text-h4 text-fg">
-            Your card requests
-          </h2>
-          <Card>
-            <ul className="divide-y divide-line">
-              {requests.map((r) => {
-                const rs = REQUEST_STATUS[r.status] ?? { label: r.status, status: "neutral" as Status };
-                return (
-                  <li key={r.id} className="flex flex-wrap items-start justify-between gap-3 px-5 py-4">
-                    <div>
-                      <p className="text-body text-fg">{r.label}</p>
-                      <p className="text-caption text-fg-muted">Requested {r.requestedOn}</p>
-                      {r.status === "REJECTED" && r.reason && <p className="mt-1 text-small text-fg-muted">{r.reason}</p>}
-                    </div>
-                    <StatusPill status={rs.status}>{rs.label}</StatusPill>
-                  </li>
-                );
-              })}
-            </ul>
-          </Card>
-        </section>
-      )}
-
-      <RequestCardDialog isOpen={requestOpen} onClose={() => setRequestOpen(false)} accounts={accounts} onSuccess={() => router.refresh()} />
     </>
   );
 }

@@ -1,11 +1,9 @@
-import { getCards, getCardRequests } from "@/app/actions/cards";
-import { getAccounts } from "@/app/actions/accounts";
+import { getCards } from "@/app/actions/cards";
 import { getProfile } from "@/app/actions/profile";
 import { loadOrSignIn } from "@/lib/portal-data";
 import { maskAccountNumber } from "@/lib/format";
 import { VAULT_TYPES, normalizeVaultType } from "@/lib/vault-rules";
-import { languageToLocale } from "@/lib/utils";
-import CardsClient, { type CardView, type CardRequestView } from "./CardsClient";
+import CardsClient, { type CardView } from "./CardsClient";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Cards" };
@@ -13,11 +11,10 @@ export const metadata = { title: "Cards" };
 const titleCase = (s: string) => s.replace(/_/g, " ").toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
 
 export default async function CardsPage() {
-  const { user, cards, requests, accounts } = await loadOrSignIn(async () => {
-    const [user, cards, requests, accounts] = await Promise.all([getProfile(), getCards(), getCardRequests(), getAccounts()]);
-    return { user, cards, requests, accounts };
+  const { user, cards } = await loadOrSignIn(async () => {
+    const [user, cards] = await Promise.all([getProfile(), getCards()]);
+    return { user, cards };
   });
-  const locale = languageToLocale(user?.preferredLanguage || "en");
   const accountLabel = (a: { accountType: string; accountNumber: string }) =>
     `${VAULT_TYPES[normalizeVaultType(a.accountType)]?.label ?? a.accountType} ${maskAccountNumber(a.accountNumber)}`;
 
@@ -42,17 +39,5 @@ export default async function CardsPage() {
     };
   });
 
-  const requestViews: CardRequestView[] = requests.map((r) => ({
-    id: r.id,
-    label: `${titleCase(r.cardType)} card${r.cardTier && r.cardTier !== "STANDARD" ? ` · ${titleCase(r.cardTier)}` : ""}`,
-    status: r.status,
-    reason: r.rejectionReason,
-    requestedOn: new Intl.DateTimeFormat(locale, { day: "numeric", month: "short", year: "numeric" }).format(r.createdAt),
-  }));
-
-  const linkable = accounts
-    .filter((a) => !a.isExternal && a.status === "ACTIVE")
-    .map((a) => ({ id: a.id, name: accountLabel(a), accountNumber: a.accountNumber, balance: Number(a.balance), accountType: a.accountType }));
-
-  return <CardsClient cards={cardViews} requests={requestViews} accounts={linkable} locale={locale} />;
+  return <CardsClient cards={cardViews} />;
 }

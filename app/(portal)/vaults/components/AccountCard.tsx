@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeftRight, ChevronRight, MoreHorizontal, Repeat, Star } from "lucide-react";
+import { ArrowLeftRight, ChevronRight, MoreHorizontal, Star } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Badge, StatusPill } from "@/components/ui/badge";
 import { AccountNumber } from "@/components/ui/account-number";
@@ -19,12 +19,10 @@ export function AccountCard({
   account,
   locale,
   onRequestPrimary,
-  onRequestSwap,
 }: {
   account: AccountView;
   locale: string;
   onRequestPrimary: () => void;
-  onRequestSwap: () => void;
 }) {
   const status = accountStatus(account.status);
   const canAskPrimary = account.canBePrimary && !account.isPrimary && !account.isExternal && account.status === "ACTIVE";
@@ -68,10 +66,6 @@ export function AccountCard({
                   Make this my primary account
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem onSelect={onRequestSwap}>
-                <Repeat aria-hidden="true" />
-                Replace this account
-              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         </div>

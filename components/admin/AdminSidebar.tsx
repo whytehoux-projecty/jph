@@ -49,7 +49,6 @@ export type AdminSidebarProps = {
     pendingRequests?: number;
     pendingTxns?: number;
     openTickets?: number;
-    pendingCardRequests?: number;
   };
 };
 
@@ -84,7 +83,7 @@ export function AdminSidebar({ badgeCounts = {} }: AdminSidebarProps) {
       icon: Building2,
       subItems: [
         { name: "e-Bank Hub", href: "/admin/ebank" },
-        { name: "Cards Management", href: "/admin/ebank/cards", badgeCount: badgeCounts.pendingCardRequests, badgeVariant: "urgent" },
+        { name: "Cards Management", href: "/admin/ebank/cards" },
         { name: "Deposits & Treasury", href: "/admin/ebank/deposits" },
         { name: "Loans Underwriting", href: "/admin/ebank/loans" },
         { name: "Rewards & Concierge", href: "/admin/ebank/benefits" },
