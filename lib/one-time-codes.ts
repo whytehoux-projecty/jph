@@ -29,17 +29,21 @@ function sameHash(a: string, b: string) {
 
 const digits = (n: number) => Array.from({ length: n }, () => randomInt(10)).join('');
 
+export type CodeOwner = { kind: 'customer' | 'admin'; id: string };
+
+const ownerWhere = (o: CodeOwner) => (o.kind === 'customer' ? { userId: o.id } : { adminUserId: o.id });
+
 /**
  * Starts a sign-in after the password matched. The browser keeps `secret`
  * for the second step; `code`, when asked for, is what to email.
  */
-export async function createSignInChallenge(userId: string, withCode: boolean) {
-  await prisma.oneTimeCode.deleteMany({ where: { userId, purpose: 'SIGN_IN', usedAt: null } });
+export async function createSignInChallenge(owner: CodeOwner, withCode: boolean) {
+  await prisma.oneTimeCode.deleteMany({ where: { ...ownerWhere(owner), purpose: 'SIGN_IN', usedAt: null } });
   const secret = randomBytes(32).toString('base64url');
   const code = withCode ? digits(6) : null;
   await prisma.oneTimeCode.create({
     data: {
-      userId,
+      ...ownerWhere(owner),
       purpose: 'SIGN_IN',
       secretHash: keyedHash(secret),
       codeHash: code ? keyedHash(code) : null,
@@ -49,14 +53,14 @@ export async function createSignInChallenge(userId: string, withCode: boolean) {
   return { secret, code };
 }
 
-export type ChallengeResult = { ok: true; userId: string } | { ok: false; reason: 'expired' | 'wrong' | 'used-up'; triesLeft?: number };
+export type ChallengeResult = { ok: true; owner: CodeOwner } | { ok: false; reason: 'expired' | 'wrong' | 'used-up'; triesLeft?: number };
 
 /** Finishes a sign-in: the challenge must be live, and the code right when one was sent. */
 export async function consumeSignInChallenge(secret: string, code: string | undefined): Promise<ChallengeResult> {
   if (!secret) return { ok: false, reason: 'expired' };
   const row = await prisma.oneTimeCode.findUnique({ where: { secretHash: keyedHash(secret) } });
   if (!row || row.purpose !== 'SIGN_IN' || row.usedAt || row.expiresAt < new Date()) return { ok: false, reason: 'expired' };
-  return claimAndCheck(row.id, row.userId, row.codeHash, code);
+  return claimAndCheck(row.id, ownerOf(row), row.codeHash, code);
 }
 
 /** A reset code for a customer, or null when they've asked for too many in the last hour. */
@@ -80,10 +84,14 @@ export async function consumeResetCode(userId: string, code: string): Promise<Ch
     orderBy: { createdAt: 'desc' },
   });
   if (!row) return { ok: false, reason: 'expired' };
-  return claimAndCheck(row.id, row.userId, row.codeHash, code);
+  return claimAndCheck(row.id, ownerOf(row), row.codeHash, code);
 }
 
-async function claimAndCheck(id: string, userId: string, codeHash: string | null, code: string | undefined): Promise<ChallengeResult> {
+function ownerOf(row: { userId: string | null; adminUserId: string | null }): CodeOwner {
+  return row.adminUserId ? { kind: 'admin', id: row.adminUserId } : { kind: 'customer', id: row.userId! };
+}
+
+async function claimAndCheck(id: string, owner: CodeOwner, codeHash: string | null, code: string | undefined): Promise<ChallengeResult> {
   if (codeHash) {
     const claimed = await prisma.oneTimeCode.updateMany({
       where: { id, usedAt: null, attempts: { lt: CODE_ATTEMPTS } },
@@ -99,5 +107,5 @@ async function claimAndCheck(id: string, userId: string, codeHash: string | null
   // Single use: only the first request to mark it wins.
   const used = await prisma.oneTimeCode.updateMany({ where: { id, usedAt: null }, data: { usedAt: new Date() } });
   if (used.count === 0) return { ok: false, reason: 'expired' };
-  return { ok: true, userId };
+  return { ok: true, owner };
 }

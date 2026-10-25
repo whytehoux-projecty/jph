@@ -12,7 +12,7 @@ import { NativeSelect } from "@/components/ui/native-select";
 import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { changeTransactionPin, updatePreferences, updateProfile } from "@/app/actions/profile";
+import { changeTransactionPin, signOutOtherDevices, updatePreferences, updateProfile } from "@/app/actions/profile";
 import { pinProblem } from "@/lib/password-policy";
 import { toast } from "@/lib/toast";
 import { userFacingError } from "@/lib/errors";
@@ -226,14 +226,41 @@ function SecuritySection({ pinSetupComplete }: { pinSetupComplete: boolean }) {
 
       <Section title="Sign-in password">
         <p className="text-body text-fg-muted">
-          To change your password, please{" "}
-          <Link href="/support" className="font-semibold text-fg-action underline underline-offset-[3px]">
-            contact us
+          To change your password,{" "}
+          <Link href="/forgot-password" className="font-semibold text-fg-action underline underline-offset-[3px]">
+            reset it with a code sent to your email
           </Link>
-          . We'll never ask you for your password or PIN.
+          . Changing it signs you out on every device.
         </p>
       </Section>
+
+      <OtherDevicesSection />
     </div>
+  );
+}
+
+function OtherDevicesSection() {
+  const [busy, setBusy] = useState(false);
+  const signOutOthers = async () => {
+    setBusy(true);
+    try {
+      const res = await signOutOtherDevices();
+      if (res.success) toast.success({ title: "Signed out of your other devices", description: "It can take up to a minute on each one." });
+      else toast.error({ title: "That didn't work", description: res.error });
+    } catch (err) {
+      toast.error({ title: "That didn't work", description: userFacingError(err, "Please try again.") });
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <Section title="Signed-in devices" description="If you signed in on a device you no longer have, or a shared one, sign it out here. You stay signed in on this one.">
+      <div>
+        <Button variant="secondary" onClick={signOutOthers} loading={busy} loadingLabel="Signing out other devices">
+          Sign out of other devices
+        </Button>
+      </div>
+    </Section>
   );
 }
 

@@ -63,7 +63,14 @@ export async function resetPassword(input: { email: string; code: string; passwo
 
   await prisma.user.update({
     where: { id: user.id },
-    data: { password: await bcrypt.hash(input.password, 12), loginFailedAttempts: 0, loginLockedUntil: null, temporaryPasswordExpiresAt: null },
+    // Raising the session version signs out every device that was signed in.
+    data: {
+      password: await bcrypt.hash(input.password, 12),
+      loginFailedAttempts: 0,
+      loginLockedUntil: null,
+      temporaryPasswordExpiresAt: null,
+      sessionVersion: { increment: 1 },
+    },
   });
   await prisma.notification.create({
     data: { userId: user.id, title: 'Password changed', message: "Your online banking password was reset. If this wasn't you, contact us straight away." },

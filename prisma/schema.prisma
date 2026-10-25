@@ -27,6 +27,9 @@ model AdminUser {
   // Wrong-password protection (lib/sign-in-guard.ts).
   loginFailedAttempts Int       @default(0) @map("login_failed_attempts")
   loginLockedUntil    DateTime? @map("login_locked_until")
+  // Raised to end every open session (lib/session-version.ts).
+  sessionVersion      Int       @default(0) @map("session_version")
+  oneTimeCodes        OneTimeCode[]
 
   @@map("admin_users")
 }
@@ -56,6 +59,8 @@ model User {
   // Wrong-password protection (lib/sign-in-guard.ts).
   loginFailedAttempts Int       @default(0) @map("login_failed_attempts")
   loginLockedUntil    DateTime? @map("login_locked_until")
+  // Raised to end every open session (lib/session-version.ts).
+  sessionVersion      Int       @default(0) @map("session_version")
   pinSetupComplete    Boolean  @default(false) @map("pin_setup_complete")
   isFirstLogin        Boolean  @default(true) @map("is_first_login")
   temporaryPassword   String?  @map("temporary_password")
@@ -579,8 +584,10 @@ model DepositImage {
 // Short-lived codes for signing in (purpose SIGN_IN) and password reset
 // (RESET). Only hashes are stored. lib/one-time-codes.ts.
 model OneTimeCode {
-  id         String    @id @default(cuid())
-  userId     String    @map("user_id")
+  id          String    @id @default(cuid())
+  // One owner: a customer (userId) or a member of staff (adminUserId).
+  userId      String?   @map("user_id")
+  adminUserId String?   @map("admin_user_id")
   purpose    String // SIGN_IN, RESET
   // SIGN_IN: hash of the challenge the browser holds between the two steps.
   secretHash String?   @unique @map("secret_hash")
@@ -591,9 +598,11 @@ model OneTimeCode {
   usedAt     DateTime? @map("used_at")
   createdAt  DateTime  @default(now()) @map("created_at")
 
-  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User?      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  adminUser AdminUser? @relation(fields: [adminUserId], references: [id], onDelete: Cascade)
 
   @@index([userId, purpose])
+  @@index([adminUserId, purpose])
   @@map("one_time_codes")
 }
 

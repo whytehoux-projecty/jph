@@ -72,7 +72,7 @@ export async function beginSignIn(input: { userId: string; password: string }): 
   if (temporaryPasswordExpired(user)) return { status: 'temp-expired' };
 
   const withCode = codesRequired();
-  const { secret, code } = await createSignInChallenge(user.id, withCode);
+  const { secret, code } = await createSignInChallenge({ kind: 'customer', id: user.id }, withCode);
   if (!code) return { status: 'ready', challenge: secret };
 
   await sendEmail({

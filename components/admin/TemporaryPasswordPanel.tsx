@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/Button';
-import { issueNewTemporaryPassword, unlockTransactionPin } from '@/app/actions/admin-customers';
+import { endCustomerSessions, issueNewTemporaryPassword, unlockTransactionPin } from '@/app/actions/admin-customers';
 import { TEMP_PASSWORD_TTL_HOURS } from '@/lib/password-policy';
 
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
@@ -29,6 +29,18 @@ export function TemporaryPasswordPanel({
 }) {
   const [pinLock, setPinLock] = useState(pinLockedUntil && new Date(pinLockedUntil).getTime() > Date.now() ? pinLockedUntil : null);
   const [unlocking, setUnlocking] = useState(false);
+  const [endingSessions, setEndingSessions] = useState(false);
+  const signOutEverywhere = async () => {
+    setEndingSessions(true);
+    try {
+      await endCustomerSessions(userId);
+      toast.success('The customer will be signed out on every device within a minute.');
+    } catch (err: any) {
+      toast.error(err?.message || 'Could not sign the customer out.');
+    } finally {
+      setEndingSessions(false);
+    }
+  };
   const unlock = async () => {
     setUnlocking(true);
     try {
@@ -124,6 +136,9 @@ export function TemporaryPasswordPanel({
             Issue a new temporary password
           </Button>
         )}
+        <Button type="button" variant="outline" onClick={signOutEverywhere} disabled={endingSessions} className="ml-2">
+          {endingSessions ? 'Signing out…' : 'Sign out everywhere'}
+        </Button>
         <p className="text-xs text-muted-foreground mt-2">
           The customer gets it by email. It works for {TEMP_PASSWORD_TTL_HOURS} hours, and they choose their own password at next sign-in.
         </p>

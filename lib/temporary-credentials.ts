@@ -45,6 +45,8 @@ export async function issueTemporaryPassword(
       isFirstLogin: true,
       temporaryPassword: null,
       temporaryPasswordExpiresAt: expiresAt,
+      // Signs out every device: the customer starts again with the new password.
+      sessionVersion: { increment: 1 },
       ...(grantOnlineAccess ? { hasOnlineAccess: true } : {}),
       ...(activatePortal ? { eportalStatus: 'ACTIVE' } : {}),
       ...extra,

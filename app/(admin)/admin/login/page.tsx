@@ -6,6 +6,7 @@ import { Lock, Mail, ShieldAlert, ArrowRight } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { beginAdminSignIn } from './actions';
 
 export default function AdminLogin() {
   const [email, setEmail] = useState('');
@@ -14,30 +15,45 @@ export default function AdminLogin() {
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
 
+  // Step two, when an emailed code is needed. Kept in memory only.
+  const [challenge, setChallenge] = useState<string | null>(null);
+  const [code, setCode] = useState('');
+
+  const finish = async (ch: string, enteredCode?: string) => {
+    const result = await signIn('credentials', { redirect: false, is_admin: 'true', challenge: ch, code: enteredCode ?? '' });
+    if (result?.error) {
+      const c = typeof result.code === 'string' ? result.code : '';
+      if (c.startsWith('CODE_WRONG:')) {
+        setError(`That code isn't right. ${c.slice(11)} tries left.`);
+        setCode('');
+        return;
+      }
+      setChallenge(null);
+      setCode('');
+      setError(c === 'CODE_USED_UP' ? 'Too many wrong codes. Sign in again.' : 'That sign-in has expired. Sign in again.');
+      return;
+    }
+    router.refresh();
+    router.push('/admin');
+  };
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     setError('');
-    
     try {
-      const result = await signIn('credentials', {
-        redirect: false,
-        email,
-        password,
-        is_admin: 'true'
-      });
-
-      if (result?.error) {
-        const locked = typeof result.code === 'string' && result.code.startsWith('LOCKED:') ? result.code.slice(7) : null;
-        setError(
-          locked
-            ? `Too many wrong passwords. Sign-in is paused for ${locked} more minute${locked === '1' ? '' : 's'}.`
-            : 'Invalid admin credentials. Access denied.',
-        );
-      } else {
-        router.refresh();
-        router.push('/admin');
+      if (challenge) {
+        await finish(challenge, code.trim());
+        return;
       }
+      const res = await beginAdminSignIn({ email, password });
+      setPassword('');
+      if (res.status === 'ready') await finish(res.challenge);
+      else if (res.status === 'code-sent') setChallenge(res.challenge);
+      else if (res.status === 'locked') setError(`Too many wrong passwords. Sign-in is paused for ${res.minutes} more minute${res.minutes === 1 ? '' : 's'}.`);
+      else setError('Invalid admin credentials. Access denied.');
+    } catch {
+      setError('Sign-in is unavailable right now. Try again shortly.');
     } finally {
       setIsLoading(false);
     }
@@ -80,6 +96,29 @@ export default function AdminLogin() {
             </div>
           )}
 
+          {challenge ? (
+          <div className="space-y-2">
+            <label htmlFor="admin-code" className="text-xs font-semibold text-paper-300 uppercase tracking-wider">
+              Code from your email
+            </label>
+            <input
+              id="admin-code"
+              type="text"
+              inputMode="numeric"
+              autoComplete="one-time-code"
+              maxLength={6}
+              value={code}
+              onChange={e => setCode(e.target.value.replace(/\D/g, ''))}
+              className="w-full px-4 py-3.5 bg-black/20 border border-white/10 rounded-xl text-white tracking-[0.5em] text-center text-lg focus:bg-black/40 focus:outline-none focus:ring-2 focus:ring-vermilion-600 focus:border-transparent"
+              required
+              disabled={isLoading}
+            />
+            <p className="text-xs text-paper-300">We emailed a 6-digit code to your staff address. It works for 10 minutes.</p>
+            <button type="button" onClick={() => { setChallenge(null); setCode(''); setError(''); }} className="text-xs text-paper-300 underline hover:text-white">
+              Start again
+            </button>
+          </div>
+          ) : (
           <div className="space-y-5">
             <div className="space-y-2">
               <label className="text-xs font-semibold text-paper-300 uppercase tracking-wider">
@@ -121,6 +160,7 @@ export default function AdminLogin() {
               </div>
             </div>
           </div>
+          )}
 
           <button 
             type="submit" 
@@ -131,7 +171,7 @@ export default function AdminLogin() {
               <span className="inline-block w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
             ) : (
               <>
-                Authenticate
+                {challenge ? 'Verify code' : 'Authenticate'}
                 <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </>
             )}
