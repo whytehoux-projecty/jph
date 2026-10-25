@@ -1,3 +1,4 @@
+import { temporaryPasswordExpired } from '@/lib/temporary-credentials';
 import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 import CredentialsProvider from 'next-auth/providers/credentials';
@@ -92,6 +93,10 @@ export const { auth, signIn, signOut, unstable_update, handlers: { GET, POST } }
           if (passwordsMatch) {
             if (!user.hasOnlineAccess || user.eportalStatus !== 'ACTIVE') {
               throw new CustomAuthError(user.eportalNotificationMessage || "Your Account Access has been suspended, kindly contact CCU.");
+            }
+            // Checked only after the password matched, so it reveals nothing to a guesser.
+            if (temporaryPasswordExpired(user)) {
+              throw new CustomAuthError("Your temporary password has expired. Contact us and we'll send you a new one.");
             }
             return { id: user.id, email: user.email, name: user.firstName, role: 'USER', isFirstLogin: user.isFirstLogin };
           }

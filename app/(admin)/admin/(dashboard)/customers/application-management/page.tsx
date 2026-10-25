@@ -1,3 +1,4 @@
+import { redactCredentials } from '@/lib/admin-redact';
 import { prisma } from '@/lib/prisma';
 import { AdminPageShell } from '@/components/admin/AdminPageShell';
 import { UnifiedApplicationList, UnifiedRequest } from '@/components/admin/UnifiedApplicationList';
@@ -74,7 +75,7 @@ export default async function ApplicationManagementHub() {
       subtitle="Unified inbox for new accounts, e-portal access, and cheque requests."
     >
       <UnifiedApplicationList 
-        requests={requests}
+        requests={redactCredentials(requests)}
         onAccountApprove={handleApprove}
         onAccountReject={handleReject}
         onAccountVerify={handleRequestVerification}

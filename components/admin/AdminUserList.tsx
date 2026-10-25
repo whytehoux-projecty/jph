@@ -1,5 +1,6 @@
 "use client";
 
+import { TemporaryPasswordPanel } from '@/components/admin/TemporaryPasswordPanel';
 import { CreditScoreManager } from '@/components/admin/CreditScoreManager';
 import { DEFAULT_TIER, isStandardTier, tierLabel, tierOptions } from '@/lib/customer-tiers';
 import { useState } from "react";
@@ -55,7 +56,6 @@ import {
   generateStatement, 
   updateEportalStatus, 
   requestOnlineAccess,
-  updateEportalCredentials,
   updateAccountManagerInfo,
 } from "@/app/actions/admin-customers";
 
@@ -72,7 +72,7 @@ export type AdminUser = {
   eportalNotificationMessage: string | null;
   createdAt: Date;
   isFirstLogin?: boolean;
-  temporaryPassword?: string | null;
+  temporaryPasswordExpiresAt?: Date | string | null;
   transferMethodOverrides?: string | null;
   accountManagerName?: string | null;
   accountManagerTitle?: string | null;
@@ -1160,52 +1160,13 @@ export function AdminUserList({
                     <div className="bg-white p-6 rounded-xl border border-neutral-200">
                       <h4 className="text-sm font-semibold uppercase tracking-wider text-ink-900 border-b pb-2 mb-4">Access Credentials</h4>
                       
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Login Email</label>
-                            <input type="text" readOnly value={selectedUser.email} className="w-full px-3 py-2 bg-neutral-100 border border-neutral-200 rounded text-sm text-ink-900 font-medium select-all" />
-                          </div>
-                          <div>
-                            <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Current/Last Known Password</label>
-                            {selectedUser.temporaryPassword ? (
-                              <input type="text" readOnly value={selectedUser.temporaryPassword} className="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded text-sm text-amber-900 font-mono font-bold select-all" />
-                            ) : (
-                              <div className="w-full px-3 py-2 bg-neutral-100 border border-neutral-200 rounded text-sm text-muted-foreground italic">
-                                Hidden (Hashed by user)
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <form action={async (fd) => {
-                          try {
-                            await updateEportalCredentials(fd);
-                            toast.success('Password updated successfully. The new password is now visible.');
-                            // Optimistically update the UI
-                            setSelectedUser(prev => prev ? ({ ...prev, temporaryPassword: fd.get('newPassword') as string }) : null);
-                          } catch (err: any) {
-                            toast.error(err.message || 'Failed to update password');
-                          }
-                        }} className="pt-4 mt-4 border-t border-neutral-100">
-                          <input type="hidden" name="id" value={selectedUser.id} />
-                          <label className="text-xs font-semibold text-ink-900 uppercase block mb-2">Set New Password</label>
-                          <div className="flex gap-2">
-                            <input 
-                              type="text" 
-                              name="newPassword" 
-                              placeholder="Enter new password (min 6 chars)" 
-                              className="flex-1 px-3 py-2 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold"
-                              minLength={6}
-                              required
-                            />
-                            <Button type="submit" variant="primary" className="bg-[#0D2545] hover:bg-[#1B355B] text-white whitespace-nowrap">
-                              Update Password
-                            </Button>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-2">Updating the password will immediately override the user's current password and display the new plain text password here for you to copy and share with the user.</p>
-                        </form>
-                      </div>
+                      <TemporaryPasswordPanel
+                        key={selectedUser.id}
+                        userId={selectedUser.id}
+                        email={selectedUser.email}
+                        isFirstLogin={!!selectedUser.isFirstLogin}
+                        expiresAt={selectedUser.temporaryPasswordExpiresAt ? new Date(selectedUser.temporaryPasswordExpiresAt).toISOString() : null}
+                      />
                     </div>
                   </div>
                 )}

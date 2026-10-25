@@ -10,6 +10,9 @@ export const PASSWORD_RULES = [
   { id: 'special', label: 'A symbol, such as ! or #', test: (v: string) => /[^A-Za-z0-9\s]/.test(v) },
 ] as const;
 
+/** How long a temporary password works before staff must issue a new one. */
+export const TEMP_PASSWORD_TTL_HOURS = 72;
+
 export const meetsPasswordPolicy = (v: string) => v.length <= 128 && PASSWORD_RULES.every((r) => r.test(v));
 
 /** 4 to 6 digits, and not all the same digit or a straight run (1234, 9876). */

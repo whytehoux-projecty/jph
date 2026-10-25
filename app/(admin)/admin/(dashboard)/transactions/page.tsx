@@ -1,3 +1,4 @@
+import { redactCredentials } from '@/lib/admin-redact';
 import { prisma } from '@/lib/prisma';
 import { AdminTransactionList } from '@/components/admin/AdminTransactionList';
 import { handleApproveTransaction, handleRejectTransaction, handleCancelTransaction } from '@/app/actions/adminTransactions';
@@ -23,7 +24,7 @@ export default async function AllTransactionsPage() {
       }
     >
       <AdminTransactionList 
-        initialTransactions={transactions} 
+        initialTransactions={redactCredentials(transactions)} 
         onApprove={handleApproveTransaction}
         onReject={handleRejectTransaction}
         onCancel={handleCancelTransaction}

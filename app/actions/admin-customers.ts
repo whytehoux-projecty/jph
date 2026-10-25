@@ -2,6 +2,7 @@
 
 import { prisma } from '@/lib/prisma';
 import { isCustomerTier } from '@/lib/customer-tiers';
+import { issueTemporaryPassword } from '@/lib/temporary-credentials';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 
@@ -315,28 +316,19 @@ export async function requestOnlineAccess(formData: FormData) {
 
 import bcrypt from 'bcryptjs';
 
-export async function updateEportalCredentials(formData: FormData) {
+/**
+ * Issues the customer a new temporary password (they choose their own at
+ * next sign-in). It's emailed to them; it's returned to staff only to pass
+ * on once when email isn't set up, and never stored readable.
+ */
+export async function issueNewTemporaryPassword(userId: string) {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
-  
-  const id = formData.get('id') as string;
-  const newPassword = formData.get('newPassword') as string;
+  if (!(await prisma.user.count({ where: { id: userId } }))) throw new Error('Customer not found');
 
-  if (!newPassword || newPassword.length < 6) {
-    throw new Error('Password must be at least 6 characters');
-  }
-
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-  await prisma.user.update({
-    where: { id },
-    data: {
-      password: hashedPassword,
-      temporaryPassword: newPassword, // Store plaintext so admin can view it
-    }
-  });
-
+  const { password, expiresAt, emailed } = await issueTemporaryPassword(userId, { signInHint: 'your email address' });
   revalidatePath('/admin/customers/account-holders');
+  return { expiresAt: expiresAt.toISOString(), emailed, password: emailed ? null : password };
 }
 
 export async function adminCreateBeneficiary(formData: FormData) {
