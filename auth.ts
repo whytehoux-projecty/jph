@@ -40,6 +40,12 @@ export const { auth, signIn, signOut, unstable_update, handlers: { GET, POST } }
           }
         }
       }
+      // After onboarding (app/(portal)/onboarding/actions.ts): re-read the
+      // first-login flag from the database. Nothing from the client is used.
+      if (params.trigger === 'update' && token.role === 'USER' && !(token as any).staffView && params.session && 'refreshFirstLogin' in params.session && token.sub) {
+        const user = await prisma.user.findUnique({ where: { id: token.sub }, select: { isFirstLogin: true } });
+        if (user) token.isFirstLogin = user.isFirstLogin;
+      }
       return token;
     },
   },
