@@ -1,9 +1,9 @@
 'use server';
 
+import { checkTransactionPin } from '@/lib/transaction-pin';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
-import bcrypt from 'bcryptjs';
 
 export type SubmitTransferResult =
   | { success: true; reference: string; id: string; status: string; duplicate?: boolean }
@@ -88,14 +88,8 @@ export async function submitTransfer(formData: FormData): Promise<SubmitTransfer
   }
 
   const pinCode = formData.get('pinCode') as string;
-  if (!user.transactionPin) {
-    return { success: false, error: 'Transaction PIN not set up. Please go to settings to set it up.', field: 'pinCode' };
-  }
-
-  const isValidPin = await bcrypt.compare(pinCode || '', user.transactionPin);
-  if (!isValidPin) {
-    return { success: false, error: 'Invalid Transaction PIN.', field: 'pinCode' };
-  }
+  const pinError = await checkTransactionPin(user.id, pinCode, 'sending money');
+  if (pinError) return { success: false, error: pinError, field: 'pinCode' };
 
   // Create PENDING transaction
   const tx = await prisma.transaction.create({

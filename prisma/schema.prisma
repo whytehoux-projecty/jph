@@ -46,6 +46,9 @@ model User {
   preferredCurrency   String   @default("USD") @map("preferred_currency")
   twoFactorEnabled    Boolean  @default(false) @map("two_factor_enabled")
   transactionPin      String?  @map("transaction_pin")
+  // Wrong-PIN protection (lib/transaction-pin.ts): consecutive wrong tries, and the lock they cause.
+  pinFailedAttempts Int       @default(0) @map("pin_failed_attempts")
+  pinLockedUntil    DateTime? @map("pin_locked_until")
   pinSetupComplete    Boolean  @default(false) @map("pin_setup_complete")
   isFirstLogin        Boolean  @default(true) @map("is_first_login")
   temporaryPassword   String?  @map("temporary_password")

@@ -1,5 +1,7 @@
 'use server';
 
+import { checkTransactionPin } from '@/lib/transaction-pin';
+import { pinProblem } from '@/lib/password-policy';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import bcrypt from 'bcryptjs';
@@ -45,20 +47,25 @@ export async function updateProfile(data: any) {
   return updated;
 }
 
-export async function changeTransactionPin(data: { currentPin: string; newPin: string }) {
+/** Errors are returned, not thrown, so their text reaches the customer in production. */
+export async function changeTransactionPin(
+  data: { currentPin: string; newPin: string },
+): Promise<{ success: true } | { success: false; field: 'currentPin' | 'newPin'; error: string }> {
   const session = await auth();
   if (!session?.user?.id) throw new Error('Unauthorized');
   
-  const user = await prisma.user.findUnique({ where: { id: session.user.id } });
-  if (!user || !user.transactionPin) throw new Error('PIN not set up');
-  
-  const match = await bcrypt.compare(data.currentPin, user.transactionPin);
-  if (!match) throw new Error('Incorrect current PIN');
-  
-  const hashedPin = await bcrypt.hash(data.newPin, 10);
+  const newPinProblem = pinProblem(data.newPin);
+  if (newPinProblem) return { success: false, field: 'newPin', error: newPinProblem };
+  if (data.newPin === data.currentPin) return { success: false, field: 'newPin', error: "Choose a PIN that's different from your current one." };
+
+  // Same wrong-PIN limit as payments, so the current PIN can't be guessed here.
+  const pinError = await checkTransactionPin(session.user.id, data.currentPin, 'changing it');
+  if (pinError) return { success: false, field: 'currentPin', error: pinError };
+
+  const hashedPin = await bcrypt.hash(data.newPin, 12);
   await prisma.user.update({
-    where: { id: user.id },
-    data: { transactionPin: hashedPin }
+    where: { id: session.user.id },
+    data: { transactionPin: hashedPin, pinFailedAttempts: 0, pinLockedUntil: null }
   });
 
   return { success: true };
@@ -70,8 +77,10 @@ export async function setupTransactionPin(pin: string) {
   
   const user = await prisma.user.findUnique({ where: { id: session.user.id } });
   if (user?.pinSetupComplete) return { error: 'PIN is already set up' };
+  const problem = pinProblem(pin);
+  if (problem) return { error: problem };
 
-  const hashedPin = await bcrypt.hash(pin, 10);
+  const hashedPin = await bcrypt.hash(pin, 12);
   
   await prisma.user.update({
     where: { id: session.user.id },
