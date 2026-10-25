@@ -10,7 +10,7 @@ import { StepFooter, StepHeading } from "@/components/portal/flow";
 import { submitDeposit, type DepositLocation } from "@/app/actions/deposits";
 import { formatAmount } from "@/lib/format";
 import { userFacingError } from "@/lib/errors";
-import { AccountField, AmountField, RequestSent, parseAmount, type DepositAccount } from "./shared";
+import { AccountField, AmountField, RequestSent, parseAmount, type MoneyAccount } from "@/components/portal/money-fields";
 
 /** Books a cash deposit and gives the customer a reference to show at the branch. */
 export function CashDeposit({
@@ -19,7 +19,7 @@ export function CashDeposit({
   locale,
   onSubmitted,
 }: {
-  accounts: DepositAccount[];
+  accounts: MoneyAccount[];
   locations: DepositLocation[];
   locale: string;
   onSubmitted: () => void;

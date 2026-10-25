@@ -10,7 +10,7 @@ import { StepFooter, StepHeading } from "@/components/portal/flow";
 import { submitDeposit, type CryptoDepositConfig } from "@/app/actions/deposits";
 import { formatAmount } from "@/lib/format";
 import { userFacingError } from "@/lib/errors";
-import { AccountField, AmountField, CopyRow, RequestSent, parseAmount, type DepositAccount } from "./shared";
+import { AccountField, AmountField, CopyRow, RequestSent, parseAmount, type MoneyAccount } from "@/components/portal/money-fields";
 
 /**
  * Shows the bank's wallet for the chosen stablecoin and network, then lets
@@ -22,7 +22,7 @@ export function CryptoDeposit({
   locale,
   onSubmitted,
 }: {
-  accounts: DepositAccount[];
+  accounts: MoneyAccount[];
   configs: CryptoDepositConfig[];
   locale: string;
   onSubmitted: () => void;

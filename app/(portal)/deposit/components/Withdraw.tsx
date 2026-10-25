@@ -15,7 +15,7 @@ import { TELLER_ORDER_MINIMUM } from "@/lib/deposit-rules";
 import { formatAmount, maskAccountNumber } from "@/lib/format";
 import { userFacingError } from "@/lib/errors";
 import { isValidRouting } from "@/lib/transfer-forms/validators";
-import { AccountField, AmountField, RequestSent, parseAmount, type DepositAccount } from "./shared";
+import { AccountField, AmountField, RequestSent, parseAmount, type MoneyAccount } from "@/components/portal/money-fields";
 
 const METHODS: Record<WithdrawalMethod, { label: string; description: string; icon: React.ReactNode }> = {
   linked_ach: {
@@ -44,7 +44,7 @@ export function Withdraw({
   hideBalances,
   onSubmitted,
 }: {
-  accounts: DepositAccount[];
+  accounts: MoneyAccount[];
   locations: DepositLocation[];
   locale: string;
   hideBalances: boolean;

@@ -11,7 +11,7 @@ import { ReviewList } from "@/components/portal/flow";
 import { formatAmount } from "@/lib/format";
 import { toast } from "@/lib/toast";
 
-export interface DepositAccount {
+export interface MoneyAccount {
   id: string;
   /** Type and masked number, e.g. "Checking •••• 6789". */
   label: string;
@@ -37,7 +37,7 @@ export function AccountField({
   showBalance,
   locale,
 }: {
-  accounts: DepositAccount[];
+  accounts: MoneyAccount[];
   value: string;
   onChange: (id: string) => void;
   label: string;
