@@ -8,7 +8,7 @@ import {
   parseUserFeatureOverrides,
   type DepositMethodsOverrides,
 } from '@/lib/feature-overrides';
-import { Landmark, ArrowDownToLine, Smartphone, CreditCard, Coins, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { Landmark, ArrowDownToLine, Smartphone, Coins, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 export function AdminUserDepositOverrides({
   userId,
@@ -86,32 +86,26 @@ export function AdminUserDepositOverrides({
   }> = [
     {
       key: 'cash',
-      name: 'Direct Cash Deposit',
-      description: 'Physical vault drops & Smart ATM barcode cash clearing',
+      name: 'Cash Deposit at a Branch',
+      description: 'Customer books a cash deposit and presents the reference at a configured branch',
       icon: Landmark,
     },
     {
       key: 'virtual',
-      name: 'Third-Party / Virtual ACH',
-      description: 'Inbound external ACH transfers & direct routing credentials',
+      name: 'Incoming Bank Transfer',
+      description: 'Shows the bank routing details; customer can notify an expected ACH/wire',
       icon: ArrowDownToLine,
     },
     {
       key: 'check',
-      name: 'Mobile Check Deposit',
-      description: 'Front & back cheque camera imaging and optical clearance',
+      name: 'Mobile Cheque Deposit',
+      description: 'Customer uploads front and back photos for staff review',
       icon: Smartphone,
-    },
-    {
-      key: 'card',
-      name: 'Debit/Credit Card Top-Up',
-      description: 'Instant card acquiring pipeline and tokenized debit deposits',
-      icon: CreditCard,
     },
     {
       key: 'crypto',
       name: 'USDC/USDT Stablecoin Deposit',
-      description: 'Multi-chain institutional treasury addresses (ETH, SOL, TRON, POLYGON)',
+      description: 'Customer sends to a configured bank wallet and reports the transaction ID',
       icon: Coins,
     },
   ];
