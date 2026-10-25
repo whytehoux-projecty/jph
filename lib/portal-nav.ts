@@ -3,7 +3,7 @@ import {
   ArrowLeftRight,
   CreditCard,
   FileText,
-  Gift,
+  Handshake,
   Landmark,
   LayoutDashboard,
   LifeBuoy,
@@ -56,7 +56,7 @@ export const PORTAL_NAV: NavGroup[] = [
     label: "Grow",
     items: [
       { label: "Savings & loans", href: "/savings", icon: PiggyBank },
-      { label: "Benefits", href: "/benefits", icon: Gift, match: ["/rewards"] },
+      { label: "Your relationship", href: "/relationship", icon: Handshake, match: ["/benefits", "/rewards"] },
     ],
   },
 ];

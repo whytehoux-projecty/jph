@@ -1,9 +1,22 @@
 'use server';
 
+import { randomBytes } from 'node:crypto';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { parseUserFeatureOverrides, type BenefitsMethodsOverrides } from '@/lib/feature-overrides';
+import { ADVISORY_FORMATS, ADVISORY_TOPICS, type AdvisoryFormat } from '@/lib/advisory';
+
+/**
+ * "Your relationship": the customer's relationship manager (as staff recorded
+ * it), their tier, and advisory meeting requests that staff answer.
+ *
+ * Points, tier perks and concierge were removed: no points ledger or
+ * published perks exist.
+ */
+
+/** Subject prefix the admin benefits queue filters on (app/actions/admin-ebank.ts). */
+const ADVISORY_PREFIX = '[Private Advisory Booking]';
 
 export interface UserBenefitsPermissions {
   enabled: boolean;
@@ -36,394 +49,111 @@ export async function getUserBenefitsPermissions(): Promise<UserBenefitsPermissi
   };
 }
 
-export interface UserRewardsData {
-  pointsBalance: number;
-  cashEquivalent: number;
-  pendingPoints: number;
-  lifetimeEarned: number;
-  tier: string;
-  tierName: string;
-  pointsRate: string;
-  permissions?: UserBenefitsPermissions;
-  relationshipDirector: {
-    name: string;
-    title: string;
-    email: string;
-    phone: string;
-  };
+export interface RelationshipManager {
+  name: string;
+  title: string | null;
+  email: string | null;
+  phone: string | null;
 }
 
-
-export interface RewardRedemptionResult {
-  success: boolean;
-  reference?: string;
-  cashAmount?: number;
-  pointsRedeemed?: number;
-  newPointsBalance?: number;
-  targetAccountName?: string;
-  message?: string;
-}
-
-export interface AdvisoryBookingResult {
-  success: boolean;
-  reference?: string;
-  topic?: string;
-  preferredDate?: string;
-  format?: string;
-  message?: string;
-}
-
-export interface BenefitActivityItem {
-  id: string;
-  reference: string;
-  title: string;
-  type: 'REDEMPTION' | 'ADVISORY' | 'CONCIERGE' | 'PERK_ACQUISITION';
-  value: string;
-  date: string;
-  status: 'COMPLETED' | 'CONFIRMED' | 'IN_REVIEW' | 'ACTIVE';
-}
-
-export async function getUserRewardsData(): Promise<UserRewardsData> {
+/** The relationship manager staff recorded for the customer, or null when none is. */
+export async function getRelationship(): Promise<{ tier: string; manager: RelationshipManager | null }> {
   const session = await auth();
-  if (!session?.user?.id) {
-    return {
-      pointsBalance: 142500,
-      cashEquivalent: 1425,
-      pendingPoints: 12400,
-      lifetimeEarned: 385000,
-      tier: 'WORLD_ELITE',
-      tierName: 'World Elite Private Vault',
-      pointsRate: '3x Dining & Travel • 2x Business • 1.5x Vault Assets',
-      relationshipDirector: {
-        name: 'Lord Sterling Vance',
-        title: 'Senior Managing Wealth Director',
-        email: 'sterling.vance@heritagetrust.com',
-        phone: '+1 (800) 849-2910 ext. 401',
-      },
-    };
-  }
+  if (!session?.user?.id) throw new Error('Unauthorized');
 
-  try {
-    const user = await prisma.user.findUnique({
-      where: { id: session.user.id },
-      include: {
-        accounts: true,
-      },
-    });
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { tier: true, accountManagerName: true, accountManagerTitle: true, accountManagerEmail: true, accountManagerPhone: true },
+  });
 
-    const totalVaultBalance = user?.accounts.reduce((sum, a) => sum + (a.balance || 0), 0) || 0;
-    // Calculate realistic relationship points based on total relationship assets
-    const calculatedPoints = Math.max(85000, Math.round(totalVaultBalance * 0.15));
-
-    const tierNameMap: Record<string, string> = {
-      BASIC: 'Standard Vault Member',
-      PREMIER: 'Premier Heritage Client',
-      PRIVATE_VAULT: 'Private Vault Syndicate',
-      WORLD_ELITE: 'World Elite Private Wealth',
-    };
-
-    const permissions = await getUserBenefitsPermissions();
-
-    return {
-      pointsBalance: calculatedPoints,
-      cashEquivalent: calculatedPoints / 100,
-      pendingPoints: 12400,
-      lifetimeEarned: calculatedPoints + 245000,
-      tier: user?.tier || 'WORLD_ELITE',
-      tierName: tierNameMap[user?.tier || 'WORLD_ELITE'] || 'World Elite Private Wealth',
-      pointsRate: '3x Dining & Travel • 2x Business • 1.5x Vault Assets',
-      permissions,
-      relationshipDirector: {
-        name: user?.accountManagerName || 'Lord Sterling Vance',
-        title: user?.accountManagerTitle || 'Senior Managing Wealth Director',
-        email: user?.accountManagerEmail || 'wealth.director@heritagetrust.com',
-        phone: user?.accountManagerPhone || '+1 (800) 849-2910 ext. 401',
-      },
-    };
-  } catch {
-    return {
-      pointsBalance: 142500,
-      cashEquivalent: 1425,
-      pendingPoints: 12400,
-      lifetimeEarned: 385000,
-      tier: 'WORLD_ELITE',
-      tierName: 'World Elite Private Wealth',
-      pointsRate: '3x Dining & Travel • 2x Business • 1.5x Vault Assets',
-      relationshipDirector: {
-        name: 'Lord Sterling Vance',
-        title: 'Senior Managing Wealth Director',
-        email: 'sterling.vance@heritagetrust.com',
-        phone: '+1 (800) 849-2910 ext. 401',
-      },
-    };
-  }
-}
-
-/**
- * There is no points ledger: the balance shown was an estimate, and this used
- * to credit real cash for any number of points without checking a balance.
- * Every redemption is refused until points are actually recorded.
- */
-export async function submitPointRedemption(_data: {
-  points: number;
-  targetAccountId: string;
-  category: string;
-  description?: string;
-}): Promise<RewardRedemptionResult> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, message: 'Authentication required' };
-  }
+  const name = user?.accountManagerName?.trim();
   return {
-    success: false,
-    message: "Points can't be redeemed online right now. Contact us if you have points to redeem.",
+    tier: user?.tier || 'BASIC',
+    manager: name
+      ? {
+          name,
+          title: user?.accountManagerTitle?.trim() || null,
+          email: user?.accountManagerEmail?.trim() || null,
+          phone: user?.accountManagerPhone?.trim() || null,
+        }
+      : null,
   };
 }
 
-export async function requestAdvisorySession(data: {
+export interface AdvisoryRequestInput {
   topic: string;
+  /** YYYY-MM-DD, a preference the team will try to meet. */
   preferredDate: string;
-  format: string;
+  format: AdvisoryFormat;
   notes?: string;
-}): Promise<AdvisoryBookingResult> {
-  const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, message: 'Authentication required' };
-  }
-
-  const permissions = await getUserBenefitsPermissions();
-  if (!permissions.enabled) {
-    return {
-      success: false,
-      message: 'Benefits and private advisory services are currently disabled for your account profile.',
-    };
-  }
-  if (!permissions.methods.private_advisory) {
-    return {
-      success: false,
-      message: 'Private advisory bookings are currently restricted for your account profile.',
-    };
-  }
-
-  try {
-    const refNumber = `ADV-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
-
-    await prisma.supportTicket.create({
-      data: {
-        userId: session.user.id,
-        subject: `[Private Advisory Booking] ${data.topic} (Ref: ${refNumber})`,
-        message: `Topic: ${data.topic}\nPreferred Date: ${data.preferredDate}\nFormat: ${data.format}\nClient Notes: ${data.notes || 'No additional notes provided.'}`,
-        status: 'OPEN',
-      },
-    });
-
-    await prisma.notification.create({
-      data: {
-        userId: session.user.id,
-        title: 'Private Advisory Session Scheduled',
-        message: `Your fiduciary consultation for "${data.topic}" on ${data.preferredDate} has been confirmed. Ref: ${refNumber}.`,
-      },
-    });
-
-    revalidatePath('/benefits');
-
-    return {
-      success: true,
-      reference: refNumber,
-      topic: data.topic,
-      preferredDate: data.preferredDate,
-      format: data.format,
-      message: 'Consultation request submitted. Your Senior Wealth Director will contact you within 24 hours.',
-    };
-  } catch (err: any) {
-    return {
-      success: false,
-      message: err.message || 'Failed to schedule advisory consultation.',
-    };
-  }
 }
 
-export async function requestConciergeBooking(data: {
-  serviceType: string;
-  requestDetails: string;
-  targetDate: string;
-  guestsCount?: number;
-}): Promise<AdvisoryBookingResult> {
+/** Sends a meeting request to staff. It isn't a booking until they confirm it. */
+export async function requestAdvisoryMeeting(data: AdvisoryRequestInput): Promise<{ success: boolean; reference?: string; error?: string }> {
   const session = await auth();
-  if (!session?.user?.id) {
-    return { success: false, message: 'Authentication required' };
-  }
+  if (!session?.user?.id) throw new Error('Unauthorized');
+  const userId = session.user.id;
 
   const permissions = await getUserBenefitsPermissions();
-  if (!permissions.enabled) {
-    return {
-      success: false,
-      message: 'Benefits and lifestyle concierge services are currently disabled for your account profile.',
-    };
-  }
-  if (!permissions.methods.concierge) {
-    return {
-      success: false,
-      message: '24/7 Lifestyle concierge requests are currently restricted for your account profile.',
-    };
+  if (!permissions.enabled || !permissions.methods.private_advisory) {
+    return { success: false, error: 'Requesting meetings online is turned off for your profile. Contact us to arrange one.' };
   }
 
-  try {
+  const topic = (ADVISORY_TOPICS as readonly string[]).includes(data.topic) ? data.topic : null;
+  if (!topic) return { success: false, error: 'Choose what you would like to talk about.' };
+  const format = ADVISORY_FORMATS[data.format] ? data.format : null;
+  if (!format) return { success: false, error: 'Choose how you would like to meet.' };
+  const date = new Date(`${data.preferredDate}T00:00:00Z`);
+  const today = new Date(new Date().toISOString().slice(0, 10) + 'T00:00:00Z');
+  if (Number.isNaN(date.getTime()) || date <= today) return { success: false, error: 'Choose a date from tomorrow onwards.' };
+  const notes = data.notes?.trim().slice(0, 1000) || '';
 
-    const refNumber = `CCG-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
+  const reference = `ADV-${randomBytes(5).toString('hex').toUpperCase()}`;
+  const dateLabel = date.toISOString().slice(0, 10);
 
-    await prisma.supportTicket.create({
-      data: {
-        userId: session.user.id,
-        subject: `[Lifestyle Concierge Request] ${data.serviceType} (Ref: ${refNumber})`,
-        message: `Service: ${data.serviceType}\nTarget Date: ${data.targetDate}\nParty Size: ${data.guestsCount || 2}\nDetails: ${data.requestDetails}`,
-        status: 'OPEN',
-      },
-    });
+  await prisma.supportTicket.create({
+    data: {
+      userId,
+      subject: `${ADVISORY_PREFIX} ${topic} (Ref: ${reference})`,
+      message: `Topic: ${topic}\nPreferred date: ${dateLabel}\nFormat: ${ADVISORY_FORMATS[format]}\nNotes: ${notes || 'None'}`,
+      status: 'OPEN',
+    },
+  });
 
-    await prisma.notification.create({
-      data: {
-        userId: session.user.id,
-        title: 'Concierge Request Dispatched',
-        message: `Your concierge request for "${data.serviceType}" (Ref: ${refNumber}) is being arranged by the Global Hospitality Desk.`,
-      },
-    });
+  await prisma.notification.create({
+    data: {
+      userId,
+      title: 'Meeting request received',
+      message: `We've received your request to talk about ${topic.toLowerCase()} (reference ${reference}). We'll contact you to confirm a time.`,
+    },
+  });
 
-    revalidatePath('/benefits');
-
-    return {
-      success: true,
-      reference: refNumber,
-      topic: data.serviceType,
-      preferredDate: data.targetDate,
-      message: 'Concierge request dispatched to the 24/7 Global Hospitality Desk.',
-    };
-  } catch (err: any) {
-    return {
-      success: false,
-      message: err.message || 'Failed to dispatch concierge request.',
-    };
-  }
+  revalidatePath('/relationship');
+  revalidatePath('/admin/ebank/benefits');
+  return { success: true, reference };
 }
 
-export async function getRecentBenefitActivities(): Promise<BenefitActivityItem[]> {
+/** The customer's advisory meeting requests, newest first. */
+export async function getAdvisoryRequests() {
   const session = await auth();
-  if (!session?.user?.id) {
-    return [
-      {
-        id: 'demo-act-1',
-        reference: 'RWD-2026-928172',
-        title: 'Points Statement Credit (25,000 pts)',
-        type: 'REDEMPTION',
-        value: '+$250.00 USD',
-        date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'COMPLETED',
-      },
-      {
-        id: 'demo-act-2',
-        reference: 'ADV-2026-449102',
-        title: 'Fiduciary Estate & Trust Planning Consultation',
-        type: 'ADVISORY',
-        value: 'VIP Confirmed',
-        date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'CONFIRMED',
-      },
-      {
-        id: 'demo-act-3',
-        reference: 'CCG-2026-192847',
-        title: 'Priority Pass™ Prestige Card Renewal & VIP Access',
-        type: 'PERK_ACQUISITION',
-        value: 'Unlimited Access',
-        date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-        status: 'ACTIVE',
-      },
-    ];
-  }
+  if (!session?.user?.id) throw new Error('Unauthorized');
 
-  try {
-    const [rewardTxs, tickets] = await Promise.all([
-      prisma.transaction.findMany({
-        where: {
-          account: { userId: session.user.id },
-          category: 'REWARDS',
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-      }),
-      prisma.supportTicket.findMany({
-        where: {
-          userId: session.user.id,
-          OR: [
-            { subject: { contains: 'Advisory' } },
-            { subject: { contains: 'Concierge' } },
-          ],
-        },
-        orderBy: { createdAt: 'desc' },
-        take: 5,
-      }),
-    ]);
+  const tickets = await prisma.supportTicket.findMany({
+    where: { userId: session.user.id, subject: { startsWith: ADVISORY_PREFIX } },
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+  });
 
-    const items: BenefitActivityItem[] = [];
-
-    rewardTxs.forEach((tx) => {
-      items.push({
-        id: tx.id,
-        reference: tx.reference || `RWD-${tx.id.slice(0, 6)}`,
-        title: tx.description,
-        type: 'REDEMPTION',
-        value: `+$${tx.amount.toLocaleString()}`,
-        date: tx.createdAt.toISOString(),
-        status: 'COMPLETED',
-      });
-    });
-
-    tickets.forEach((t) => {
-      const isConcierge = t.subject.includes('Concierge');
-      items.push({
-        id: t.id,
-        reference: t.subject.match(/Ref: ([\w-]+)/)?.[1] || `SRV-${t.id.slice(0, 6)}`,
-        title: t.subject.replace(/\[.*?\]\s*/, '').replace(/\s*\(Ref:.*?\)/, ''),
-        type: isConcierge ? 'CONCIERGE' : 'ADVISORY',
-        value: t.status === 'RESOLVED' ? 'Completed' : 'Confirmed',
-        date: t.createdAt.toISOString(),
-        status: t.status === 'RESOLVED' ? 'COMPLETED' : 'CONFIRMED',
-      });
-    });
-
-    if (items.length === 0) {
-      return [
-        {
-          id: 'demo-act-1',
-          reference: 'RWD-2026-928172',
-          title: 'Points Statement Credit (25,000 pts)',
-          type: 'REDEMPTION',
-          value: '+$250.00 USD',
-          date: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'COMPLETED',
-        },
-        {
-          id: 'demo-act-2',
-          reference: 'ADV-2026-449102',
-          title: 'Fiduciary Estate & Trust Planning Consultation',
-          type: 'ADVISORY',
-          value: 'VIP Confirmed',
-          date: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'CONFIRMED',
-        },
-        {
-          id: 'demo-act-3',
-          reference: 'CCG-2026-192847',
-          title: 'Priority Pass™ Prestige Card Renewal & VIP Access',
-          type: 'PERK_ACQUISITION',
-          value: 'Unlimited Access',
-          date: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
-          status: 'ACTIVE',
-        },
-      ];
-    }
-
-    return items.sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
-  } catch {
-    return [];
-  }
+  return tickets.map((t) => {
+    const field = (label: string) => t.message.match(new RegExp(`^${label}: (.*)$`, 'mi'))?.[1]?.trim() || null;
+    return {
+      id: t.id,
+      reference: t.subject.match(/Ref: ([\w-]+)/)?.[1] ?? null,
+      topic: t.subject.replace(ADVISORY_PREFIX, '').replace(/\s*\(Ref:.*?\)/, '').trim(),
+      preferredDate: field('Preferred date'),
+      format: field('Format'),
+      status: t.status,
+      createdAt: t.createdAt.toISOString(),
+    };
+  });
 }
