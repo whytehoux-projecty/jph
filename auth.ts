@@ -1,9 +1,9 @@
-import { temporaryPasswordExpired } from '@/lib/temporary-credentials';
+import { checkPasswordWithLimit, minutesLeft } from '@/lib/sign-in-guard';
+import { consumeSignInChallenge } from '@/lib/one-time-codes';
 import NextAuth from 'next-auth';
 import { authConfig } from './auth.config';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import { prisma } from './lib/prisma';
-import { verifyPassword } from './lib/password';
 import { CredentialsSignin } from 'next-auth';
 
 class CustomAuthError extends CredentialsSignin {
@@ -57,52 +57,42 @@ export const { auth, signIn, signOut, unstable_update, handlers: { GET, POST } }
         email: { label: "Email", type: "email" },
         password: { label: "Password", type: "password" },
         is_admin: { label: "Admin Login", type: "text" },
+        // Customer sign-in, step two (see beginSignIn).
+        challenge: { label: "Challenge", type: "text" },
+        code: { label: "Code", type: "text" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
-
-        const email = (credentials.email as string).trim();
-        const password = credentials.password as string;
-        const isAdminLogin = credentials.is_admin === 'true';
+        const isAdminLogin = credentials?.is_admin === 'true';
 
         if (isAdminLogin) {
+          if (!credentials?.email || !credentials?.password) return null;
+          const email = (credentials.email as string).trim();
           const admin = await prisma.adminUser.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } });
           if (!admin) return null;
-          // Admin rows created before hashing are upgraded to bcrypt on first sign-in.
-          const passwordsMatch = await verifyPassword(password, admin.password, {
-            legacyPlaintext: true,
-            onUpgrade: (hash) => prisma.adminUser.update({ where: { id: admin.id }, data: { password: hash } }),
-          });
-          if (passwordsMatch) {
-            return { id: admin.id, email: admin.email, name: admin.firstName, role: 'ADMIN' };
-          }
-        } else {
-          let user;
-          if (email.includes('@')) {
-            user = await prisma.user.findFirst({ where: { email: { equals: email, mode: 'insensitive' } } });
-          } else {
-            const account = await prisma.account.findUnique({ where: { accountNumber: email } });
-            if (account) {
-              user = await prisma.user.findUnique({ where: { id: account.userId } });
-            }
-          }
-          // Customer sign-in only ever authenticates customers; administrators
-          // sign in at /admin/login.
-          if (!user) return null;
-          const passwordsMatch = await verifyPassword(password, user.password);
-          if (passwordsMatch) {
-            if (!user.hasOnlineAccess || user.eportalStatus !== 'ACTIVE') {
-              throw new CustomAuthError(user.eportalNotificationMessage || "Your Account Access has been suspended, kindly contact CCU.");
-            }
-            // Checked only after the password matched, so it reveals nothing to a guesser.
-            if (temporaryPasswordExpired(user)) {
-              throw new CustomAuthError("Your temporary password has expired. Contact us and we'll send you a new one.");
-            }
-            return { id: user.id, email: user.email, name: user.firstName, role: 'USER', isFirstLogin: user.isFirstLogin };
-          }
+          // Same wrong-password limit as customers. Admin rows created before
+          // hashing are upgraded to bcrypt on first sign-in.
+          const check = await checkPasswordWithLimit(
+            { kind: 'admin', id: admin.id, email: admin.email, stored: admin.password },
+            credentials.password as string,
+            (hash) => prisma.adminUser.update({ where: { id: admin.id }, data: { password: hash } }),
+          );
+          if (check.ok) return { id: admin.id, email: admin.email, name: admin.firstName, role: 'ADMIN' };
+          if (check.lockedUntil) throw new CustomAuthError(`LOCKED:${minutesLeft(check.lockedUntil)}`);
+          return null;
         }
 
-        return null;
+        // Customers: the password (and wrong-try limit, access checks and any
+        // emailed code) is handled by beginSignIn in app/(portal)/login/actions.ts.
+        // This only accepts the challenge it issued, so neither the limit nor
+        // the code can be skipped by calling this endpoint directly.
+        const result = await consumeSignInChallenge((credentials?.challenge as string) || '', (credentials?.code as string) || undefined);
+        if (!result.ok) {
+          if (result.reason === 'wrong') throw new CustomAuthError(`CODE_WRONG:${result.triesLeft ?? 0}`);
+          throw new CustomAuthError(result.reason === 'used-up' ? 'CODE_USED_UP' : 'CODE_EXPIRED');
+        }
+        const user = await prisma.user.findUnique({ where: { id: result.userId } });
+        if (!user || !user.hasOnlineAccess || user.eportalStatus !== 'ACTIVE') return null;
+        return { id: user.id, email: user.email, name: user.firstName, role: 'USER', isFirstLogin: user.isFirstLogin };
       },
     }),
   ],

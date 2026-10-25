@@ -24,6 +24,10 @@ model AdminUser {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @updatedAt @map("updated_at")
 
+  // Wrong-password protection (lib/sign-in-guard.ts).
+  loginFailedAttempts Int       @default(0) @map("login_failed_attempts")
+  loginLockedUntil    DateTime? @map("login_locked_until")
+
   @@map("admin_users")
 }
 
@@ -49,6 +53,9 @@ model User {
   // Wrong-PIN protection (lib/transaction-pin.ts): consecutive wrong tries, and the lock they cause.
   pinFailedAttempts Int       @default(0) @map("pin_failed_attempts")
   pinLockedUntil    DateTime? @map("pin_locked_until")
+  // Wrong-password protection (lib/sign-in-guard.ts).
+  loginFailedAttempts Int       @default(0) @map("login_failed_attempts")
+  loginLockedUntil    DateTime? @map("login_locked_until")
   pinSetupComplete    Boolean  @default(false) @map("pin_setup_complete")
   isFirstLogin        Boolean  @default(true) @map("is_first_login")
   temporaryPassword   String?  @map("temporary_password")
@@ -84,6 +91,7 @@ model User {
   cryptoWallets    CryptoWallet[]
   chequeRequests ChequeRequest[]
   depositImages    DepositImage[]
+  oneTimeCodes     OneTimeCode[]
   registrationForm RegistrationForm?
   budgets          Budget[]
   creditScores     CreditScore[]
@@ -566,6 +574,27 @@ model DepositImage {
   @@index([userId])
   @@index([transactionId])
   @@map("deposit_images")
+}
+
+// Short-lived codes for signing in (purpose SIGN_IN) and password reset
+// (RESET). Only hashes are stored. lib/one-time-codes.ts.
+model OneTimeCode {
+  id         String    @id @default(cuid())
+  userId     String    @map("user_id")
+  purpose    String // SIGN_IN, RESET
+  // SIGN_IN: hash of the challenge the browser holds between the two steps.
+  secretHash String?   @unique @map("secret_hash")
+  // The emailed code, hashed. Empty for a sign-in that needs no code.
+  codeHash   String?   @map("code_hash")
+  attempts   Int       @default(0)
+  expiresAt  DateTime  @map("expires_at")
+  usedAt     DateTime? @map("used_at")
+  createdAt  DateTime  @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, purpose])
+  @@map("one_time_codes")
 }
 
 model SupportTicket {
