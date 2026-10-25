@@ -3,6 +3,14 @@ import { Resend } from 'resend';
 // Initialize Resend if API key is provided
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
+/**
+ * Whether email can actually be sent. Features that depend on reaching the
+ * customer (sign-in codes, password reset) check this first.
+ */
+export function emailConfigured(): boolean {
+  return resend !== null;
+}
+
 export async function sendEmail({ to, subject, html }: { to: string, subject: string, html: string }) {
   if (!resend) {
     // Email isn't configured. Never log the recipient or body: messages carry

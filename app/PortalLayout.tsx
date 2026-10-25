@@ -25,6 +25,7 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
   const isPassThrough =
     pathname?.includes("/auth/") ||
     pathname === "/login" ||
+    pathname === "/forgot-password" ||
     pathname === "/signup" ||
     // First sign-in setup: focused, like sign-in (every other page redirects here until it's done)
     pathname === "/onboarding" ||

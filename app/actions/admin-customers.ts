@@ -316,6 +316,15 @@ export async function requestOnlineAccess(formData: FormData) {
 
 import bcrypt from 'bcryptjs';
 
+/** Lifts a transaction-PIN lock early, e.g. once staff have confirmed it was the customer. */
+export async function unlockTransactionPin(userId: string) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+  await prisma.user.update({ where: { id: userId }, data: { pinFailedAttempts: 0, pinLockedUntil: null } });
+  revalidatePath('/admin/customers/account-holders');
+  return { success: true };
+}
+
 /**
  * Issues the customer a new temporary password (they choose their own at
  * next sign-in). It's emailed to them; it's returned to staff only to pass

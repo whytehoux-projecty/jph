@@ -13,6 +13,7 @@ import { Switch } from "@/components/ui/switch";
 import { Label } from "@/components/ui/label";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { changeTransactionPin, updatePreferences, updateProfile } from "@/app/actions/profile";
+import { pinProblem } from "@/lib/password-policy";
 import { toast } from "@/lib/toast";
 import { userFacingError } from "@/lib/errors";
 
@@ -172,22 +173,25 @@ function SecuritySection({ pinSetupComplete }: { pinSetupComplete: boolean }) {
   const save = async () => {
     const next: Record<string, string> = {};
     if (!/^\d{4,6}$/.test(currentPin)) next.currentPin = "Enter your current 4 to 6 digit PIN.";
-    if (!/^\d{4,6}$/.test(newPin)) next.newPin = "Your new PIN must be 4 to 6 digits.";
+    const newPinIssue = pinProblem(newPin);
+    if (newPinIssue) next.newPin = newPinIssue;
     else if (newPin === currentPin) next.newPin = "Choose a PIN that's different from your current one.";
     if (newPin && confirmPin !== newPin) next.confirmPin = "The two PINs don't match.";
     setErrors(next);
     if (Object.keys(next).length) return;
     setSaving(true);
     try {
-      await changeTransactionPin({ currentPin, newPin });
+      const res = await changeTransactionPin({ currentPin, newPin });
+      if (!res.success) {
+        setErrors({ [res.field]: res.error });
+        return;
+      }
       toast.success({ title: "Your transaction PIN has been changed" });
       setCurrentPin("");
       setNewPin("");
       setConfirmPin("");
     } catch (err) {
-      const msg = userFacingError(err, "Please try again.");
-      if (/incorrect current pin/i.test(msg)) setErrors({ currentPin: "That isn't your current PIN." });
-      else toast.error({ title: "Your PIN wasn't changed", description: msg });
+      toast.error({ title: "Your PIN wasn't changed", description: userFacingError(err, "Please try again.") });
     } finally {
       setSaving(false);
     }

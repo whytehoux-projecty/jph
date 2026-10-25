@@ -11,6 +11,8 @@ import { Button } from "@/components/ui/Button";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { PasswordInput } from "@/components/ui/password-input";
+import { OtpInput } from "@/components/ui/otp-input";
+import { beginSignIn } from "./actions";
 import { consumeSignOutReason, type SignOutReason } from "@/lib/sign-out-notice";
 import { BRAND } from "@/src/content/facts";
 import { ROUTES } from "@/lib/constants";
@@ -23,6 +25,8 @@ const EMAIL = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 const NO_MATCH = "The details you entered don't match our records. Check them and try again.";
 const UNAVAILABLE = "We couldn't sign you in just now. Please try again in a few minutes.";
+const lockedText = (minutes: number) =>
+  `Too many wrong passwords, so sign-in is paused for ${minutes} more minute${minutes === 1 ? "" : "s"}. You can reset your password if you've forgotten it.`;
 
 const NOTICES: Record<SignOutReason, { title: string; body: string }> = {
   "signed-out": {
@@ -55,6 +59,11 @@ export default function LoginPage() {
   const [notice, setNotice] = useState<SignOutReason | null>(null);
   const [capsLock, setCapsLock] = useState(false);
   const [loading, setLoading] = useState(false);
+  // Step two, when an emailed code is needed. Kept in memory only.
+  const [codeStep, setCodeStep] = useState<{ challenge: string; sentTo: string } | null>(null);
+  const [code, setCode] = useState("");
+  const [codeError, setCodeError] = useState<string | null>(null);
+  const codeHeadingRef = useRef<HTMLHeadingElement>(null);
 
   const submitting = useRef(false);
   const userIdRef = useRef<HTMLInputElement>(null);
@@ -71,6 +80,10 @@ export default function LoginPage() {
   useEffect(() => {
     if (formError) formErrorRef.current?.focus();
   }, [formError]);
+
+  useEffect(() => {
+    if (codeStep) codeHeadingRef.current?.focus();
+  }, [codeStep]);
 
   function trackCapsLock(e: KeyboardEvent<HTMLInputElement>) {
     setCapsLock(e.getModifierState?.("CapsLock") ?? false);
@@ -102,34 +115,108 @@ export default function LoginPage() {
     submitting.current = true;
     setLoading(true);
     try {
-      const result = await signIn("credentials", {
-        email: userId,
-        password: password,
-        redirect: false,
-      });
-
-      if (result?.error) {
-        // auth.ts only raises a custom code after the password has matched,
-        // for profiles whose online access an administrator has paused.
-        if (result.error === "CredentialsSignin" && result.code && result.code !== "credentials") {
-          setSuspendedMessage(result.code);
-        } else {
-          setFormError(result.error === "Configuration" ? UNAVAILABLE : NO_MATCH);
-        }
-        setPassword("");
-        submitting.current = false;
-        setLoading(false);
-        return;
+      const res = await beginSignIn({ userId, password });
+      setPassword("");
+      if (res.status === "ready") return await finish(res.challenge);
+      if (res.status === "code-sent") {
+        setCodeStep({ challenge: res.challenge, sentTo: res.sentTo });
+      } else if (res.status === "paused") {
+        setSuspendedMessage(res.message);
+      } else if (res.status === "locked") {
+        setFormError(lockedText(res.minutes));
+      } else if (res.status === "temp-expired") {
+        setFormError("Your temporary password has expired. Contact us and we'll send you a new one.");
+      } else {
+        setFormError(NO_MATCH);
       }
-
-      // Stay busy until the dashboard has loaded, so the form can't be resent.
-      router.push(AFTER_LOGIN_ROUTE);
-      router.refresh();
     } catch {
       setFormError(UNAVAILABLE);
+    }
+    submitting.current = false;
+    setLoading(false);
+  }
+
+  /** Step two: hands the challenge (and code, when one was emailed) to NextAuth. */
+  async function finish(challenge: string, enteredCode?: string) {
+    const result = await signIn("credentials", { challenge, code: enteredCode ?? "", redirect: false });
+    if (result?.error) {
+      const c = typeof result.code === "string" ? result.code : "";
+      if (c.startsWith("CODE_WRONG:")) {
+        const left = Number(c.slice(11));
+        setCodeError(`That code isn't right. ${left} ${left === 1 ? "try" : "tries"} left.`);
+        setCode("");
+      } else {
+        // Expired, used up or already used: start again from the password.
+        setCodeStep(null);
+        setCode("");
+        setFormError(c === "CODE_USED_UP" ? "Too many wrong codes. Sign in again to get a new one." : "That sign-in has expired. Sign in again.");
+      }
+      submitting.current = false;
+      setLoading(false);
+      return;
+    }
+    // Stay busy until the dashboard has loaded, so nothing can be resent.
+    router.push(AFTER_LOGIN_ROUTE);
+    router.refresh();
+  }
+
+  async function submitCode(e?: FormEvent, value = code) {
+    e?.preventDefault();
+    if (!codeStep || submitting.current) return;
+    if (!/^\d{6}$/.test(value)) {
+      setCodeError("Enter the 6-digit code from the email.");
+      return;
+    }
+    setCodeError(null);
+    submitting.current = true;
+    setLoading(true);
+    try {
+      await finish(codeStep.challenge, value);
+    } catch {
+      setCodeError(UNAVAILABLE);
       submitting.current = false;
       setLoading(false);
     }
+  }
+
+  if (codeStep) {
+    return (
+      <AuthShell>
+        <p className="text-label uppercase text-fg-muted">{BRAND.vault}</p>
+        <h1 ref={codeHeadingRef} tabIndex={-1} className="mt-2 font-display text-h1 text-fg focus:outline-none">
+          Check your email
+        </h1>
+        <p className="mt-2 text-body text-fg-muted">
+          We sent a 6-digit code to <span className="font-semibold text-fg">{codeStep.sentTo}</span>. It works for 10 minutes.
+        </p>
+        <form onSubmit={submitCode} noValidate aria-busy={loading} className="mt-8 flex flex-col gap-5">
+          <FormField label="Sign-in code" error={codeError}>
+            <OtpInput length={6} value={code} onChange={(v) => { setCode(v); setCodeError(null); }} onComplete={(v) => void submitCode(undefined, v)} />
+          </FormField>
+          <Button type="submit" size="lg" fullWidth loading={loading} loadingLabel="Checking the code">
+            Continue
+          </Button>
+          <Button
+            type="button"
+            variant="tertiary"
+            fullWidth
+            icon={<ArrowLeft aria-hidden="true" />}
+            onClick={() => {
+              setCodeStep(null);
+              setCode("");
+              setCodeError(null);
+            }}
+            disabled={loading}
+          >
+            Didn&apos;t get it? Sign in again
+          </Button>
+        </form>
+        <p className="mt-6 text-small text-fg-muted">
+          We will never ask you for this code. If you didn&apos;t just try to sign in, someone may know your password.{" "}
+          <Link href="/forgot-password" className="font-semibold text-fg-action underline underline-offset-[3px]">Reset it</Link>.
+        </p>
+      </AuthShell>
+    );
   }
 
   if (suspendedMessage) {
@@ -216,7 +303,7 @@ export default function LoginPage() {
 
         <div className="-mt-2 flex justify-end">
           <Link
-            href={ROUTES.contact}
+            href="/forgot-password"
             className="inline-flex min-h-11 items-center text-small font-semibold text-fg-action underline decoration-1 underline-offset-[3px] hover:decoration-2"
           >
             Forgotten your password?

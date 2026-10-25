@@ -73,6 +73,7 @@ export type AdminUser = {
   createdAt: Date;
   isFirstLogin?: boolean;
   temporaryPasswordExpiresAt?: Date | string | null;
+  pinLockedUntil?: Date | string | null;
   transferMethodOverrides?: string | null;
   accountManagerName?: string | null;
   accountManagerTitle?: string | null;
@@ -1166,6 +1167,7 @@ export function AdminUserList({
                         email={selectedUser.email}
                         isFirstLogin={!!selectedUser.isFirstLogin}
                         expiresAt={selectedUser.temporaryPasswordExpiresAt ? new Date(selectedUser.temporaryPasswordExpiresAt).toISOString() : null}
+                        pinLockedUntil={selectedUser.pinLockedUntil ? new Date(selectedUser.pinLockedUntil).toISOString() : null}
                       />
                     </div>
                   </div>

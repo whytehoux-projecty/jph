@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/Button';
-import { issueNewTemporaryPassword } from '@/app/actions/admin-customers';
+import { issueNewTemporaryPassword, unlockTransactionPin } from '@/app/actions/admin-customers';
 import { TEMP_PASSWORD_TTL_HOURS } from '@/lib/password-policy';
 
 const when = (iso: string) => new Date(iso).toLocaleString(undefined, { dateStyle: 'medium', timeStyle: 'short' });
@@ -18,12 +18,29 @@ export function TemporaryPasswordPanel({
   email,
   isFirstLogin,
   expiresAt,
+  pinLockedUntil,
 }: {
   userId: string;
   email: string;
   isFirstLogin: boolean;
   expiresAt: string | null;
+  /** When the customer's transaction PIN lock ends, if it's locked. */
+  pinLockedUntil: string | null;
 }) {
+  const [pinLock, setPinLock] = useState(pinLockedUntil && new Date(pinLockedUntil).getTime() > Date.now() ? pinLockedUntil : null);
+  const [unlocking, setUnlocking] = useState(false);
+  const unlock = async () => {
+    setUnlocking(true);
+    try {
+      await unlockTransactionPin(userId);
+      setPinLock(null);
+      toast.success('Transaction PIN unlocked');
+    } catch (err: any) {
+      toast.error(err?.message || 'Could not unlock the PIN.');
+    } finally {
+      setUnlocking(false);
+    }
+  };
   const [busy, setBusy] = useState(false);
   const [state, setState] = useState<{ pending: boolean; expiresAt: string | null }>({ pending: isFirstLogin, expiresAt });
   const [shownOnce, setShownOnce] = useState<string | null>(null);
@@ -66,6 +83,17 @@ export function TemporaryPasswordPanel({
           </p>
         </div>
       </div>
+
+      {pinLock && (
+        <div className="p-4 bg-rose-50 border border-rose-200 rounded-lg flex flex-wrap items-center gap-3">
+          <p className="text-sm text-rose-900 flex-1 min-w-[12rem]">
+            Transaction PIN locked after too many wrong tries, until {when(pinLock)}. Unlock it only once you&apos;ve confirmed it was the customer.
+          </p>
+          <Button type="button" size="small" variant="outline" onClick={unlock} disabled={unlocking}>
+            {unlocking ? 'Unlocking…' : 'Unlock PIN'}
+          </Button>
+        </div>
+      )}
 
       {shownOnce && (
         <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg">

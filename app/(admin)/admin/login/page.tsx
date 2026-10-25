@@ -28,7 +28,12 @@ export default function AdminLogin() {
       });
 
       if (result?.error) {
-        setError('Invalid admin credentials. Access denied.');
+        const locked = typeof result.code === 'string' && result.code.startsWith('LOCKED:') ? result.code.slice(7) : null;
+        setError(
+          locked
+            ? `Too many wrong passwords. Sign-in is paused for ${locked} more minute${locked === '1' ? '' : 's'}.`
+            : 'Invalid admin credentials. Access denied.',
+        );
       } else {
         router.refresh();
         router.push('/admin');

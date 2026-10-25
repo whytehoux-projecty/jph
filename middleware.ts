@@ -8,6 +8,7 @@ import type { NextRequest } from 'next/server';
 // Paths that are always public — no auth check
 const PUBLIC_PATHS = [
     '/login',
+    '/forgot-password',
     '/admin/login',
     '/unavailable',
     // Corporate marketing pages (existing)
