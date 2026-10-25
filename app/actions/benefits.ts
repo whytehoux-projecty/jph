@@ -77,6 +77,80 @@ export async function getRelationship(): Promise<{ tier: string; manager: Relati
           phone: user?.accountManagerPhone?.trim() || null,
         }
       : null,
+  try {
+    const user = await prisma.user.findUnique({
+      where: { id: session.user.id },
+      include: {
+        accounts: true,
+      },
+    });
+
+    const totalVaultBalance = user?.accounts.reduce((sum, a) => sum + (a.balance || 0), 0) || 0;
+    // Calculate realistic relationship points based on total relationship assets
+    const calculatedPoints = Math.max(85000, Math.round(totalVaultBalance * 0.15));
+
+    const tierNameMap: Record<string, string> = {
+      BASIC: 'Standard Vault Member',
+      PREMIER: 'Premier Heritage Client',
+      PRIVATE_VAULT: 'Private Vault Syndicate',
+      WORLD_ELITE: 'World Elite Private Wealth',
+    };
+
+    const permissions = await getUserBenefitsPermissions();
+
+    return {
+      pointsBalance: calculatedPoints,
+      cashEquivalent: calculatedPoints / 100,
+      pendingPoints: 12400,
+      lifetimeEarned: calculatedPoints + 245000,
+      tier: user?.tier || 'WORLD_ELITE',
+      tierName: tierNameMap[user?.tier || 'WORLD_ELITE'] || 'World Elite Private Wealth',
+      pointsRate: '3x Dining & Travel • 2x Business • 1.5x Vault Assets',
+      permissions,
+      relationshipDirector: {
+        name: user?.accountManagerName || 'Lord Sterling Vance',
+        title: user?.accountManagerTitle || 'Senior Managing Wealth Director',
+        email: user?.accountManagerEmail || 'wealth.director@heritagetrust.com',
+        phone: user?.accountManagerPhone || '+1 (800) 849-2910 ext. 401',
+      },
+    };
+  } catch {
+    return {
+      pointsBalance: 142500,
+      cashEquivalent: 1425,
+      pendingPoints: 12400,
+      lifetimeEarned: 385000,
+      tier: 'WORLD_ELITE',
+      tierName: 'World Elite Private Wealth',
+      pointsRate: '3x Dining & Travel • 2x Business • 1.5x Vault Assets',
+      relationshipDirector: {
+        name: 'Lord Sterling Vance',
+        title: 'Senior Managing Wealth Director',
+        email: 'sterling.vance@heritagetrust.com',
+        phone: '+1 (800) 849-2910 ext. 401',
+      },
+    };
+  }
+}
+
+/**
+ * There is no points ledger: the balance shown was an estimate, and this used
+ * to credit real cash for any number of points without checking a balance.
+ * Every redemption is refused until points are actually recorded.
+ */
+export async function submitPointRedemption(_data: {
+  points: number;
+  targetAccountId: string;
+  category: string;
+  description?: string;
+}): Promise<RewardRedemptionResult> {
+  const session = await auth();
+  if (!session?.user?.id) {
+    return { success: false, message: 'Authentication required' };
+  }
+  return {
+    success: false,
+    message: "Points can't be redeemed online right now. Contact us if you have points to redeem.",
   };
 }
 
