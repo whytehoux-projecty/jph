@@ -111,7 +111,8 @@ export async function payBill(data: any) {
 
   if (actualPayeeId) {
     const existingPayee = await prisma.payee.findUnique({ where: { id: actualPayeeId } });
-    if (existingPayee) {
+    // Only the customer's own payees can be paid by id.
+    if (existingPayee && existingPayee.userId === session.user.id) {
       payeeName = existingPayee.name;
     } else {
       actualPayeeId = undefined;
@@ -222,10 +223,17 @@ export interface BillProvider {
   isCustom?: boolean;
 }
 
+/**
+ * The signed-in customer's own billers (saved by them, or by staff on their
+ * behalf). Never another customer's payees.
+ */
 export async function getProviders(): Promise<BillProvider[]> {
-  // Fetch real-time service providers from the database (configured by admin or users)
+  const session = await auth();
+  if (!session?.user?.id) throw new Error('Unauthorized');
+
   try {
     const payees = await prisma.payee.findMany({
+      where: { userId: session.user.id },
       orderBy: { createdAt: 'desc' },
       take: 100,
     });
