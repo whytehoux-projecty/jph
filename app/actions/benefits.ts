@@ -159,7 +159,12 @@ export async function getUserRewardsData(): Promise<UserRewardsData> {
   }
 }
 
-export async function submitPointRedemption(data: {
+/**
+ * There is no points ledger: the balance shown was an estimate, and this used
+ * to credit real cash for any number of points without checking a balance.
+ * Every redemption is refused until points are actually recorded.
+ */
+export async function submitPointRedemption(_data: {
   points: number;
   targetAccountId: string;
   category: string;
@@ -169,92 +174,10 @@ export async function submitPointRedemption(data: {
   if (!session?.user?.id) {
     return { success: false, message: 'Authentication required' };
   }
-
-  // Check customer-level benefits permissions set by Admin
-  const permissions = await getUserBenefitsPermissions();
-  if (!permissions.enabled) {
-    return {
-      success: false,
-      message: 'Benefits and rewards redemption is currently disabled for your account profile.',
-    };
-  }
-  if (!permissions.methods.points_redemption) {
-    return {
-      success: false,
-      message: 'Points cash redemption is currently restricted for your account profile.',
-    };
-  }
-
-  if (data.points <= 0) {
-    return { success: false, message: 'Please enter points greater than zero' };
-  }
-
-
-  try {
-    const account = await prisma.account.findUnique({
-      where: { id: data.targetAccountId },
-    });
-
-    if (!account || account.userId !== session.user.id) {
-      return { success: false, message: 'Target credit account not found' };
-    }
-
-    const cashAmount = Math.round((data.points / 100) * 100) / 100;
-    const refNumber = `RWD-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 900000)}`;
-
-    // Credit destination account
-    await prisma.account.update({
-      where: { id: account.id },
-      data: { balance: { increment: cashAmount } },
-    });
-
-    // Create completed credit transaction
-    await prisma.transaction.create({
-      data: {
-        accountId: account.id,
-        type: 'CREDIT',
-        amount: cashAmount,
-        currency: account.currency || 'USD',
-        status: 'APPROVED',
-        category: 'REWARDS',
-        transactionType: 'REWARD_REDEMPTION',
-        methodId: 'points_redemption',
-        description: `Rewards Point Redemption (${data.points.toLocaleString()} pts) - ${data.category}`,
-        reference: refNumber,
-        metadata: JSON.stringify({
-          pointsRedeemed: data.points,
-          conversionRate: '0.01 USD/point',
-          category: data.category,
-        }),
-      },
-    });
-
-    // Notify user
-    await prisma.notification.create({
-      data: {
-        userId: session.user.id,
-        title: 'Rewards Points Redeemed',
-        message: `Successfully converted ${data.points.toLocaleString()} points into $${cashAmount.toLocaleString()} credited to ${account.accountType} (••••${account.accountNumber.slice(-4)}).`,
-      },
-    });
-
-    revalidatePath('/benefits');
-    revalidatePath('/dashboard');
-
-    return {
-      success: true,
-      reference: refNumber,
-      cashAmount,
-      pointsRedeemed: data.points,
-      targetAccountName: `${account.accountType} ••••${account.accountNumber.slice(-4)}`,
-      message: `Successfully credited $${cashAmount.toLocaleString()} to your vault account.`,
-    };
-  } catch (err: any) {
-    return {
-      success: false,
-      message: err.message || 'Failed to process points redemption.',
-    };
-  }
+  return {
+    success: false,
+    message: "Points can't be redeemed online right now. Contact us if you have points to redeem.",
+  };
 }
 
 export async function requestAdvisorySession(data: {
