@@ -10,7 +10,7 @@ import { StepFooter, StepHeading } from "@/components/portal/flow";
 import { submitDeposit, type BankRoutingDetails } from "@/app/actions/deposits";
 import { formatAmount } from "@/lib/format";
 import { userFacingError } from "@/lib/errors";
-import { AccountField, AmountField, CopyRow, RequestSent, parseAmount, type DepositAccount } from "./shared";
+import { AccountField, AmountField, CopyRow, RequestSent, parseAmount, type MoneyAccount } from "@/components/portal/money-fields";
 
 /**
  * The details another bank needs to send money in, plus an optional notice
@@ -23,7 +23,7 @@ export function BankTransferIn({
   locale,
   onSubmitted,
 }: {
-  accounts: DepositAccount[];
+  accounts: MoneyAccount[];
   details: BankRoutingDetails;
   holderName: string;
   locale: string;

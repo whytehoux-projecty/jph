@@ -86,14 +86,14 @@ export function AdminUserBillOverrides({
   }> = [
     {
       key: 'providers',
-      name: 'Available Bill Providers',
-      description: 'Access to curated utility, telecom, insurance, and municipal biller directory with instant routing',
+      name: 'Pay Saved Billers',
+      description: 'Customer pays billers saved for them; each payment is reviewed by staff before it is sent',
       icon: Building2,
     },
     {
       key: 'einvoice',
-      name: 'E-Invoice Ticket Pipeline',
-      description: 'Upload PDF bill tickets with automated OCR parsing, extraction, and direct payment execution',
+      name: 'Attach a Copy of the Bill',
+      description: 'Customer can attach a PDF or photo of the bill to a payment, stored privately for staff review',
       icon: FileText,
     },
   ];

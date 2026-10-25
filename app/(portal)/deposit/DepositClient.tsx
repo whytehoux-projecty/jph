@@ -19,7 +19,7 @@ import type {
   RecentMoneyMovement,
   UserDepositPermissions,
 } from "@/app/actions/deposits";
-import type { DepositAccount } from "./components/shared";
+import type { MoneyAccount } from "@/components/portal/money-fields";
 import { BankTransferIn } from "./components/BankTransferIn";
 import { CashDeposit } from "./components/CashDeposit";
 import { ChequeDeposit } from "./components/ChequeDeposit";
@@ -27,7 +27,7 @@ import { CryptoDeposit } from "./components/CryptoDeposit";
 import { Withdraw } from "./components/Withdraw";
 import { RecentMovements } from "./components/RecentMovements";
 
-export type { DepositAccount };
+export type { MoneyAccount };
 
 const DEPOSIT_METHODS: Record<DepositMethod, { label: string; description: string; icon: React.ReactNode; steps: string[] }> = {
   virtual: {
@@ -110,7 +110,7 @@ export default function DepositClient({
   holderName: string;
   locale: string;
   hideBalances: boolean;
-  accounts: DepositAccount[];
+  accounts: MoneyAccount[];
   routingDetails: BankRoutingDetails | null;
   cryptoConfigs: CryptoDepositConfig[];
   locations: DepositLocation[];

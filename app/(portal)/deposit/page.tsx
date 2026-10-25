@@ -11,7 +11,7 @@ import { loadOrSignIn } from "@/lib/portal-data";
 import { maskAccountNumber } from "@/lib/format";
 import { languageToLocale } from "@/lib/utils";
 import { VAULT_TYPES, normalizeVaultType } from "@/lib/vault-rules";
-import DepositClient, { type DepositAccount } from "./DepositClient";
+import DepositClient, { type MoneyAccount } from "./DepositClient";
 
 export const dynamic = "force-dynamic";
 export const metadata = { title: "Deposit and withdraw" };
@@ -31,7 +31,7 @@ export default async function DepositPage() {
   });
 
   // Only the bank's own, active accounts can take deposits or fund withdrawals.
-  const accounts: DepositAccount[] = rawAccounts
+  const accounts: MoneyAccount[] = rawAccounts
     .filter((a) => !a.isExternal && a.status === "ACTIVE")
     .map((a) => ({
       id: a.id,
