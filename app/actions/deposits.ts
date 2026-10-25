@@ -1,13 +1,13 @@
 'use server';
 
 import { randomBytes } from 'node:crypto';
-import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { parseUserFeatureOverrides, type DepositMethodsOverrides } from '@/lib/feature-overrides';
 import { isValidBic, isValidRouting } from '@/lib/transfer-forms/validators';
 import { TELLER_ORDER_MINIMUM } from '@/lib/deposit-rules';
+import { checkTransactionPin } from '@/lib/transaction-pin';
 
 /** Deposit methods the portal offers. Card top-ups were removed: there is no card processor. */
 export type DepositMethod = 'cash' | 'virtual' | 'check' | 'crypto';
@@ -428,13 +428,8 @@ export async function submitWithdrawal(data: WithdrawalSubmissionData): Promise<
     description = `${label} · payable to ${payee}`;
   }
 
-  const user = await prisma.user.findUnique({ where: { id: userId }, select: { transactionPin: true } });
-  if (!user?.transactionPin) {
-    return { success: false, error: 'Set up a transaction PIN in Settings before making a withdrawal.', field: 'pin' };
-  }
-  if (!(await bcrypt.compare(pin || '', user.transactionPin))) {
-    return { success: false, error: "That PIN isn't right. Try again.", field: 'pin' };
-  }
+  const pinError = await checkTransactionPin(userId, pin, 'making a withdrawal');
+  if (pinError) return { success: false, error: pinError, field: 'pin' };
 
   // The request waits for staff. The account is debited only when they
   // approve it (approveWithdrawal), after the balance is checked again.

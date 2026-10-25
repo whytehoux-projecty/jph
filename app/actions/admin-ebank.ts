@@ -296,30 +296,30 @@ export async function approveAndDisburseLoan(txId: string) {
     include: { account: true },
   });
 
-  if (!tx) throw new Error('Loan transaction not found');
+  if (!tx || tx.transactionType !== 'LOAN_APPLICATION') throw new Error('Loan application not found');
   if (tx.status === 'APPROVED') return { success: true };
+  if (tx.status !== 'PENDING') throw new Error('Only pending applications can be approved.');
 
-  // Instant fund disbursement into the customer's account
-  const updatedAccount = await prisma.account.update({
-    where: { id: tx.accountId },
-    data: { balance: { increment: tx.amount } },
-  });
-
-  await prisma.transaction.update({
-    where: { id: txId },
-    data: {
-      status: 'APPROVED',
-      processedAt: new Date(),
-      runningBalance: updatedAccount.balance,
-      adminNote: 'Underwritten & instantly disbursed by Institutional Credit Desk.',
-    },
+  // Claim the application and disburse in one transaction, so a double click
+  // can't pay the loan out twice.
+  await prisma.$transaction(async (db) => {
+    const claimed = await db.transaction.updateMany({
+      where: { id: txId, status: 'PENDING' },
+      data: { status: 'APPROVED', processedAt: new Date(), adminNote: 'Approved and disbursed by the lending team.' },
+    });
+    if (claimed.count === 0) throw new Error('This application was already processed.');
+    const updatedAccount = await db.account.update({
+      where: { id: tx.accountId },
+      data: { balance: { increment: tx.amount } },
+    });
+    await db.transaction.update({ where: { id: txId }, data: { runningBalance: updatedAccount.balance } });
   });
 
   await prisma.notification.create({
     data: {
       userId: tx.account.userId,
-      title: 'Loan Approved & Disbursed',
-      message: `Your loan facility (Ref: ${tx.reference}) has been approved! The loan principal of $${tx.amount.toLocaleString()} has been disbursed directly into your ${tx.account.accountType} account.`,
+      title: 'Loan approved',
+      message: `Your loan application (Ref: ${tx.reference}) has been approved. $${tx.amount.toLocaleString()} has been paid into your ${tx.account.accountType} account.`,
     },
   });
 
@@ -338,22 +338,23 @@ export async function rejectLoan(txId: string, reason: string) {
     include: { account: true },
   });
 
-  if (!tx) throw new Error('Loan transaction not found');
+  if (!tx || tx.transactionType !== 'LOAN_APPLICATION') throw new Error('Loan application not found');
 
-  await prisma.transaction.update({
-    where: { id: txId },
+  const claimed = await prisma.transaction.updateMany({
+    where: { id: txId, status: 'PENDING' },
     data: {
       status: 'REJECTED',
-      rejectionReason: reason || 'Does not meet current institutional lending portfolio thresholds.',
+      rejectionReason: reason || 'Does not meet current lending criteria.',
       processedAt: new Date(),
     },
   });
+  if (claimed.count === 0) throw new Error('This application was already processed.');
 
   await prisma.notification.create({
     data: {
       userId: tx.account.userId,
-      title: 'Loan Application Decision',
-      message: `Your credit request (Ref: ${tx.reference}) was reviewed. Decision: Declined. Reason: ${reason || 'Portfolio criteria.'}`,
+      title: 'Loan application decision',
+      message: `Your loan application (Ref: ${tx.reference}) was reviewed and declined. Reason: ${reason || 'Does not meet current lending criteria.'}`,
     },
   });
 

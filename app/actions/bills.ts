@@ -1,12 +1,12 @@
 'use server';
 
 import { randomBytes } from 'node:crypto';
-import bcrypt from 'bcryptjs';
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 import { parseUserFeatureOverrides, type BillMethodsOverrides } from '@/lib/feature-overrides';
 import { normalizeBillCategory, normalizeBillCountry } from '@/lib/bill-constants';
+import { checkTransactionPin } from '@/lib/transaction-pin';
 
 export interface UserBillPermissions {
   /** Bill payments as a whole. */
@@ -162,13 +162,8 @@ export async function payBill(data: PayBillInput): Promise<PayBillResult> {
     if (!file) return { success: false, error: 'The attached bill has expired. Attach it again.' };
   }
 
-  const user = await prisma.user.findUnique({ where: { id: userId }, select: { transactionPin: true } });
-  if (!user?.transactionPin) {
-    return { success: false, error: 'Set up a transaction PIN in Settings before paying bills.', field: 'pin' };
-  }
-  if (!(await bcrypt.compare(data.pin || '', user.transactionPin))) {
-    return { success: false, error: "That PIN isn't right. Try again.", field: 'pin' };
-  }
+  const pinError = await checkTransactionPin(userId, data.pin, 'paying bills');
+  if (pinError) return { success: false, error: pinError, field: 'pin' };
 
   // Pending until staff approve it in Admin › E-bank › Bill services, which
   // debits the account.
