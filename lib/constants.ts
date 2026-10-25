@@ -21,7 +21,6 @@ export const BANK_INFO = {
     email: BRAND.email,
     address: BRAND.address,
     fdic: BRAND.fdic,
-    routing: BRAND.routing,
 } as const;
 
 export const ROUTES = {

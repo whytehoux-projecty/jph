@@ -575,7 +575,7 @@ export default function BusinessRegistrationFormClient({ application }: { applic
                                 A member of Heritage Financial Group • Established 1888
                             </p>
                             <p className="text-[10px] text-neutral-500 font-mono">
-                                100 Wall Street, 28th Floor, New York, NY 10005 • Member FDIC • Fedwire: 021000089
+                                100 Wall Street, 28th Floor, New York, NY 10005 • Member FDIC
                             </p>
                         </div>
 
