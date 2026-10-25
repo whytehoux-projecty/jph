@@ -78,6 +78,7 @@ model User {
   supportTickets   SupportTicket[]
   cryptoWallets    CryptoWallet[]
   chequeRequests ChequeRequest[]
+  depositImages    DepositImage[]
   registrationForm RegistrationForm?
   budgets          Budget[]
   creditScores     CreditScore[]
@@ -559,6 +560,27 @@ model Notification {
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("notifications")
+}
+
+// Cheque images for mobile deposits. Stored in the database (not public/ or
+// the server's disk) so they are private by construction and survive
+// serverless deploys. Read only through /api/deposits/images/[id], by the
+// owner or an administrator.
+model DepositImage {
+  id            String   @id @default(cuid())
+  userId        String   @map("user_id")
+  side          String // FRONT, BACK
+  contentType   String   @map("content_type")
+  size          Int
+  data          Bytes
+  transactionId String?  @map("transaction_id") // set when the deposit is submitted
+  createdAt     DateTime @default(now()) @map("created_at")
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([transactionId])
+  @@map("deposit_images")
 }
 
 model SupportTicket {
