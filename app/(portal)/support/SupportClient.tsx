@@ -1,260 +1,304 @@
-'use client';
+"use client";
 
-export const dynamic = 'force-dynamic';
-
-import { useState } from 'react';
-import {
-    HelpCircle,
-    MessageCircle,
-    Phone,
-    Mail,
-    Clock,
-    Search,
-    Send,
-    ChevronRight,
-    ExternalLink
-} from 'lucide-react';
-
-import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
+import * as React from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { Mail, Phone, ShieldAlert } from "lucide-react";
+import { PageHeader } from "@/components/layout/PageHeader";
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
+import { Alert } from "@/components/ui/alert";
+import { StatusPill, type Status } from "@/components/ui/badge";
+import { Button } from "@/components/ui/Button";
+import { Card } from "@/components/ui/Card";
+import { EmptyState } from "@/components/ui/empty-state";
+import { FormField } from "@/components/ui/form-field";
+import { Input } from "@/components/ui/input";
+import { NativeSelect } from "@/components/ui/native-select";
+import { Textarea } from "@/components/ui/textarea";
+import { LocalDate } from "@/components/dashboard/LocalDate";
+import { RequestSent } from "@/components/portal/money-fields";
+import { StepFooter, StepHeading } from "@/components/portal/flow";
 import { sendContactMessage } from "@/app/actions/support";
-import { toast } from '@/lib/toast';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent } from '@/components/ui/Card';
-import {
-    Accordion,
-    AccordionContent,
-    AccordionItem,
-    AccordionTrigger,
-} from '@/components/ui/accordion';
-import { Select, SelectTrigger, SelectValue, SelectContent, SelectItem } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
+import { SUPPORT_TOPICS } from "@/lib/support-topics";
+import { userFacingError } from "@/lib/errors";
 
-const FAQS = [
-    {
-        id: '1',
-        category: 'Account',
-        question: 'How do I reset my password?',
-        answer: 'You can reset your password by clicking "Forgot Password" on the login page. Follow the instructions sent to your registered email address.',
-    },
-    {
-        id: '2',
-        category: 'Transfers',
-        question: 'How long do transfers take?',
-        answer: 'Internal transfers between Heritage Trust accounts are instant. External transfers typically take 1-3 business days.',
-    },
-    {
-        id: '3',
-        category: 'Cards',
-        question: 'What should I do if my card is lost or stolen?',
-        answer: 'Immediately freeze your card through the Cards page or call our 24/7 support line at 1-800-JP-HERIT. We\'ll help you secure your account and order a replacement card.',
-    },
-    {
-        id: '4',
-        category: 'Security',
-        question: 'How do I enable two-factor authentication?',
-        answer: 'Go to Settings > Security and toggle on Two-Factor Authentication. You\'ll receive a verification code via SMS or email for each login.',
-    },
-    {
-        id: '5',
-        category: 'Bills',
-        question: 'Can I schedule recurring bill payments?',
-        answer: 'Yes! When adding a biller, you can enable AutoPay to automatically pay bills on their due date each month.',
-    },
+interface MessageView {
+  id: string;
+  subject: string;
+  reference: string | null;
+  status: string;
+  createdAt: string;
+}
+
+interface Contact {
+  phone: string | null;
+  phoneTel: string | null;
+  fraudPhone: string | null;
+  fraudPhoneTel: string | null;
+  email: string | null;
+}
+
+const STATUS: Record<string, { label: string; status: Status }> = {
+  OPEN: { label: "Waiting for a reply", status: "warning" },
+  CLOSED: { label: "Closed", status: "success" },
+  RESOLVED: { label: "Closed", status: "success" },
+};
+
+/** Only what the portal actually does today. */
+const FAQS: Array<{ q: string; a: React.ReactNode }> = [
+  {
+    q: "Why does my payment say “Being checked”?",
+    a: (
+      <>
+        Our team checks every transfer, withdrawal and bill payment before it&apos;s processed. You&apos;ll see the status change in{" "}
+        <Link href="/activities" className="text-fg-action underline underline-offset-[3px]">Activity</Link>, and you&apos;ll get a notification when it&apos;s done.
+      </>
+    ),
+  },
+  {
+    q: "My card is lost or stolen. What should I do?",
+    a: (
+      <>
+        Freeze it straight away in{" "}
+        <Link href="/cards" className="text-fg-action underline underline-offset-[3px]">Cards</Link>: new payments are declined while it&apos;s frozen. Then send us a message
+        below so we can help with a replacement.
+      </>
+    ),
+  },
+  {
+    q: "When will my deposit show in my balance?",
+    a: "Deposits are added once our team has confirmed them: when a transfer arrives, a cheque is checked, or a branch has counted your cash. You'll get a notification when it's credited.",
+  },
+  {
+    q: "How do I change or reset my transaction PIN?",
+    a: (
+      <>
+        If you know your current PIN, change it in{" "}
+        <Link href="/settings" className="text-fg-action underline underline-offset-[3px]">Settings</Link>. If you&apos;ve forgotten it, send us a message and we&apos;ll help.
+      </>
+    ),
+  },
+  {
+    q: "How do I get a statement?",
+    a: (
+      <>
+        Go to <Link href="/statements" className="text-fg-action underline underline-offset-[3px]">Statements</Link>. You can create one for any of the last 12
+        months, then print it or save it as a PDF.
+      </>
+    ),
+  },
+  {
+    q: "Who can I pay, and how do I add them?",
+    a: (
+      <>
+        Save people and accounts you send money to in{" "}
+        <Link href="/beneficiaries" className="text-fg-action underline underline-offset-[3px]">Payees</Link>, and companies you pay bills to in{" "}
+        <Link href="/bills" className="text-fg-action underline underline-offset-[3px]">Pay bills</Link>.
+      </>
+    ),
+  },
 ];
 
-export default function SupportClient() {
-    const [searchQuery, setSearchQuery] = useState('');
-    const [contactForm, setContactForm] = useState({
-        subject: '',
-        category: '',
-        message: '',
-    });
-    const [isSubmitting, setIsSubmitting] = useState(false);
+function MessageForm({ onSent }: { onSent: () => void }) {
+  const [topic, setTopic] = React.useState<string>(SUPPORT_TOPICS[0]);
+  const [subject, setSubject] = React.useState("");
+  const [message, setMessage] = React.useState("");
+  const [errors, setErrors] = React.useState<{ subject?: string; message?: string }>({});
+  const [submitError, setSubmitError] = React.useState<string | null>(null);
+  const [busy, setBusy] = React.useState(false);
+  const [sent, setSent] = React.useState<string | null>(null);
 
-    const filteredFaqs = FAQS.filter(faq =>
-        faq.question.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        faq.answer.toLowerCase().includes(searchQuery.toLowerCase())
-    );
+  const submit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const next: typeof errors = {};
+    if (!subject.trim()) next.subject = "Add a short subject, for example “Card not arrived”.";
+    if (!message.trim()) next.message = "Tell us what you need help with.";
+    setErrors(next);
+    if (Object.keys(next).length) return;
 
-    const handleSubmitContact = async () => {
-        if (!contactForm.subject || !contactForm.category || !contactForm.message) {
-            toast.warn({ title: 'Please complete all fields' });
-            return;
-        }
-        setIsSubmitting(true);
-        try {
-            await sendContactMessage(contactForm);
-            toast.success({ title: 'Message sent', description: "We'll respond within 24 hours." });
-            setContactForm({ subject: '', category: '', message: '' });
-        } catch {
-            toast.error({ title: 'Failed to send message', description: 'Please try again or call us directly.' });
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
+    setBusy(true);
+    setSubmitError(null);
+    try {
+      const res = await sendContactMessage({ topic, subject, message });
+      if (res.success) {
+        setSent(res.reference);
+        onSent();
+      } else {
+        setSubmitError(res.error);
+      }
+    } catch (err) {
+      setSubmitError(userFacingError(err, "We couldn't send your message. Try again."));
+    } finally {
+      setBusy(false);
+    }
+  };
 
+  if (sent) {
     return (
-        <div className="space-y-8 max-w-7xl mx-auto p-4 animate-fade-in-up">
-
-            <div className="text-center py-6 space-y-2">
-                <h1 className="text-4xl font-display font-bold text-ink-900">How can we help you?</h1>
-                <p className="text-muted-foreground text-lg">Search our knowledge base or get in touch with support.</p>
-
-                <div className="max-w-xl mx-auto pt-4 relative">
-                    <Search className="absolute left-3 top-7 h-5 w-5 text-muted-foreground" />
-                    <Input
-                        className="pl-10 h-12 text-lg shadow-none"
-                        placeholder="Search for answers..."
-                        value={searchQuery}
-                        onChange={(e) => setSearchQuery(e.target.value)}
-                    />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                {/* Contact Options */}
-                <Card className="hover:shadow-none transition-shadow cursor-pointer border-paper-200">
-                    <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
-                        <div className="h-12 w-12 rounded-full bg-pine-700/10 flex items-center justify-center text-pine-700">
-                            <Phone className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-lg">Call Us</h3>
-                            <p className="text-muted-foreground text-sm">24/7 Priority Support</p>
-                        </div>
-                        <p className="font-mono text-ink-900 font-semibold">1-800-AURUM-VAULT</p>
-                        <Button variant="outline" size="small" className="w-full" onClick={() => { window.location.href = 'tel:+18002878664'; }}>Call Now</Button>
-                    </CardContent>
-                </Card>
-
-                <Card className="hover:shadow-none transition-shadow cursor-pointer border-paper-200">
-                    <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
-                        <div className="h-12 w-12 rounded-full bg-vintage-gold/10 flex items-center justify-center text-vintage-gold">
-                            <MessageCircle className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-lg">Live Chat</h3>
-                            <p className="text-muted-foreground text-sm">Mon-Fri 9AM-6PM EST</p>
-                        </div>
-                        <p className="text-sm text-muted-foreground">Available during business hours</p>
-                        <Button variant="outline" size="small" className="w-full" onClick={() => toast.info({ title: 'Live Chat', description: 'Launching soon. Use phone or email for immediate help.' })}>Start Chat</Button>
-                    </CardContent>
-                </Card>
-
-                <Card className="hover:shadow-none transition-shadow cursor-pointer border-paper-200">
-                    <CardContent className="p-6 flex flex-col items-center text-center space-y-4">
-                        <div className="h-12 w-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
-                            <Mail className="w-6 h-6" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-lg">Email Support</h3>
-                            <p className="text-muted-foreground text-sm">Response within 24h</p>
-                        </div>
-                        <p className="font-mono text-ink-900 font-semibold">support@heritagetrust.com</p>
-                        <Button variant="outline" size="small" className="w-full" onClick={() => { window.location.href = 'mailto:support@heritagetrust.com'; }}>Send Email</Button>
-                    </CardContent>
-                </Card>
-            </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 pt-8">
-
-                {/* FAQs Column */}
-                <div className="lg:col-span-2 space-y-6">
-                    <div className="flex items-center gap-2 mb-2">
-                        <HelpCircle className="w-5 h-5 text-pine-700" />
-                        <h2 className="text-2xl font-bold font-display">Frequently Asked Questions</h2>
-                    </div>
-
-                    <Accordion type="single" collapsible className="w-full">
-                        {filteredFaqs.length > 0 ? (
-                            filteredFaqs.map((faq) => (
-                                <AccordionItem key={faq.id} value={faq.id}>
-                                    <AccordionTrigger className="text-left font-medium text-ink-900">
-                                        {faq.question}
-                                    </AccordionTrigger>
-                                    <AccordionContent className="text-muted-foreground leading-relaxed">
-                                        {faq.answer}
-                                    </AccordionContent>
-                                </AccordionItem>
-                            ))
-                        ) : (
-                            <div className="p-8 text-center border rounded-lg bg-muted/20">
-                                <p className="text-muted-foreground">No questions found matching your search.</p>
-                            </div>
-                        )}
-                    </Accordion>
-                </div>
-
-                {/* Contact Form Column */}
-                <div className="space-y-6">
-                    <div className="flex items-center gap-2 mb-2">
-                        <Send className="w-5 h-5 text-pine-700" />
-                        <h2 className="text-2xl font-bold font-display">Send a Message</h2>
-                    </div>
-
-                    <Card>
-                        <CardContent className="p-6 space-y-4">
-                            <div className="space-y-2">
-                                <Label>Subject</Label>
-                                <Input
-                                    placeholder="Brief description"
-                                    value={contactForm.subject}
-                                    onChange={e => setContactForm({ ...contactForm, subject: e.target.value })}
-                                />
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label>Category</Label>
-                                <Select value={contactForm.category} onValueChange={v => setContactForm({ ...contactForm, category: v })}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select Issue Type" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        <SelectItem value="account">Account Issues</SelectItem>
-                                        <SelectItem value="billing">Billing & Payments</SelectItem>
-                                        <SelectItem value="technical">Technical Support</SelectItem>
-                                        <SelectItem value="other">Other</SelectItem>
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            <div className="space-y-2">
-                                <Label>Message</Label>
-                                <Textarea
-                                    placeholder="Describe your issue in detail..."
-                                    className="min-h-[120px]"
-                                    value={contactForm.message}
-                                    onChange={e => setContactForm({ ...contactForm, message: e.target.value })}
-                                />
-                            </div>
-
-                            <Button onClick={handleSubmitContact} disabled={isSubmitting} className="w-full bg-pine-700 hover:bg-pine-800 text-white">
-                                {isSubmitting ? 'Sending...' : 'Send Message'}
-                            </Button>
-                        </CardContent>
-                    </Card>
-
-                    <Card className="bg-paper-100 border-none shadow-none">
-                        <CardContent className="p-6 space-y-3">
-                            <h4 className="font-semibold flex items-center gap-2">
-                                <Clock className="w-4 h-4 text-muted-foreground" /> Support Hours
-                            </h4>
-                            <ul className="space-y-2 text-sm text-muted-foreground">
-                                <li className="flex justify-between">
-                                    <span>Phone & Email</span>
-                                    <span className="font-medium text-ink-900">24/7</span>
-                                </li>
-                                <li className="flex justify-between">
-                                    <span>Live Chat</span>
-                                    <span className="font-medium text-ink-900">M-F, 9am - 6pm</span>
-                                </li>
-                            </ul>
-                        </CardContent>
-                    </Card>
-                </div>
-
-            </div>
-        </div>
+      <RequestSent
+        title="Message sent"
+        description="We'll reply in Notifications. You can see your messages and their status below."
+        rows={[
+          ["Reference", <span key="r" className="font-code text-small">{sent}</span>],
+          ["About", topic],
+          ["Subject", subject.trim()],
+        ]}
+        anotherLabel="Send another message"
+        onAnother={() => {
+          setSent(null);
+          setSubject("");
+          setMessage("");
+        }}
+      />
     );
+  }
+
+  return (
+    <form onSubmit={submit} noValidate aria-labelledby="message-heading" className="flex flex-col gap-5">
+      <StepHeading
+        id="message-heading"
+        title="Send us a secure message"
+        description="Messages are sent from your signed-in session, so we know it's you. Never include your full card number, PIN or password."
+      />
+      <FormField label="What is it about?">
+        <NativeSelect value={topic} onChange={(e) => setTopic(e.target.value)}>
+          {SUPPORT_TOPICS.map((t) => (
+            <option key={t} value={t}>
+              {t}
+            </option>
+          ))}
+        </NativeSelect>
+      </FormField>
+      <FormField label="Subject" error={errors.subject}>
+        <Input autoComplete="off" maxLength={120} value={subject} onChange={(e) => setSubject(e.target.value)} />
+      </FormField>
+      <FormField label="Message" error={errors.message}>
+        <Textarea rows={6} maxLength={4000} value={message} onChange={(e) => setMessage(e.target.value)} />
+      </FormField>
+      {submitError && (
+        <Alert variant="danger" title="Not sent">
+          {submitError}
+        </Alert>
+      )}
+      <StepFooter next={<Button loading={busy} loadingLabel="Sending your message">Send message</Button>} />
+    </form>
+  );
+}
+
+export default function SupportClient({ messages, contact, locale }: { messages: MessageView[]; contact: Contact; locale: string }) {
+  const router = useRouter();
+  const hasContact = contact.phone || contact.email || contact.fraudPhone;
+
+  return (
+    <>
+      <PageHeader title="Help and support" description="Answers to common questions, and a secure way to message us." />
+
+      <div className="grid gap-6 lg:grid-cols-12 lg:gap-8">
+        <Card className="p-5 sm:p-6 lg:col-span-7">
+          <MessageForm onSent={() => router.refresh()} />
+        </Card>
+
+        <aside className="flex flex-col gap-6 lg:col-span-5" aria-label="Other ways to reach us">
+          {contact.fraudPhone && (
+            <Alert variant="warning" title="Think someone has used your account?">
+              Freeze your cards in Cards, then call{" "}
+              <a href={`tel:${contact.fraudPhoneTel}`} className="font-semibold underline underline-offset-[3px]">
+                {contact.fraudPhone}
+              </a>
+              .
+            </Alert>
+          )}
+          {hasContact && (
+            <Card className="flex flex-col gap-3 p-5">
+              <h2 className="font-sans text-h5 text-fg">Other ways to reach us</h2>
+              <ul className="flex flex-col gap-1">
+                {contact.phone && (
+                  <li>
+                    <a href={`tel:${contact.phoneTel}`} className="inline-flex min-h-11 items-center gap-2 text-body text-fg-action underline-offset-[3px] hover:underline">
+                      <Phone className="size-4" aria-hidden="true" /> {contact.phone}
+                    </a>
+                  </li>
+                )}
+                {contact.email && (
+                  <li>
+                    <a href={`mailto:${contact.email}`} className="inline-flex min-h-11 items-center gap-2 break-all text-body text-fg-action underline-offset-[3px] hover:underline">
+                      <Mail className="size-4 shrink-0" aria-hidden="true" /> {contact.email}
+                    </a>
+                  </li>
+                )}
+              </ul>
+            </Card>
+          )}
+          {!contact.fraudPhone && (
+            <Card variant="muted" className="flex gap-3 p-5">
+              <ShieldAlert className="mt-0.5 size-5 shrink-0 text-fg-muted" aria-hidden="true" />
+              <p className="text-small text-fg">
+                If your card is lost or you see a payment you don&apos;t recognise, freeze your cards in{" "}
+                <Link href="/cards" className="text-fg-action underline underline-offset-[3px]">Cards</Link> first, then send us a message.
+              </p>
+            </Card>
+          )}
+        </aside>
+      </div>
+
+      <section aria-labelledby="faq-heading" className="mt-10">
+        <h2 id="faq-heading" className="mb-3 font-sans text-h4 text-fg">
+          Common questions
+        </h2>
+        <Card className="px-5">
+          <Accordion type="single" collapsible>
+            {FAQS.map((f, i) => (
+              <AccordionItem key={f.q} value={`faq-${i}`} className="last:border-b-0">
+                <AccordionTrigger className="text-left text-body text-fg">{f.q}</AccordionTrigger>
+                <AccordionContent className="text-body text-fg-muted">{f.a}</AccordionContent>
+              </AccordionItem>
+            ))}
+          </Accordion>
+        </Card>
+      </section>
+
+      <section aria-labelledby="messages-heading" className="mt-10">
+        <h2 id="messages-heading" className="mb-3 font-sans text-h4 text-fg">
+          Your messages
+        </h2>
+        <Card>
+          {messages.length === 0 ? (
+            <EmptyState compact headingLevel={3} title="No messages yet" description="Messages you send here appear with their status. Replies arrive in Notifications." />
+          ) : (
+            <ul className="divide-y divide-line">
+              {messages.map((m) => {
+                const s = STATUS[m.status] ?? { label: m.status.charAt(0) + m.status.slice(1).toLowerCase(), status: "neutral" as Status };
+                return (
+                  <li key={m.id} className="flex flex-wrap items-start justify-between gap-3 px-5 py-4">
+                    <div className="min-w-0">
+                      <p className="text-body text-fg">{m.subject}</p>
+                      <p className="text-caption text-fg-muted">
+                        Sent <LocalDate iso={m.createdAt} locale={locale} />
+                        {m.reference && (
+                          <>
+                            {" "}
+                            · <span className="font-code">{m.reference}</span>
+                          </>
+                        )}
+                        {m.status !== "OPEN" && (
+                          <>
+                            {" "}
+                            · any reply is in{" "}
+                            <Link href="/notifications" className="text-fg-action underline underline-offset-[3px]">
+                              Notifications
+                            </Link>
+                          </>
+                        )}
+                      </p>
+                    </div>
+                    <StatusPill status={s.status}>{s.label}</StatusPill>
+                  </li>
+                );
+              })}
+            </ul>
+          )}
+        </Card>
+      </section>
+    </>
+  );
 }

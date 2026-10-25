@@ -20,11 +20,12 @@ export async function handleResolveTicket(formData: FormData) {
     await prisma.notification.create({
       data: {
         userId: ticket.userId,
-        title: 'Support Request Resolved',
-        message: `Admin reply to "${ticket.subject}": ${reply}`,
+        title: 'Reply to your message',
+        message: `About "${ticket.subject.replace(/\s*\(Ref: [\w-]+\)$/, '')}": ${reply}`,
       }
     });
   }
 
   revalidatePath('/admin/communications/support');
+  revalidatePath('/support');
 }
