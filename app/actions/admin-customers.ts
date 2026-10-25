@@ -468,35 +468,76 @@ export async function updateSidebarPreferences(formData: FormData) {
   revalidatePath('/admin/customers/portal-users');
 }
 
-export async function updateCreditScore(formData: FormData) {
+// -----------------------------------------------------------------------------
+// Credit scores (staff-recorded; nothing generates them)
+// -----------------------------------------------------------------------------
+
+/** Scores staff can record: the common 300–850 range. */
+const CREDIT_SCORE_MIN = 300;
+const CREDIT_SCORE_MAX = 850;
+
+async function requireAdmin() {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+}
 
-  const userId = formData.get('userId') as string;
-  const score = parseInt(formData.get('score') as string, 10);
-  const change = parseInt(formData.get('change') as string, 10) || 0;
-  const month = new Date().toISOString().slice(0, 7); // YYYY-MM
-
-  if (isNaN(score)) throw new Error('Invalid score');
-
-  // Find if a score for this month already exists
-  const existing = await prisma.creditScore.findFirst({
-    where: { userId, month }
-  });
-
-  if (existing) {
-    await prisma.creditScore.update({
-      where: { id: existing.id },
-      data: { score, change }
-    });
-  } else {
-    await prisma.creditScore.create({
-      data: { userId, score, change, month }
-    });
+/**
+ * Recalculates every month's "change" for a customer from the month before,
+ * so edits and deletions can never leave the history inconsistent.
+ */
+async function recalculateCreditScoreChanges(db: typeof prisma, userId: string) {
+  const rows = await db.creditScore.findMany({ where: { userId }, orderBy: { month: 'asc' } });
+  for (let i = 0; i < rows.length; i++) {
+    const change = i === 0 ? 0 : rows[i].score - rows[i - 1].score;
+    if (rows[i].change !== change) await db.creditScore.update({ where: { id: rows[i].id }, data: { change } });
   }
+}
 
+function revalidateCreditScore() {
   revalidatePath('/admin/customers/account-holders');
   revalidatePath('/admin/customers/portal-users');
+  revalidatePath('/savings');
+}
+
+export async function getCustomerCreditScores(userId: string) {
+  await requireAdmin();
+  const rows = await prisma.creditScore.findMany({ where: { userId }, orderBy: { month: 'desc' } });
+  return rows.map((r) => ({ id: r.id, month: r.month, score: r.score, change: r.change, updatedAt: r.updatedAt.toISOString() }));
+}
+
+/** Records or corrects a customer's score for a month (YYYY-MM). */
+export async function saveCreditScore(userId: string, month: string, score: number) {
+  await requireAdmin();
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw new Error('Choose a month.');
+  if (month > new Date().toISOString().slice(0, 7)) throw new Error("A score can't be for a future month.");
+  if (!Number.isInteger(score) || score < CREDIT_SCORE_MIN || score > CREDIT_SCORE_MAX) {
+    throw new Error(`Enter a whole number from ${CREDIT_SCORE_MIN} to ${CREDIT_SCORE_MAX}.`);
+  }
+  if (!(await prisma.user.count({ where: { id: userId } }))) throw new Error('Customer not found');
+
+  await prisma.$transaction(async (db) => {
+    const existing = await db.creditScore.findFirst({ where: { userId, month } });
+    if (existing) await db.creditScore.update({ where: { id: existing.id }, data: { score } });
+    else await db.creditScore.create({ data: { userId, month, score, change: 0 } });
+    await recalculateCreditScoreChanges(db as typeof prisma, userId);
+  });
+
+  revalidateCreditScore();
+  return { success: true };
+}
+
+export async function deleteCreditScore(id: string) {
+  await requireAdmin();
+  const row = await prisma.creditScore.findUnique({ where: { id } });
+  if (!row) throw new Error('Score not found');
+
+  await prisma.$transaction(async (db) => {
+    await db.creditScore.delete({ where: { id } });
+    await recalculateCreditScoreChanges(db as typeof prisma, row.userId);
+  });
+
+  revalidateCreditScore();
+  return { success: true };
 }
 
 export async function updateUserTransferOverrides(userId: string, overridesJson: string) {

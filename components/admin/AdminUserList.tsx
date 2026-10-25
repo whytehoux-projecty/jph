@@ -1,6 +1,7 @@
 "use client";
 
-import { DEFAULT_TIER, tierLabel, tierOptions } from '@/lib/customer-tiers';
+import { CreditScoreManager } from '@/components/admin/CreditScoreManager';
+import { DEFAULT_TIER, isStandardTier, tierLabel, tierOptions } from '@/lib/customer-tiers';
 import { useState } from "react";
 import { format } from "date-fns";
 import { Users, Search, Filter, ShieldAlert, ShieldCheck, UserCheck, UserX, Crown, User as UserIcon, Building2, CreditCard, FileText, Settings, Key, Trash2, LogIn, Download, Mail, Plus, Edit2, Check, X, Building, Link2, CreditCard as CardIcon, FileSpreadsheet, Lock, Star } from "lucide-react";
@@ -227,9 +228,9 @@ export function AdminUserList({
                   </TableCell>
                   <TableCell>
                     <span className={`flex items-center gap-1 text-xs font-semibold ${
-                      user.tier && user.tier !== DEFAULT_TIER ? 'text-vintage-gold' : 'text-slate-500'
+                      !isStandardTier(user.tier) ? 'text-vintage-gold' : 'text-slate-500'
                     }`}>
-                      {user.tier && user.tier !== DEFAULT_TIER ? <Crown className="w-3 h-3" /> : <UserIcon className="w-3 h-3" />}
+                      {!isStandardTier(user.tier) ? <Crown className="w-3 h-3" /> : <UserIcon className="w-3 h-3" />}
                       {tierLabel(user.tier || DEFAULT_TIER)}
                     </span>
                   </TableCell>
@@ -450,25 +451,8 @@ export function AdminUserList({
 
                       {/* Credit Score Editor */}
                       <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm">
-                        <h5 className="text-xs font-bold uppercase tracking-widest text-(--heritage-gold) mb-4">Credit Score Editor</h5>
-                        <form action={async (fd) => {
-                          const { updateCreditScore } = await import('@/app/actions/admin-customers');
-                          fd.append('userId', selectedUser.id);
-                          await updateCreditScore(fd);
-                          toast.success('Credit score updated');
-                        }} className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <label className="text-xs text-muted-foreground font-semibold uppercase mb-1 block">Score Value</label>
-                              <input type="number" name="score" defaultValue="750" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm" required />
-                            </div>
-                            <div>
-                              <label className="text-xs text-muted-foreground font-semibold uppercase mb-1 block">Point Change</label>
-                              <input type="number" name="change" defaultValue="12" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm" required />
-                            </div>
-                          </div>
-                          <Button type="submit" size="small" className="w-full bg-(--ink-900) text-white hover:bg-(--ink-900)/90">Update Score</Button>
-                        </form>
+                        <h5 className="text-xs font-bold uppercase tracking-widest text-(--heritage-gold) mb-4">Credit Score</h5>
+                        <CreditScoreManager userId={selectedUser.id} />
                       </div>
 
                       {/* Widget Visibility */}
@@ -1302,7 +1286,7 @@ export function AdminUserList({
                             <option key={t} value={t}>{tierLabel(t)}</option>
                           ))}
                         </select>
-                        <p className="text-[11px] text-neutral-500">Shown to the customer on Your relationship (not shown for Basic). A label only: no perks or fees depend on it.</p>
+                        <p className="text-[11px] text-neutral-500">Shown to the customer on Your relationship (not shown for Standard). A label only: no perks or fees depend on it.</p>
                       </div>
                       <h4 className="text-xs font-semibold text-neutral-900 uppercase tracking-widest pt-2">Relationship manager</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -20,7 +20,7 @@ import { StepFooter, StepHeading } from "@/components/portal/flow";
 import { requestAdvisoryMeeting, type RelationshipManager } from "@/app/actions/benefits";
 import { ADVISORY_FORMATS, ADVISORY_TOPICS, type AdvisoryFormat } from "@/lib/advisory";
 import { userFacingError } from "@/lib/errors";
-import { DEFAULT_TIER, tierLabel } from "@/lib/customer-tiers";
+import { isStandardTier, tierLabel } from "@/lib/customer-tiers";
 
 interface AdvisoryRequestView {
   id: string;
@@ -213,7 +213,7 @@ export default function RelationshipClient({
       <PageHeader
         title="Your relationship"
         description="Who looks after your banking with us, and how to arrange a conversation with a specialist."
-        actions={tier !== DEFAULT_TIER ? <Badge variant="outline">{tierLabel(tier)} client</Badge> : undefined}
+        actions={!isStandardTier(tier) ? <Badge variant="outline">{tierLabel(tier)}</Badge> : undefined}
       />
 
       <div className="grid gap-6 lg:grid-cols-12 lg:gap-8">
