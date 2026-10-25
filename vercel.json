@@ -78,5 +78,11 @@
   ],
   "env": {
     "NEXT_TELEMETRY_DISABLED": "1"
-  }
+  },
+  "crons": [
+    {
+      "path": "/api/cron/savings",
+      "schedule": "0 7 * * *"
+    }
+  ]
 }

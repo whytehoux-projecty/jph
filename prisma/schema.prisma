@@ -112,6 +112,7 @@ model Account {
   statements   Statement[]
   cheques      Cheque[]
   chequeRequests ChequeRequest[]
+  savingsGoals SavingsGoal[]
 
   @@map("accounts")
 }
@@ -463,6 +464,9 @@ model ChequeRequest {
 // Core Banking Entities
 // -----------------------------------------------------------------------------
 
+// Money set aside towards a goal. currentAmount is held by the goal (moved
+// out of the linked account); it goes back to an account with "Move money
+// back", and a goal can only be deleted when it's empty.
 model SavingsGoal {
   id            String   @id @default(cuid())
   userId        String   @map("user_id")
@@ -473,6 +477,17 @@ model SavingsGoal {
   createdAt     DateTime @default(now()) @map("created_at")
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
+  // Contribution plan. mode: NONE, AUTO (moved on the day by the daily job,
+  // app/api/cron/savings) or MANUAL (email + notification reminder).
+  accountId          String?   @map("account_id")
+  account            Account?  @relation(fields: [accountId], references: [id], onDelete: SetNull)
+  contributionMode   String    @default("NONE") @map("contribution_mode")
+  contributionAmount Float?    @map("contribution_amount")
+  frequency          String? // WEEKLY, MONTHLY
+  scheduleDay        Int?      @map("schedule_day") // weekday 0-6 (Sun-Sat) or day of month 1-28
+  nextContributionAt DateTime? @map("next_contribution_at")
+
+  @@index([contributionMode, nextContributionAt])
   @@map("savings_goals")
 }
 

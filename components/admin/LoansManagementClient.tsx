@@ -271,7 +271,7 @@ export function LoansManagementClient({
           <div>
             <h4 className="font-bold text-lg text-ink-900">Active Lending Facilities & Rate Tables</h4>
             <p className="text-sm text-neutral-500 mt-1">
-              Live commercial & private banking credit programs presented in the client portal.
+              What customers can apply for in the portal. Rates and terms come from the published rates table (src/content/rates.ts).
             </p>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -280,20 +280,22 @@ export function LoansManagementClient({
                 <div className="flex justify-between items-start">
                   <div>
                     <h5 className="font-bold text-base text-ink-900">{p.name}</h5>
-                    <p className="text-xs text-neutral-500 mt-0.5">{p.headline}</p>
+                    <p className="text-xs text-neutral-500 mt-0.5">{p.description}</p>
                   </div>
                   <span className="text-xs font-bold font-mono bg-white border border-neutral-300 px-2 py-1 rounded text-vintage-gold">
-                    {p.aprDisplay}
+                    {p.rate}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2 text-xs border-t border-neutral-200 pt-3">
                   <div>
-                    <span className="text-neutral-400">Credit Limit:</span>
-                    <div className="font-semibold text-ink-900 font-mono">${(p.maxAmount / 1000).toFixed(0)}k Max</div>
+                    <span className="text-neutral-400">Amount:</span>
+                    <div className="font-semibold text-ink-900 font-mono">
+                      {p.maxAmount ? `$${p.minAmount.toLocaleString()} to $${p.maxAmount.toLocaleString()}` : 'Not published'}
+                    </div>
                   </div>
                   <div>
-                    <span className="text-neutral-400">Origination Fee:</span>
-                    <div className="font-semibold text-ink-900 font-mono">{p.originationFee}</div>
+                    <span className="text-neutral-400">Terms:</span>
+                    <div className="font-semibold text-ink-900">{p.terms}</div>
                   </div>
                 </div>
               </div>
