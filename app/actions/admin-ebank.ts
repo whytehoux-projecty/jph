@@ -460,15 +460,13 @@ export async function resolveBenefitTicket(ticketId: string, notes?: string) {
   await prisma.notification.create({
     data: {
       userId: ticket.userId,
-      title: ticket.subject.startsWith('[Private Advisory Booking]')
-        ? 'Advisory Session Confirmed by Director'
-        : 'Concierge Request Fulfilled',
-      message: notes || `Your request (${ticket.subject}) has been processed and confirmed by the Executive Wealth team.`,
+      title: ticket.subject.startsWith('[Private Advisory Booking]') ? 'Your meeting request' : 'Your request',
+      message: notes || `We've dealt with your request "${ticket.subject.replace(/^\[.*?\]\s*/, '')}". Contact us if you need anything else.`,
     },
   });
 
   revalidatePath('/admin/ebank/benefits');
   revalidatePath('/admin/ebank/support');
-  revalidatePath('/benefits');
+  revalidatePath('/relationship');
   return { success: true };
 }

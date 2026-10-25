@@ -288,7 +288,7 @@ export function BenefitsManagementClient({
                     <TableCell className="text-xs text-neutral-500">{u.email}</TableCell>
                     <TableCell>
                       <span className="bg-amber-100 text-amber-900 text-xs font-bold px-2.5 py-0.5 rounded uppercase">
-                        {u.tier || 'WORLD_ELITE'}
+                        {u.tier || 'BASIC'}
                       </span>
                     </TableCell>
                     <TableCell className="text-xs text-neutral-600 font-mono">

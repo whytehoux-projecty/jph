@@ -8,7 +8,7 @@ import {
   parseUserFeatureOverrides,
   type BenefitsMethodsOverrides,
 } from '@/lib/feature-overrides';
-import { Gift, Sparkles, Crown, Briefcase, Compass, ShieldAlert, ShieldCheck } from 'lucide-react';
+import { Gift, Briefcase, ShieldAlert, ShieldCheck } from 'lucide-react';
 
 export function AdminUserBenefitOverrides({
   userId,
@@ -85,28 +85,10 @@ export function AdminUserBenefitOverrides({
     icon: any;
   }> = [
     {
-      key: 'points_redemption',
-      name: 'Points Cash Conversion & Redemption',
-      description: 'Convert loyalty points to direct cash deposits credited to customer vaults (0.01 USD/point)',
-      icon: Sparkles,
-    },
-    {
-      key: 'relationship_tiers',
-      name: 'Relationship Tier Status & Multipliers',
-      description: 'Exclusive tier privileges (World Elite / Private Vault), multiplier boosts, and luxury airport lounge passes',
-      icon: Crown,
-    },
-    {
       key: 'private_advisory',
-      name: 'Private Wealth Advisory Consultations',
-      description: 'Direct booking requests with dedicated Senior Managing Wealth Directors and fiduciary specialists',
+      name: 'Advisory Meeting Requests',
+      description: 'Customer can ask for a meeting from Your relationship; requests arrive in E-bank › Benefits for staff to arrange',
       icon: Briefcase,
-    },
-    {
-      key: 'concierge',
-      name: '24/7 Global Lifestyle Concierge',
-      description: 'Bespoke travel, superyacht charter, private aviation, and Michelin reservation dispatch desk',
-      icon: Compass,
     },
   ];
 
