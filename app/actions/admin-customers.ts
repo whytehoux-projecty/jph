@@ -3,6 +3,7 @@
 import { prisma } from '@/lib/prisma';
 import { isCustomerTier } from '@/lib/customer-tiers';
 import { issueTemporaryPassword } from '@/lib/temporary-credentials';
+import { endAllSessions } from '@/lib/session-version';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 
@@ -283,11 +284,21 @@ export async function updateEportalStatus(formData: FormData) {
     data: {
       eportalStatus,
       eportalNotificationMessage: eportalNotificationMessage || null,
-      hasOnlineAccess
+      hasOnlineAccess,
+      // Pausing access ends any session the customer has open, within a minute.
+      ...(hasOnlineAccess ? {} : { sessionVersion: { increment: 1 } }),
     }
   });
 
   revalidatePath('/admin/customers/account-holders');
+}
+
+/** Ends every online banking session the customer has open (within a minute). */
+export async function endCustomerSessions(userId: string) {
+  const session = await auth();
+  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+  await endAllSessions({ kind: 'customer', id: userId });
+  return { success: true };
 }
 
 export async function requestOnlineAccess(formData: FormData) {

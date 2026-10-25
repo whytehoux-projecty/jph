@@ -1,9 +1,10 @@
 'use server';
 
+import { endAllSessions } from '@/lib/session-version';
 import { checkTransactionPin } from '@/lib/transaction-pin';
 import { pinProblem } from '@/lib/password-policy';
 import { prisma } from '@/lib/prisma';
-import { auth } from '@/auth';
+import { auth, unstable_update } from '@/auth';
 import bcrypt from 'bcryptjs';
 
 export async function getProfile() {
@@ -108,5 +109,18 @@ export async function updatePreferences(data: { preferredLanguage?: string, pref
       data: updateData
     });
   }
+  return { success: true };
+}
+
+/**
+ * Signs the customer out on every other device. This session is moved to
+ * the new session version so it stays signed in.
+ */
+export async function signOutOtherDevices(): Promise<{ success: boolean; error?: string }> {
+  const session = await auth();
+  if (!session?.user?.id) throw new Error('Unauthorized');
+  if ((session as any).staffView) return { success: false, error: 'Not available in staff view.' };
+  await endAllSessions({ kind: 'customer', id: session.user.id });
+  await unstable_update({ refreshSessionVersion: true } as any);
   return { success: true };
 }

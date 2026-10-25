@@ -42,7 +42,26 @@ Not available online:
 - **Storage:** only HMAC-SHA256 hashes, keyed with `AUTH_SECRET`.
 - **Use:** each code can be used once, and its tries are claimed before checking.
 
-## Known limits
+## Staff sign-in
 
-- **Sessions after a reset:** sessions are JWTs, so a password reset doesn't sign out sessions already open on other devices. They last until they expire or the customer signs out.
-- **Admin sign-in:** it has the wrong-password limit, but no emailed code yet.
+Staff sign-in uses the same two steps:
+- **Step one:** `beginAdminSignIn` (`app/(admin)/admin/login/actions.ts`) checks the password with the wrong-try limit.
+- **Step two:** `authorize` accepts only a staff challenge. A customer's challenge can't sign in staff, and the reverse.
+
+| Setting | Effect |
+|---|---|
+| `ADMIN_SIGN_IN_EMAIL_CODES=required` | A 6-digit code is emailed to the staff address after the password. As for customers, it's used only when email is configured. |
+
+## Signing out other devices
+
+Sessions are JWTs that last 15 minutes and renew while in use. Each customer and member of staff has a **session version** (`session_version`):
+- **At sign-in:** the session carries the version.
+- **While in use:** `auth.ts` re-checks it at most once a minute (`lib/session-version.ts`).
+- **When it's raised:** older sessions end within a minute.
+
+It's raised by:
+- **Password reset:** every device is signed out.
+- **Staff issuing a new temporary password:** the customer starts again.
+- **Staff pausing online access:** the customer's open sessions end.
+- **Admin › customer profile › "Sign out everywhere".**
+- **Settings › "Sign out of other devices":** the customer's current session moves to the new version and stays signed in.
