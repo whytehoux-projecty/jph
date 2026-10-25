@@ -1,6 +1,8 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { isCustomerTier } from '@/lib/customer-tiers';
+import { issueTemporaryPassword } from '@/lib/temporary-credentials';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 
@@ -314,28 +316,19 @@ export async function requestOnlineAccess(formData: FormData) {
 
 import bcrypt from 'bcryptjs';
 
-export async function updateEportalCredentials(formData: FormData) {
+/**
+ * Issues the customer a new temporary password (they choose their own at
+ * next sign-in). It's emailed to them; it's returned to staff only to pass
+ * on once when email isn't set up, and never stored readable.
+ */
+export async function issueNewTemporaryPassword(userId: string) {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
-  
-  const id = formData.get('id') as string;
-  const newPassword = formData.get('newPassword') as string;
+  if (!(await prisma.user.count({ where: { id: userId } }))) throw new Error('Customer not found');
 
-  if (!newPassword || newPassword.length < 6) {
-    throw new Error('Password must be at least 6 characters');
-  }
-
-  const hashedPassword = await bcrypt.hash(newPassword, 10);
-
-  await prisma.user.update({
-    where: { id },
-    data: {
-      password: hashedPassword,
-      temporaryPassword: newPassword, // Store plaintext so admin can view it
-    }
-  });
-
+  const { password, expiresAt, emailed } = await issueTemporaryPassword(userId, { signInHint: 'your email address' });
   revalidatePath('/admin/customers/account-holders');
+  return { expiresAt: expiresAt.toISOString(), emailed, password: emailed ? null : password };
 }
 
 export async function adminCreateBeneficiary(formData: FormData) {
@@ -467,35 +460,76 @@ export async function updateSidebarPreferences(formData: FormData) {
   revalidatePath('/admin/customers/portal-users');
 }
 
-export async function updateCreditScore(formData: FormData) {
+// -----------------------------------------------------------------------------
+// Credit scores (staff-recorded; nothing generates them)
+// -----------------------------------------------------------------------------
+
+/** Scores staff can record: the common 300–850 range. */
+const CREDIT_SCORE_MIN = 300;
+const CREDIT_SCORE_MAX = 850;
+
+async function requireAdmin() {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
+}
 
-  const userId = formData.get('userId') as string;
-  const score = parseInt(formData.get('score') as string, 10);
-  const change = parseInt(formData.get('change') as string, 10) || 0;
-  const month = new Date().toISOString().slice(0, 7); // YYYY-MM
-
-  if (isNaN(score)) throw new Error('Invalid score');
-
-  // Find if a score for this month already exists
-  const existing = await prisma.creditScore.findFirst({
-    where: { userId, month }
-  });
-
-  if (existing) {
-    await prisma.creditScore.update({
-      where: { id: existing.id },
-      data: { score, change }
-    });
-  } else {
-    await prisma.creditScore.create({
-      data: { userId, score, change, month }
-    });
+/**
+ * Recalculates every month's "change" for a customer from the month before,
+ * so edits and deletions can never leave the history inconsistent.
+ */
+async function recalculateCreditScoreChanges(db: typeof prisma, userId: string) {
+  const rows = await db.creditScore.findMany({ where: { userId }, orderBy: { month: 'asc' } });
+  for (let i = 0; i < rows.length; i++) {
+    const change = i === 0 ? 0 : rows[i].score - rows[i - 1].score;
+    if (rows[i].change !== change) await db.creditScore.update({ where: { id: rows[i].id }, data: { change } });
   }
+}
 
+function revalidateCreditScore() {
   revalidatePath('/admin/customers/account-holders');
   revalidatePath('/admin/customers/portal-users');
+  revalidatePath('/savings');
+}
+
+export async function getCustomerCreditScores(userId: string) {
+  await requireAdmin();
+  const rows = await prisma.creditScore.findMany({ where: { userId }, orderBy: { month: 'desc' } });
+  return rows.map((r) => ({ id: r.id, month: r.month, score: r.score, change: r.change, updatedAt: r.updatedAt.toISOString() }));
+}
+
+/** Records or corrects a customer's score for a month (YYYY-MM). */
+export async function saveCreditScore(userId: string, month: string, score: number) {
+  await requireAdmin();
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(month)) throw new Error('Choose a month.');
+  if (month > new Date().toISOString().slice(0, 7)) throw new Error("A score can't be for a future month.");
+  if (!Number.isInteger(score) || score < CREDIT_SCORE_MIN || score > CREDIT_SCORE_MAX) {
+    throw new Error(`Enter a whole number from ${CREDIT_SCORE_MIN} to ${CREDIT_SCORE_MAX}.`);
+  }
+  if (!(await prisma.user.count({ where: { id: userId } }))) throw new Error('Customer not found');
+
+  await prisma.$transaction(async (db) => {
+    const existing = await db.creditScore.findFirst({ where: { userId, month } });
+    if (existing) await db.creditScore.update({ where: { id: existing.id }, data: { score } });
+    else await db.creditScore.create({ data: { userId, month, score, change: 0 } });
+    await recalculateCreditScoreChanges(db as typeof prisma, userId);
+  });
+
+  revalidateCreditScore();
+  return { success: true };
+}
+
+export async function deleteCreditScore(id: string) {
+  await requireAdmin();
+  const row = await prisma.creditScore.findUnique({ where: { id } });
+  if (!row) throw new Error('Score not found');
+
+  await prisma.$transaction(async (db) => {
+    await db.creditScore.delete({ where: { id } });
+    await recalculateCreditScoreChanges(db as typeof prisma, row.userId);
+  });
+
+  revalidateCreditScore();
+  return { success: true };
 }
 
 export async function updateUserTransferOverrides(userId: string, overridesJson: string) {
@@ -558,10 +592,17 @@ export async function updateAccountManagerInfo(formData: FormData) {
   const accountManagerTitle = formData.get('accountManagerTitle') as string;
   const accountManagerEmail = formData.get('accountManagerEmail') as string;
   const accountManagerPhone = formData.get('accountManagerPhone') as string;
+  const tier = formData.get('tier');
+  if (tier !== null && !isCustomerTier(tier)) {
+    // Only a tier from the list, or the customer's existing one left as it is.
+    const current = await prisma.user.findUnique({ where: { id: userId }, select: { tier: true } });
+    if (tier !== current?.tier) throw new Error('Choose a valid tier.');
+  }
 
   await prisma.user.update({
     where: { id: userId },
     data: {
+      ...(tier !== null ? { tier } : {}),
       accountManagerName: accountManagerName || null,
       accountManagerTitle: accountManagerTitle || null,
       accountManagerEmail: accountManagerEmail || null,
@@ -569,22 +610,5 @@ export async function updateAccountManagerInfo(formData: FormData) {
     }
   });
   revalidatePath('/admin');
-}
-
-export async function updateCreditScoreSettings(formData: FormData) {
-  const session = await auth();
-  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
-
-  const userId = formData.get('userId') as string;
-  const creditScoreAutoMode = formData.get('creditScoreAutoMode') as string;
-  const creditScoreFixedChange = parseInt(formData.get('creditScoreFixedChange') as string) || 0;
-
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      creditScoreAutoMode,
-      creditScoreFixedChange,
-    }
-  });
-  revalidatePath('/admin');
+  revalidatePath('/relationship');
 }

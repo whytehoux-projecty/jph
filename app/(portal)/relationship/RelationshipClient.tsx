@@ -20,6 +20,7 @@ import { StepFooter, StepHeading } from "@/components/portal/flow";
 import { requestAdvisoryMeeting, type RelationshipManager } from "@/app/actions/benefits";
 import { ADVISORY_FORMATS, ADVISORY_TOPICS, type AdvisoryFormat } from "@/lib/advisory";
 import { userFacingError } from "@/lib/errors";
+import { isStandardTier, tierLabel } from "@/lib/customer-tiers";
 
 interface AdvisoryRequestView {
   id: string;
@@ -36,8 +37,6 @@ const STATUS: Record<string, { label: string; status: Status }> = {
   RESOLVED: { label: "Dealt with", status: "success" },
 };
 
-/** "PRIVATE_VAULT" → "Private vault". */
-const tierLabel = (tier: string) => tier.charAt(0) + tier.slice(1).toLowerCase().replace(/_/g, " ");
 
 function ManagerCard({ manager }: { manager: RelationshipManager | null }) {
   if (!manager) {
@@ -214,7 +213,7 @@ export default function RelationshipClient({
       <PageHeader
         title="Your relationship"
         description="Who looks after your banking with us, and how to arrange a conversation with a specialist."
-        actions={tier !== "BASIC" ? <Badge variant="outline">{tierLabel(tier)} client</Badge> : undefined}
+        actions={!isStandardTier(tier) ? <Badge variant="outline">{tierLabel(tier)}</Badge> : undefined}
       />
 
       <div className="grid gap-6 lg:grid-cols-12 lg:gap-8">

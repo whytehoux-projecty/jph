@@ -33,8 +33,6 @@ export const BRAND = {
   address: '1 Heritage Plaza, New York, NY 10005',
   /** Year of founding */
   founded: 1988,
-  /** Routing number (fictional, for display/realism) */
-  routing: '021000089',
   /** FDIC fine print */
   fdic: 'Heritage Trust Bank, N.A. Member FDIC. Equal Housing Lender.',
   /** FDIC line for the marketing site (brand name without the legal suffix) */

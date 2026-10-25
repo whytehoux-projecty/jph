@@ -249,24 +249,6 @@ export async function openNewVault(input: OpenNewVaultInput) {
       });
     }
 
-    // If DCA vault, provision corresponding CryptoWallet record if not already existing
-    if (normalizedType === 'DCA') {
-      const existingWallet = await tx.cryptoWallet.findFirst({
-        where: { userId, currency: 'USDC' }
-      });
-      if (!existingWallet) {
-        const dummyAddress = `0x${Array.from({ length: 40 }, () => Math.floor(Math.random() * 16).toString(16)).join('')}`;
-        await tx.cryptoWallet.create({
-          data: {
-            userId,
-            currency: 'USDC',
-            balance: initialDeposit,
-            address: dummyAddress,
-            status: 'ACTIVE'
-          }
-        });
-      }
-    }
 
     return created;
   });

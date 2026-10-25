@@ -1,5 +1,8 @@
 "use client";
 
+import { TemporaryPasswordPanel } from '@/components/admin/TemporaryPasswordPanel';
+import { CreditScoreManager } from '@/components/admin/CreditScoreManager';
+import { DEFAULT_TIER, isStandardTier, tierLabel, tierOptions } from '@/lib/customer-tiers';
 import { useState } from "react";
 import { format } from "date-fns";
 import { Users, Search, Filter, ShieldAlert, ShieldCheck, UserCheck, UserX, Crown, User as UserIcon, Building2, CreditCard, FileText, Settings, Key, Trash2, LogIn, Download, Mail, Plus, Edit2, Check, X, Building, Link2, CreditCard as CardIcon, FileSpreadsheet, Lock, Star } from "lucide-react";
@@ -53,9 +56,7 @@ import {
   generateStatement, 
   updateEportalStatus, 
   requestOnlineAccess,
-  updateEportalCredentials,
   updateAccountManagerInfo,
-  updateCreditScoreSettings
 } from "@/app/actions/admin-customers";
 
 export type AdminUser = {
@@ -71,7 +72,7 @@ export type AdminUser = {
   eportalNotificationMessage: string | null;
   createdAt: Date;
   isFirstLogin?: boolean;
-  temporaryPassword?: string | null;
+  temporaryPasswordExpiresAt?: Date | string | null;
   transferMethodOverrides?: string | null;
   accountManagerName?: string | null;
   accountManagerTitle?: string | null;
@@ -227,10 +228,10 @@ export function AdminUserList({
                   </TableCell>
                   <TableCell>
                     <span className={`flex items-center gap-1 text-xs font-semibold ${
-                      user.tier === 'PREMIUM' ? 'text-vintage-gold' : 'text-slate-500'
+                      !isStandardTier(user.tier) ? 'text-vintage-gold' : 'text-slate-500'
                     }`}>
-                      {user.tier === 'PREMIUM' ? <Crown className="w-3 h-3" /> : <UserIcon className="w-3 h-3" />}
-                      {user.tier}
+                      {!isStandardTier(user.tier) ? <Crown className="w-3 h-3" /> : <UserIcon className="w-3 h-3" />}
+                      {tierLabel(user.tier || DEFAULT_TIER)}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -396,7 +397,7 @@ export function AdminUserList({
                   className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'account_manager' ? 'text-vintage-gold border-b-2 border-vintage-gold' : 'text-neutral-500 hover:text-neutral-700'}`}
                   onClick={() => setActiveTab('account_manager')}
                 >
-                  <UserIcon className="w-4 h-4 inline-block mr-1" /> Mgr / Credit
+                  <UserIcon className="w-4 h-4 inline-block mr-1" /> Relationship / Credit
                 </button>
               </div>
 
@@ -450,25 +451,8 @@ export function AdminUserList({
 
                       {/* Credit Score Editor */}
                       <div className="bg-white p-6 rounded-2xl border border-neutral-100 shadow-sm">
-                        <h5 className="text-xs font-bold uppercase tracking-widest text-(--heritage-gold) mb-4">Credit Score Editor</h5>
-                        <form action={async (fd) => {
-                          const { updateCreditScore } = await import('@/app/actions/admin-customers');
-                          fd.append('userId', selectedUser.id);
-                          await updateCreditScore(fd);
-                          toast.success('Credit score updated');
-                        }} className="space-y-4">
-                          <div className="grid grid-cols-2 gap-4">
-                            <div>
-                              <label className="text-xs text-muted-foreground font-semibold uppercase mb-1 block">Score Value</label>
-                              <input type="number" name="score" defaultValue="750" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm" required />
-                            </div>
-                            <div>
-                              <label className="text-xs text-muted-foreground font-semibold uppercase mb-1 block">Point Change</label>
-                              <input type="number" name="change" defaultValue="12" className="w-full px-3 py-2 border border-neutral-200 rounded-lg text-sm" required />
-                            </div>
-                          </div>
-                          <Button type="submit" size="small" className="w-full bg-(--ink-900) text-white hover:bg-(--ink-900)/90">Update Score</Button>
-                        </form>
+                        <h5 className="text-xs font-bold uppercase tracking-widest text-(--heritage-gold) mb-4">Credit Score</h5>
+                        <CreditScoreManager userId={selectedUser.id} />
                       </div>
 
                       {/* Widget Visibility */}
@@ -1176,52 +1160,13 @@ export function AdminUserList({
                     <div className="bg-white p-6 rounded-xl border border-neutral-200">
                       <h4 className="text-sm font-semibold uppercase tracking-wider text-ink-900 border-b pb-2 mb-4">Access Credentials</h4>
                       
-                      <div className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          <div>
-                            <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Login Email</label>
-                            <input type="text" readOnly value={selectedUser.email} className="w-full px-3 py-2 bg-neutral-100 border border-neutral-200 rounded text-sm text-ink-900 font-medium select-all" />
-                          </div>
-                          <div>
-                            <label className="text-xs font-semibold text-muted-foreground uppercase block mb-1">Current/Last Known Password</label>
-                            {selectedUser.temporaryPassword ? (
-                              <input type="text" readOnly value={selectedUser.temporaryPassword} className="w-full px-3 py-2 bg-amber-50 border border-amber-200 rounded text-sm text-amber-900 font-mono font-bold select-all" />
-                            ) : (
-                              <div className="w-full px-3 py-2 bg-neutral-100 border border-neutral-200 rounded text-sm text-muted-foreground italic">
-                                Hidden (Hashed by user)
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        <form action={async (fd) => {
-                          try {
-                            await updateEportalCredentials(fd);
-                            toast.success('Password updated successfully. The new password is now visible.');
-                            // Optimistically update the UI
-                            setSelectedUser(prev => prev ? ({ ...prev, temporaryPassword: fd.get('newPassword') as string }) : null);
-                          } catch (err: any) {
-                            toast.error(err.message || 'Failed to update password');
-                          }
-                        }} className="pt-4 mt-4 border-t border-neutral-100">
-                          <input type="hidden" name="id" value={selectedUser.id} />
-                          <label className="text-xs font-semibold text-ink-900 uppercase block mb-2">Set New Password</label>
-                          <div className="flex gap-2">
-                            <input 
-                              type="text" 
-                              name="newPassword" 
-                              placeholder="Enter new password (min 6 chars)" 
-                              className="flex-1 px-3 py-2 border border-neutral-300 rounded text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold"
-                              minLength={6}
-                              required
-                            />
-                            <Button type="submit" variant="primary" className="bg-[#0D2545] hover:bg-[#1B355B] text-white whitespace-nowrap">
-                              Update Password
-                            </Button>
-                          </div>
-                          <p className="text-xs text-muted-foreground mt-2">Updating the password will immediately override the user's current password and display the new plain text password here for you to copy and share with the user.</p>
-                        </form>
-                      </div>
+                      <TemporaryPasswordPanel
+                        key={selectedUser.id}
+                        userId={selectedUser.id}
+                        email={selectedUser.email}
+                        isFirstLogin={!!selectedUser.isFirstLogin}
+                        expiresAt={selectedUser.temporaryPasswordExpiresAt ? new Date(selectedUser.temporaryPasswordExpiresAt).toISOString() : null}
+                      />
                     </div>
                   </div>
                 )}
@@ -1276,9 +1221,10 @@ export function AdminUserList({
                     <form action={async (fd) => {
                       fd.append('userId', selectedUser.id);
                       await updateAccountManagerInfo(fd);
-                      toast.success('Account Manager info updated');
+                      toast.success('Relationship details updated');
                       setSelectedUser(prev => prev ? ({
                         ...prev,
+                        tier: fd.get('tier') as string,
                         accountManagerName: fd.get('accountManagerName') as string,
                         accountManagerTitle: fd.get('accountManagerTitle') as string,
                         accountManagerEmail: fd.get('accountManagerEmail') as string,
@@ -1287,8 +1233,23 @@ export function AdminUserList({
                     }} className="space-y-6 p-6 border border-neutral-200 rounded-md bg-white">
                       <div className="flex items-center gap-2 mb-2">
                         <UserIcon className="w-5 h-5 text-vintage-gold" />
-                        <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-widest">Account Manager Details</h3>
+                        <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-widest">Relationship</h3>
                       </div>
+                      <div className="space-y-1 max-w-xs">
+                        <label htmlFor="customer-tier" className="text-xs font-semibold text-neutral-500">Tier</label>
+                        <select
+                          id="customer-tier"
+                          name="tier"
+                          defaultValue={selectedUser.tier || DEFAULT_TIER}
+                          className="w-full bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold"
+                        >
+                          {tierOptions(selectedUser.tier).map((t) => (
+                            <option key={t} value={t}>{tierLabel(t)}</option>
+                          ))}
+                        </select>
+                        <p className="text-[11px] text-neutral-500">Shown to the customer on Your relationship (not shown for Standard). A label only: no perks or fees depend on it.</p>
+                      </div>
+                      <h4 className="text-xs font-semibold text-neutral-900 uppercase tracking-widest pt-2">Relationship manager</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <label className="text-xs font-semibold text-neutral-500">Name</label>
@@ -1309,43 +1270,7 @@ export function AdminUserList({
                       </div>
                       <div className="flex justify-end">
                         <Button type="submit" className="bg-vintage-gold hover:bg-vintage-gold/90 text-white shadow-vintage-sm">
-                          <Check className="w-4 h-4 mr-1" /> Save Manager Info
-                        </Button>
-                      </div>
-                    </form>
-
-                    <form action={async (fd) => {
-                      fd.append('userId', selectedUser.id);
-                      await updateCreditScoreSettings(fd);
-                      toast.success('Credit score settings updated');
-                      setSelectedUser(prev => prev ? ({
-                        ...prev,
-                        creditScoreAutoMode: fd.get('creditScoreAutoMode') as string,
-                        creditScoreFixedChange: parseInt(fd.get('creditScoreFixedChange') as string) || 0,
-                      }) : null);
-                    }} className="space-y-6 p-6 border border-neutral-200 rounded-md bg-white mt-8">
-                      <div className="flex items-center gap-2 mb-2">
-                        <FileSpreadsheet className="w-5 h-5 text-vintage-gold" />
-                        <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-widest">Credit Score Automation</h3>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <label className="text-xs font-semibold text-neutral-500">Update Mode</label>
-                          <select name="creditScoreAutoMode" defaultValue={selectedUser.creditScoreAutoMode || 'MANUAL'} className="w-full bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold">
-                            <option value="MANUAL">Manual (No Auto-Update)</option>
-                            <option value="RANDOM">Random Fluctuation</option>
-                            <option value="FIXED_INCREASE">Fixed Increase (Monthly)</option>
-                            <option value="FIXED_DECREASE">Fixed Decrease (Monthly)</option>
-                          </select>
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-semibold text-neutral-500">Fixed Change Amount (if applicable)</label>
-                          <input type="number" name="creditScoreFixedChange" defaultValue={selectedUser.creditScoreFixedChange || 0} placeholder="e.g. 5" className="w-full bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold" />
-                        </div>
-                      </div>
-                      <div className="flex justify-end">
-                        <Button type="submit" className="bg-vintage-gold hover:bg-vintage-gold/90 text-white shadow-vintage-sm">
-                          <Check className="w-4 h-4 mr-1" /> Save Credit Settings
+                          <Check className="w-4 h-4 mr-1" /> Save Relationship
                         </Button>
                       </div>
                     </form>

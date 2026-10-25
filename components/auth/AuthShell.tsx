@@ -41,14 +41,14 @@ const LEGAL_LINKS = [
   { name: "Contact us", href: ROUTES.contact },
 ] as const;
 
-export function AuthShell({ children }: { children: React.ReactNode }) {
+export function AuthShell({ children, skipLabel = "Skip to sign in" }: { children: React.ReactNode; skipLabel?: string }) {
   return (
     <div className="grid min-h-dvh bg-surface text-fg lg:grid-cols-[minmax(0,1fr)_minmax(0,1fr)] xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
       <a
         href="#auth-main"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-(--z-skip-link) focus:bg-surface focus:px-4 focus:py-3 focus:text-small focus:font-semibold focus:text-fg focus:outline-2 focus:outline-focus"
       >
-        Skip to sign in
+        {skipLabel}
       </a>
 
       {/* Brand panel — desktop only, purely supporting content */}

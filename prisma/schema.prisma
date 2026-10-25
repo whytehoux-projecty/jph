@@ -49,6 +49,8 @@ model User {
   pinSetupComplete    Boolean  @default(false) @map("pin_setup_complete")
   isFirstLogin        Boolean  @default(true) @map("is_first_login")
   temporaryPassword   String?  @map("temporary_password")
+  // When the current temporary password stops working (see lib/temporary-credentials.ts).
+  temporaryPasswordExpiresAt DateTime? @map("temporary_password_expires_at")
   cryptoWalletEnabled Boolean  @default(false) @map("crypto_wallet_enabled")
   profilePhotoUrl     String?  @map("profile_photo_url")
   profileType         String   @default("PERSONAL") @map("profile_type")

@@ -248,7 +248,7 @@ export async function deleteSavingsGoal(goalId: string): Promise<GoalResult> {
 /** The latest score staff recorded for the customer, or null when there is none. */
 export async function getUserCreditScore(): Promise<{ score: number; change: number; month: string } | null> {
   const userId = await requireUser();
-  const cs = await prisma.creditScore.findFirst({ where: { userId }, orderBy: { createdAt: 'desc' } });
+  const cs = await prisma.creditScore.findFirst({ where: { userId }, orderBy: { month: 'desc' } });
   return cs ? { score: cs.score, change: cs.change || 0, month: cs.month } : null;
 }
 

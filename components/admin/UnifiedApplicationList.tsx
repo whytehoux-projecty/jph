@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import { CUSTOMER_TIERS, tierLabel } from "@/lib/customer-tiers";
+import { TEMP_PASSWORD_TTL_HOURS } from "@/lib/password-policy";
 import { format } from "date-fns";
 import { FileText, Search, Filter, ShieldCheck, FileSpreadsheet, Eye, CheckCircle2, XCircle, CalendarClock, Lock, Copy, RefreshCw, ExternalLink } from "lucide-react";
 import { 
@@ -362,8 +364,23 @@ export function UnifiedApplicationList({
 
                   {selectedReq.status === 'PENDING' && (
                     <div className="pt-6 mt-6 border-t border-neutral-200 flex gap-3">
-                      <form action={onEportalApprove}>
+                      <form action={onEportalApprove} className="flex flex-col gap-3">
                         <input type="hidden" name="id" value={selectedReq.id} />
+                        <div>
+                          <label htmlFor="eportal-tier" className="text-xs font-semibold text-neutral-500 block mb-1">Customer tier (optional)</label>
+                          <select
+                            id="eportal-tier"
+                            name="tier"
+                            defaultValue=""
+                            className="w-full bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold"
+                          >
+                            <option value="">Keep current tier</option>
+                            {CUSTOMER_TIERS.map((t) => (
+                              <option key={t} value={t}>{tierLabel(t)}</option>
+                            ))}
+                          </select>
+                          <p className="text-[11px] text-neutral-500 mt-1">Approving emails the customer a temporary password that works for {TEMP_PASSWORD_TTL_HOURS} hours.</p>
+                        </div>
                         <Button type="submit" className="bg-emerald-600 hover:bg-emerald-700 text-white">
                           <CheckCircle2 className="w-4 h-4 mr-2" /> Approve Access
                         </Button>

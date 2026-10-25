@@ -1,3 +1,4 @@
+import { redactCredentials } from '@/lib/admin-redact';
 import { prisma } from '@/lib/prisma';
 import { AdminTransferHistory } from '@/components/admin/AdminTransferHistory';
 import { AdminPageShell } from '@/components/admin/AdminPageShell';
@@ -31,7 +32,7 @@ export default async function TransfersHistoryPage() {
         </Link>
       }
     >
-      <AdminTransferHistory initialTransactions={transactions} />
+      <AdminTransferHistory initialTransactions={redactCredentials(transactions)} />
     </AdminPageShell>
   );
 }

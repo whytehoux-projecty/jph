@@ -1,3 +1,4 @@
+import { withoutCredentials } from '@/lib/admin-redact';
 import { prisma } from '@/lib/prisma';
 import { AdminUserList } from '@/components/admin/AdminUserList';
 import { deleteUserPin, loginAsUser, toggleUserStatus, toggleUserTier, toggleUserOnlineAccess } from '@/app/actions/admin';
@@ -46,7 +47,7 @@ export default async function AllAccountHoldersPage() {
       } as any;
     }
     return {
-      ...user,
+      ...withoutCredentials(user),
       registrationForm,
       cards: user.accounts.flatMap(acc => acc.cards),
       cheques: user.accounts.flatMap(acc => acc.cheques),
