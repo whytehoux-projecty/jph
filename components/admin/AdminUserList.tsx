@@ -56,7 +56,6 @@ import {
   requestOnlineAccess,
   updateEportalCredentials,
   updateAccountManagerInfo,
-  updateCreditScoreSettings
 } from "@/app/actions/admin-customers";
 
 export type AdminUser = {
@@ -1327,42 +1326,6 @@ export function AdminUserList({
                       <div className="flex justify-end">
                         <Button type="submit" className="bg-vintage-gold hover:bg-vintage-gold/90 text-white shadow-vintage-sm">
                           <Check className="w-4 h-4 mr-1" /> Save Relationship
-                        </Button>
-                      </div>
-                    </form>
-
-                    <form action={async (fd) => {
-                      fd.append('userId', selectedUser.id);
-                      await updateCreditScoreSettings(fd);
-                      toast.success('Credit score settings updated');
-                      setSelectedUser(prev => prev ? ({
-                        ...prev,
-                        creditScoreAutoMode: fd.get('creditScoreAutoMode') as string,
-                        creditScoreFixedChange: parseInt(fd.get('creditScoreFixedChange') as string) || 0,
-                      }) : null);
-                    }} className="space-y-6 p-6 border border-neutral-200 rounded-md bg-white mt-8">
-                      <div className="flex items-center gap-2 mb-2">
-                        <FileSpreadsheet className="w-5 h-5 text-vintage-gold" />
-                        <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-widest">Credit Score Automation</h3>
-                      </div>
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div className="space-y-1">
-                          <label className="text-xs font-semibold text-neutral-500">Update Mode</label>
-                          <select name="creditScoreAutoMode" defaultValue={selectedUser.creditScoreAutoMode || 'MANUAL'} className="w-full bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold">
-                            <option value="MANUAL">Manual (No Auto-Update)</option>
-                            <option value="RANDOM">Random Fluctuation</option>
-                            <option value="FIXED_INCREASE">Fixed Increase (Monthly)</option>
-                            <option value="FIXED_DECREASE">Fixed Decrease (Monthly)</option>
-                          </select>
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-xs font-semibold text-neutral-500">Fixed Change Amount (if applicable)</label>
-                          <input type="number" name="creditScoreFixedChange" defaultValue={selectedUser.creditScoreFixedChange || 0} placeholder="e.g. 5" className="w-full bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold" />
-                        </div>
-                      </div>
-                      <div className="flex justify-end">
-                        <Button type="submit" className="bg-vintage-gold hover:bg-vintage-gold/90 text-white shadow-vintage-sm">
-                          <Check className="w-4 h-4 mr-1" /> Save Credit Settings
                         </Button>
                       </div>
                     </form>

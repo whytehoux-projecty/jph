@@ -579,21 +579,3 @@ export async function updateAccountManagerInfo(formData: FormData) {
   revalidatePath('/admin');
   revalidatePath('/relationship');
 }
-
-export async function updateCreditScoreSettings(formData: FormData) {
-  const session = await auth();
-  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
-
-  const userId = formData.get('userId') as string;
-  const creditScoreAutoMode = formData.get('creditScoreAutoMode') as string;
-  const creditScoreFixedChange = parseInt(formData.get('creditScoreFixedChange') as string) || 0;
-
-  await prisma.user.update({
-    where: { id: userId },
-    data: {
-      creditScoreAutoMode,
-      creditScoreFixedChange,
-    }
-  });
-  revalidatePath('/admin');
-}
