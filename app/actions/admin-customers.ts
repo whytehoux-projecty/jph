@@ -1,6 +1,7 @@
 'use server';
 
 import { prisma } from '@/lib/prisma';
+import { isCustomerTier } from '@/lib/customer-tiers';
 import { auth } from '@/auth';
 import { revalidatePath } from 'next/cache';
 
@@ -558,10 +559,17 @@ export async function updateAccountManagerInfo(formData: FormData) {
   const accountManagerTitle = formData.get('accountManagerTitle') as string;
   const accountManagerEmail = formData.get('accountManagerEmail') as string;
   const accountManagerPhone = formData.get('accountManagerPhone') as string;
+  const tier = formData.get('tier');
+  if (tier !== null && !isCustomerTier(tier)) {
+    // Only a tier from the list, or the customer's existing one left as it is.
+    const current = await prisma.user.findUnique({ where: { id: userId }, select: { tier: true } });
+    if (tier !== current?.tier) throw new Error('Choose a valid tier.');
+  }
 
   await prisma.user.update({
     where: { id: userId },
     data: {
+      ...(tier !== null ? { tier } : {}),
       accountManagerName: accountManagerName || null,
       accountManagerTitle: accountManagerTitle || null,
       accountManagerEmail: accountManagerEmail || null,
@@ -569,6 +577,7 @@ export async function updateAccountManagerInfo(formData: FormData) {
     }
   });
   revalidatePath('/admin');
+  revalidatePath('/relationship');
 }
 
 export async function updateCreditScoreSettings(formData: FormData) {

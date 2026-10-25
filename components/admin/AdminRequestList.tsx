@@ -1,5 +1,6 @@
 "use client";
 
+import { CUSTOMER_TIERS, tierLabel } from '@/lib/customer-tiers';
 import { useState } from "react";
 import { format } from "date-fns";
 import { KeyRound, Search, Filter, Eye, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
@@ -217,8 +218,23 @@ export function AdminRequestList({
               {/* Action Buttons */}
               {selectedReq.status === 'PENDING' && !isRejecting && (
                 <div className="flex flex-col gap-3 pt-4 border-t border-neutral-200">
-                  <form action={async (formData) => { await onApprove(formData); setSelectedReq(null); }} className="w-full">
+                  <form action={async (formData) => { await onApprove(formData); setSelectedReq(null); }} className="w-full space-y-3">
                     <input type="hidden" name="id" value={selectedReq.id} />
+                    <div>
+                      <label htmlFor="approve-tier" className="text-xs font-semibold text-neutral-500 block mb-1">Customer tier (optional)</label>
+                      <select
+                        id="approve-tier"
+                        name="tier"
+                        defaultValue=""
+                        className="w-full bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold"
+                      >
+                        <option value="">Keep current tier</option>
+                        {CUSTOMER_TIERS.map((t) => (
+                          <option key={t} value={t}>{tierLabel(t)}</option>
+                        ))}
+                      </select>
+                      <p className="text-[11px] text-neutral-500 mt-1">You can change it later on the customer&apos;s profile, under Relationship / Credit.</p>
+                    </div>
                     <Button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white">
                       <CheckCircle2 className="w-4 h-4 mr-2" /> Approve & Generate OTP
                     </Button>

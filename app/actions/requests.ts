@@ -6,12 +6,16 @@ import { auth } from '@/auth';
 import { sendEmail } from '@/lib/email';
 import bcrypt from 'bcryptjs';
 import { generateTemporaryPassword } from '@/lib/temporary-password';
+import { isCustomerTier } from '@/lib/customer-tiers';
 
 
 export async function handleApproveRequest(formData: FormData) {
   const session = await auth();
   if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
   const id = formData.get('id') as string;
+  // Optional: the tier the customer starts with in online banking.
+  const tier = formData.get('tier');
+  if (tier !== null && tier !== '' && !isCustomerTier(tier)) throw new Error('Choose a valid tier.');
   const request = await prisma.onlineAccessRequest.findUnique({ where: { id } });
   if (!request) return;
   
@@ -29,6 +33,7 @@ export async function handleApproveRequest(formData: FormData) {
           data: { 
               hasOnlineAccess: true,
               isFirstLogin: true,
+              ...(isCustomerTier(tier) ? { tier } : {}),
               temporaryPassword: tempPassword,
               password: hashedPassword
           }

@@ -1,5 +1,6 @@
 "use client";
 
+import { DEFAULT_TIER, tierLabel, tierOptions } from '@/lib/customer-tiers';
 import { useState } from "react";
 import { format } from "date-fns";
 import { Users, Search, Filter, ShieldAlert, ShieldCheck, UserCheck, UserX, Crown, User as UserIcon, Building2, CreditCard, FileText, Settings, Key, Trash2, LogIn, Download, Mail, Plus, Edit2, Check, X, Building, Link2, CreditCard as CardIcon, FileSpreadsheet, Lock, Star } from "lucide-react";
@@ -227,10 +228,10 @@ export function AdminUserList({
                   </TableCell>
                   <TableCell>
                     <span className={`flex items-center gap-1 text-xs font-semibold ${
-                      user.tier === 'PREMIUM' ? 'text-vintage-gold' : 'text-slate-500'
+                      user.tier && user.tier !== DEFAULT_TIER ? 'text-vintage-gold' : 'text-slate-500'
                     }`}>
-                      {user.tier === 'PREMIUM' ? <Crown className="w-3 h-3" /> : <UserIcon className="w-3 h-3" />}
-                      {user.tier}
+                      {user.tier && user.tier !== DEFAULT_TIER ? <Crown className="w-3 h-3" /> : <UserIcon className="w-3 h-3" />}
+                      {tierLabel(user.tier || DEFAULT_TIER)}
                     </span>
                   </TableCell>
                   <TableCell>
@@ -396,7 +397,7 @@ export function AdminUserList({
                   className={`px-4 py-2 text-sm font-medium transition-colors ${activeTab === 'account_manager' ? 'text-vintage-gold border-b-2 border-vintage-gold' : 'text-neutral-500 hover:text-neutral-700'}`}
                   onClick={() => setActiveTab('account_manager')}
                 >
-                  <UserIcon className="w-4 h-4 inline-block mr-1" /> Mgr / Credit
+                  <UserIcon className="w-4 h-4 inline-block mr-1" /> Relationship / Credit
                 </button>
               </div>
 
@@ -1276,9 +1277,10 @@ export function AdminUserList({
                     <form action={async (fd) => {
                       fd.append('userId', selectedUser.id);
                       await updateAccountManagerInfo(fd);
-                      toast.success('Account Manager info updated');
+                      toast.success('Relationship details updated');
                       setSelectedUser(prev => prev ? ({
                         ...prev,
+                        tier: fd.get('tier') as string,
                         accountManagerName: fd.get('accountManagerName') as string,
                         accountManagerTitle: fd.get('accountManagerTitle') as string,
                         accountManagerEmail: fd.get('accountManagerEmail') as string,
@@ -1287,8 +1289,23 @@ export function AdminUserList({
                     }} className="space-y-6 p-6 border border-neutral-200 rounded-md bg-white">
                       <div className="flex items-center gap-2 mb-2">
                         <UserIcon className="w-5 h-5 text-vintage-gold" />
-                        <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-widest">Account Manager Details</h3>
+                        <h3 className="text-sm font-semibold text-neutral-900 uppercase tracking-widest">Relationship</h3>
                       </div>
+                      <div className="space-y-1 max-w-xs">
+                        <label htmlFor="customer-tier" className="text-xs font-semibold text-neutral-500">Tier</label>
+                        <select
+                          id="customer-tier"
+                          name="tier"
+                          defaultValue={selectedUser.tier || DEFAULT_TIER}
+                          className="w-full bg-neutral-50 border border-neutral-200 rounded-md py-2 px-3 text-sm focus:outline-none focus:ring-1 focus:ring-vintage-gold"
+                        >
+                          {tierOptions(selectedUser.tier).map((t) => (
+                            <option key={t} value={t}>{tierLabel(t)}</option>
+                          ))}
+                        </select>
+                        <p className="text-[11px] text-neutral-500">Shown to the customer on Your relationship (not shown for Basic). A label only: no perks or fees depend on it.</p>
+                      </div>
+                      <h4 className="text-xs font-semibold text-neutral-900 uppercase tracking-widest pt-2">Relationship manager</h4>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div className="space-y-1">
                           <label className="text-xs font-semibold text-neutral-500">Name</label>
@@ -1309,7 +1326,7 @@ export function AdminUserList({
                       </div>
                       <div className="flex justify-end">
                         <Button type="submit" className="bg-vintage-gold hover:bg-vintage-gold/90 text-white shadow-vintage-sm">
-                          <Check className="w-4 h-4 mr-1" /> Save Manager Info
+                          <Check className="w-4 h-4 mr-1" /> Save Relationship
                         </Button>
                       </div>
                     </form>
