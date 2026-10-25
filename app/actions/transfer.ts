@@ -169,18 +169,6 @@ export async function getRecentTransferRequests(limit: number = 5) {
   return txs.map(t => ({ ...t, createdAt: t.createdAt.toISOString() }));
 }
 
-export async function getExchangeRate(from: string, to: string) {
-  // Hardcoded rates for demo
-  const rates: Record<string, number> = {
-    'USD-EUR': 0.92,
-    'EUR-USD': 1.09,
-    'USD-GBP': 0.79,
-    'GBP-USD': 1.27,
-  };
-  const key = `${from}-${to}`;
-  return rates[key] || 1.0;
-}
-
 export async function getRecentRecipients(method?: string, limit: number = 5) {
   const session = await auth();
   if (!session?.user?.id) throw new Error('Unauthorized');

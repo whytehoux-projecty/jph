@@ -2,8 +2,10 @@
 /* Fonts loaded via next/font/google in layout.tsx (self-hosted at build time). */
 /* This file handles: Ledger CSS tokens, base reset, theme-ink, utilities.      */
 
+/* Scoped to .ht-site so these never leak into the portal when CSS from a
+   marketing route stays loaded after client-side navigation. */
 @layer base {
-  :root {
+  .ht-site {
     /* Ledger surface tokens */
     --bg:           #FBF9F4; /* paper-50 */
     --surface:      #F3EFE4; /* paper-100 */
@@ -23,7 +25,7 @@
   }
 
   /* Dark / ink surface theme — applied to footer and dark sections */
-  .theme-ink {
+  .ht-site .theme-ink {
     --bg:           #14181B; /* ink-900 */
     --surface:      #1C2226;
     --line:         #2E353B; /* ink-700 */
@@ -35,7 +37,7 @@
   }
 
   /* Base reset for marketing site */
-  body {
+  .ht-site {
     background: var(--bg);
     color: var(--text);
     font-family: var(--font-body);
@@ -43,12 +45,12 @@
     line-height: 1.6;
   }
 
-  h1, h2, h3, h4, h5, h6 {
+  .ht-site :is(h1, h2, h3, h4, h5, h6) {
     font-family: var(--font-display);
   }
 
   /* Universal focus ring — Ledger uses solid 2px ink ring */
-  :focus-visible {
+  .ht-site :focus-visible {
     outline: 2px solid var(--focus);
     outline-offset: 2px;
   }

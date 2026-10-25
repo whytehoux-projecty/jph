@@ -2,47 +2,47 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ArrowLeftRight, CreditCard, Menu, List } from "lucide-react";
+import { Menu } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MOBILE_TABS, isActive } from "@/lib/portal-nav";
 
-const navItems = [
-  { name: "Home", href: "/dashboard", icon: LayoutDashboard },
-  { name: "Activities", href: "/activities", icon: List },
-  { name: "Transfers & Pay Bills", href: "/transfer", icon: ArrowLeftRight },
-  { name: "Vaults & Cards", href: "/vaults", icon: CreditCard },
-  { name: "More", href: "/settings", icon: Menu },
-];
+const tabClass =
+  "relative flex h-full flex-1 flex-col items-center justify-center gap-1 text-caption transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus";
 
-export function MobileBottomNav() {
+/** Phone tab bar: four destinations within thumb reach, plus the full menu. */
+export function MobileBottomNav({ onOpenMenu }: { onOpenMenu: () => void }) {
   const pathname = usePathname();
 
   return (
-    <div className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-paper-100/95 backdrop-blur-md border-t border-ink-900/15 safe-area-pb">
-      <nav className="flex items-center justify-around h-16">
-        {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(`${item.href}/`);
+    <nav
+      aria-label="Shortcuts"
+      className="fixed inset-x-0 bottom-0 z-(--z-header) border-t border-line bg-surface pb-[env(safe-area-inset-bottom)] lg:hidden print:hidden"
+    >
+      <ul className="flex h-16 items-stretch">
+        {MOBILE_TABS.map((item) => {
+          const active = isActive(item, pathname);
           const Icon = item.icon;
-          
           return (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={cn(
-                "relative flex flex-col items-center justify-center w-full h-full space-y-1 transition-colors rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vermilion-600 focus-visible:ring-offset-2",
-                isActive 
-                  ? "text-ink-900 font-semibold" 
-                  : "text-muted-foreground hover:text-ink-900/80"
-              )}
-            >
-              {isActive && (
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-1 bg-vermilion-600 rounded-b-md" />
-              )}
-              <Icon className="h-5 w-5" />
-              <span className="text-[10px] font-medium">{item.name}</span>
-            </Link>
+            <li key={item.href} className="flex flex-1">
+              <Link
+                href={item.href}
+                aria-current={active ? "page" : undefined}
+                className={cn(tabClass, active ? "font-semibold text-fg" : "text-fg-muted hover:text-fg")}
+              >
+                {active && <span aria-hidden="true" className="absolute inset-x-5 top-0 h-0.5 bg-action" />}
+                <Icon className={cn("size-5", active && "text-fg-action")} strokeWidth={1.75} aria-hidden="true" />
+                {item.label}
+              </Link>
+            </li>
           );
         })}
-      </nav>
-    </div>
+        <li className="flex flex-1">
+          <button type="button" onClick={onOpenMenu} className={cn(tabClass, "text-fg-muted hover:text-fg")}>
+            <Menu className="size-5" strokeWidth={1.75} aria-hidden="true" />
+            Menu
+          </button>
+        </li>
+      </ul>
+    </nav>
   );
 }

@@ -301,7 +301,7 @@ export function AdminUserList({
                     <form action={onLoginAs}>
                       <input type="hidden" name="id" value={selectedUser.id} />
                       <Button type="submit" variant="outline" size="small" className="text-xs text-blue-600 border-blue-200 hover:bg-blue-50 h-7 px-3">
-                        <LogIn className="w-3 h-3 mr-1" /> Login As
+                        <LogIn className="w-3 h-3 mr-1" aria-hidden="true" /> Open online banking
                       </Button>
                     </form>
                   </div>

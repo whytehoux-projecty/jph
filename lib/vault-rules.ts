@@ -26,7 +26,7 @@ export const VAULT_TYPES: Record<VaultType, VaultTypeDefinition> = {
     category: 'core',
     canBePrimary: true,
     defaultCurrency: 'USD',
-    shortDesc: 'Capital accumulation and emergency reserves with high-yield compound growth.',
+    shortDesc: 'For money you are setting aside, kept separate from everyday spending.',
     interestRate: '4.20% APY',
     liquidity: 'Standard Liquidity (Notice/Transfer)',
     explainer: {
@@ -50,7 +50,7 @@ export const VAULT_TYPES: Record<VaultType, VaultTypeDefinition> = {
     category: 'core',
     canBePrimary: true,
     defaultCurrency: 'USD',
-    shortDesc: 'Primary transactional hub for day-to-day liquidity, payroll, debit cards, and bills.',
+    shortDesc: 'Your everyday account for payments, transfers, cards and bills.',
     interestRate: '0.00% APR',
     liquidity: 'Instant Liquidity (Unrestricted)',
     explainer: {
@@ -74,7 +74,7 @@ export const VAULT_TYPES: Record<VaultType, VaultTypeDefinition> = {
     category: 'sub',
     canBePrimary: false,
     defaultCurrency: 'USD',
-    shortDesc: 'Institutional custody for liquid digital dollars (USDC/USDT) and blockchain settlements.',
+    shortDesc: 'Holds US dollar stablecoins (USDC and USDT).',
     interestRate: 'Variable Yield',
     liquidity: 'T+0 Instant Ledger',
     explainer: {
@@ -98,7 +98,7 @@ export const VAULT_TYPES: Record<VaultType, VaultTypeDefinition> = {
     category: 'sub',
     canBePrimary: false,
     defaultCurrency: 'USD',
-    shortDesc: 'Wealth management cash hub for money market allocations, treasuries, and portfolio growth.',
+    shortDesc: 'Holds cash set aside for your investments.',
     interestRate: 'Market Benchmark',
     liquidity: 'T+1 Settlement',
     explainer: {
@@ -122,7 +122,7 @@ export const VAULT_TYPES: Record<VaultType, VaultTypeDefinition> = {
     category: 'sub',
     canBePrimary: false,
     defaultCurrency: 'USD',
-    shortDesc: 'Multi-currency international custody booked in premier global financial jurisdictions.',
+    shortDesc: 'For holding money in currencies other than US dollars.',
     interestRate: 'Tiered Sovereign Yield',
     liquidity: 'Multi-Currency Global Wire',
     explainer: {

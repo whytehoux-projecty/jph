@@ -1,12 +1,11 @@
 'use client';
 
 import { useState } from 'react';
-import { beneficiaryRails, BeneficiaryField } from '@/lib/beneficiary-rails';
-import { Label } from '@/components/ui/label';
-import { Input } from '@/components/ui/input';
+import { beneficiaryRails } from '@/lib/beneficiary-rails';
 import { Button } from '@/components/ui/Button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { z } from 'zod';
+import { FormField } from '@/components/ui/form-field';
+import { Input } from '@/components/ui/input';
+import { NativeSelect } from '@/components/ui/native-select';
 import { BrandIcon, getBrandIconSrc } from '@/components/ui/BrandIcon';
 
 interface DynamicBeneficiaryFormProps {
@@ -17,29 +16,31 @@ interface DynamicBeneficiaryFormProps {
   isAdmin?: boolean;
 }
 
+const lower = (s: string) => s.charAt(0).toLowerCase() + s.slice(1);
+
+/** Payee details for any payment method (shared by the portal and the admin). */
 export function DynamicBeneficiaryForm({ initialData, onSubmit, onCancel, isSubmitting, isAdmin }: DynamicBeneficiaryFormProps) {
   const [railId, setRailId] = useState<string>(initialData?.rail || 'us_bank');
   const [name, setName] = useState(initialData?.name || '');
   const [nickname, setNickname] = useState(initialData?.nickname || '');
   const [status, setStatus] = useState(initialData?.status || 'ACTIVE');
   const [notes, setNotes] = useState(initialData?.notes || '');
-  
+
   let defaultDetails = {};
   try {
     defaultDetails = initialData?.details ? JSON.parse(initialData.details) : {};
-  } catch (e) {
+  } catch {
     defaultDetails = {};
   }
   const [details, setDetails] = useState<Record<string, string>>(defaultDetails);
-  
   const [errors, setErrors] = useState<Record<string, string>>({});
 
   const activeRail = beneficiaryRails[railId];
 
   const handleFieldChange = (fieldName: string, value: string) => {
-    setDetails(prev => ({ ...prev, [fieldName]: value }));
+    setDetails((prev) => ({ ...prev, [fieldName]: value }));
     if (errors[fieldName]) {
-      setErrors(prev => {
+      setErrors((prev) => {
         const next = { ...prev };
         delete next[fieldName];
         return next;
@@ -51,27 +52,25 @@ export function DynamicBeneficiaryForm({ initialData, onSubmit, onCancel, isSubm
     e.preventDefault();
     const newErrors: Record<string, string> = {};
 
-    if (!name.trim()) {
-      newErrors.name = "Full name is required.";
-    }
+    if (!name.trim()) newErrors.name = "Enter the payee's full name.";
 
-    if (activeRail) {
-      activeRail.fields.forEach(field => {
-        const val = details[field.name] || "";
-        if (field.required && !val.trim()) {
-          newErrors[field.name] = `${field.label} is required.`;
-        } else {
-          try {
-            field.validation.parse(val);
-          } catch (err: any) {
-            newErrors[field.name] = err.issues?.[0]?.message || "Invalid value";
-          }
+    activeRail?.fields.forEach((field) => {
+      const val = details[field.name] || '';
+      if (field.required && !val.trim()) {
+        newErrors[field.name] = `Enter ${lower(field.label)}.`;
+      } else if (val.trim()) {
+        try {
+          field.validation.parse(val);
+        } catch (err: any) {
+          newErrors[field.name] = err.issues?.[0]?.message || `Check ${lower(field.label)}.`;
         }
-      });
-    }
+      }
+    });
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
+      // Move focus to the first field with an error.
+      requestAnimationFrame(() => (document.querySelector('[aria-invalid="true"]') as HTMLElement | null)?.focus());
       return;
     }
 
@@ -80,159 +79,143 @@ export function DynamicBeneficiaryForm({ initialData, onSubmit, onCancel, isSubm
       nickname,
       rail: railId,
       details: JSON.stringify(details),
-      ...(isAdmin ? { status, notes } : {})
+      ...(isAdmin ? { status, notes } : {}),
     });
   };
 
   return (
-    <form onSubmit={validateAndSubmit} className="space-y-6">
-      {/* Universal Fields */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label>Full Name <span className="text-red-500">*</span></Label>
-          <Input 
-            value={name} 
-            onChange={e => {
+    <form onSubmit={validateAndSubmit} noValidate className="flex flex-col gap-5">
+      <div className="grid gap-5 sm:grid-cols-2">
+        <FormField label="Full name" hint="As it appears on their account." error={errors.name} required>
+          <Input
+            autoComplete="off"
+            value={name}
+            onChange={(e) => {
               setName(e.target.value);
-              setErrors(p => ({ ...p, name: '' }));
-            }} 
-            placeholder="e.g. Jane Doe"
-            className={errors.name ? 'border-red-500 focus-visible:ring-red-500' : ''}
+              setErrors((p) => ({ ...p, name: '' }));
+            }}
           />
-          {errors.name && <p className="text-xs text-red-500">{errors.name}</p>}
-        </div>
-        <div className="space-y-2">
-          <Label>Nickname (Optional)</Label>
-          <Input 
-            value={nickname} 
-            onChange={e => setNickname(e.target.value)} 
-            placeholder="e.g. Rent, Freelancer" 
-          />
-        </div>
+        </FormField>
+        <FormField label="Nickname" optional hint="Only you see this.">
+          <Input autoComplete="off" value={nickname} onChange={(e) => setNickname(e.target.value)} />
+        </FormField>
       </div>
 
-      <div className="space-y-2">
-        <Label>Transfer Method (Rail) <span className="text-red-500">*</span></Label>
-        <Select value={railId} onValueChange={(val) => {
-          setRailId(val);
-          setDetails({});
-          setErrors({});
-        }}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {Object.values(beneficiaryRails).map(rail => (
-              <SelectItem key={rail.id} value={rail.id}>
-                <div className="flex items-center gap-2">
-                  {getBrandIconSrc(rail.id) && <BrandIcon name={rail.id} size={16} />}
-                  <span>{rail.displayName}</span>
-                </div>
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="bg-slate-50 border border-slate-100 p-4 rounded-none space-y-4">
-        <div className="flex items-center gap-2 mb-2">
-          {getBrandIconSrc(railId) && <BrandIcon name={railId} size={18} />}
-          <h4 className="text-sm font-medium text-slate-700">Transfer Details</h4>
-        </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {activeRail?.fields.map((field) => (
-            <div key={field.name} className="space-y-2">
-              <Label>
-                {field.label} {field.required && <span className="text-red-500">*</span>}
-              </Label>
-              {field.type === 'select' ? (
-                <Select value={details[field.name] || ""} onValueChange={(val) => handleFieldChange(field.name, val)}>
-                  <SelectTrigger className={errors[field.name] ? 'border-red-500 focus-visible:ring-red-500' : ''}>
-                    <SelectValue placeholder={field.placeholder || 'Select...'} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {field.options?.map(opt => (
-                      <SelectItem key={opt.value} value={opt.value}>{opt.label}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Input 
-                  type={field.type}
-                  placeholder={field.placeholder}
-                  value={details[field.name] || ""}
-                  onChange={e => handleFieldChange(field.name, e.target.value)}
-                  className={errors[field.name] ? 'border-red-500 focus-visible:ring-red-500 font-mono' : 'font-mono'}
-                />
-              )}
-              {field.helpText && !errors[field.name] && (
-                <p className="text-xs text-muted-foreground">{field.helpText}</p>
-              )}
-              {errors[field.name] && (
-                <p className="text-xs text-red-500">{errors[field.name]}</p>
-              )}
-            </div>
+      <FormField label="How you'll pay them" required>
+        <NativeSelect
+          value={railId}
+          onChange={(e) => {
+            setRailId(e.target.value);
+            setDetails({});
+            setErrors({});
+          }}
+        >
+          {Object.values(beneficiaryRails).map((rail) => (
+            <option key={rail.id} value={rail.id}>
+              {rail.displayName}
+            </option>
           ))}
-        </div>
-      </div>
+        </NativeSelect>
+      </FormField>
+
+      {activeRail && activeRail.fields.length > 0 && (
+        <fieldset className="flex flex-col gap-5 rounded-surface border border-line bg-surface-muted p-4">
+          <legend className="flex items-center gap-2 px-1 text-small font-semibold text-fg">
+            {getBrandIconSrc(railId) && <BrandIcon name={railId} size={18} alt="" />}
+            {activeRail.displayName} details
+          </legend>
+          <div className="grid gap-5 sm:grid-cols-2">
+            {activeRail.fields.map((field) => (
+              <FormField
+                key={field.name}
+                label={field.label}
+                hint={field.helpText}
+                error={errors[field.name]}
+                required={field.required}
+                optional={!field.required}
+              >
+                {field.type === 'select' ? (
+                  <NativeSelect value={details[field.name] || ''} onChange={(e) => handleFieldChange(field.name, e.target.value)}>
+                    <option value="">Choose one</option>
+                    {field.options?.map((opt) => (
+                      <option key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </option>
+                    ))}
+                  </NativeSelect>
+                ) : (
+                  <Input
+                    type={field.type === 'email' ? 'email' : field.type === 'tel' ? 'tel' : 'text'}
+                    autoComplete="off"
+                    spellCheck={false}
+                    placeholder={field.placeholder}
+                    value={details[field.name] || ''}
+                    onChange={(e) => handleFieldChange(field.name, e.target.value)}
+                  />
+                )}
+              </FormField>
+            ))}
+          </div>
+        </fieldset>
+      )}
 
       {isAdmin && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-2">
-            <Label>Status</Label>
-            <Select value={status} onValueChange={setStatus}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ACTIVE">Active</SelectItem>
-                <SelectItem value="PENDING">Pending</SelectItem>
-                <SelectItem value="BLOCKED">Blocked</SelectItem>
-                <SelectItem value="VERIFIED">Verified</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div className="space-y-2">
-            <Label>Admin Notes</Label>
-            <Input 
-              value={notes} 
-              onChange={e => setNotes(e.target.value)} 
-              placeholder="Internal notes..." 
-            />
-          </div>
+        <div className="grid gap-5 sm:grid-cols-2">
+          <FormField label="Status">
+            <NativeSelect value={status} onChange={(e) => setStatus(e.target.value)}>
+              <option value="ACTIVE">Active</option>
+              <option value="PENDING">Pending</option>
+              <option value="BLOCKED">Blocked</option>
+              <option value="VERIFIED">Verified</option>
+            </NativeSelect>
+          </FormField>
+          <FormField label="Admin notes" optional>
+            <Input value={notes} onChange={(e) => setNotes(e.target.value)} />
+          </FormField>
         </div>
       )}
 
       {isAdmin && initialData?.auditTrail && (
-        <div className="mt-4 p-3 bg-slate-50 border rounded text-xs space-y-2 max-h-32 overflow-y-auto">
-          <h6 className="font-semibold text-slate-700">Audit Trail</h6>
+        <div className="max-h-32 overflow-y-auto rounded-surface border border-line bg-surface-muted p-3 text-caption">
+          <h4 className="font-semibold text-fg">Audit trail</h4>
           {(() => {
-            let audits = [];
+            let audits: Array<{ date: string; admin: string; action: string }> = [];
             try {
               audits = JSON.parse(initialData.auditTrail);
-            } catch (e) {}
-            return audits.reverse().map((audit: { date: string; admin: string; action: string }, i: number) => (
-              <div key={i} className="flex justify-between border-b pb-1">
-                <span className="text-slate-600">{new Date(audit.date).toLocaleString()} by {audit.admin}</span>
-                <span className="font-mono text-[10px] bg-slate-200 px-1 rounded">{audit.action}</span>
+            } catch {}
+            return [...audits].reverse().map((audit, i) => (
+              <div key={i} className="flex justify-between gap-3 border-b border-line py-1 last:border-0">
+                <span className="text-fg-muted">
+                  {new Date(audit.date).toLocaleString()} by {audit.admin}
+                </span>
+                <span className="font-code text-fg">{audit.action}</span>
               </div>
             ));
           })()}
         </div>
       )}
 
-      <div className="flex justify-between items-center pt-4 border-t border-border">
+      <div className="flex flex-col-reverse gap-2 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
         {isAdmin && initialData?.id && initialData?.id !== 'new' ? (
-          <Button type="button" variant="ghost" onClick={async () => {
-            if (confirm('Are you sure you want to delete this beneficiary?')) {
-              await onSubmit({ ...initialData, isDelete: true });
-            }
-          }} className="text-red-600 hover:bg-red-50 hover:text-red-700 h-8 text-xs">Delete</Button>
-        ) : <div></div>}
-        <div className="flex justify-end gap-2">
-          <Button type="button" variant="ghost" onClick={onCancel} className="rounded-none">Cancel</Button>
-          <Button type="submit" disabled={isSubmitting} variant="primary" className="rounded-none">
-            {isSubmitting ? 'Saving...' : 'Save Beneficiary'}
+          <Button
+            type="button"
+            variant="tertiary"
+            className="text-danger hover:bg-danger-subtle"
+            onClick={async () => {
+              if (confirm('Delete this beneficiary?')) await onSubmit({ ...initialData, isDelete: true });
+            }}
+          >
+            Delete
+          </Button>
+        ) : (
+          <span />
+        )}
+        <div className="flex flex-col-reverse gap-2 sm:flex-row">
+          <Button type="button" variant="tertiary" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" loading={isSubmitting} loadingLabel="Saving payee">
+            {initialData?.id ? 'Save changes' : 'Save payee'}
           </Button>
         </div>
       </div>

@@ -1,4 +1,3 @@
-import DepositClient from "./DepositClient";
 import { getProfile } from "@/app/actions/profile";
 import { getAccounts } from "@/app/actions/accounts";
 import {
@@ -8,51 +7,51 @@ import {
   getRecentDeposits,
   getUserDepositPermissions,
 } from "@/app/actions/deposits";
-import { redirect } from "next/navigation";
+import { loadOrSignIn } from "@/lib/portal-data";
+import { maskAccountNumber } from "@/lib/format";
+import { languageToLocale } from "@/lib/utils";
+import { VAULT_TYPES, normalizeVaultType } from "@/lib/vault-rules";
+import DepositClient, { type DepositAccount } from "./DepositClient";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Deposit and withdraw" };
 
 export default async function DepositPage() {
-  try {
-    const [user, rawAccounts, routingDetails, cryptoConfigs, locations, recentDeposits, permissions] =
-      await Promise.all([
-        getProfile(),
-        getAccounts(),
-        getBankRoutingDetails(),
-        getCryptoDepositConfigs(),
-        getDepositLocations(),
-        getRecentDeposits().catch(() => []),
-        getUserDepositPermissions(),
-      ]);
+  const { user, rawAccounts, routingDetails, cryptoConfigs, locations, recent, permissions } = await loadOrSignIn(async () => {
+    const [user, rawAccounts, routingDetails, cryptoConfigs, locations, recent, permissions] = await Promise.all([
+      getProfile(),
+      getAccounts(),
+      getBankRoutingDetails(),
+      getCryptoDepositConfigs(),
+      getDepositLocations(),
+      getRecentDeposits(),
+      getUserDepositPermissions(),
+    ]);
+    return { user, rawAccounts, routingDetails, cryptoConfigs, locations, recent, permissions };
+  });
 
-
-    const userPreferences = {
-      language: user?.preferredLanguage || "en",
-      currency: user?.preferredCurrency || "USD",
-      name: `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "Vault Holder",
-    };
-
-    const accounts = (rawAccounts || []).map((acc: any) => ({
-      id: acc.id,
-      accountNumber: acc.accountNumber,
-      accountType: acc.accountType,
-      balance: acc.balance,
-      currency: acc.currency || "USD",
-      name: `${acc.accountType.charAt(0) + acc.accountType.slice(1).toLowerCase()} Account`,
+  // Only the bank's own, active accounts can take deposits or fund withdrawals.
+  const accounts: DepositAccount[] = rawAccounts
+    .filter((a) => !a.isExternal && a.status === "ACTIVE")
+    .map((a) => ({
+      id: a.id,
+      label: `${VAULT_TYPES[normalizeVaultType(a.accountType)]?.label ?? a.accountType} ${maskAccountNumber(a.accountNumber)}`,
+      accountNumber: a.accountNumber,
+      balance: Number(a.balance),
+      currency: a.currency || "USD",
     }));
 
-    return (
-      <DepositClient
-        userPreferences={userPreferences}
-        accounts={accounts}
-        routingDetails={routingDetails}
-        cryptoConfigs={cryptoConfigs}
-        locations={locations}
-        recentDeposits={recentDeposits}
-        permissions={permissions}
-      />
-    );
-  } catch (error) {
-    redirect("/login");
-  }
+  return (
+    <DepositClient
+      holderName={`${user?.firstName ?? ""} ${user?.lastName ?? ""}`.trim()}
+      locale={languageToLocale(user?.preferredLanguage || "en")}
+      hideBalances={!!user?.hideBalance}
+      accounts={accounts}
+      routingDetails={routingDetails}
+      cryptoConfigs={cryptoConfigs}
+      locations={locations}
+      recent={recent}
+      permissions={permissions}
+    />
+  );
 }

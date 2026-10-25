@@ -3,38 +3,69 @@ import { cva, type VariantProps } from "class-variance-authority"
 
 import { cn } from "@/lib/utils"
 
+/**
+ * Badge / StatusPill — docs/DESIGN_SYSTEM.md#badge-and-status-pill
+ *
+ * Status is never colour alone: the text says it, and StatusPill adds a dot.
+ * neutral · info · success · warning · danger are the semantic variants.
+ * `default`, `secondary`, `destructive` and `outline` are kept for existing
+ * call sites (action, neutral, danger, outline).
+ */
 const badgeVariants = cva(
-    "inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2",
+    "inline-flex max-w-full items-center gap-1.5 whitespace-nowrap rounded-control border px-2 py-0.5 text-caption font-semibold",
     {
         variants: {
             variant: {
-                default:
-                    "border-transparent bg-primary text-primary-foreground hover:bg-primary/80",
-                secondary:
-                    "border-transparent bg-secondary text-secondary-foreground hover:bg-secondary/80",
-                destructive:
-                    "border-transparent bg-destructive text-destructive-foreground hover:bg-destructive/80",
-                outline: "text-foreground",
-                success:
-                    "border-transparent bg-green-100 text-green-700 hover:bg-green-200",
-                warning:
-                    "border-transparent bg-yellow-100 text-yellow-700 hover:bg-yellow-200",
+                neutral: "border-transparent bg-surface-muted text-fg",
+                info: "border-transparent bg-info-subtle text-info",
+                success: "border-transparent bg-success-subtle text-success",
+                warning: "border-transparent bg-warning-subtle text-warning",
+                danger: "border-transparent bg-danger-subtle text-danger",
+                outline: "border-line-strong bg-transparent text-fg",
+                default: "border-transparent bg-action-subtle text-fg-action",
+                secondary: "border-transparent bg-surface-muted text-fg",
+                destructive: "border-transparent bg-danger-subtle text-danger",
             },
         },
         defaultVariants: {
-            variant: "default",
+            variant: "neutral",
         },
     }
 )
 
 export interface BadgeProps
-    extends React.HTMLAttributes<HTMLDivElement>,
+    extends React.HTMLAttributes<HTMLSpanElement>,
     VariantProps<typeof badgeVariants> { }
 
 function Badge({ className, variant, ...props }: BadgeProps) {
     return (
-        <div className={cn(badgeVariants({ variant }), className)} {...props} />
+        <span className={cn(badgeVariants({ variant }), className)} {...props} />
     )
 }
 
-export { Badge, badgeVariants }
+const dotColour: Record<string, string> = {
+    neutral: "bg-fg-muted",
+    info: "bg-info",
+    success: "bg-success",
+    warning: "bg-warning",
+    danger: "bg-danger",
+}
+
+export type Status = "neutral" | "info" | "success" | "warning" | "danger"
+
+/** A Badge with a leading status dot, for transaction and account states. */
+function StatusPill({
+    status = "neutral",
+    className,
+    children,
+    ...props
+}: Omit<BadgeProps, "variant"> & { status?: Status }) {
+    return (
+        <Badge variant={status} className={className} {...props}>
+            <span aria-hidden="true" className={cn("size-1.5 shrink-0 rounded-round", dotColour[status])} />
+            {children}
+        </Badge>
+    )
+}
+
+export { Badge, StatusPill, badgeVariants }

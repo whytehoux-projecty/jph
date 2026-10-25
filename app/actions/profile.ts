@@ -101,8 +101,3 @@ export async function updatePreferences(data: { preferredLanguage?: string, pref
   }
   return { success: true };
 }
-
-export async function updateNotificationSettings(data: any) {
-  // Demo mock to update notification preferences
-  return { success: true };
-}

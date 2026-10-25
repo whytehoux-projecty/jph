@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from 'next';
-import { Source_Serif_4, Source_Sans_3, Source_Code_Pro } from 'next/font/google';
+import { sourceSerif, sourceSans, sourceCode } from '@/app/fonts';
 import './globals.css';
 import './isobath.css';
 import { Header } from '@/components/layout/Header';
@@ -7,33 +7,7 @@ import { Footer } from '@/components/layout/Footer';
 import { ConsentBanner } from '@/components/commercial/ConsentBanner';
 import { auth } from '@/auth';
 
-/**
- * Isobath prototype faces — loaded via next/font/google (self-hosted at build
- * time, no runtime request to Google). Production swaps these for licensed
- * Suisse Works / Suisse Int'l files through next/font/local.
- * Familjen Grotesk and IBM Plex Mono are retired (UI/UX review, typography).
- */
-const sourceSerif = Source_Serif_4({
-  subsets: ['latin', 'latin-ext'],
-  axes: ['opsz'],
-  style: ['normal', 'italic'],
-  variable: '--font-source-serif',
-  display: 'swap',
-});
-
-const sourceSans = Source_Sans_3({
-  subsets: ['latin', 'latin-ext'],
-  variable: '--font-source-sans',
-  display: 'swap',
-});
-
-const sourceCode = Source_Code_Pro({
-  subsets: ['latin'],
-  weight: ['400'],
-  variable: '--font-source-code',
-  display: 'swap',
-  preload: false,
-});
+// Faces are shared with the portal — see app/fonts.ts.
 
 export const metadata: Metadata = {
   title: {

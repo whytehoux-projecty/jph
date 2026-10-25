@@ -12,7 +12,7 @@ export default async function AdminCardsPage() {
     redirect("/admin/login");
   }
 
-  const [cards, rawCardRequests, usersWithAccounts] = await Promise.all([
+  const [cards, usersWithAccounts] = await Promise.all([
     prisma.card.findMany({
       include: {
         account: {
@@ -28,9 +28,6 @@ export default async function AdminCardsPage() {
           },
         },
       },
-      orderBy: { createdAt: "desc" },
-    }),
-    prisma.cardRequest.findMany({
       orderBy: { createdAt: "desc" },
     }),
     prisma.user.findMany({
@@ -58,45 +55,13 @@ export default async function AdminCardsPage() {
     }),
   ]);
 
-  // Lookup users and accounts for card requests
-  const userIds = Array.from(new Set(rawCardRequests.map((r) => r.userId)));
-  const accountIds = Array.from(
-    new Set(rawCardRequests.map((r) => r.accountId).filter(Boolean) as string[])
-  );
-
-  const [requestUsers, requestAccounts] = await Promise.all([
-    prisma.user.findMany({
-      where: { id: { in: userIds } },
-      select: { id: true, firstName: true, lastName: true, email: true },
-    }),
-    prisma.account.findMany({
-      where: { id: { in: accountIds } },
-      select: { id: true, accountNumber: true, accountType: true, balance: true },
-    }),
-  ]);
-
-  const userMap = new Map(requestUsers.map((u) => [u.id, u]));
-  const accountMap = new Map(requestAccounts.map((a) => [a.id, a]));
-
-  const cardRequests = rawCardRequests.map((req) => ({
-    ...req,
-    user: userMap.get(req.userId) || {
-      id: req.userId,
-      firstName: "Customer",
-      lastName: req.userId.slice(0, 5),
-      email: "customer@portal.com",
-    },
-    account: req.accountId ? accountMap.get(req.accountId) || null : null,
-  }));
-
   return (
     <AdminPageShell
       title="Cards & Facilities Management"
-      subtitle="Underwrite customer card applications, customize luxury card artwork, manage daily limits, and supervise risk freeze controls."
+      subtitle="Issue cards to customers, set card artwork and daily limits, and freeze or block cards."
     >
       <AdminCardsManager
         cards={cards as any}
-        cardRequests={cardRequests as any}
         usersWithAccounts={usersWithAccounts as any}
       />
     </AdminPageShell>

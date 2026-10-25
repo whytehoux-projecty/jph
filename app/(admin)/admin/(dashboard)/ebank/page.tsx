@@ -16,7 +16,7 @@ import {
 export const dynamic = 'force-dynamic';
 
 export default async function EbankManagementHub() {
-  const [unreadNotifications, openTickets, totalPayees, pendingBills, pendingDeposits, pendingLoans, totalRedemptions, pendingCardRequests] =
+  const [unreadNotifications, openTickets, totalPayees, pendingBills, pendingDeposits, pendingLoans, totalRedemptions, activeCards] =
     await Promise.all([
       prisma.notification.count({ where: { isRead: false } }),
       prisma.supportTicket.count({ where: { status: 'OPEN' } }),
@@ -46,18 +46,18 @@ export default async function EbankManagementHub() {
           OR: [{ category: 'REWARDS' }, { transactionType: 'REWARD_REDEMPTION' }],
         },
       }),
-      prisma.cardRequest.count({
-        where: { status: 'PENDING' },
+      prisma.card.count({
+        where: { status: 'ACTIVE' },
       }),
     ]);
 
   const cards = [
     {
       title: 'Cards Management',
-      description: 'Underwrite card applications, issue debit & credit cards, assign custom artwork, and freeze cards.',
-      statLabel: 'Pending Requests',
-      statValue: pendingCardRequests,
-      statVariant: pendingCardRequests > 0 ? 'amber' : 'emerald',
+      description: 'Issue debit & credit cards, assign custom artwork, and freeze cards.',
+      statLabel: 'Active Cards',
+      statValue: activeCards,
+      statVariant: 'emerald',
       href: '/admin/ebank/cards',
       icon: CreditCard,
       color: 'indigo',

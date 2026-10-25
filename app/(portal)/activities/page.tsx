@@ -1,61 +1,34 @@
-import { getTransactions, getTransactionStats } from "@/app/actions/transactions";
 import { getAccounts } from "@/app/actions/accounts";
 import { getProfile } from "@/app/actions/profile";
-import ActivitiesClient from "./ActivitiesClient";
-import { redirect } from "next/navigation";
+import { queryTransactions } from "@/app/actions/transactions";
+import { loadOrSignIn } from "@/lib/portal-data";
+import { VAULT_TYPES, normalizeVaultType } from "@/lib/vault-rules";
+import { maskAccountNumber } from "@/lib/format";
+import { languageToLocale } from "@/lib/utils";
+import ActivityClient from "./ActivityClient";
+import { toActivityRow } from "./activity-row";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Activity" };
 
-export default async function TransactionsPage() {
-  let user, rawAccounts, rawTransactions, stats;
-  
-  try {
-    user = await getProfile();
-    rawAccounts = await getAccounts();
-    rawTransactions = await getTransactions({ limit: 100 });
-    stats = await getTransactionStats("month");
-  } catch (error) {
-    redirect('/login');
-  }
+export default async function ActivityPage() {
+  const { user, accounts, first } = await loadOrSignIn(async () => {
+    const [user, accounts, first] = await Promise.all([getProfile(), getAccounts(), queryTransactions({ page: 1 })]);
+    return { user, accounts, first };
+  });
 
-  const userPreferences = {
-    language: user?.preferredLanguage || "en",
-    currency: user?.preferredCurrency || "USD",
-  };
-
-  const initialAccounts = rawAccounts.map((acc: any) => ({
-    id: acc.id,
-    name: `${acc.accountType.charAt(0) + acc.accountType.slice(1).toLowerCase()} Account`,
-    accountNumber: acc.accountNumber,
-  }));
-
-  const initialTransactions = rawTransactions.map((tx: any) => ({
-    id: tx.id,
-    description: tx.description,
-    amount: tx.amount,
-    date: tx.createdAt.toISOString(),
-    type: tx.type === 'CREDIT' ? 'credit' : 'debit',
-    category: tx.category || (tx.metadata ? JSON.parse(tx.metadata).category : null) || 'General',
-    status: tx.status.toLowerCase(),
-    accountId: tx.accountId,
-    reference: tx.reference,
-    runningBalance: tx.runningBalance,
-    notes: tx.notes ? JSON.parse(tx.notes) : [],
-    channel: tx.channel,
-    counterparty: tx.counterparty ? JSON.parse(tx.counterparty) : null
-  }));
-
-  const initialStats = {
-    deposits: stats.income,
-    withdrawals: stats.expenses
-  };
+  const accountOptions = accounts.map((a) => {
+    const def = VAULT_TYPES[normalizeVaultType(a.accountType)];
+    const name = a.isExternal ? `${a.institutionName || "External"} ${def?.label ?? a.accountType}` : def?.label ?? a.accountType;
+    return { id: a.id, label: `${name} ${maskAccountNumber(a.accountNumber)}` };
+  });
 
   return (
-    <ActivitiesClient 
-      initialTransactions={initialTransactions}
-      initialAccounts={initialAccounts}
-      initialStats={initialStats}
-      userPreferences={userPreferences}
+    <ActivityClient
+      accounts={accountOptions}
+      locale={languageToLocale(user?.preferredLanguage || "en")}
+      fallbackCurrency={user?.preferredCurrency || "USD"}
+      initial={{ rows: first.rows.map((t) => toActivityRow(t)), total: first.total, pageSize: first.pageSize }}
     />
   );
 }

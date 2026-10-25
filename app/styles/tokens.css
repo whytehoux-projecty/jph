@@ -1,0 +1,267 @@
+/* ═══ Heritage Trust design tokens ═══════════════════════════════════════════
+   The single source of truth for the Heritage Vault portal, derived from the
+   commercial site's Isobath system (app/(corporate)/isobath.css).
+
+   - White ground, chalk alternates, Heritage ink, petrol as the one action
+     colour. Logo orange lives in the logo only.
+   - Source Serif 4 for display and page headings, Source Sans 3 for UI, body
+     and every figure (tabular, lining). Source Code Pro for reference codes.
+   - 2 px controls, 4 px surfaces, 1 px rules. Elevation only on overlays.
+   - Light mode only: the commercial site has dark sections, not a dark mode.
+
+   Documented in docs/DESIGN_SYSTEM.md. Legacy palette names (paper-*, ink-*,
+   vermilion-*, pine-*, stone-*) in app/globals.css are deprecated; new code
+   uses the role tokens below.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+@theme {
+  /* ── Colour: brand primitives ─────────────────────────────────────────── */
+  --color-brand-ink: #14181C;
+  --color-brand-petrol: #0E4A55;
+  --color-brand-petrol-deep: #0A3840;
+  --color-brand-shallows: #E2EEEC;
+  --color-brand-sea-glass: #7CC4B8;
+  --color-brand-chalk: #F4F6F5;
+  --color-brand-shoal: #D5DBDA;
+  --color-brand-fog: #56636A;
+  --color-brand-orange: #E8532B; /* logo artwork only — never UI */
+
+  /* ── Colour: surfaces ─────────────────────────────────────────────────── */
+  --color-surface: #FFFFFF;             /* page ground, cards, inputs */
+  --color-surface-muted: #F4F6F5;       /* chalk: bands, table headers, hover */
+  --color-surface-sunken: #E9EDEC;      /* wells, skeletons, pressed */
+  --color-surface-selected: #E2EEEC;    /* shallows: selected rows, active nav */
+  --color-surface-inverse: #14181C;     /* ink sections, tooltips */
+  --color-scrim: rgb(20 24 28 / 0.56);  /* behind modals and drawers */
+
+  /* ── Colour: text ─────────────────────────────────────────────────────── */
+  --color-fg: #14181C;                  /* 17.8:1 on surface */
+  --color-fg-muted: #56636A;            /* 6.2:1 on surface, 5.7:1 on muted */
+  --color-fg-disabled: #8A9599;         /* disabled only (WCAG-exempt) */
+  --color-fg-on-action: #FFFFFF;        /* 9.9:1 on action */
+  --color-fg-inverse: #FFFFFF;
+  --color-fg-inverse-muted: #AEB8BC;    /* 8.8:1 on surface-inverse */
+  --color-fg-action: #0E4A55;           /* links, 9.9:1 on surface */
+
+  /* ── Colour: borders ──────────────────────────────────────────────────── */
+  --color-line: #D5DBDA;                /* decorative rules and card edges */
+  --color-line-strong: #7E8C8F;         /* input borders, 3.5:1 (non-text AA) */
+  --color-line-inverse: #333D43;
+
+  /* ── Colour: action ───────────────────────────────────────────────────── */
+  --color-action: #0E4A55;
+  --color-action-hover: #0A3840;
+  --color-action-subtle: #E2EEEC;
+  --color-action-on-inverse: #7CC4B8;   /* action on ink, 8.9:1 */
+  --color-focus: #0E4A55;
+  --color-focus-inverse: #FFFFFF;
+
+  /* ── Colour: status ───────────────────────────────────────────────────── */
+  --color-success: #1B6B45;             /* 6.3:1 on surface */
+  --color-success-subtle: #E7F2EC;      /* text on it 5.7:1 */
+  --color-warning: #8A5300;             /* 6.1:1 on surface */
+  --color-warning-subtle: #FFF4DB;
+  --color-danger: #B3261E;              /* 6.5:1 on surface */
+  --color-danger-hover: #8C1D17;
+  --color-danger-subtle: #FCEDEB;
+  --color-info: #1F5FA6;                /* 6.2:1 on surface */
+  --color-info-subtle: #E8F0FA;
+
+  /* Money: credits read as success, debits stay ink (sign carries meaning) */
+  --color-amount-credit: #1B6B45;
+  --color-amount-debit: #14181C;
+
+  /* Back-compat aliases for the existing status names */
+  --color-success-bg: var(--color-success-subtle);
+  --color-warning-bg: var(--color-warning-subtle);
+  --color-error: var(--color-danger);
+  --color-error-bg: var(--color-danger-subtle);
+  --color-info-bg: var(--color-info-subtle);
+
+  /* ── Typography: families ─────────────────────────────────────────────── */
+  --font-serif: var(--font-source-serif), "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-display: var(--font-source-serif), "Source Serif 4", Georgia, "Times New Roman", serif;
+  --font-sans: var(--font-source-sans), "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  /* Numbers are never set in monospace: font-mono is the text face with
+     tabular figures (see base layer). Codes use font-code. */
+  --font-mono: var(--font-source-sans), "Source Sans 3", ui-sans-serif, system-ui, sans-serif;
+  --font-code: var(--font-source-code), "Source Code Pro", ui-monospace, SFMono-Regular, monospace;
+
+  /* ── Typography: scale (app sizes — marketing display sizes live in
+        isobath.css). Fluid between 360 px and 1440 px. ─────────────────── */
+  --text-display: clamp(2.25rem, 1.9rem + 1.5vw, 3rem);
+  --text-display--line-height: 1.1;
+  --text-display--letter-spacing: -0.01em;
+  --text-display--font-weight: 300;
+
+  --text-h1: clamp(1.75rem, 1.6rem + 0.67vw, 2.25rem);
+  --text-h1--line-height: 1.2;
+  --text-h1--letter-spacing: -0.005em;
+  --text-h1--font-weight: 400;
+
+  --text-h2: clamp(1.375rem, 1.3rem + 0.33vw, 1.625rem);
+  --text-h2--line-height: 1.25;
+  --text-h2--letter-spacing: 0;
+  --text-h2--font-weight: 400;
+
+  --text-h3: 1.25rem;
+  --text-h3--line-height: 1.4;
+  --text-h3--letter-spacing: 0;
+  --text-h3--font-weight: 600;
+
+  --text-h4: 1.0625rem;
+  --text-h4--line-height: 1.47;
+  --text-h4--font-weight: 600;
+
+  --text-h5: 0.9375rem;
+  --text-h5--line-height: 1.47;
+  --text-h5--font-weight: 600;
+
+  --text-h6: 0.8125rem;
+  --text-h6--line-height: 1.23;
+  --text-h6--letter-spacing: 0.06em;
+  --text-h6--font-weight: 600;
+
+  --text-body-lg: 1.125rem;
+  --text-body-lg--line-height: 1.55;
+
+  --text-body: 1rem;
+  --text-body--line-height: 1.5625;
+
+  --text-small: 0.875rem;
+  --text-small--line-height: 1.5;
+
+  --text-caption: 0.8125rem;            /* legal floor: 13 px */
+  --text-caption--line-height: 1.4;
+
+  --text-label: 0.8125rem;              /* caps, four words or fewer */
+  --text-label--line-height: 1.23;
+  --text-label--letter-spacing: 0.06em;
+  --text-label--font-weight: 600;
+
+  --text-figure: clamp(2rem, 1.75rem + 1.1vw, 2.75rem); /* headline balance */
+  --text-figure--line-height: 1.1;
+  --text-figure--letter-spacing: -0.01em;
+  --text-figure--font-weight: 300;
+
+  --text-data-lg: 1.75rem;              /* account card balance */
+  --text-data-lg--line-height: 1.15;
+  --text-data-lg--letter-spacing: -0.01em;
+  --text-data-lg--font-weight: 400;
+
+  --text-data: 1rem;                    /* amounts in rows */
+  --text-data--line-height: 1.4;
+
+  /* ── Radii ────────────────────────────────────────────────────────────── */
+  --radius-control: 2px;                /* buttons, inputs, pills, tabs */
+  --radius-surface: 4px;                /* cards, dialogs, menus, toasts */
+  --radius-round: 9999px;               /* avatars, switch, status dot only */
+
+  /* ── Elevation: flat by default; shadows only for overlays ─────────────── */
+  --shadow-raised: 0 1px 2px rgb(20 24 28 / 0.06);
+  --shadow-overlay: 0 4px 12px rgb(20 24 28 / 0.08), 0 16px 32px rgb(20 24 28 / 0.08);
+
+  /* ── Motion ───────────────────────────────────────────────────────────── */
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-enter: cubic-bezier(0.2, 0.7, 0.1, 1);
+  --ease-exit: cubic-bezier(0.4, 0, 1, 1);
+
+  /* Entrance animations. Always apply with motion-safe: */
+  --animate-hv-fade-in: hv-fade-in var(--duration-base) var(--ease-enter) both;
+  --animate-hv-rise: hv-rise var(--duration-base) var(--ease-enter) both;
+  --animate-hv-slide-up: hv-slide-up var(--duration-slow) var(--ease-enter) both;
+  --animate-hv-slide-down: hv-slide-down var(--duration-slow) var(--ease-enter) both;
+  --animate-hv-slide-left: hv-slide-left var(--duration-slow) var(--ease-enter) both;
+  --animate-hv-slide-right: hv-slide-right var(--duration-slow) var(--ease-enter) both;
+  --animate-hv-pulse: hv-pulse 1.6s var(--ease-standard) infinite;
+
+  @keyframes hv-fade-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes hv-rise { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+  @keyframes hv-slide-up { from { transform: translateY(100%); } to { transform: none; } }
+  @keyframes hv-slide-down { from { transform: translateY(-100%); } to { transform: none; } }
+  @keyframes hv-slide-left { from { transform: translateX(100%); } to { transform: none; } }
+  @keyframes hv-slide-right { from { transform: translateX(-100%); } to { transform: none; } }
+  @keyframes hv-pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.55; } }
+
+  /* ── Breakpoints (mobile-first; base covers 360 px) ───────────────────── */
+  --breakpoint-sm: 40rem;   /* 640 */
+  --breakpoint-md: 48rem;   /* 768 */
+  --breakpoint-lg: 64rem;   /* 1024 */
+  --breakpoint-xl: 80rem;   /* 1280 */
+  --breakpoint-2xl: 96rem;  /* 1536 — 1440 layouts are designed at xl */
+
+  /* ── Layout ───────────────────────────────────────────────────────────── */
+  --container-page: 80rem;  /* portal content max width, 1280 */
+  --container-form: 36rem;  /* single-column forms */
+  --container-measure: 68ch;
+}
+
+@layer base {
+  :root {
+    /* Spacing: Tailwind's --spacing (0.25rem) is the 4 px base. Use the
+       numeric scale: 1 = 4 px, 2 = 8 px, 3 = 12 px, 4 = 16 px, 6 = 24 px,
+       8 = 32 px, 12 = 48 px, 16 = 64 px. */
+
+    /* Motion durations (use as duration-(--duration-fast)) */
+    --duration-instant: 80ms;
+    --duration-fast: 150ms;
+    --duration-base: 220ms;
+    --duration-slow: 320ms;
+
+    /* Z-index (use as z-(--z-modal)) */
+    --z-base: 0;
+    --z-raised: 10;
+    --z-sticky: 30;
+    --z-header: 40;
+    --z-overlay: 60;    /* modal and drawer scrim */
+    --z-modal: 70;
+    --z-dropdown: 75;   /* menus, selects, popovers: above the modal that opened them */
+    --z-toast: 80;
+    --z-skip-link: 100;
+
+    /* Touch target floor */
+    --size-target: 2.75rem; /* 44 px */
+  }
+
+  html {
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Display and page headings use the serif; h3 and below are the sans. */
+  h1, h2 {
+    font-family: var(--font-display);
+    text-wrap: balance;
+  }
+  h3, h4, h5, h6 {
+    font-family: var(--font-sans);
+  }
+
+  /* Every figure is tabular and lining */
+  table,
+  .font-mono,
+  .tabular,
+  .tabular-nums {
+    font-variant-numeric: tabular-nums lining-nums;
+  }
+  .font-code {
+    font-variant-numeric: normal;
+  }
+
+  /* One focus treatment: 2 px petrol ring, offset from the element */
+  :focus-visible {
+    outline: 2px solid var(--color-focus);
+    outline-offset: 2px;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,100 +1,25 @@
 "use client";
 
-import { ReactNode, useState, useEffect, useCallback } from "react";
+import { ReactNode, useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
-import Image from "next/image";
-import { X, CheckCircle2, AlertCircle, AlertTriangle, Info } from "lucide-react";
-import { cn } from "@/lib/utils";
-import { PortalHeader } from "@/components/layout/PortalHeader";
-import { PortalSubHeader } from "@/components/layout/PortalSubHeader";
-import type { UserProfile } from "@/components/layout/RightSidebar";
-import { Footer } from "@/components/layout/Footer";
+import { AppSidebar } from "@/components/layout/AppSidebar";
+import { AppTopBar } from "@/components/layout/AppTopBar";
+import { MobileNavDrawer } from "@/components/layout/MobileNavDrawer";
+import { PortalFooter } from "@/components/layout/PortalFooter";
+import type { PortalProfile } from "@/components/layout/types";
 import { MobileInstallPrompt } from "@/components/layout/MobileInstallPrompt";
 import { MobileBottomNav } from "@/components/layout/MobileBottomNav";
 import { PinSetupModal } from "@/components/portal/PinSetupModal";
 import { AutoLogoutProvider } from "@/components/layout/AutoLogoutProvider";
 import { getProfile } from "@/app/actions/profile";
-import type { ToastItem } from "@/lib/toast";
-
-const VARIANT_STYLES: Record<ToastItem["variant"], string> = {
-  success: "border-l-vintage-green",
-  error: "border-l-red-500",
-  warning: "border-l-soft-gold",
-  info: "border-l-blue-500",
-};
-
-const VARIANT_ICONS: Record<ToastItem["variant"], React.ReactNode> = {
-  success: <CheckCircle2 className="h-4 w-4 text-vintage-green shrink-0" />,
-  error: <AlertCircle className="h-4 w-4 text-red-500 shrink-0" />,
-  warning: <AlertTriangle className="h-4 w-4 text-soft-gold shrink-0" />,
-  info: <Info className="h-4 w-4 text-blue-500 shrink-0" />,
-};
-
-function ToastContainer() {
-  const [toasts, setToasts] = useState<(ToastItem & { exiting?: boolean })[]>([]);
-
-  const dismiss = useCallback((id: string) => {
-    setToasts((prev) =>
-      prev.map((t) => (t.id === id ? { ...t, exiting: true } : t)),
-    );
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 300);
-  }, []);
-
-  useEffect(() => {
-    const handler = (e: Event) => {
-      const item = (e as CustomEvent<ToastItem>).detail;
-      setToasts((prev) => [...prev, item]);
-      setTimeout(() => dismiss(item.id), item.duration ?? 4000);
-    };
-    window.addEventListener("av:toast", handler);
-    return () => window.removeEventListener("av:toast", handler);
-  }, [dismiss]);
-
-  if (toasts.length === 0) return null;
-
-  return (
-    <div
-      aria-live="polite"
-      aria-atomic="false"
-      className="fixed bottom-6 right-6 z-9999 flex flex-col gap-3 w-full max-w-sm pointer-events-none">
-      {toasts.map((t) => (
-        <div
-          key={t.id}
-          role="alert"
-          className={cn(
-            "flex items-start gap-3 bg-white border-l-4 rounded-sm px-4 py-3 shadow-vintage-md pointer-events-auto",
-            "animate-slide-in-right",
-            VARIANT_STYLES[t.variant],
-            t.exiting && "toast-exit",
-          )}>
-          <span className="mt-0.5">{VARIANT_ICONS[t.variant]}</span>
-          <div className="flex-1 min-w-0">
-            <p className="text-sm font-semibold text-charcoal leading-snug">
-              {t.title}
-            </p>
-            {t.description && (
-              <p className="text-xs text-muted-foreground mt-0.5 leading-snug">
-                {t.description}
-              </p>
-            )}
-          </div>
-          <button
-            onClick={() => dismiss(t.id)}
-            aria-label="Dismiss notification"
-            className="mt-0.5 text-muted-foreground hover:text-charcoal transition-colors shrink-0">
-            <X className="h-3.5 w-3.5" />
-          </button>
-        </div>
-      ))}
-    </div>
-  );
-}
+import { ToastViewport } from "@/components/ui/toast";
+import { getStaffViewState, type StaffViewState } from "@/app/actions/staff-view";
 
 export default function PortalLayout({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const [profile, setProfile] = useState<UserProfile | null>(null);
+  const [profile, setProfile] = useState<PortalProfile | null>(null);
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [staffView, setStaffView] = useState<StaffViewState | null>(null);
 
   // Skip portal layout for auth, corporate marketing, and admin pages
   const isPassThrough =
@@ -144,9 +69,7 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
               profilePhotoUrl: user.profilePhotoUrl,
               hideBalance: user.hideBalance,
               email: user.email,
-              phone: user.phone,
-              profileType: (user as any).profileType || "PERSONAL",
-              accountNumber: (user as any).accounts?.[0]?.accountNumber,
+              profileType: user.profileType || "PERSONAL",
             });
           }
         })
@@ -154,6 +77,9 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
           // Unauthenticated or error
           setProfile(null);
         });
+      getStaffViewState()
+        .then(setStaffView)
+        .catch(() => setStaffView(null));
     }
   }, [isPassThrough, pathname]);
 
@@ -163,30 +89,35 @@ export default function PortalLayout({ children }: { children: ReactNode }) {
 
   return (
     <AutoLogoutProvider>
-      <div className="flex min-h-screen bg-paper-200 relative isolate">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-(--z-skip-link) focus:bg-surface focus:px-4 focus:py-3 focus:text-small focus:font-semibold focus:text-fg focus:outline-2 focus:outline-focus"
+      >
+        Skip to main content
+      </a>
+      <div className="min-h-dvh bg-surface-muted">
+        <AppSidebar />
+        <div className="flex min-h-dvh flex-col lg:pl-64 print:pl-0">
+          <AppTopBar profile={profile} staffView={staffView} onOpenMenu={() => setMenuOpen(true)} />
+          <main
+            id="main-content"
+            tabIndex={-1}
+            className="mx-auto w-full max-w-(--container-page) flex-1 px-4 pb-[calc(6rem+env(safe-area-inset-bottom))] pt-6 focus:outline-none md:px-6 lg:px-8 lg:pb-12 lg:pt-8"
+          >
+            {children}
+          </main>
+          <div className="pb-[calc(4rem+env(safe-area-inset-bottom))] lg:pb-0">
+            <PortalFooter />
+          </div>
+        </div>
+        <MobileBottomNav onOpenMenu={() => setMenuOpen(true)} />
+        <MobileNavDrawer open={menuOpen} onOpenChange={setMenuOpen} />
         <MobileInstallPrompt />
-
-      <div className="flex-1 flex flex-col min-w-0 relative z-10 transition-all duration-300 ease-in-out">
-        <PortalHeader
-          profile={profile}
-        />
-        <PortalSubHeader profile={profile} accountNumber={profile?.accountNumber} />
-        <main
-          className={cn(
-            "flex-1 px-4 md:px-6 lg:px-8 pt-5 pb-[calc(4rem+env(safe-area-inset-bottom))] md:pb-6",
-            "transition-all duration-300 ease-in-out",
-          )}>
-          {children}
-        </main>
-        <Footer isSlim={true} />
       </div>
 
-      {/* Global Toast Notification Container */}
-      <ToastContainer />
-      {profile && !profile.pinSetupComplete && <PinSetupModal />}
-      
-      <MobileBottomNav />
-    </div>
+      <ToastViewport />
+      {/* Only the customer may set their own transaction PIN — never in staff view. */}
+      {profile && !staffView && !profile.pinSetupComplete && <PinSetupModal />}
     </AutoLogoutProvider>
   );
 }

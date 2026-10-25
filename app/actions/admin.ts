@@ -1,5 +1,7 @@
 'use server';
 
+import { startStaffView } from './staff-view';
+
 import { prisma } from '@/lib/prisma';
 import { auth } from '@/auth';
 import bcrypt from 'bcryptjs';
@@ -39,22 +41,9 @@ export async function deleteUserPin(formData: FormData) {
   revalidatePath('/admin/users');
 }
 
+/** Opens the customer's online banking in staff view (app/actions/staff-view.ts). */
 export async function loginAsUser(formData: FormData) {
-  const session = await auth();
-  if ((session?.user as any)?.role !== 'ADMIN') throw new Error('Unauthorized');
-  
-  const userId = formData.get('id') as string;
-  const token = crypto.randomBytes(32).toString('hex');
-  
-  await prisma.impersonationToken.create({
-    data: {
-      userId,
-      token,
-      expiresAt: new Date(Date.now() + 5 * 60 * 1000) // 5 minutes
-    }
-  });
-  
-  redirect(`/impersonate?token=${token}`);
+  await startStaffView(formData.get('id') as string);
 }
 
 export async function toggleUserStatus(formData: FormData) {

@@ -1,5 +1,25 @@
 import { type ClassValue, clsx } from "clsx";
-import { twMerge } from "tailwind-merge";
+import { extendTailwindMerge } from "tailwind-merge";
+
+// Teach tailwind-merge the design-system type scale (app/styles/tokens.css).
+// Without this, `text-body` and `text-fg` look like two colours and the
+// later one silently removes the other.
+const twMerge = extendTailwindMerge({
+  extend: {
+    classGroups: {
+      "font-size": [
+        {
+          text: [
+            "display", "display-xl", "display-lg", "display-sm",
+            "h1", "h2", "h3", "h4", "h5", "h6",
+            "lead", "body-lg", "body", "small", "caption", "label",
+            "figure", "data-lg", "data",
+          ],
+        },
+      ],
+    },
+  },
+});
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));

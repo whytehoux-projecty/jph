@@ -62,6 +62,8 @@ export async function getAdminDeposits() {
   }));
 }
 
+const DEPOSIT_TYPES = ['CASH_DEPOSIT', 'VIRTUAL_DEPOSIT', 'CHECK_DEPOSIT', 'CARD_DEPOSIT', 'CRYPTO_DEPOSIT', 'DEPOSIT'];
+
 export async function approveDeposit(txId: string) {
   await checkAdmin();
 
@@ -70,23 +72,23 @@ export async function approveDeposit(txId: string) {
     include: { account: true },
   });
 
-  if (!tx) throw new Error('Transaction not found');
+  if (!tx || tx.type !== 'CREDIT' || !DEPOSIT_TYPES.includes(tx.transactionType)) throw new Error('Deposit not found');
   if (tx.status === 'APPROVED') return { success: true };
+  if (tx.status !== 'PENDING') throw new Error('Only pending deposits can be approved.');
 
-  // Credit the account
-  const updatedAccount = await prisma.account.update({
-    where: { id: tx.accountId },
-    data: { balance: { increment: tx.amount } },
-  });
-
-  // Mark transaction approved
-  await prisma.transaction.update({
-    where: { id: txId },
-    data: {
-      status: 'APPROVED',
-      processedAt: new Date(),
-      runningBalance: updatedAccount.balance,
-    },
+  // Claim the pending row and credit the account in one transaction, so a
+  // double click or two reviewers can't credit the same deposit twice.
+  await prisma.$transaction(async (db) => {
+    const claimed = await db.transaction.updateMany({
+      where: { id: txId, status: 'PENDING' },
+      data: { status: 'APPROVED', processedAt: new Date() },
+    });
+    if (claimed.count === 0) throw new Error('This deposit was already processed.');
+    const updatedAccount = await db.account.update({
+      where: { id: tx.accountId },
+      data: { balance: { increment: tx.amount } },
+    });
+    await db.transaction.update({ where: { id: txId }, data: { runningBalance: updatedAccount.balance } });
   });
 
   // Notify customer
@@ -113,16 +115,17 @@ export async function rejectDeposit(txId: string, reason: string) {
     include: { account: true },
   });
 
-  if (!tx) throw new Error('Transaction not found');
+  if (!tx || tx.type !== 'CREDIT' || !DEPOSIT_TYPES.includes(tx.transactionType)) throw new Error('Deposit not found');
 
-  await prisma.transaction.update({
-    where: { id: txId },
+  const claimed = await prisma.transaction.updateMany({
+    where: { id: txId, status: 'PENDING' },
     data: {
       status: 'REJECTED',
       rejectionReason: reason || 'Deposit verification failed institutional underwriting criteria.',
       processedAt: new Date(),
     },
   });
+  if (claimed.count === 0) throw new Error('This deposit was already processed.');
 
   await prisma.notification.create({
     data: {
@@ -134,6 +137,108 @@ export async function rejectDeposit(txId: string, reason: string) {
 
   revalidatePath('/admin/ebank/deposits');
   revalidatePath('/admin/transactions');
+  revalidatePath('/deposit');
+  return { success: true };
+}
+
+// -----------------------------------------------------------------------------
+// WITHDRAWAL REQUESTS (portal Deposit & withdraw page)
+// -----------------------------------------------------------------------------
+
+export async function getAdminWithdrawals() {
+  await checkAdmin();
+
+  const rows = await prisma.transaction.findMany({
+    where: { transactionType: 'WITHDRAWAL', category: 'CASH_WITHDRAWAL' },
+    include: {
+      account: {
+        include: { user: { select: { id: true, firstName: true, lastName: true, email: true } } },
+      },
+    },
+    orderBy: { createdAt: 'desc' },
+    take: 50,
+  });
+
+  return rows.map((w) => ({
+    id: w.id,
+    reference: w.reference,
+    amount: w.amount,
+    currency: w.currency,
+    status: w.status,
+    description: w.description,
+    methodId: w.methodId || 'withdrawal',
+    transactionType: w.transactionType,
+    createdAt: w.createdAt.toISOString(),
+    accountNumber: w.account.accountNumber,
+    accountType: w.account.accountType,
+    accountBalance: w.account.balance,
+    customerName: `${w.account.user.firstName} ${w.account.user.lastName}`,
+    customerEmail: w.account.user.email,
+    customerId: w.account.user.id,
+    metadata: w.metadata,
+  }));
+}
+
+/** Debits the account and completes the request; refused if the balance no longer covers it. */
+export async function approveWithdrawal(txId: string) {
+  await checkAdmin();
+
+  const tx = await prisma.transaction.findUnique({ where: { id: txId }, include: { account: true } });
+  if (!tx || tx.transactionType !== 'WITHDRAWAL') throw new Error('Withdrawal not found');
+  if (tx.status === 'APPROVED') return { success: true };
+  if (tx.status !== 'PENDING') throw new Error('Only pending withdrawals can be approved.');
+
+  await prisma.$transaction(async (db) => {
+    const claimed = await db.transaction.updateMany({
+      where: { id: txId, status: 'PENDING' },
+      data: { status: 'APPROVED', processedAt: new Date() },
+    });
+    if (claimed.count === 0) throw new Error('This withdrawal was already processed.');
+    const debited = await db.account.updateMany({
+      where: { id: tx.accountId, balance: { gte: tx.amount } },
+      data: { balance: { decrement: tx.amount } },
+    });
+    if (debited.count === 0) throw new Error('The account balance no longer covers this withdrawal.');
+    const account = await db.account.findUniqueOrThrow({ where: { id: tx.accountId }, select: { balance: true } });
+    await db.transaction.update({ where: { id: txId }, data: { runningBalance: account.balance } });
+  });
+
+  await prisma.notification.create({
+    data: {
+      userId: tx.account.userId,
+      title: 'Withdrawal approved',
+      message: `Your withdrawal of $${tx.amount.toLocaleString()} (Ref: ${tx.reference}) has been approved and debited from your ${tx.account.accountType} account.`,
+    },
+  });
+
+  revalidatePath('/admin/ebank/deposits');
+  revalidatePath('/admin/transactions');
+  revalidatePath('/deposit');
+  revalidatePath('/dashboard');
+  return { success: true };
+}
+
+export async function rejectWithdrawal(txId: string, reason: string) {
+  await checkAdmin();
+
+  const tx = await prisma.transaction.findUnique({ where: { id: txId }, include: { account: true } });
+  if (!tx || tx.transactionType !== 'WITHDRAWAL') throw new Error('Withdrawal not found');
+
+  const claimed = await prisma.transaction.updateMany({
+    where: { id: txId, status: 'PENDING' },
+    data: { status: 'REJECTED', rejectionReason: reason, processedAt: new Date() },
+  });
+  if (claimed.count === 0) throw new Error('This withdrawal was already processed.');
+
+  await prisma.notification.create({
+    data: {
+      userId: tx.account.userId,
+      title: 'Withdrawal not completed',
+      message: `Your withdrawal request (Ref: ${tx.reference}) was declined. Reason: ${reason}`,
+    },
+  });
+
+  revalidatePath('/admin/ebank/deposits');
   revalidatePath('/deposit');
   return { success: true };
 }

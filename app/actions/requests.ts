@@ -5,15 +5,8 @@ import { revalidatePath } from 'next/cache';
 import { auth } from '@/auth';
 import { sendEmail } from '@/lib/email';
 import bcrypt from 'bcryptjs';
+import { generateTemporaryPassword } from '@/lib/temporary-password';
 
-function generateTemporaryPassword() {
-  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz23456789@#$*!';
-  let password = '';
-  for (let i = 0; i < 12; i++) {
-    password += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return password;
-}
 
 export async function handleApproveRequest(formData: FormData) {
   const session = await auth();
