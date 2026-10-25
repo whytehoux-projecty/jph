@@ -92,6 +92,8 @@ export type AdminBillItem = {
     category: string;
     country?: string;
   };
+  /** Copy of the bill the customer attached, if any. */
+  attachmentId?: string | null;
 };
 
 export function AdminBillServices({
@@ -231,7 +233,7 @@ export function AdminBillServices({
               {payees.length}
             </span>
             <span className="text-xs text-neutral-500 mt-0.5 block">
-              Global & custom billers
+              Billers saved for customers
             </span>
           </div>
           <div className="w-11 h-11 rounded-lg bg-neutral-100 flex items-center justify-center text-ink-900">
@@ -596,7 +598,7 @@ export function AdminBillServices({
               Add Service Provider / Payee
             </DialogTitle>
             <DialogDescription>
-              Register a corporate biller, utility authority, or telecom provider to the live database directory.
+              Save a biller for one customer, with their account or reference number at that biller.
             </DialogDescription>
           </DialogHeader>
 
@@ -672,22 +674,23 @@ export function AdminBillServices({
 
             <div>
               <label className="text-xs font-semibold text-ink-900 block mb-1">
-                Availability & Customer Assignment
+                Customer *
               </label>
               <select
                 name="userId"
-                defaultValue="GLOBAL"
+                required
+                defaultValue=""
                 className="w-full px-3 py-2 text-sm bg-neutral-50 border border-neutral-200 rounded-md focus:outline-none focus:ring-1 focus:ring-vintage-gold/50"
               >
-                <option value="GLOBAL">★ Global Provider (Available to All Customers)</option>
+                <option value="" disabled>Choose a customer</option>
                 {users.map((u) => (
                   <option key={u.id} value={u.id}>
-                    Assign to: {u.firstName} {u.lastName} ({u.email})
+                    {u.firstName} {u.lastName} ({u.email})
                   </option>
                 ))}
               </select>
               <span className="text-[11px] text-muted-foreground block mt-1">
-                Global providers appear immediately in the customer portal bills directory.
+                The biller appears only in this customer&apos;s Bills page. The identifier is their account or reference number with the biller.
               </span>
             </div>
 
@@ -758,6 +761,19 @@ export function AdminBillServices({
                       <span className="font-mono font-bold text-ink-900">
                         ${selectedBill.account.balance.toLocaleString(undefined, { minimumFractionDigits: 2 })}
                       </span>
+                    </div>
+                  )}
+                  {selectedBill.attachmentId && (
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-muted-foreground">Attached bill:</span>
+                      <a
+                        href={`/api/bills/attachments/${selectedBill.attachmentId}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-semibold text-ink-900 underline"
+                      >
+                        Open
+                      </a>
                     </div>
                   )}
                   <div className="flex justify-between items-center border-t border-neutral-200 pt-2.5">

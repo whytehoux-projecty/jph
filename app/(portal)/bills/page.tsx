@@ -1,52 +1,73 @@
 import { getAccounts } from "@/app/actions/accounts";
-import { getProviders, getBillHistory, getUserBillPermissions, type BillProvider, type UserBillPermissions } from "@/app/actions/bills";
-import BillsClient from "./BillsClient";
-import { redirect } from "next/navigation";
+import { getProfile } from "@/app/actions/profile";
+import { getBillHistory, getPayees, getUserBillPermissions } from "@/app/actions/bills";
+import { loadOrSignIn } from "@/lib/portal-data";
+import { maskAccountNumber } from "@/lib/format";
+import { languageToLocale } from "@/lib/utils";
+import { VAULT_TYPES, normalizeVaultType } from "@/lib/vault-rules";
+import { BILL_CATEGORIES } from "@/lib/bill-constants";
+import BillsClient, { type BillerView, type BillPaymentView } from "./BillsClient";
+import type { MoneyAccount } from "@/components/portal/money-fields";
 
 export const dynamic = "force-dynamic";
+export const metadata = { title: "Pay bills" };
+
+const categoryLabel = (id: string) => BILL_CATEGORIES.find((c) => c.id === id)?.label ?? "Other";
 
 export default async function BillsPage() {
-  let accounts: any[] = [];
-  let providers: BillProvider[] = [];
-  let history: any[] = [];
-  let permissions: UserBillPermissions = {
-    enabled: true,
-    methods: { providers: true, einvoice: true },
-  };
-
-  try {
-    const [rawAccounts, rawProviders, rawHistory, userPermissions] = await Promise.all([
+  const { user, rawAccounts, payees, history, permissions } = await loadOrSignIn(async () => {
+    const [user, rawAccounts, payees, history, permissions] = await Promise.all([
+      getProfile(),
       getAccounts(),
-      getProviders(),
-      getBillHistory().catch(() => []),
-      getUserBillPermissions().catch(() => ({
-        enabled: true,
-        methods: { providers: true, einvoice: true },
-      })),
+      getPayees(),
+      getBillHistory(),
+      getUserBillPermissions(),
     ]);
+    return { user, rawAccounts, payees, history, permissions };
+  });
 
-    accounts = (rawAccounts || []).map((acc: any) => ({
-      id: acc.id,
-      name: `${acc.accountType.charAt(0) + acc.accountType.slice(1).toLowerCase()} Account`,
-      accountType: acc.accountType,
-      balance: acc.balance,
-      accountNumber: acc.accountNumber,
-      currency: acc.currency || "USD",
+  const accountLabel = (a: { accountType: string; accountNumber: string }) =>
+    `${VAULT_TYPES[normalizeVaultType(a.accountType)]?.label ?? a.accountType} ${maskAccountNumber(a.accountNumber)}`;
+
+  // Only the bank's own, active accounts can pay bills.
+  const accounts: MoneyAccount[] = rawAccounts
+    .filter((a) => !a.isExternal && a.status === "ACTIVE")
+    .map((a) => ({
+      id: a.id,
+      label: accountLabel(a),
+      accountNumber: a.accountNumber,
+      balance: Number(a.balance),
+      currency: a.currency || "USD",
     }));
 
-    providers = rawProviders || [];
-    history = rawHistory || [];
-    permissions = userPermissions;
-  } catch (error) {
-    redirect("/login");
-  }
+  // A biller reference is the customer's own number with that biller: shown masked.
+  const billers: BillerView[] = payees.map((p) => ({
+    id: p.id,
+    name: p.name,
+    reference: maskAccountNumber(p.accountNumber),
+    category: categoryLabel(p.category),
+  }));
+
+  const payments: BillPaymentView[] = history.map((b) => ({
+    id: b.id,
+    transactionId: b.transaction?.id ?? null,
+    reference: b.transaction?.reference ?? null,
+    biller: b.payee.name,
+    accountLabel: accountLabel(b.account),
+    amount: b.amount,
+    currency: b.account.currency || "USD",
+    status: b.status,
+    createdAt: b.createdAt.toISOString(),
+  }));
 
   return (
     <BillsClient
-      initialAccounts={accounts}
-      initialProviders={providers}
-      initialHistory={history}
+      accounts={accounts}
+      billers={billers}
+      payments={payments}
       permissions={permissions}
+      locale={languageToLocale(user?.preferredLanguage || "en")}
+      hideBalances={!!user?.hideBalance}
     />
   );
 }

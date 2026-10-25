@@ -14,6 +14,7 @@ An invalid value is logged and treated as missing. Admin › E-bank › Deposits
 
 - **Deposits** are recorded as pending credits. Staff approve them in Admin › E-bank › Deposits, which credits the account once (approving twice can't credit twice) and notifies the customer.
 - **Cheque photos** are stored in the `deposit_images` table, not on disk or in `public/`. Only the customer who uploaded them and administrators can open them, through `/api/deposits/images/[id]`. Photos that aren't attached to a deposit within 24 hours are deleted the next time that customer uploads.
+- **Bill attachments** (a PDF or photo a customer adds to a bill payment) use the same private table, with `side = BILL`. They're uploaded through `/api/bills/attachments` and served by `/api/bills/attachments/[id]` (PDFs download rather than open in the browser). The shared logic is in `lib/private-files.ts`.
 - **Withdrawals** (to another bank, cash from a branch, cashier's cheque) need the customer's transaction PIN. They wait in the Withdrawal Requests tab. Approving one debits the account, and is refused if the balance no longer covers it. Staff then carry out the transfer, cash order or cheque through normal operations.
 
 ## Database
